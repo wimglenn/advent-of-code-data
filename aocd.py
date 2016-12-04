@@ -20,6 +20,7 @@ AOC_TZ = pytz.timezone('America/New_York')
 CONF_FNAME = os.path.expanduser('~/.aocdrc')
 MEMO_FNAME = os.path.expanduser('~/.aocd_memo.json')
 RATE_LIMIT = 10  # seconds between consecutive requests
+USER_AGENT = 'aocd.py/v0.3.1'
 
 
 memo = {}
@@ -55,7 +56,6 @@ def get_data(session=None, day=None, year=None):
     if year is None:
         year = guess_year()
     uri = URI.format(year=year, day=day)
-    cookies = {'session': session}
     key = '{}?session={}'.format(uri, session)
     if key not in memo:
         try:
@@ -70,7 +70,9 @@ def get_data(session=None, day=None, year=None):
                 cprint('Sleeping {} seconds...'.format(t_sleep))
                 time.sleep(t_sleep)
                 cprint('Done.')
-        response = requests.get(uri, cookies=cookies)
+        response = requests.get(uri, 
+            cookies={'session': session}, headers={'User-Agent': USER_AGENT},
+        )
         get_data.last_request = datetime.now()
         if response.status_code != 200:
             eprint(response.status_code)

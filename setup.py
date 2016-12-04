@@ -14,7 +14,7 @@ with open("README.rst") as f:
 
 setup(
     name='advent-of-code-data',
-    version='0.3',
+    version='0.3.1',
     description='Get your puzzle data with a single import',
     long_description=long_description,
     py_modules=['aocd'],
