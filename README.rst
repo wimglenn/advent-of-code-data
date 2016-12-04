@@ -20,6 +20,8 @@ Get your puzzle data with a single import statement:
 
 Might be useful for lazy Pythonistas and speedhackers.  
 
+**Note:  Please use version 0.3+ of this library.**  It memoizes successful requests client side and rate-limits the get_data function, as `requested by the AoC author <https://www.reddit.com/r/adventofcode/comments/3v64sb/aoc_is_fragile_please_be_gentle/>`_.  Thanks!
+
 
 Setup Guide
 -----------
