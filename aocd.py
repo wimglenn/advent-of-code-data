@@ -1,9 +1,12 @@
 from __future__ import print_function
 
+import atexit
 import errno
+import json
 import os
 import re
 import sys
+import time
 import traceback
 from datetime import datetime
 
@@ -15,6 +18,21 @@ from termcolor import cprint
 URI = 'http://adventofcode.com/{year}/day/{day}/input'
 AOC_TZ = pytz.timezone('America/New_York')
 CONF_FNAME = os.path.expanduser('~/.aocdrc')
+MEMO_FNAME = os.path.expanduser('~/.aocd_memo.json')
+RATE_LIMIT = 10  # seconds between consecutive requests
+
+
+memo = {}
+try:
+    with open(MEMO_FNAME) as f:
+        memo = json.load(f)
+except (OSError, IOError) as err:
+    if err.errno != errno.ENOENT:
+        raise AocdError('Problem loading memo')
+
+def dump_memo():
+    with open(MEMO_FNAME, 'w') as f:
+        json.dump(memo, f, sort_keys=True, indent=2)
 
 
 class AocdError(Exception):
@@ -38,12 +56,31 @@ def get_data(session=None, day=None, year=None):
         year = guess_year()
     uri = URI.format(year=year, day=day)
     cookies = {'session': session}
-    response = requests.get(uri, cookies=cookies)
-    if response.status_code != 200:
-        eprint(response.status_code)
-        eprint(response.content)
-        raise AocdError('Unexpected response')
-    return response.text
+    key = '{}?session={}'.format(uri, session)
+    if key not in memo:
+        try:
+            delta = (datetime.now() - get_data.last_request).total_seconds()
+        except AttributeError:
+            # it's the first request
+            pass
+        else:
+            t_sleep = max(RATE_LIMIT - delta, 0)
+            if t_sleep > 0:
+                cprint('You are being rate-limited.', color='red')
+                cprint('Sleeping {} seconds...'.format(t_sleep))
+                time.sleep(t_sleep)
+                cprint('Done.')
+        response = requests.get(uri, cookies=cookies)
+        get_data.last_request = datetime.now()
+        if response.status_code != 200:
+            eprint(response.status_code)
+            eprint(response.content)
+            raise AocdError('Unexpected response')
+        memo[key] = response.text
+        if not getattr(dump_memo, 'registered', False):
+            atexit.register(dump_memo)
+            dump_memo.registered = True
+    return memo[key]
 
 
 def guess_year():
