@@ -41,8 +41,8 @@ your browser inspector.  If you're hacking on AoC at all you probably already
 know these kind of tricks, but if you need help with that part then you can 
 `look here <https://github.com/wimglenn/advent-of-code/issues/1>`_.
 
-*Note:* If you don't like the env var, you could also put into a file 
-``my_session.txt`` in your working directory.
+*Note:* If you don't like the env var, you could also put into a text file 
+in your home directory (use the filename ``~/.aocdrc``).
 
 
 How does it work?
@@ -65,10 +65,9 @@ A filename like ``problem_one.py`` will break shit, so don't do that.  If
 you don't like weird frame hacks, just use the ``aocd.get_data()`` function 
 instead and have a nice day!
 
-*Please be aware that Python will not import the same module twice, so if you 
-need to get puzzle for multiple problems from within the same interpreter 
-session then you will need to use the function directly rather than using the 
-import-time magic.*
+*Please be aware that Python won't import the same module twice, so if you 
+want to get data for multiple problems from within the same interpreter session
+then you should be using the* ``get_data`` *function directly.*
 
 .. code-block:: python
 

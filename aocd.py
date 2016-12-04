@@ -14,6 +14,7 @@ from termcolor import cprint
 
 URI = 'http://adventofcode.com/{year}/day/{day}/input'
 AOC_TZ = pytz.timezone('America/New_York')
+CONF_FNAME = os.path.expanduser('~/.aocdrc')
 
 
 class AocdError(Exception):
@@ -78,9 +79,9 @@ def get_cookie():
     if cookie:
         return cookie
 
-    # or chuck it in my_session.txt in the current directory
+    # or chuck it in a file at ~/.aocdrc
     try:
-        with open('my_session.txt') as f:
+        with open(CONF_FNAME) as f:
             cookie = f.read().strip()
     except (OSError, IOError) as err:
         if err.errno != errno.ENOENT:
@@ -95,10 +96,22 @@ def get_cookie():
 
     eprint('ERROR: AoC session ID is needed to get your puzzle data!')
     eprint('You can find it in your browser cookies after login.')
-    eprint('    1) Save the cookie in a file called my_session.txt, or')
+    eprint('    1) Save the cookie into a text file {}, or'.format(CONF_FNAME))
     eprint('    2) Export the cookie in environment variable AOC_SESSION')
 
     raise AocdError('Missing session ID')
+
+
+def skip_frame(name):
+    basename = os.path.basename(name)
+    skip = any([
+        name == __file__,
+        'importlib' in name,  # Python 3 import machinery
+        '/IPython/' in name,  # ipython adds a tonne of stack frames
+        name.startswith('<'),  # crap like <decorator-gen-57>
+        not re.search(r'[1-9]', basename),  # no digits in filename
+    ])
+    return skip
 
 
 def introspect_date():
@@ -114,11 +127,10 @@ def introspect_date():
     """
     pattern_year = r'201[5-9]'
     pattern_day = r'[1-9][0-9]?'
-    for frame in traceback.extract_stack():
-        if frame[0] == __file__:
-            continue
-        if 'importlib' not in frame[0]:
-            abspath = os.path.abspath(frame[0])
+    stack = [f[0] for f in traceback.extract_stack()]
+    for name in stack:
+        if not skip_frame(name):
+            abspath = os.path.abspath(name)
             break
     else:
         raise AocdError('Failed introspection of filename')
