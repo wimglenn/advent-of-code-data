@@ -68,7 +68,7 @@ def guess_day():
     aoc_now = datetime.now(tz=AOC_TZ)
     if aoc_now.month != 12:
         raise AocdError('guess_day is only available in December (EST)')
-    day = max(aoc_now.day, 25)
+    day = min(aoc_now.day, 25)
     return day
 
 
@@ -139,8 +139,21 @@ def introspect_date():
     raise AocdError('Failed introspection of day')
 
 
-try:
-    day, year = introspect_date()
-    data = get_data(day=day, year=year)
-except AocdError:
-    data = None
+def is_interactive():
+    import __main__
+    try:
+        __main__.__file__
+    except AttributeError:
+        return True
+    else:
+        return False
+
+
+if is_interactive():
+    data = get_data()
+else:
+    try:
+        day, year = introspect_date()
+        data = get_data(day=day, year=year)
+    except AocdError:
+        data = None

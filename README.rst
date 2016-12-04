@@ -48,8 +48,9 @@ know these kind of tricks, but if you need help with that part then you can
 How does it work?
 -----------------
 
-This is done by introspection of the path and file name from which ``aocd`` 
-module was imported.  
+It will automatically get today's data at import time, if used within the 
+interactive interpreter.  Otherwise, the date is found by introspection of the
+path and file name from which ``aocd`` module was imported.  
 
 This means your filenames should be something sensible.  The examples below
 should all parse correctly:
