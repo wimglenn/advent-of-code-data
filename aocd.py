@@ -23,6 +23,10 @@ RATE_LIMIT = 10  # seconds between consecutive requests
 USER_AGENT = 'aocd.py/v0.3.1'
 
 
+class AocdError(Exception):
+    pass
+
+
 memo = {}
 try:
     with open(MEMO_FNAME) as f:
@@ -34,10 +38,6 @@ except (OSError, IOError) as err:
 def dump_memo():
     with open(MEMO_FNAME, 'w') as f:
         json.dump(memo, f, sort_keys=True, indent=2)
-
-
-class AocdError(Exception):
-    pass
 
 
 def eprint(*args, **kwargs):
