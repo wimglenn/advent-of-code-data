@@ -15,12 +15,15 @@ import requests
 from termcolor import cprint
 
 
+__version__ = '0.3.3'
+
+
 URI = 'http://adventofcode.com/{year}/day/{day}/input'
 AOC_TZ = pytz.timezone('America/New_York')
 CONF_FNAME = os.path.expanduser('~/.aocdrc')
 MEMO_FNAME = os.path.expanduser('~/.aocd_memo.json')
 RATE_LIMIT = 10  # seconds between consecutive requests
-USER_AGENT = 'aocd.py/v0.3.1'
+USER_AGENT = 'aocd.py/v{}'.format(__version__)
 
 
 class AocdError(Exception):
