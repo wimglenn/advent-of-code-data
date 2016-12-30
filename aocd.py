@@ -15,7 +15,7 @@ import requests
 from termcolor import cprint
 
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 
 URI = 'http://adventofcode.com/{year}/day/{day}/input'
@@ -151,6 +151,7 @@ def skip_frame(name):
         'importlib' in name,  # Python 3 import machinery
         '/IPython/' in name,  # ipython adds a tonne of stack frames
         name.startswith('<'),  # crap like <decorator-gen-57>
+        name.endswith('ython3'),  # ipython3 alias
         not re.search(r'[1-9]', basename),  # no digits in filename
     ])
     return skip
