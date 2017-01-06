@@ -15,7 +15,7 @@ import requests
 from termcolor import cprint
 
 
-__version__ = '0.3.5'
+__version__ = '0.3.6'
 
 
 URI = 'http://adventofcode.com/{year}/day/{day}/input'
@@ -205,7 +205,10 @@ def is_interactive():
 
 
 if is_interactive():
-    data = get_data()
+    try:
+        data = get_data()
+    except AocdError:
+        data = None
 else:
     try:
         day, year = introspect_date()
