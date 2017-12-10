@@ -14,10 +14,12 @@ classifiers = [
 with open('README.rst') as f:
     long_description = f.read()
 
+
 def get_version():
     with open('aocd.py') as f:
-        [version] = re.findall(r"\n__version__ = '([0-9\.]*)'\n", f.read())
+        [version] = re.findall(r"\n__version__ = '([0-9.]*)'\n", f.read())
     return version
+
 
 setup(
     name='advent-of-code-data',
@@ -30,5 +32,5 @@ setup(
     license='MIT',
     url='https://github.com/wimglenn/advent-of-code-data',
     classifiers=classifiers,
-    install_requires=['pytz', 'requests', 'termcolor'],
+    install_requires=['pytz', 'requests', 'termcolor', 'beautifulsoup4', 'lxml'],
 )
