@@ -8,17 +8,20 @@ import re
 import sys
 import time
 import traceback
+import webbrowser
 from datetime import datetime
+from functools import partial
 
+import bs4
 import pytz
 import requests
 from termcolor import cprint
 
 
-__version__ = '0.3.6'
+__version__ = '0.4.0'
 
 
-URI = 'http://adventofcode.com/{year}/day/{day}/input'
+URI = 'http://adventofcode.com/{year}/day/{day}/'
 AOC_TZ = pytz.timezone('America/New_York')
 CONF_FNAME = os.path.expanduser('~/.aocdrc')
 MEMO_FNAME = os.path.expanduser('~/.aocd_memo.json')
@@ -37,6 +40,7 @@ try:
 except (OSError, IOError) as err:
     if err.errno != errno.ENOENT:
         raise AocdError('Problem loading memo')
+
 
 def dump_memo():
     with open(MEMO_FNAME, 'w') as f:
@@ -58,7 +62,7 @@ def get_data(session=None, day=None, year=None):
         day = guess_day()
     if year is None:
         year = guess_year()
-    uri = URI.format(year=year, day=day)
+    uri = URI.format(year=year, day=day) + 'input'
     key = '{}?session={}'.format(uri, session)
     if key not in memo:
         try:
@@ -204,6 +208,48 @@ def is_interactive():
         return False
 
 
+def submit(answer, level, day=None, year=None, session=None, reopen=True):
+    if level not in {1, 2, '1', '2'}:
+        raise AocdError('level must be 1 or 2')
+    if session is None:
+        session = get_cookie()
+    if day is None:
+        day = guess_day()
+    if year is None:
+        year = guess_year()
+    uri = URI.format(year=year, day=day) + 'answer'
+    response = requests.post(
+        uri,
+        cookies={'session': session},
+        headers={'User-Agent': USER_AGENT},
+        data={'level': level, 'answer': answer},
+    )
+    if not response.ok:
+        raise AocdError('Non-200 response for POST: {}'.format(response))
+    soup = bs4.BeautifulSoup(response.text, 'lxml')
+    message = soup.article.text
+    if "That's the right answer" in message:
+        color = 'green'
+        if reopen:
+            webbrowser.open(response.url)  # So you can read part B on the website...
+    elif "Did you already complete it" in message:
+        color = 'yellow'
+    elif "That's not the right answer" in message or "You gave an answer too recently" in message:
+        color = 'red'
+    else:
+        color = None
+    cprint(soup.article.text, color=color)
+    return response
+
+
+def submit1(answer, year=None, day=None, session=None, reopen=True):
+    return submit(answer, level=1, day=day, year=year, session=session, reopen=reopen)
+
+
+def submit2(answer, year=None, day=None, session=None, reopen=True):
+    return submit(answer, level=2, day=day, year=year, session=session, reopen=reopen)
+
+
 if is_interactive():
     try:
         data = get_data()
@@ -213,5 +259,8 @@ else:
     try:
         day, year = introspect_date()
         data = get_data(day=day, year=year)
+        submit = partial(submit, day=day, year=year)
+        submit1 = partial(submit1, day=day, year=year)
+        submit2 = partial(submit2, day=day, year=year)
     except AocdError:
         data = None

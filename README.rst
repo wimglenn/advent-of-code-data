@@ -23,6 +23,27 @@ Might be useful for lazy Pythonistas and speedhackers.
 **Note:  Please use version 0.3+ of this library.**  It memoizes successful requests client side and rate-limits the get_data function, as `requested by the AoC author <https://www.reddit.com/r/adventofcode/comments/3v64sb/aoc_is_fragile_please_be_gentle/>`_.  Thanks!
 
 
+Automated submission
+--------------------
+
+New in version 0.4.0.
+
+.. code-block:: python
+
+   from aocd import submit
+   submit(my_answer, level=1, day=25, year=2017)
+
+The same filename introspection of year/day also works for the automated submission.  There is no introspection of the "level", i.e. part A or part B, but there are convenience functions:
+
+.. code-block:: python
+
+   from aocd import submit1, submit2
+   submit1(my_answer_part_1)
+   submit2(my_answer_part_2)
+
+The response message from AoC will be printed in the terminal. If you gave the right answer, then the puzzle will be refreshed in your web browser (so you can read the instructions for the next part, for example). **Proceed with caution!** If you submit wrong guesses, your user **WILL** get rate-limited by Eric, so don't call submit until you're fairly confident you have a correct answer!
+
+
 Setup Guide
 -----------
 
