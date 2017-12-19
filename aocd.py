@@ -187,7 +187,7 @@ def introspect_date():
     year = years.pop() if years else None
     fname = re.sub(pattern_year, '', abspath)
     try:
-        [n] = set(re.findall(pattern_day, fname))
+        n = re.findall(pattern_day, fname)[-1]
     except ValueError:
         pass
     else:
