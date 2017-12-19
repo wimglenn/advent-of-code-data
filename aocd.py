@@ -18,7 +18,7 @@ import requests
 from termcolor import cprint
 
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 
 URI = 'http://adventofcode.com/{year}/day/{day}/'
