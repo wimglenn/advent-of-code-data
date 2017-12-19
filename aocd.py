@@ -18,7 +18,7 @@ import requests
 from termcolor import cprint
 
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 
 URI = 'http://adventofcode.com/{year}/day/{day}/'
@@ -173,7 +173,7 @@ def introspect_date():
     use the aocd.get_data() function and have a nice day!
     """
     pattern_year = r'201[5-9]'
-    pattern_day = r'[1-9][0-9]?'
+    pattern_day = r'2[0-5]|1[0-9]|[1-9]'
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
         if not skip_frame(name):
@@ -187,7 +187,7 @@ def introspect_date():
     year = years.pop() if years else None
     fname = re.sub(pattern_year, '', abspath)
     try:
-        [n] = re.findall(pattern_day, fname)
+        [n] = set(re.findall(pattern_day, fname))
     except ValueError:
         pass
     else:
