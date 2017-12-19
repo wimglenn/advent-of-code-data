@@ -85,7 +85,7 @@ def get_data(session=None, day=None, year=None):
         if not getattr(dump_memo, 'registered', False):
             atexit.register(dump_memo)
             dump_memo.registered = True
-    return memo[key].strip()
+    return memo[key].rstrip('\r\n')
 
 
 def guess_year():
