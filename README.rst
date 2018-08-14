@@ -7,7 +7,7 @@ Advent of Code data
 .. _pyversions: 
 
 .. |pypi| image:: https://img.shields.io/pypi/v/advent-of-code-data.svg
-.. _pypi: https://pypi.python.org/pypi/advent-of-code-data
+.. _pypi: https://pypi.org/project/advent-of-code-data/
 
 .. |womm| image:: https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg
 .. _womm: https://github.com/nikku/works-on-my-machine
