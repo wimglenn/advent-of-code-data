@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import errno
+import io
 import os
 import re
 import sys
@@ -56,23 +57,21 @@ def get_data(session=None, day=None, year=None):
     memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
     try:
         # use previously received data, if any existing
-        with open(memo_fname) as f:
+        with io.open(memo_fname, encoding="utf-8") as f:
             data = f.read()
         log.info("reusing existing data %s", memo_fname)
-    except (IOError, OSError):
+    except (IOError, OSError) as err:
+        if err.errno != errno.ENOENT:
+            raise
         log.info("getting data year=%s day=%s", year, day)
-        try:
-            delta = time.time() - get_data.last_request
-        except AttributeError:
-            # it's the first request
-            pass
-        else:
-            t_sleep = max(RATE_LIMIT - delta, 0)
-            if t_sleep > 0:
-                cprint('You are being rate-limited.', color='red')
-                cprint('Sleeping {} seconds...'.format(t_sleep))
-                time.sleep(t_sleep)
-                cprint('Done.')
+        t = time.time()
+        delta = t - getattr(get_data, 'last_request', t - RATE_LIMIT)
+        t_sleep = max(RATE_LIMIT - delta, 0)
+        if t_sleep > 0:
+            cprint('You are being rate-limited.', color='red')
+            cprint('Sleeping {} seconds...'.format(t_sleep))
+            time.sleep(t_sleep)
+            cprint('Done.')
         response = requests.get(
             url=uri,
             cookies={'session': session},
@@ -89,7 +88,11 @@ def get_data(session=None, day=None, year=None):
             os.makedirs(parent, exist_ok=True)
         except TypeError:
             # exist_ok not avail on Python 2
-            os.makedirs(parent)
+            try:
+                os.makedirs(parent)
+            except OSError as err:
+                if err.errno != errno.EEXIST:
+                    raise
         with open(memo_fname, 'w') as f:
             log.info("caching this data")
             f.write(data)
