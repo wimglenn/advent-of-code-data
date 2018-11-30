@@ -1,8 +1,6 @@
 from __future__ import print_function
 
-import atexit
 import errno
-import json
 import os
 import re
 import sys
@@ -11,6 +9,7 @@ import traceback
 import webbrowser
 from datetime import datetime
 from functools import partial
+from logging import getLogger
 
 import bs4
 import pytz
@@ -18,33 +17,22 @@ import requests
 from termcolor import cprint
 
 
-__version__ = '0.4.2'
+__version__ = '0.5'
+
+
+log = getLogger(__name__)
 
 
 URI = 'http://adventofcode.com/{year}/day/{day}/'
 AOC_TZ = pytz.timezone('America/New_York')
-CONF_FNAME = os.path.expanduser('~/.aocdrc')
-MEMO_FNAME = os.path.expanduser('~/.aocd_memo.json')
-RATE_LIMIT = 10  # seconds between consecutive requests
+CONF_FNAME = os.path.expanduser('~/.config/aocd/token')
+MEMO_FNAME = os.path.expanduser('~/.config/aocd/{session}/{year}/{day}.txt')
+RATE_LIMIT = 4  # seconds between consecutive requests
 USER_AGENT = 'aocd.py/v{}'.format(__version__)
 
 
 class AocdError(Exception):
     pass
-
-
-memo = {}
-try:
-    with open(MEMO_FNAME) as f:
-        memo = json.load(f)
-except (OSError, IOError) as err:
-    if err.errno != errno.ENOENT:
-        raise AocdError('Problem loading memo')
-
-
-def dump_memo():
-    with open(MEMO_FNAME, 'w') as f:
-        json.dump(memo, f, sort_keys=True, indent=2)
 
 
 def eprint(*args, **kwargs):
@@ -60,13 +48,21 @@ def get_data(session=None, day=None, year=None):
         session = get_cookie()
     if day is None:
         day = guess_day()
+        log.info("guessed day=%s", day)
     if year is None:
         year = guess_year()
+        log.info("guessed year=%s", year)
     uri = URI.format(year=year, day=day) + 'input'
-    key = '{}?session={}'.format(uri, session)
-    if key not in memo:
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    try:
+        # use previously received data, if any existing
+        with open(memo_fname) as f:
+            data = f.read()
+        log.info("reusing existing data %s", memo_fname)
+    except (IOError, OSError):
+        log.info("getting data year=%s day=%s", year, day)
         try:
-            delta = (datetime.now() - get_data.last_request).total_seconds()
+            delta = time.time() - get_data.last_request
         except AttributeError:
             # it's the first request
             pass
@@ -77,19 +73,27 @@ def get_data(session=None, day=None, year=None):
                 cprint('Sleeping {} seconds...'.format(t_sleep))
                 time.sleep(t_sleep)
                 cprint('Done.')
-        response = requests.get(uri, 
-            cookies={'session': session}, headers={'User-Agent': USER_AGENT},
+        response = requests.get(
+            url=uri,
+            cookies={'session': session},
+            headers={'User-Agent': USER_AGENT},
         )
-        get_data.last_request = datetime.now()
-        if response.status_code != 200:
-            eprint(response.status_code)
-            eprint(response.content)
+        get_data.last_request = time.time()
+        if not response.ok:
+            log.error("got %s status code", response.status_code)
+            log.error(response.content)
             raise AocdError('Unexpected response')
-        memo[key] = response.text
-        if not getattr(dump_memo, 'registered', False):
-            atexit.register(dump_memo)
-            dump_memo.registered = True
-    return memo[key].rstrip('\r\n')
+        data = response.text
+        parent = os.path.dirname(memo_fname)
+        try:
+            os.makedirs(parent, exist_ok=True)
+        except TypeError:
+            # exist_ok not avail on Python 2
+            os.makedirs(parent)
+        with open(memo_fname, 'w') as f:
+            log.info("caching this data")
+            f.write(data)
+    return data.rstrip('\r\n')
 
 
 def guess_year():
@@ -125,7 +129,7 @@ def get_cookie():
     if cookie:
         return cookie
 
-    # or chuck it in a file at ~/.aocdrc
+    # or chuck it in a plaintext file at ~/.config/aocd/token
     try:
         with open(CONF_FNAME) as f:
             cookie = f.read().strip()
@@ -218,6 +222,7 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
     if year is None:
         year = guess_year()
     uri = URI.format(year=year, day=day) + 'answer'
+    log.info("submitting %s", uri)
     response = requests.post(
         uri,
         cookies={'session': session},
@@ -225,8 +230,10 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
         data={'level': level, 'answer': answer},
     )
     if not response.ok:
+        log.error("got %s status code", response.status_code)
+        log.error(response.content)
         raise AocdError('Non-200 response for POST: {}'.format(response))
-    soup = bs4.BeautifulSoup(response.text, 'lxml')
+    soup = bs4.BeautifulSoup(response.text, 'html.parser')
     message = soup.article.text
     if "That's the right answer" in message:
         color = 'green'

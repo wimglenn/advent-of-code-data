@@ -65,7 +65,7 @@ know these kind of tricks, but if you need help with that part then you can
 `look here <https://github.com/wimglenn/advent-of-code/issues/1>`_.
 
 *Note:* If you don't like the env var, you could also put into a text file 
-in your home directory (use the filename ``~/.aocdrc``).
+in your home directory (use the filename ``~/.config/aocd/token``).
 
 
 How does it work?

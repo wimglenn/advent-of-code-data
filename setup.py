@@ -32,5 +32,5 @@ setup(
     license='MIT',
     url='https://github.com/wimglenn/advent-of-code-data',
     classifiers=classifiers,
-    install_requires=['pytz', 'requests', 'termcolor', 'beautifulsoup4', 'lxml'],
+    install_requires=['pytz', 'requests', 'termcolor', 'beautifulsoup4'],
 )
