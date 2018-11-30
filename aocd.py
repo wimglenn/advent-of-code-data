@@ -18,18 +18,18 @@ import requests
 from termcolor import cprint
 
 
-__version__ = '0.5'
+__version__ = "0.5"
 
 
 log = getLogger(__name__)
 
 
-URI = 'http://adventofcode.com/{year}/day/{day}/'
-AOC_TZ = pytz.timezone('America/New_York')
-CONF_FNAME = os.path.expanduser('~/.config/aocd/token')
-MEMO_FNAME = os.path.expanduser('~/.config/aocd/{session}/{year}/{day}.txt')
+URI = "http://adventofcode.com/{year}/day/{day}/"
+AOC_TZ = pytz.timezone("America/New_York")
+CONF_FNAME = os.path.expanduser("~/.config/aocd/token")
+MEMO_FNAME = os.path.expanduser("~/.config/aocd/{session}/{year}/{day}.txt")
 RATE_LIMIT = 4  # seconds between consecutive requests
-USER_AGENT = 'aocd.py/v{}'.format(__version__)
+USER_AGENT = "aocd.py/v{}".format(__version__)
 
 
 class AocdError(Exception):
@@ -37,7 +37,7 @@ class AocdError(Exception):
 
 
 def eprint(*args, **kwargs):
-    cprint(*args, color='red', file=sys.stderr, **kwargs)
+    cprint(*args, color="red", file=sys.stderr, **kwargs)
 
 
 def get_data(session=None, day=None, year=None):
@@ -53,7 +53,7 @@ def get_data(session=None, day=None, year=None):
     if year is None:
         year = guess_year()
         log.info("guessed year=%s", year)
-    uri = URI.format(year=year, day=day) + 'input'
+    uri = URI.format(year=year, day=day) + "input"
     memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
     try:
         # use previously received data, if any existing
@@ -65,23 +65,21 @@ def get_data(session=None, day=None, year=None):
             raise
         log.info("getting data year=%s day=%s", year, day)
         t = time.time()
-        delta = t - getattr(get_data, 'last_request', t - RATE_LIMIT)
+        delta = t - getattr(get_data, "last_request", t - RATE_LIMIT)
         t_sleep = max(RATE_LIMIT - delta, 0)
         if t_sleep > 0:
-            cprint('You are being rate-limited.', color='red')
-            cprint('Sleeping {} seconds...'.format(t_sleep))
+            cprint("You are being rate-limited.", color="red")
+            cprint("Sleeping {} seconds...".format(t_sleep))
             time.sleep(t_sleep)
-            cprint('Done.')
+            cprint("Done.")
         response = requests.get(
-            url=uri,
-            cookies={'session': session},
-            headers={'User-Agent': USER_AGENT},
+            url=uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}
         )
         get_data.last_request = time.time()
         if not response.ok:
             log.error("got %s status code", response.status_code)
             log.error(response.content)
-            raise AocdError('Unexpected response')
+            raise AocdError("Unexpected response")
         data = response.text
         parent = os.path.dirname(memo_fname)
         try:
@@ -93,10 +91,10 @@ def get_data(session=None, day=None, year=None):
             except OSError as err:
                 if err.errno != errno.EEXIST:
                     raise
-        with open(memo_fname, 'w') as f:
+        with open(memo_fname, "w") as f:
             log.info("caching this data")
             f.write(data)
-    return data.rstrip('\r\n')
+    return data.rstrip("\r\n")
 
 
 def guess_year():
@@ -110,7 +108,7 @@ def guess_year():
     if aoc_now.month < 12:
         year -= 1
     if year < 2015:
-        raise AocdError('Time travel not supported yet')
+        raise AocdError("Time travel not supported yet")
     return year
 
 
@@ -121,14 +119,14 @@ def guess_day():
     """
     aoc_now = datetime.now(tz=AOC_TZ)
     if aoc_now.month != 12:
-        raise AocdError('guess_day is only available in December (EST)')
+        raise AocdError("guess_day is only available in December (EST)")
     day = min(aoc_now.day, 25)
     return day
 
 
 def get_cookie():
     # export your session id as AOC_SESSION env var
-    cookie = os.getenv('AOC_SESSION')
+    cookie = os.getenv("AOC_SESSION")
     if cookie:
         return cookie
 
@@ -138,33 +136,35 @@ def get_cookie():
             cookie = f.read().strip()
     except (OSError, IOError) as err:
         if err.errno != errno.ENOENT:
-            raise AocdError('Wat')
+            raise AocdError("Wat")
     if cookie:
         return cookie
 
     # heck, you can just paste it in directly here if you want:
-    cookie = ''
+    cookie = ""
     if cookie:
         return cookie
 
-    eprint('ERROR: AoC session ID is needed to get your puzzle data!')
-    eprint('You can find it in your browser cookies after login.')
-    eprint('    1) Save the cookie into a text file {}, or'.format(CONF_FNAME))
-    eprint('    2) Export the cookie in environment variable AOC_SESSION')
+    eprint("ERROR: AoC session ID is needed to get your puzzle data!")
+    eprint("You can find it in your browser cookies after login.")
+    eprint("    1) Save the cookie into a text file {}, or".format(CONF_FNAME))
+    eprint("    2) Export the cookie in environment variable AOC_SESSION")
 
-    raise AocdError('Missing session ID')
+    raise AocdError("Missing session ID")
 
 
 def skip_frame(name):
     basename = os.path.basename(name)
-    skip = any([
-        name == __file__,
-        'importlib' in name,  # Python 3 import machinery
-        '/IPython/' in name,  # ipython adds a tonne of stack frames
-        name.startswith('<'),  # crap like <decorator-gen-57>
-        name.endswith('ython3'),  # ipython3 alias
-        not re.search(r'[1-9]', basename),  # no digits in filename
-    ])
+    skip = any(
+        [
+            name == __file__,
+            "importlib" in name,  # Python 3 import machinery
+            "/IPython/" in name,  # ipython adds a tonne of stack frames
+            name.startswith("<"),  # crap like <decorator-gen-57>
+            name.endswith("ython3"),  # ipython3 alias
+            not re.search(r"[1-9]", basename),  # no digits in filename
+        ]
+    )
     return skip
 
 
@@ -179,34 +179,35 @@ def introspect_date():
     break shit, so don't do that.  If you don't like weird frame hacks, just 
     use the aocd.get_data() function and have a nice day!
     """
-    pattern_year = r'201[5-9]'
-    pattern_day = r'2[0-5]|1[0-9]|[1-9]'
+    pattern_year = r"201[5-9]"
+    pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
         if not skip_frame(name):
             abspath = os.path.abspath(name)
             break
     else:
-        raise AocdError('Failed introspection of filename')
+        raise AocdError("Failed introspection of filename")
     years = {int(year) for year in re.findall(pattern_year, abspath)}
     if len(years) > 1:
-        raise AocdError('Failed introspection of year')
+        raise AocdError("Failed introspection of year")
     year = years.pop() if years else None
-    fname = re.sub(pattern_year, '', abspath)
+    fname = re.sub(pattern_year, "", abspath)
     try:
         [n] = set(re.findall(pattern_day, fname))
     except ValueError:
         pass
     else:
-        assert not n.startswith('0')  # regex must prevent any leading 0
+        assert not n.startswith("0")  # regex must prevent any leading 0
         n = int(n)
         if 1 <= n <= 25:
             return n, year
-    raise AocdError('Failed introspection of day')
+    raise AocdError("Failed introspection of day")
 
 
 def is_interactive():
     import __main__
+
     try:
         __main__.__file__
     except AttributeError:
@@ -216,36 +217,39 @@ def is_interactive():
 
 
 def submit(answer, level, day=None, year=None, session=None, reopen=True):
-    if level not in {1, 2, '1', '2'}:
-        raise AocdError('level must be 1 or 2')
+    if level not in {1, 2, "1", "2"}:
+        raise AocdError("level must be 1 or 2")
     if session is None:
         session = get_cookie()
     if day is None:
         day = guess_day()
     if year is None:
         year = guess_year()
-    uri = URI.format(year=year, day=day) + 'answer'
+    uri = URI.format(year=year, day=day) + "answer"
     log.info("submitting %s", uri)
     response = requests.post(
         uri,
-        cookies={'session': session},
-        headers={'User-Agent': USER_AGENT},
-        data={'level': level, 'answer': answer},
+        cookies={"session": session},
+        headers={"User-Agent": USER_AGENT},
+        data={"level": level, "answer": answer},
     )
     if not response.ok:
         log.error("got %s status code", response.status_code)
         log.error(response.content)
-        raise AocdError('Non-200 response for POST: {}'.format(response))
-    soup = bs4.BeautifulSoup(response.text, 'html.parser')
+        raise AocdError("Non-200 response for POST: {}".format(response))
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
     message = soup.article.text
     if "That's the right answer" in message:
-        color = 'green'
+        color = "green"
         if reopen:
             webbrowser.open(response.url)  # So you can read part B on the website...
     elif "Did you already complete it" in message:
-        color = 'yellow'
-    elif "That's not the right answer" in message or "You gave an answer too recently" in message:
-        color = 'red'
+        color = "yellow"
+    elif (
+        "That's not the right answer" in message
+        or "You gave an answer too recently" in message
+    ):
+        color = "red"
     else:
         color = None
     cprint(soup.article.text, color=color)
