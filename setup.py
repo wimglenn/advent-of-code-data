@@ -27,6 +27,7 @@ setup(
     description="Get your puzzle data with a single import",
     long_description=long_description,
     py_modules=["aocd"],
+    entry_points={"console_scripts": ["aocd=aocd:main"]},
     author="Wim Glenn",
     author_email="hey@wimglenn.com",
     license="MIT",

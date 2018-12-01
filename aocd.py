@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import argparse
 import errno
 import io
 import os
@@ -11,6 +12,7 @@ import webbrowser
 from datetime import datetime
 from functools import partial
 from logging import getLogger
+from textwrap import dedent
 
 import bs4
 import pytz
@@ -34,10 +36,6 @@ USER_AGENT = "aocd.py/v{}".format(__version__)
 
 class AocdError(Exception):
     pass
-
-
-def eprint(*args, **kwargs):
-    cprint(*args, color="red", file=sys.stderr, **kwargs)
 
 
 def get_data(session=None, day=None, year=None):
@@ -145,10 +143,15 @@ def get_cookie():
     if cookie:
         return cookie
 
-    eprint("ERROR: AoC session ID is needed to get your puzzle data!")
-    eprint("You can find it in your browser cookies after login.")
-    eprint("    1) Save the cookie into a text file {}, or".format(CONF_FNAME))
-    eprint("    2) Export the cookie in environment variable AOC_SESSION")
+    msg = dedent(
+        """\
+        ERROR: AoC session ID is needed to get your puzzle data!
+        You can find it in your browser cookies after login.
+            1) Save the cookie into a text file {}, or")
+            2) Export the cookie in environment variable AOC_SESSION
+    """
+    )
+    cprint(msg.format(CONF_FNAME), color="red", file=sys.stderr)
 
     raise AocdError("Missing session ID")
 
@@ -179,7 +182,7 @@ def introspect_date():
     break shit, so don't do that.  If you don't like weird frame hacks, just 
     use the aocd.get_data() function and have a nice day!
     """
-    pattern_year = r"201[5-9]"
+    pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
@@ -239,19 +242,17 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
         raise AocdError("Non-200 response for POST: {}".format(response))
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     message = soup.article.text
+    color = None
     if "That's the right answer" in message:
         color = "green"
         if reopen:
             webbrowser.open(response.url)  # So you can read part B on the website...
     elif "Did you already complete it" in message:
         color = "yellow"
-    elif (
-        "That's not the right answer" in message
-        or "You gave an answer too recently" in message
-    ):
+    elif "That's not the right answer" in message:
         color = "red"
-    else:
-        color = None
+    elif "You gave an answer too recently" in message:
+        color = "red"
     cprint(soup.article.text, color=color)
     return response
 
@@ -278,3 +279,29 @@ else:
         submit2 = partial(submit2, day=day, year=year)
     except AocdError:
         data = None
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Advent of Code Data")
+    aoc_now = datetime.now(tz=AOC_TZ)
+    parser.add_argument(
+        "day",
+        nargs="?",
+        type=int,
+        default=min(aoc_now.day, 25),
+        help="1-25 (default: %(default)s)",
+    )
+    parser.add_argument(
+        "year",
+        nargs="?",
+        type=int,
+        default=guess_year(),
+        help=">= 2015 (default: %(default)s)",
+    )
+    args = parser.parse_args()
+    data = get_data(day=args.day, year=args.year)
+    print(data)
+
+
+if __name__ == "__main__":
+    main()
