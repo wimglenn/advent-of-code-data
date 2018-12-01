@@ -40,7 +40,7 @@ class AocdError(Exception):
 
 def get_data(session=None, day=None, year=None):
     """
-    Get data for day (1-25) and year (> 2015)
+    Get data for day (1-25) and year (>= 2015)
     User's session cookie is needed (puzzle inputs differ by user)
     """
     if session is None:
