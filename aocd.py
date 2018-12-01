@@ -149,10 +149,9 @@ def get_cookie():
         You can find it in your browser cookies after login.
             1) Save the cookie into a text file {}, or")
             2) Export the cookie in environment variable AOC_SESSION
-    """
+        """
     )
     cprint(msg.format(CONF_FNAME), color="red", file=sys.stderr)
-
     raise AocdError("Missing session ID")
 
 
