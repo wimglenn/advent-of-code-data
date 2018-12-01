@@ -147,7 +147,7 @@ def get_cookie():
         """\
         ERROR: AoC session ID is needed to get your puzzle data!
         You can find it in your browser cookies after login.
-            1) Save the cookie into a text file {}, or")
+            1) Save the cookie into a text file {}, or
             2) Export the cookie in environment variable AOC_SESSION
         """
     )
