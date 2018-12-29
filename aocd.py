@@ -20,7 +20,7 @@ import requests
 from termcolor import cprint
 
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 
 
 log = getLogger(__name__)
@@ -57,41 +57,43 @@ def get_data(session=None, day=None, year=None):
         # use previously received data, if any existing
         with io.open(memo_fname, encoding="utf-8") as f:
             data = f.read()
-        log.info("reusing existing data %s", memo_fname)
     except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
             raise
-        log.info("getting data year=%s day=%s", year, day)
-        t = time.time()
-        delta = t - getattr(get_data, "last_request", t - RATE_LIMIT)
-        t_sleep = max(RATE_LIMIT - delta, 0)
-        if t_sleep > 0:
-            cprint("You are being rate-limited.", color="red")
-            cprint("Sleeping {} seconds...".format(t_sleep))
-            time.sleep(t_sleep)
-            cprint("Done.")
-        response = requests.get(
-            url=uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}
-        )
-        get_data.last_request = time.time()
-        if not response.ok:
-            log.error("got %s status code", response.status_code)
-            log.error(response.content)
-            raise AocdError("Unexpected response")
-        data = response.text
-        parent = os.path.dirname(memo_fname)
+    else:
+        log.info("reusing existing data %s", memo_fname)
+        return data.rstrip("\r\n")
+    log.info("getting data year=%s day=%s", year, day)
+    t = time.time()
+    delta = t - getattr(get_data, "last_request", t - RATE_LIMIT)
+    t_sleep = max(RATE_LIMIT - delta, 0)
+    if t_sleep > 0:
+        cprint("You are being rate-limited.", color="red")
+        cprint("Sleeping {} seconds...".format(t_sleep))
+        time.sleep(t_sleep)
+        cprint("Done.")
+    response = requests.get(
+        url=uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}
+    )
+    get_data.last_request = time.time()
+    if not response.ok:
+        log.error("got %s status code", response.status_code)
+        log.error(response.content)
+        raise AocdError("Unexpected response")
+    data = response.text
+    parent = os.path.dirname(memo_fname)
+    try:
+        os.makedirs(parent, exist_ok=True)
+    except TypeError:
+        # exist_ok not avail on Python 2
         try:
-            os.makedirs(parent, exist_ok=True)
-        except TypeError:
-            # exist_ok not avail on Python 2
-            try:
-                os.makedirs(parent)
-            except OSError as err:
-                if err.errno != errno.EEXIST:
-                    raise
-        with open(memo_fname, "w") as f:
-            log.info("caching this data")
-            f.write(data)
+            os.makedirs(parent)
+        except OSError as err:
+            if err.errno != errno.EEXIST:
+                raise
+    with open(memo_fname, "w") as f:
+        log.info("caching this data")
+        f.write(data)
     return data.rstrip("\r\n")
 
 
@@ -196,26 +198,29 @@ def introspect_date():
     year = years.pop() if years else None
     fname = re.sub(pattern_year, "", abspath)
     try:
-        [n] = set(re.findall(pattern_day, fname))
+        [day] = set(re.findall(pattern_day, fname))
     except ValueError:
         pass
     else:
-        assert not n.startswith("0")  # regex must prevent any leading 0
-        n = int(n)
-        if 1 <= n <= 25:
-            return n, year
+        assert not day.startswith("0")  # regex must prevent any leading 0
+        day = int(day)
+        if 1 <= day <= 25:
+            log.debug("year=%d day=%d", year, day)
+            return day, year
     raise AocdError("Failed introspection of day")
 
 
 def is_interactive():
+    log.debug("detecting if interactive")
     import __main__
-
     try:
         __main__.__file__
     except AttributeError:
-        return True
+        result = True
     else:
-        return False
+        result = False
+    log.debug("running in repl=%s", result)
+    return result
 
 
 def submit(answer, level, day=None, year=None, session=None, reopen=True):
@@ -243,6 +248,7 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
     message = soup.article.text
     color = None
     if "That's the right answer" in message:
+        # TODO: store this alongside data
         color = "green"
         if reopen:
             webbrowser.open(response.url)  # So you can read part B on the website...
@@ -254,30 +260,6 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
         color = "red"
     cprint(soup.article.text, color=color)
     return response
-
-
-def submit1(answer, year=None, day=None, session=None, reopen=True):
-    return submit(answer, level=1, day=day, year=year, session=session, reopen=reopen)
-
-
-def submit2(answer, year=None, day=None, session=None, reopen=True):
-    return submit(answer, level=2, day=day, year=year, session=session, reopen=reopen)
-
-
-if is_interactive():
-    try:
-        data = get_data()
-    except AocdError:
-        data = None
-else:
-    try:
-        day, year = introspect_date()
-        data = get_data(day=day, year=year)
-        submit = partial(submit, day=day, year=year)
-        submit1 = partial(submit1, day=day, year=year)
-        submit2 = partial(submit2, day=day, year=year)
-    except AocdError:
-        data = None
 
 
 def main():
@@ -300,6 +282,32 @@ def main():
     args = parser.parse_args()
     data = get_data(day=args.day, year=args.year)
     print(data)
+
+
+class Aocd(object):
+
+    def __dir__(self):
+        return ["data", "get_data", "main", "submit", "introspect_data", "is_interactive", "get_cookie", "AocdError", "__version__"]
+
+    def __getattr__(self, name):
+        if name == "data":
+            if is_interactive():
+                return get_data()
+            day, year = introspect_date()
+            return get_data(day=day, year=year)
+        if name == "submit":
+            if is_interactive():
+                return submit
+            day, year = introspect_date()
+            return partial(submit, day=day, year=year)
+        try:
+            return globals()[name]
+        except KeyError:
+            raise AttributeError
+
+
+_self = sys.modules[__name__]
+sys.modules[__name__] = Aocd()
 
 
 if __name__ == "__main__":
