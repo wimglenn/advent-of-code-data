@@ -29,15 +29,23 @@ Thanks!
 Automated submission
 --------------------
 
-New in version 0.4.0.
+New in version 0.4.0. Basic use:
 
 .. code-block:: python
 
    from aocd import submit
    submit(my_answer, level=1, day=25, year=2017)
 
-The same filename introspection of year/day also works for the automated
-submission. There is no introspection of the "level", i.e. part 1 or part 2.
+Note that the same filename introspection of year/day also works for automated
+submission. There's also introspection of the "level", i.e. part 1 or part 2,
+aocd can automatically determine if you have already completed part 1 or not,
+and submit an answer for the correct part accordingly. In this case, just use:
+
+.. code-block:: python
+
+   from aocd import submit
+   submit(my_answer)
+
 The response message from AoC will be printed in the terminal. If you gave
 the right answer, then the puzzle will be refreshed in your web browser
 (so you can read the instructions for the next part, for example).
