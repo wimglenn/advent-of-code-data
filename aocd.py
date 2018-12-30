@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import argparse
+import datetime
 import errno
 import io
 import os
@@ -9,7 +10,6 @@ import sys
 import time
 import traceback
 import webbrowser
-from datetime import datetime
 from functools import partial
 from logging import getLogger
 from textwrap import dedent
@@ -46,11 +46,11 @@ def get_data(session=None, day=None, year=None):
     if session is None:
         session = get_cookie()
     if day is None:
-        day = guess_day()
-        log.info("guessed day=%s", day)
+        day = current_day()
+        log.info("current day=%s", day)
     if year is None:
-        year = guess_year()
-        log.info("guessed year=%s", year)
+        year = most_recent_year()
+        log.info("most recent year=%s", year)
     uri = URI.format(year=year, day=day) + "input"
     memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
     try:
@@ -81,29 +81,20 @@ def get_data(session=None, day=None, year=None):
         log.error(response.content)
         raise AocdError("Unexpected response")
     data = response.text
-    parent = os.path.dirname(memo_fname)
-    try:
-        os.makedirs(parent, exist_ok=True)
-    except TypeError:
-        # exist_ok not avail on Python 2
-        try:
-            os.makedirs(parent)
-        except OSError as err:
-            if err.errno != errno.EEXIST:
-                raise
+    _ensure_intermediate_dirs(memo_fname)
     with open(memo_fname, "w") as f:
         log.info("caching this data")
         f.write(data)
     return data.rstrip("\r\n")
 
 
-def guess_year():
+def most_recent_year():
     """
-    This year, if it's December.  
+    This year, if it's December.
     The most recent year, otherwise.
     Note: Advent of Code started in 2015
     """
-    aoc_now = datetime.now(tz=AOC_TZ)
+    aoc_now = datetime.datetime.now(tz=AOC_TZ)
     year = aoc_now.year
     if aoc_now.month < 12:
         year -= 1
@@ -112,14 +103,14 @@ def guess_year():
     return year
 
 
-def guess_day():
+def current_day():
     """
-    Most recent day, if it's during the Advent of Code.  Happy Holidays!
+    Most recent day, if it's during the Advent of Code. Happy Holidays!
     Raises exception otherwise.
     """
-    aoc_now = datetime.now(tz=AOC_TZ)
+    aoc_now = datetime.datetime.now(tz=AOC_TZ)
     if aoc_now.month != 12:
-        raise AocdError("guess_day is only available in December (EST)")
+        raise AocdError("current_day is only available in December (EST)")
     day = min(aoc_now.day, 25)
     return day
 
@@ -136,13 +127,13 @@ def get_cookie():
             cookie = f.read().strip()
     except (OSError, IOError) as err:
         if err.errno != errno.ENOENT:
-            raise AocdError("Wat")
+            raise
     if cookie:
         return cookie
 
     # heck, you can just paste it in directly here if you want:
     cookie = ""
-    if cookie:
+    if cookie:  # pragma: no cover
         return cookie
 
     msg = dedent(
@@ -157,7 +148,7 @@ def get_cookie():
     raise AocdError("Missing session ID")
 
 
-def skip_frame(name):
+def _skip_frame(name):
     basename = os.path.basename(name)
     skip = any(
         [
@@ -172,22 +163,40 @@ def skip_frame(name):
     return skip
 
 
+def _ensure_intermediate_dirs(fname):
+    parent = os.path.dirname(fname)
+    try:
+        os.makedirs(parent, exist_ok=True)
+    except TypeError:
+        # exist_ok not avail on Python 2
+        try:
+            os.makedirs(parent)
+        except OSError as err:
+            if err.errno != errno.EEXIST:
+                raise
+
+
 def introspect_date():
     """
-    Here be dragons.  This is some black magic so that lazy users can get 
-    their puzzle input simply by using `from aocd import data`.  The day is
-    parsed from the filename which used the import statement.  
+    Here be dragons.
 
-    This means your filenames should be something simple like "q03.py" or 
-    "xmas_problem_2016_25b_dawg.py".  A filename like "problem_one.py" will 
-    break shit, so don't do that.  If you don't like weird frame hacks, just 
-    use the aocd.get_data() function and have a nice day!
+    The correct date is determined with introspection of the call stack, first
+    finding the filename of the module from which ``aocd`` was imported.
+
+    This means your filenames should be something sensible, which identify the
+    day and year unambiguously. The examples below should all parse correctly,
+    because they have unique digits in the file path that are recognisable as
+    AoC years (2015+) or days (1-25).
+
+    A filename like ``problem_one.py`` will not work, so don't do that. If you
+    don't like weird frame hacks, just use the ``aocd.get_data()`` function
+    directly instead and have a nice day!
     """
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
-        if not skip_frame(name):
+        if not _skip_frame(name):
             abspath = os.path.abspath(name)
             break
     else:
@@ -202,25 +211,12 @@ def introspect_date():
     except ValueError:
         pass
     else:
-        assert not day.startswith("0")  # regex must prevent any leading 0
+        assert not day.startswith("0"), "regex pattern_day must prevent any leading 0"
         day = int(day)
-        if 1 <= day <= 25:
-            log.debug("year=%d day=%d", year, day)
-            return day, year
+        assert 1 <= day <= 25, "regex pattern_day must only match numbers in range 1-25"
+        log.debug("year=%d day=%d", year, day)
+        return day, year
     raise AocdError("Failed introspection of day")
-
-
-def is_interactive():
-    log.debug("detecting if interactive")
-    import __main__
-    try:
-        __main__.__file__
-    except AttributeError:
-        result = True
-    else:
-        result = False
-    log.debug("running in repl=%s", result)
-    return result
 
 
 def submit(answer, level, day=None, year=None, session=None, reopen=True):
@@ -229,9 +225,9 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
     if session is None:
         session = get_cookie()
     if day is None:
-        day = guess_day()
+        day = current_day()
     if year is None:
-        year = guess_year()
+        year = most_recent_year()
     uri = URI.format(year=year, day=day) + "answer"
     log.info("submitting %s", uri)
     response = requests.post(
@@ -252,6 +248,13 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
         color = "green"
         if reopen:
             webbrowser.open(response.url)  # So you can read part B on the website...
+        memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+        part = {"1": "a", "2": "b"}[str(level)]
+        answer_fname = memo_fname.replace(".txt", "{}_answer.txt".format(part))
+        _ensure_intermediate_dirs(answer_fname)
+        with open(answer_fname, "w") as f:
+            log.info("caching this data")
+            f.write(str(answer).strip())
     elif "Did you already complete it" in message:
         color = "yellow"
     elif "That's not the right answer" in message:
@@ -264,11 +267,12 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
 
 def main():
     parser = argparse.ArgumentParser(description="Advent of Code Data")
-    aoc_now = datetime.now(tz=AOC_TZ)
+    aoc_now = datetime.datetime.now(tz=AOC_TZ)
     parser.add_argument(
         "day",
         nargs="?",
         type=int,
+        choices=range(1,26),
         default=min(aoc_now.day, 25),
         help="1-25 (default: %(default)s)",
     )
@@ -276,7 +280,8 @@ def main():
         "year",
         nargs="?",
         type=int,
-        default=guess_year(),
+        choices=range(2015, aoc_now.year + 1),
+        default=most_recent_year(),
         help=">= 2015 (default: %(default)s)",
     )
     args = parser.parse_args()
@@ -285,30 +290,42 @@ def main():
 
 
 class Aocd(object):
+    _module = sys.modules[__name__]
 
     def __dir__(self):
-        return ["data", "get_data", "main", "submit", "introspect_data", "is_interactive", "get_cookie", "AocdError", "__version__"]
+        return [
+            "data", "get_data", "main", "submit", "introspect_date", "get_cookie",
+            "AocdError", "__version__", "current_day", "most_recent_year",
+        ]
 
     def __getattr__(self, name):
         if name == "data":
-            if is_interactive():
+            if self.repl:
                 return get_data()
             day, year = introspect_date()
             return get_data(day=day, year=year)
-        if name == "submit":
-            if is_interactive():
-                return submit
+        if name == "submit" and not self.repl:
             day, year = introspect_date()
             return partial(submit, day=day, year=year)
-        try:
+        if name in dir(self):
             return globals()[name]
-        except KeyError:
-            raise AttributeError
+        raise AttributeError
+
+    def __init__(self):
+        log.debug("detecting if running within REPL")
+        import __main__
+        try:
+            __main__.__file__
+        except AttributeError:
+            self.repl = True
+            log.debug("running interactive")
+        else:
+            self.repl = False
+            log.debug("not interactive")
 
 
-_self = sys.modules[__name__]
 sys.modules[__name__] = Aocd()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
