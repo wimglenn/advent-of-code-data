@@ -1,7 +1,7 @@
 Advent of Code data
 ===================
 
-|pyversions|_ |pypi|_ |womm|_
+|pyversions|_ |pypi|_ |womm|_ |travis|_
 
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/advent-of-code-data.svg
 .. _pyversions: 
@@ -11,6 +11,10 @@ Advent of Code data
 
 .. |womm| image:: https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg
 .. _womm: https://github.com/nikku/works-on-my-machine
+
+.. |travis| image:: https://img.shields.io/travis/wimglenn/advent-of-code-data.svg?branch=master
+.. _travis: https://travis-ci.com/wimglenn/advent-of-code-data
+
 
 Get your puzzle data with a single import statement:
 
