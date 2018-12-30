@@ -249,7 +249,7 @@ def user_has_completed_part_a(day, year, session):
     if len(paras) >= 1:
         [para] = paras
         parta_correct_answer = para.code.text
-        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level=level, session=session)
+        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level="1", session=session)
         return True
     return False
 

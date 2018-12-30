@@ -79,3 +79,67 @@ def test_correct_submit_records_good_answer(requests_mock, tmpdir):
 def test_failure_to_create_dirs_unhandled():
     with pytest.raises(OSError):
         aocd._module._ensure_intermediate_dirs("/")
+
+
+def test_submit_puts_level2_when_already_submitted_level1(freezer, requests_mock, tmpdir):
+    freezer.move_to("2018-12-01 12:00:00Z")
+    post = requests_mock.post(
+        url="https://adventofcode.com/2018/day/1/answer",
+        text="<article>That's the right answer</article>",
+    )
+    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018/1a_answer.txt"
+    parta_answer.ensure(file=True)
+    submit(1234, reopen=False)
+    assert post.called
+    assert post.call_count == 1
+    qs = sorted(post.last_request.text.split("&"))  # form encoded
+    assert qs == ['answer=1234', 'level=2']
+
+
+def test_submit_puts_level2_when_already_submitted_level1_but_answer_not_saved_yet(freezer, requests_mock, tmpdir):
+    freezer.move_to("2018-12-01 12:00:00Z")
+    get = requests_mock.get(
+        url="https://adventofcode.com/2018/day/1/",
+        text="<p>Your puzzle answer was <code>666</code></p>"
+    )
+    post = requests_mock.post(
+        url="https://adventofcode.com/2018/day/1/answer",
+        text="<article>That's the right answer</article>",
+    )
+    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018/1a_answer.txt"
+    partb_answer = tmpdir / ".config/aocd/thetesttoken/2018/1b_answer.txt"
+    assert not parta_answer.exists()
+    assert not partb_answer.exists()
+    submit(1234, reopen=False)
+    assert parta_answer.exists()
+    assert partb_answer.exists()
+    assert parta_answer.read() == "666"
+    assert partb_answer.read() == "1234"
+    assert get.called
+    assert get.call_count == 1
+    assert post.called
+    assert post.call_count == 1
+    qs = sorted(post.last_request.text.split("&"))  # form encoded
+    assert qs == ['answer=1234', 'level=2']
+
+
+def test_submit_puts_level1_by_default(freezer, requests_mock, tmpdir):
+    freezer.move_to("2018-12-01 12:00:00Z")
+    get = requests_mock.get(
+        url="https://adventofcode.com/2018/day/1/",
+    )
+    post = requests_mock.post(
+        url="https://adventofcode.com/2018/day/1/answer",
+        text="<article>That's the right answer</article>",
+    )
+    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018/1a_answer.txt"
+    assert not parta_answer.exists()
+    submit(1234, reopen=False)
+    assert get.called
+    assert get.call_count == 1
+    assert post.called
+    assert post.call_count == 1
+    qs = sorted(post.last_request.text.split("&"))  # form encoded
+    assert qs == ['answer=1234', 'level=1']
+    assert parta_answer.exists()
+    assert parta_answer.read() == "1234"
