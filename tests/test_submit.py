@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 from termcolor import colored
 
@@ -16,7 +18,8 @@ def test_submit_correct_answer(requests_mock, capsys):
     submit(1234, level=1, day=1, year=2018, session="whatever", reopen=False)
     assert post.called
     assert post.call_count == 1
-    assert post.last_request.text == 'answer=1234&level=1'
+    qs = sorted(post.last_request.text.split("&"))  # form encoded
+    assert qs == ['answer=1234', 'level=1']
     out, err = capsys.readouterr()
     msg = colored("That's the right answer. Yeah!!", "green")
     assert msg in out
@@ -72,6 +75,7 @@ def test_correct_submit_records_good_answer(requests_mock, tmpdir):
     assert answer_fname.read() == "1234"
 
 
+@pytest.mark.skipif(sys.version_info >= (3,), reason="py2 only")
 def test_failure_to_create_dirs_unhandled():
     with pytest.raises(OSError):
         aocd._module._ensure_intermediate_dirs("/")

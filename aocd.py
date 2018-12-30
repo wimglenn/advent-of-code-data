@@ -78,7 +78,7 @@ def get_data(session=None, day=None, year=None):
     get_data.last_request = time.time()
     if not response.ok:
         log.error("got %s status code", response.status_code)
-        log.error(response.content)
+        log.error(response.text)
         raise AocdError("Unexpected response")
     data = response.text
     _ensure_intermediate_dirs(memo_fname)
@@ -125,7 +125,7 @@ def get_cookie():
     try:
         with open(CONF_FNAME) as f:
             cookie = f.read().strip()
-    except (OSError, IOError) as err:
+    except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
             raise
     if cookie:
@@ -171,7 +171,7 @@ def _ensure_intermediate_dirs(fname):
         # exist_ok not avail on Python 2
         try:
             os.makedirs(parent)
-        except OSError as err:
+        except (IOError, OSError) as err:
             if err.errno != errno.EEXIST:
                 raise
 
@@ -238,7 +238,7 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
     )
     if not response.ok:
         log.error("got %s status code", response.status_code)
-        log.error(response.content)
+        log.error(response.text)
         raise AocdError("Non-200 response for POST: {}".format(response))
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     message = soup.article.text
