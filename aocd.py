@@ -231,8 +231,41 @@ def get_day_and_year():
     raise AocdError("Failed introspection of day")
 
 
-def submit(answer, level, day=None, year=None, session=None, reopen=True):
-    if level not in {1, 2, "1", "2"}:
+def user_has_completed_part_a(day, year, session):
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    part_a_answer_fname = memo_fname.replace(".txt", "a_answer.txt")
+    if os.path.isfile(part_a_answer_fname):
+        return True
+    # check question page for already solved answer
+    uri = URI.format(year=year, day=day)
+    response = requests.get(
+        uri,
+        cookies={"session": session},
+        headers={"User-Agent": USER_AGENT},
+    )
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    response.raise_for_status()
+    paras = [p for p in soup.find_all('p') if p.text.startswith("Your puzzle answer was")]
+    if len(paras) >= 1:
+        [para] = paras
+        parta_correct_answer = para.code.text
+        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level=level, session=session)
+        return True
+    return False
+
+
+def save_correct_answer(answer, day, year, level, session):
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    part = {"1": "a", "2": "b"}[str(level)]
+    answer_fname = memo_fname.replace(".txt", "{}_answer.txt".format(part))
+    _ensure_intermediate_dirs(answer_fname)
+    with open(answer_fname, "w") as f:
+        log.info("caching this data")
+        f.write(str(answer).strip())
+
+
+def submit(answer, level=None, day=None, year=None, session=None, reopen=True):
+    if level not in {1, 2, "1", "2", None}:
         raise AocdError("level must be 1 or 2")
     if session is None:
         session = get_cookie()
@@ -240,8 +273,16 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
         day = current_day()
     if year is None:
         year = most_recent_year()
+    if level is None:
+        # figure out if user is submitting for part a or part b
+        if user_has_completed_part_a(day, year, session):
+            log.debug("you already completed part a, submitting for part b")
+            level = 2
+        else:
+            log.debug("submitting for part a")
+            level = 1
     uri = URI.format(year=year, day=day) + "answer"
-    log.info("submitting %s", uri)
+    log.info("posting to %s", uri)
     response = requests.post(
         uri,
         cookies={"session": session},
@@ -256,21 +297,16 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
     message = soup.article.text
     color = None
     if "That's the right answer" in message:
-        # TODO: store this alongside data
         color = "green"
         if reopen:
             webbrowser.open(response.url)  # So you can read part B on the website...
-        memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
-        part = {"1": "a", "2": "b"}[str(level)]
-        answer_fname = memo_fname.replace(".txt", "{}_answer.txt".format(part))
-        _ensure_intermediate_dirs(answer_fname)
-        with open(answer_fname, "w") as f:
-            log.info("caching this data")
-            f.write(str(answer).strip())
+        save_correct_answer(answer=answer, day=day, year=year, level=level, session=session)
     elif "Did you already complete it" in message:
         color = "yellow"
     elif "That's not the right answer" in message:
         color = "red"
+        you_guessed = soup.article.span.code.text
+        log.debug("wrong answer %s", you_guessed)
     elif "You gave an answer too recently" in message:
         color = "red"
     cprint(soup.article.text, color=color)
