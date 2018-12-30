@@ -21,6 +21,11 @@ from termcolor import cprint
 
 
 __version__ = "0.6.0"
+__all__ = [
+    "data", "get_data", "get_answer", "main", "submit", "__version__",
+    "AocdError", "PuzzleUnsolvedError", "AOC_TZ", "current_day",
+    "most_recent_year", "get_cookie",
+]
 
 
 log = getLogger(__name__)
@@ -35,6 +40,10 @@ USER_AGENT = "aocd.py/v{}".format(__version__)
 
 
 class AocdError(Exception):
+    pass
+
+
+class PuzzleUnsolvedError(AocdError):
     pass
 
 
@@ -86,6 +95,45 @@ def get_data(session=None, day=None, year=None):
         log.info("caching this data")
         f.write(data)
     return data.rstrip("\r\n")
+
+
+def get_answer(day, year, session=None, level=1):
+    """
+    Get correct answer for day (1-25), year (>= 2015), and level (1 or 2)
+    User's session cookie is needed (puzzle answers differ by user)
+    Note: Answers are only revealed after a correct submission. If you
+    have not already solved the puzzle, this AocdError will be raised.
+    """
+    if session is None:
+        session = get_cookie()
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    part = {1: "a", 2: "b"}[int(level)]
+    answer_fname = memo_fname.replace(".txt", "{}_answer.txt".format(part))
+    if os.path.isfile(answer_fname):
+        with open(answer_fname) as f:
+            return f.read().strip()
+    # check question page for already solved answers
+    uri = URI.format(year=year, day=day)
+    response = requests.get(
+        uri,
+        cookies={"session": session},
+        headers={"User-Agent": USER_AGENT},
+    )
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    response.raise_for_status()
+    paras = [p for p in soup.find_all('p') if p.text.startswith("Your puzzle answer was")]
+    if paras:
+        parta_correct_answer = paras[0].code.text
+        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level=1, session=session)
+        if len(paras) > 1:
+            _p1, p2 = paras
+            partb_correct_answer = p2.code.text
+            save_correct_answer(answer=partb_correct_answer, day=day, year=year, level=2, session=session)
+    if os.path.isfile(answer_fname):
+        with open(answer_fname) as f:
+            return f.read().strip()
+    msg = "Answer {}-{}{} is not available".format(year, day, part)
+    raise PuzzleUnsolvedError(msg)
 
 
 def most_recent_year():
@@ -232,29 +280,12 @@ def get_day_and_year():
 
 
 def user_has_completed_part_a(day, year, session):
-    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
-    part_a_answer_fname = memo_fname.replace(".txt", "a_answer.txt")
-    if os.path.isfile(part_a_answer_fname):
+    try:
+        get_answer(day=day, year=year, session=session, level=1)
+    except PuzzleUnsolvedError:
+        return False
+    else:
         return True
-    # check question page for already solved answer
-    uri = URI.format(year=year, day=day)
-    response = requests.get(
-        uri,
-        cookies={"session": session},
-        headers={"User-Agent": USER_AGENT},
-    )
-    soup = bs4.BeautifulSoup(response.text, "html.parser")
-    response.raise_for_status()
-    paras = [p for p in soup.find_all('p') if p.text.startswith("Your puzzle answer was")]
-    if paras:
-        parta_correct_answer = paras[0].code.text
-        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level=1, session=session)
-        if len(paras) > 1:
-            _p1, p2 = paras
-            partb_correct_answer = p2.code.text
-            save_correct_answer(answer=partb_correct_answer, day=day, year=year, level=2, session=session)
-        return True
-    return False
 
 
 def save_correct_answer(answer, day, year, level, session):
@@ -344,10 +375,7 @@ class Aocd(object):
     _module = sys.modules[__name__]
 
     def __dir__(self):
-        return [
-            "data", "get_data", "main", "submit", "get_day_and_year", "get_cookie",
-            "AocdError", "__version__", "current_day", "most_recent_year",
-        ]
+        return __all__
 
     def __getattr__(self, name):
         if name == "data":
