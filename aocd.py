@@ -30,7 +30,7 @@ URI = "https://adventofcode.com/{year}/day/{day}/"
 AOC_TZ = pytz.timezone("America/New_York")
 CONF_FNAME = os.path.expanduser("~/.config/aocd/token")
 MEMO_FNAME = os.path.expanduser("~/.config/aocd/{session}/{year}/{day}.txt")
-RATE_LIMIT = 4  # seconds between consecutive requests
+RATE_LIMIT = 1  # seconds between consecutive requests
 USER_AGENT = "aocd.py/v{}".format(__version__)
 
 

@@ -98,17 +98,17 @@ def test_rate_limit(tmpdir, requests_mock, capsys, mocked_sleep, freezer):
         [{"text": "first request"}, {"text": "second request"}],
     )
     cached = tmpdir / ".config/aocd/thetesttoken/2018/1.txt"
-    freezer.move_to("2018-12-01 12:00:00Z")
+    freezer.move_to("2018-12-01 12:00:00.000Z")
     data1 = aocd.get_data(year=2018, day=1)
     cached.remove()
-    freezer.move_to("2018-12-01 12:00:01Z")
+    freezer.move_to("2018-12-01 12:00:00.5000Z")
     data2 = aocd.get_data(year=2018, day=1)
     assert data1 == "first request"
     assert data2 == "second request"
-    mocked_sleep.assert_called_with(3.0)
+    mocked_sleep.assert_called_with(.5)
     out, err = capsys.readouterr()
     assert "You are being rate-limited" in out
-    assert "Sleeping 3.0 seconds..." in out
+    assert "Sleeping 0.5 seconds..." in out
 
 
 def test_saved_data_multitenancy(tmpdir):
