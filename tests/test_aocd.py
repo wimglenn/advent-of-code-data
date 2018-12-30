@@ -23,10 +23,11 @@ def test_import_submit_binds_day_and_year(mocker):
     submit.keywords == {'day': 23, 'year': 2017}
 
 
-def test_get_data_via_import_in_interactive_mode(monkeypatch, mocker):
+def test_get_data_via_import_in_interactive_mode(monkeypatch, mocker, freezer):
+    freezer.move_to("2017-12-10 12:00:00Z")
     monkeypatch.delattr("__main__.__file__")
     new_aocd = type(aocd)()
     mock = mocker.patch("aocd._module.get_data", return_value="repl data")
     data = new_aocd.data
-    mock.assert_called_once_with()
+    mock.assert_called_once_with(day=10, year=2017)
     assert data == "repl data"

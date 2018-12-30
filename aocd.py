@@ -176,9 +176,11 @@ def _ensure_intermediate_dirs(fname):
                 raise
 
 
-def introspect_date():
+def get_day_and_year():
     """
-    Here be dragons.
+    Returns tuple (day, year).
+
+    Here be dragons!
 
     The correct date is determined with introspection of the call stack, first
     finding the filename of the module from which ``aocd`` was imported.
@@ -192,6 +194,16 @@ def introspect_date():
     don't like weird frame hacks, just use the ``aocd.get_data()`` function
     directly instead and have a nice day!
     """
+    import __main__
+    try:
+        __main__.__file__
+    except AttributeError:
+        log.debug("running within REPL")
+        day = current_day()
+        year = most_recent_year()
+        return day, year
+    else:
+        log.debug("non-interactive")
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     stack = [f[0] for f in traceback.extract_stack()]
@@ -294,34 +306,20 @@ class Aocd(object):
 
     def __dir__(self):
         return [
-            "data", "get_data", "main", "submit", "introspect_date", "get_cookie",
+            "data", "get_data", "main", "submit", "get_day_and_year", "get_cookie",
             "AocdError", "__version__", "current_day", "most_recent_year",
         ]
 
     def __getattr__(self, name):
         if name == "data":
-            if self.repl:
-                return get_data()
-            day, year = introspect_date()
+            day, year = get_day_and_year()
             return get_data(day=day, year=year)
-        if name == "submit" and not self.repl:
-            day, year = introspect_date()
+        if name == "submit":
+            day, year = get_day_and_year()
             return partial(submit, day=day, year=year)
         if name in dir(self):
             return globals()[name]
         raise AttributeError
-
-    def __init__(self):
-        log.debug("detecting if running within REPL")
-        import __main__
-        try:
-            __main__.__file__
-        except AttributeError:
-            self.repl = True
-            log.debug("running interactive")
-        else:
-            self.repl = False
-            log.debug("not interactive")
 
 
 sys.modules[__name__] = Aocd()
