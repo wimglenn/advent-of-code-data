@@ -246,13 +246,13 @@ def user_has_completed_part_a(day, year, session):
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     response.raise_for_status()
     paras = [p for p in soup.find_all('p') if p.text.startswith("Your puzzle answer was")]
-    if len(paras) >= 1:
+    if paras:
         parta_correct_answer = paras[0].code.text
-        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level="1", session=session)
+        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level=1, session=session)
         if len(paras) > 1:
-            _para1, para2 = paras
-            partb_correct_answer = para2.code.text
-            save_correct_answer(answer=partb_correct_answer, day=day, year=year, level="2", session=session)
+            _p1, p2 = paras
+            partb_correct_answer = p2.code.text
+            save_correct_answer(answer=partb_correct_answer, day=day, year=year, level=2, session=session)
         return True
     return False
 
