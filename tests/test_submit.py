@@ -63,6 +63,32 @@ def test_submit_when_already_solved(requests_mock, capsys):
     assert msg in out
 
 
+def test_submit_when_submitted_too_recently(requests_mock, capsys):
+    html = '''<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. <a href="/2015/day/25">[Return to Day 25]</a></p></article>'''
+    requests_mock.post(
+        url="https://adventofcode.com/2015/day/25/answer",
+        text=html,
+    )
+    submit(1234, level=1, year=2015, day=25, reopen=False)
+    out, err = capsys.readouterr()
+    msg = "You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. [Return to Day 25]"
+    msg = colored(msg, "red")
+    assert msg in out
+
+
+def test_submit_wrong_answer(requests_mock, capsys):
+    html = '''<article><p>That's not the right answer.  If you're stuck, there are some general tips on the <a href="/2015/about">about page</a>, or you can ask for hints on the <a href="https://www.reddit.com/r/adventofcode/" target="_blank">subreddit</a>.  Please wait one minute before trying again. (You guessed <span style="white-space:nowrap;"><code>WROOOONG</code>.)</span> <a href="/2015/day/1">[Return to Day 1]</a></p></article>'''
+    requests_mock.post(
+        url="https://adventofcode.com/2015/day/1/answer",
+        text=html,
+    )
+    submit(1234, level=1, year=2015, day=1, reopen=False)
+    out, err = capsys.readouterr()
+    msg = "That's not the right answer.  If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit.  Please wait one minute before trying again. (You guessed WROOOONG.) [Return to Day 1]"
+    msg = colored(msg, "red")
+    assert msg in out
+
+
 def test_correct_submit_records_good_answer(requests_mock, tmpdir):
     requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer",
@@ -99,7 +125,7 @@ def test_submit_puts_level2_when_already_submitted_level1(freezer, requests_mock
 def test_submit_puts_level2_when_already_submitted_level1_but_answer_not_saved_yet(freezer, requests_mock, tmpdir):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = requests_mock.get(
-        url="https://adventofcode.com/2018/day/1/",
+        url="https://adventofcode.com/2018/day/1",
         text="<p>Your puzzle answer was <code>666</code></p>"
     )
     post = requests_mock.post(
@@ -126,7 +152,7 @@ def test_submit_puts_level2_when_already_submitted_level1_but_answer_not_saved_y
 def test_submit_puts_level1_by_default(freezer, requests_mock, tmpdir):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = requests_mock.get(
-        url="https://adventofcode.com/2018/day/1/",
+        url="https://adventofcode.com/2018/day/1",
     )
     post = requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer",

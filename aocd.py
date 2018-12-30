@@ -26,7 +26,7 @@ __version__ = "0.6.0"
 log = getLogger(__name__)
 
 
-URI = "https://adventofcode.com/{year}/day/{day}/"
+URI = "https://adventofcode.com/{year}/day/{day}"
 AOC_TZ = pytz.timezone("America/New_York")
 CONF_FNAME = os.path.expanduser("~/.config/aocd/token")
 MEMO_FNAME = os.path.expanduser("~/.config/aocd/{session}/{year}/{day}.txt")
@@ -51,7 +51,7 @@ def get_data(session=None, day=None, year=None):
     if year is None:
         year = most_recent_year()
         log.info("most recent year=%s", year)
-    uri = URI.format(year=year, day=day) + "input"
+    uri = URI.format(year=year, day=day) + "/input"
     memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
     try:
         # use previously received data, if any existing
@@ -247,9 +247,12 @@ def user_has_completed_part_a(day, year, session):
     response.raise_for_status()
     paras = [p for p in soup.find_all('p') if p.text.startswith("Your puzzle answer was")]
     if len(paras) >= 1:
-        [para] = paras
-        parta_correct_answer = para.code.text
+        parta_correct_answer = paras[0].code.text
         save_correct_answer(answer=parta_correct_answer, day=day, year=year, level="1", session=session)
+        if len(paras) > 1:
+            _para1, para2 = paras
+            partb_correct_answer = para2.code.text
+            save_correct_answer(answer=partb_correct_answer, day=day, year=year, level="2", session=session)
         return True
     return False
 
@@ -281,7 +284,7 @@ def submit(answer, level=None, day=None, year=None, session=None, reopen=True):
         else:
             log.debug("submitting for part a")
             level = 1
-    uri = URI.format(year=year, day=day) + "answer"
+    uri = URI.format(year=year, day=day) + "/answer"
     log.info("posting to %s", uri)
     response = requests.post(
         uri,
