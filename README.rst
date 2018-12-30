@@ -1,7 +1,7 @@
 Advent of Code data
 ===================
 
-|pyversions|_ |pypi|_ |womm|_
+|pyversions|_ |pypi|_ |womm|_ |travis|_
 
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/advent-of-code-data.svg
 .. _pyversions: 
@@ -12,6 +12,10 @@ Advent of Code data
 .. |womm| image:: https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg
 .. _womm: https://github.com/nikku/works-on-my-machine
 
+.. |travis| image:: https://img.shields.io/travis/wimglenn/advent-of-code-data.svg?branch=master
+.. _travis: https://travis-ci.com/wimglenn/advent-of-code-data
+
+
 Get your puzzle data with a single import statement:
 
 .. code-block:: python
@@ -20,28 +24,38 @@ Get your puzzle data with a single import statement:
 
 Might be useful for lazy Pythonistas and speedhackers.  
 
-**Note:  Please use version 0.3+ of this library.**  It memoizes successful requests client side and rate-limits the get_data function, as `requested by the AoC author <https://www.reddit.com/r/adventofcode/comments/3v64sb/aoc_is_fragile_please_be_gentle/>`_.  Thanks!
+**Note:  Please use version 0.3+ of this library.**  It memoizes successful
+requests client side and rate-limits the get_data function, as
+`requested by the AoC author <https://www.reddit.com/r/adventofcode/comments/3v64sb/aoc_is_fragile_please_be_gentle/>`_.
+Thanks!
 
 
 Automated submission
 --------------------
 
-New in version 0.4.0.
+New in version 0.4.0. Basic use:
 
 .. code-block:: python
 
    from aocd import submit
    submit(my_answer, level=1, day=25, year=2017)
 
-The same filename introspection of year/day also works for the automated submission.  There is no introspection of the "level", i.e. part A or part B, but there are convenience functions:
+Note that the same filename introspection of year/day also works for automated
+submission. There's also introspection of the "level", i.e. part 1 or part 2,
+aocd can automatically determine if you have already completed part 1 or not,
+and submit an answer for the correct part accordingly. In this case, just use:
 
 .. code-block:: python
 
-   from aocd import submit1, submit2
-   submit1(my_answer_part_1)
-   submit2(my_answer_part_2)
+   from aocd import submit
+   submit(my_answer)
 
-The response message from AoC will be printed in the terminal. If you gave the right answer, then the puzzle will be refreshed in your web browser (so you can read the instructions for the next part, for example). **Proceed with caution!** If you submit wrong guesses, your user **WILL** get rate-limited by Eric, so don't call submit until you're fairly confident you have a correct answer!
+The response message from AoC will be printed in the terminal. If you gave
+the right answer, then the puzzle will be refreshed in your web browser
+(so you can read the instructions for the next part, for example).
+**Proceed with caution!** If you submit wrong guesses, your user **WILL**
+get rate-limited by Eric, so don't call submit until you're fairly confident
+you have a correct answer!
 
 
 Setup Guide
@@ -75,8 +89,9 @@ It will automatically get today's data at import time, if used within the
 interactive interpreter.  Otherwise, the date is found by introspection of the
 path and file name from which ``aocd`` module was imported.  
 
-This means your filenames should be something sensible.  The examples below
-should all parse correctly:
+This means your filenames should be something sensible. The examples below
+should all parse correctly, because they have digits in the path that are
+unambiguously recognisable as AoC years (2015+) or days (1-25).
 
 .. code-block::
 
@@ -84,13 +99,9 @@ should all parse correctly:
    xmas_problem_2016_25b_dawg.py
    ~/src/aoc/2015/p8.py
 
-A filename like ``problem_one.py`` will break shit, so don't do that.  If 
+A filename like ``problem_one.py`` will not work, so don't do that.  If
 you don't like weird frame hacks, just use the ``aocd.get_data()`` function 
 instead and have a nice day!
-
-*Please be aware that Python won't import the same module twice, so if you 
-want to get data for multiple problems from within the same interpreter session
-then you should be using the* ``get_data`` *function directly.*
 
 .. code-block:: python
 

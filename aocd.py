@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import argparse
+import datetime
 import errno
 import io
 import os
@@ -9,7 +10,6 @@ import sys
 import time
 import traceback
 import webbrowser
-from datetime import datetime
 from functools import partial
 from logging import getLogger
 from textwrap import dedent
@@ -20,17 +20,17 @@ import requests
 from termcolor import cprint
 
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 
 
 log = getLogger(__name__)
 
 
-URI = "https://adventofcode.com/{year}/day/{day}/"
+URI = "https://adventofcode.com/{year}/day/{day}"
 AOC_TZ = pytz.timezone("America/New_York")
 CONF_FNAME = os.path.expanduser("~/.config/aocd/token")
 MEMO_FNAME = os.path.expanduser("~/.config/aocd/{session}/{year}/{day}.txt")
-RATE_LIMIT = 4  # seconds between consecutive requests
+RATE_LIMIT = 1  # seconds between consecutive requests
 USER_AGENT = "aocd.py/v{}".format(__version__)
 
 
@@ -46,62 +46,55 @@ def get_data(session=None, day=None, year=None):
     if session is None:
         session = get_cookie()
     if day is None:
-        day = guess_day()
-        log.info("guessed day=%s", day)
+        day = current_day()
+        log.info("current day=%s", day)
     if year is None:
-        year = guess_year()
-        log.info("guessed year=%s", year)
-    uri = URI.format(year=year, day=day) + "input"
+        year = most_recent_year()
+        log.info("most recent year=%s", year)
+    uri = URI.format(year=year, day=day) + "/input"
     memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
     try:
         # use previously received data, if any existing
         with io.open(memo_fname, encoding="utf-8") as f:
             data = f.read()
-        log.info("reusing existing data %s", memo_fname)
     except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
             raise
-        log.info("getting data year=%s day=%s", year, day)
-        t = time.time()
-        delta = t - getattr(get_data, "last_request", t - RATE_LIMIT)
-        t_sleep = max(RATE_LIMIT - delta, 0)
-        if t_sleep > 0:
-            cprint("You are being rate-limited.", color="red")
-            cprint("Sleeping {} seconds...".format(t_sleep))
-            time.sleep(t_sleep)
-            cprint("Done.")
-        response = requests.get(
-            url=uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}
-        )
-        get_data.last_request = time.time()
-        if not response.ok:
-            log.error("got %s status code", response.status_code)
-            log.error(response.content)
-            raise AocdError("Unexpected response")
-        data = response.text
-        parent = os.path.dirname(memo_fname)
-        try:
-            os.makedirs(parent, exist_ok=True)
-        except TypeError:
-            # exist_ok not avail on Python 2
-            try:
-                os.makedirs(parent)
-            except OSError as err:
-                if err.errno != errno.EEXIST:
-                    raise
-        with open(memo_fname, "w") as f:
-            log.info("caching this data")
-            f.write(data)
+    else:
+        log.info("reusing existing data %s", memo_fname)
+        return data.rstrip("\r\n")
+    log.info("getting data year=%s day=%s", year, day)
+    t = time.time()
+    delta = t - getattr(get_data, "last_request", t - RATE_LIMIT)
+    t_sleep = max(RATE_LIMIT - delta, 0)
+    if t_sleep > 0:
+        cprint("You are being rate-limited.", color="red")
+        cprint("Sleeping {} seconds...".format(t_sleep))
+        time.sleep(t_sleep)
+        cprint("Done.")
+    response = requests.get(
+        url=uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}
+    )
+    get_data.last_request = time.time()
+    if not response.ok:
+        log.error("got %s status code", response.status_code)
+        log.error(response.text)
+        raise AocdError("Unexpected response")
+    data = response.text
+    _ensure_intermediate_dirs(memo_fname)
+    with open(memo_fname, "w") as f:
+        log.info("caching this data")
+        f.write(data)
     return data.rstrip("\r\n")
 
 
-def guess_year():
+def most_recent_year():
     """
-    This year, if it's December.  
+    This year, if it's December.
     The most recent year, otherwise.
     Note: Advent of Code started in 2015
     """
-    aoc_now = datetime.now(tz=AOC_TZ)
+    aoc_now = datetime.datetime.now(tz=AOC_TZ)
     year = aoc_now.year
     if aoc_now.month < 12:
         year -= 1
@@ -110,14 +103,14 @@ def guess_year():
     return year
 
 
-def guess_day():
+def current_day():
     """
-    Most recent day, if it's during the Advent of Code.  Happy Holidays!
+    Most recent day, if it's during the Advent of Code. Happy Holidays!
     Raises exception otherwise.
     """
-    aoc_now = datetime.now(tz=AOC_TZ)
+    aoc_now = datetime.datetime.now(tz=AOC_TZ)
     if aoc_now.month != 12:
-        raise AocdError("guess_day is only available in December (EST)")
+        raise AocdError("current_day is only available in December (EST)")
     day = min(aoc_now.day, 25)
     return day
 
@@ -132,15 +125,15 @@ def get_cookie():
     try:
         with open(CONF_FNAME) as f:
             cookie = f.read().strip()
-    except (OSError, IOError) as err:
+    except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
-            raise AocdError("Wat")
+            raise
     if cookie:
         return cookie
 
     # heck, you can just paste it in directly here if you want:
     cookie = ""
-    if cookie:
+    if cookie:  # pragma: no cover
         return cookie
 
     msg = dedent(
@@ -155,7 +148,7 @@ def get_cookie():
     raise AocdError("Missing session ID")
 
 
-def skip_frame(name):
+def _skip_frame(name):
     basename = os.path.basename(name)
     skip = any(
         [
@@ -170,22 +163,52 @@ def skip_frame(name):
     return skip
 
 
-def introspect_date():
-    """
-    Here be dragons.  This is some black magic so that lazy users can get 
-    their puzzle input simply by using `from aocd import data`.  The day is
-    parsed from the filename which used the import statement.  
+def _ensure_intermediate_dirs(fname):
+    parent = os.path.dirname(fname)
+    try:
+        os.makedirs(parent, exist_ok=True)
+    except TypeError:
+        # exist_ok not avail on Python 2
+        try:
+            os.makedirs(parent)
+        except (IOError, OSError) as err:
+            if err.errno != errno.EEXIST:
+                raise
 
-    This means your filenames should be something simple like "q03.py" or 
-    "xmas_problem_2016_25b_dawg.py".  A filename like "problem_one.py" will 
-    break shit, so don't do that.  If you don't like weird frame hacks, just 
-    use the aocd.get_data() function and have a nice day!
+
+def get_day_and_year():
     """
+    Returns tuple (day, year).
+
+    Here be dragons!
+
+    The correct date is determined with introspection of the call stack, first
+    finding the filename of the module from which ``aocd`` was imported.
+
+    This means your filenames should be something sensible, which identify the
+    day and year unambiguously. The examples below should all parse correctly,
+    because they have unique digits in the file path that are recognisable as
+    AoC years (2015+) or days (1-25).
+
+    A filename like ``problem_one.py`` will not work, so don't do that. If you
+    don't like weird frame hacks, just use the ``aocd.get_data()`` function
+    directly instead and have a nice day!
+    """
+    import __main__
+    try:
+        __main__.__file__
+    except AttributeError:
+        log.debug("running within REPL")
+        day = current_day()
+        year = most_recent_year()
+        return day, year
+    else:
+        log.debug("non-interactive")
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
-        if not skip_frame(name):
+        if not _skip_frame(name):
             abspath = os.path.abspath(name)
             break
     else:
@@ -196,39 +219,73 @@ def introspect_date():
     year = years.pop() if years else None
     fname = re.sub(pattern_year, "", abspath)
     try:
-        [n] = set(re.findall(pattern_day, fname))
+        [day] = set(re.findall(pattern_day, fname))
     except ValueError:
         pass
     else:
-        assert not n.startswith("0")  # regex must prevent any leading 0
-        n = int(n)
-        if 1 <= n <= 25:
-            return n, year
+        assert not day.startswith("0"), "regex pattern_day must prevent any leading 0"
+        day = int(day)
+        assert 1 <= day <= 25, "regex pattern_day must only match numbers in range 1-25"
+        log.debug("year=%d day=%d", year, day)
+        return day, year
     raise AocdError("Failed introspection of day")
 
 
-def is_interactive():
-    import __main__
-
-    try:
-        __main__.__file__
-    except AttributeError:
+def user_has_completed_part_a(day, year, session):
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    part_a_answer_fname = memo_fname.replace(".txt", "a_answer.txt")
+    if os.path.isfile(part_a_answer_fname):
         return True
-    else:
-        return False
+    # check question page for already solved answer
+    uri = URI.format(year=year, day=day)
+    response = requests.get(
+        uri,
+        cookies={"session": session},
+        headers={"User-Agent": USER_AGENT},
+    )
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    response.raise_for_status()
+    paras = [p for p in soup.find_all('p') if p.text.startswith("Your puzzle answer was")]
+    if paras:
+        parta_correct_answer = paras[0].code.text
+        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level=1, session=session)
+        if len(paras) > 1:
+            _p1, p2 = paras
+            partb_correct_answer = p2.code.text
+            save_correct_answer(answer=partb_correct_answer, day=day, year=year, level=2, session=session)
+        return True
+    return False
 
 
-def submit(answer, level, day=None, year=None, session=None, reopen=True):
-    if level not in {1, 2, "1", "2"}:
+def save_correct_answer(answer, day, year, level, session):
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    part = {"1": "a", "2": "b"}[str(level)]
+    answer_fname = memo_fname.replace(".txt", "{}_answer.txt".format(part))
+    _ensure_intermediate_dirs(answer_fname)
+    with open(answer_fname, "w") as f:
+        log.info("caching this data")
+        f.write(str(answer).strip())
+
+
+def submit(answer, level=None, day=None, year=None, session=None, reopen=True):
+    if level not in {1, 2, "1", "2", None}:
         raise AocdError("level must be 1 or 2")
     if session is None:
         session = get_cookie()
     if day is None:
-        day = guess_day()
+        day = current_day()
     if year is None:
-        year = guess_year()
-    uri = URI.format(year=year, day=day) + "answer"
-    log.info("submitting %s", uri)
+        year = most_recent_year()
+    if level is None:
+        # figure out if user is submitting for part a or part b
+        if user_has_completed_part_a(day, year, session):
+            log.debug("you already completed part a, submitting for part b")
+            level = 2
+        else:
+            log.debug("submitting for part a")
+            level = 1
+    uri = URI.format(year=year, day=day) + "/answer"
+    log.info("posting to %s", uri)
     response = requests.post(
         uri,
         cookies={"session": session},
@@ -237,7 +294,7 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
     )
     if not response.ok:
         log.error("got %s status code", response.status_code)
-        log.error(response.content)
+        log.error(response.text)
         raise AocdError("Non-200 response for POST: {}".format(response))
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     message = soup.article.text
@@ -246,47 +303,27 @@ def submit(answer, level, day=None, year=None, session=None, reopen=True):
         color = "green"
         if reopen:
             webbrowser.open(response.url)  # So you can read part B on the website...
+        save_correct_answer(answer=answer, day=day, year=year, level=level, session=session)
     elif "Did you already complete it" in message:
         color = "yellow"
     elif "That's not the right answer" in message:
         color = "red"
+        you_guessed = soup.article.span.code.text
+        log.debug("wrong answer %s", you_guessed)
     elif "You gave an answer too recently" in message:
         color = "red"
     cprint(soup.article.text, color=color)
     return response
 
 
-def submit1(answer, year=None, day=None, session=None, reopen=True):
-    return submit(answer, level=1, day=day, year=year, session=session, reopen=reopen)
-
-
-def submit2(answer, year=None, day=None, session=None, reopen=True):
-    return submit(answer, level=2, day=day, year=year, session=session, reopen=reopen)
-
-
-if is_interactive():
-    try:
-        data = get_data()
-    except AocdError:
-        data = None
-else:
-    try:
-        day, year = introspect_date()
-        data = get_data(day=day, year=year)
-        submit = partial(submit, day=day, year=year)
-        submit1 = partial(submit1, day=day, year=year)
-        submit2 = partial(submit2, day=day, year=year)
-    except AocdError:
-        data = None
-
-
 def main():
     parser = argparse.ArgumentParser(description="Advent of Code Data")
-    aoc_now = datetime.now(tz=AOC_TZ)
+    aoc_now = datetime.datetime.now(tz=AOC_TZ)
     parser.add_argument(
         "day",
         nargs="?",
         type=int,
+        choices=range(1,26),
         default=min(aoc_now.day, 25),
         help="1-25 (default: %(default)s)",
     )
@@ -294,7 +331,8 @@ def main():
         "year",
         nargs="?",
         type=int,
-        default=guess_year(),
+        choices=range(2015, aoc_now.year + 1),
+        default=most_recent_year(),
         help=">= 2015 (default: %(default)s)",
     )
     args = parser.parse_args()
@@ -302,5 +340,29 @@ def main():
     print(data)
 
 
-if __name__ == "__main__":
+class Aocd(object):
+    _module = sys.modules[__name__]
+
+    def __dir__(self):
+        return [
+            "data", "get_data", "main", "submit", "get_day_and_year", "get_cookie",
+            "AocdError", "__version__", "current_day", "most_recent_year",
+        ]
+
+    def __getattr__(self, name):
+        if name == "data":
+            day, year = get_day_and_year()
+            return get_data(day=day, year=year)
+        if name == "submit":
+            day, year = get_day_and_year()
+            return partial(submit, day=day, year=year)
+        if name in dir(self):
+            return globals()[name]
+        raise AttributeError
+
+
+sys.modules[__name__] = Aocd()
+
+
+if __name__ == "__main__":  # pragma: no cover
     main()
