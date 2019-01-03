@@ -2,6 +2,12 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
+def mocked_sleep(mocker):
+    no_sleep_till_brooklyn = mocker.patch("aocd._module.time.sleep")
+    return no_sleep_till_brooklyn
+
+
+@pytest.fixture(autouse=True)
 def remove_user_env(tmpdir, monkeypatch):
     token_file = tmpdir / ".config/aocd/token"
     memo = tmpdir / ".config/aocd/{session}/{year}/{day}.txt"

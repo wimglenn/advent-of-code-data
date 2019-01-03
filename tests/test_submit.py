@@ -63,15 +63,43 @@ def test_submit_when_already_solved(requests_mock, capsys):
     assert msg in out
 
 
-def test_submit_when_submitted_too_recently(requests_mock, capsys):
-    html = '''<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. <a href="/2015/day/25">[Return to Day 25]</a></p></article>'''
+def test_submit_when_submitted_too_recently_and_autoretry(requests_mock, capsys, mocked_sleep):
+    html1 = '''<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. <a href="/2015/day/25">[Return to Day 25]</a></p></article>'''
+    html2 = "<article>That's the right answer. Yeah!!</article>"
+    requests_mock.post(
+        "https://adventofcode.com/2015/day/25/answer",
+        [{"text": html1}, {"text": html2}],
+    )
+    submit(1234, level=1, year=2015, day=25, reopen=False)
+    mocked_sleep.assert_called_once_with(30)
+    out, err = capsys.readouterr()
+    msg = "That's the right answer. Yeah!!"
+    msg = colored(msg, "green")
+    assert msg in out
+
+
+def test_submit_when_submitted_too_recently_and_autoretry_and_quiet(requests_mock, capsys, mocked_sleep):
+    html1 = '''<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 3m 30s left to wait. <a href="/2015/day/25">[Return to Day 25]</a></p></article>'''
+    html2 = "<article>That's the right answer. Yeah!!</article>"
+    requests_mock.post(
+        "https://adventofcode.com/2015/day/25/answer",
+        [{"text": html1}, {"text": html2}],
+    )
+    submit(1234, level=1, year=2015, day=25, reopen=False, quiet=True)
+    mocked_sleep.assert_called_once_with(3*60 + 30)
+    out, err = capsys.readouterr()
+    assert out == err == ""
+
+
+def test_submit_when_submitted_too_recently_no_autoretry(requests_mock, capsys):
+    html = '''<article><p>You gave an answer too recently</p></article>'''
     requests_mock.post(
         url="https://adventofcode.com/2015/day/25/answer",
         text=html,
     )
     submit(1234, level=1, year=2015, day=25, reopen=False)
     out, err = capsys.readouterr()
-    msg = "You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. [Return to Day 25]"
+    msg = "You gave an answer too recently"
     msg = colored(msg, "red")
     assert msg in out
 

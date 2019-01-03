@@ -6,12 +6,6 @@ import aocd
 from aocd import AocdError
 
 
-@pytest.fixture(autouse=True)
-def mocked_sleep(mocker):
-    no_sleep_till_brooklyn = mocker.patch("aocd._module.time.sleep")
-    return no_sleep_till_brooklyn
-
-
 def test_get_from_server(requests_mock):
     mock = requests_mock.get(
         url="https://adventofcode.com/2018/day/1/input",
