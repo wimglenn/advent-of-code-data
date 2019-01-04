@@ -231,3 +231,16 @@ def test_failure_to_create_dirs_unhandled(mocker):
     err.errno = errno.EEXIST
     mocker.patch("aocd._module.os.makedirs", side_effect=[TypeError, err])
     aocd._module._ensure_intermediate_dirs("/")
+
+
+def test_cannot_submit_same_bad_answer_twice(requests_mock, capsys):
+    mock = requests_mock.post(
+        url="https://adventofcode.com/2015/day/1/answer",
+        text="<article><p>That's not the right answer. (You guessed <span><code>69</code>.)</span></a></p></article>",
+    )
+    submit(year=2015, day=1, level=1, answer=69)
+    submit(year=2015, day=1, level=1, answer=69)
+    submit(year=2015, day=1, level=1, answer=69, quiet=True)
+    assert mock.call_count == 1
+    out, err = capsys.readouterr()
+    assert "aocd will not submit that answer again" in out

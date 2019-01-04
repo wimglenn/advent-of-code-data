@@ -289,6 +289,29 @@ def save_correct_answer(answer, day, year, level, session):
         f.write(str(answer).strip())
 
 
+def save_incorrect_answer(answer, day, year, level, session, extra):
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    part = {"1": "a", "2": "b"}[str(level)]
+    answer_fname = memo_fname.replace(".txt", "{}_bad_answers.txt".format(part))
+    _ensure_intermediate_dirs(answer_fname)
+    with open(answer_fname, "a") as f:
+        log.info("caching this data")
+        f.write(str(answer).strip() + " " + extra.replace("\n", " ") + "\n")
+
+
+def get_incorrect_answers(day, year, level, session):
+    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
+    part = {"1": "a", "2": "b"}[str(level)]
+    answer_fname = memo_fname.replace(".txt", "{}_bad_answers.txt".format(part))
+    result = {}
+    if os.path.isfile(answer_fname):
+        with open(answer_fname) as f:
+            for line in f:
+                answer, _sep, extra = line.strip().partition(" ")
+                result[answer] = extra
+    return result
+
+
 def submit(answer, level=None, day=None, year=None, session=None, reopen=True, quiet=False):
     if level not in {1, 2, "1", "2", None}:
         raise AocdError("level must be 1 or 2")
@@ -308,6 +331,13 @@ def submit(answer, level=None, day=None, year=None, session=None, reopen=True, q
         else:
             log.debug("submitting for part b (part a is already completed)")
             level = 2
+    bad_guesses = get_incorrect_answers(day=day, year=year, level=level, session=session)
+    if str(answer) in bad_guesses:
+        if not quiet:
+            msg = "aocd will not submit that answer again. You've previously guessed {} and the server responded:"
+            print(msg.format(answer))
+            cprint(bad_guesses[str(answer)], "red")
+        return
     uri = URI.format(year=year, day=day) + "/answer"
     log.info("posting to %s", uri)
     response = requests.post(
@@ -331,17 +361,16 @@ def submit(answer, level=None, day=None, year=None, session=None, reopen=True, q
     elif "Did you already complete it" in message:
         color = "yellow"
     elif "That's not the right answer" in message:
-        # TODO: save these too, they provide hints and you could
-        # prevent accidentally submitting same wrong answer twice
         color = "red"
         you_guessed = soup.article.span.code.text
         log.warning("wrong answer %s", you_guessed)
+        save_incorrect_answer(answer=answer, day=day, year=year, level=level, session=session, extra=soup.article.text)
     elif "You gave an answer too recently" in message:
         wait_pattern = r"You have (?:(\d+)m )?(\d+)s left to wait"
         try:
-            [(minutes, seconds)] = re.findall(wait_pattern, soup.article.text)
+            [(minutes, seconds)] = re.findall(wait_pattern, message)
         except ValueError:
-            log.warning(soup.article.text)
+            log.warning(message)
             color = "red"
         else:
             wait_time = int(seconds)
@@ -351,7 +380,7 @@ def submit(answer, level=None, day=None, year=None, session=None, reopen=True, q
             time.sleep(wait_time)
             return submit(answer=answer, level=level, day=day, year=year, session=session, reopen=reopen, quiet=quiet)
     if not quiet:
-        cprint(soup.article.text, color=color)
+        cprint(message, color=color)
     return response
 
 
