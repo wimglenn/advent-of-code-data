@@ -121,9 +121,3 @@ def test_corrupted_cache(tmpdir):
     cached.ensure_dir()
     with pytest.raises(IOError):
         aocd.get_data(year=2018, day=1)
-
-
-# def test_problem_creating_saved_copy(tmpdir, requests_mock):
-#     cached = tmpdir / ".config/aocd/thetesttoken/2018/1.txt"
-#     with pytest.raises(AocdError):
-#         aocd.get_data(session="whatever", year=2018, day=1)
