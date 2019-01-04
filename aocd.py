@@ -20,7 +20,7 @@ import requests
 from termcolor import cprint
 
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __all__ = [
     "data", "get_data", "get_answer", "main", "submit", "__version__",
     "AocdError", "PuzzleUnsolvedError", "AOC_TZ", "current_day",
@@ -392,7 +392,7 @@ def main():
         nargs="?",
         type=int,
         choices=range(1,26),
-        default=min(aoc_now.day, 25),
+        default=min(aoc_now.day, 25) if aoc_now.month == 12 else 1,
         help="1-25 (default: %(default)s)",
     )
     parser.add_argument(

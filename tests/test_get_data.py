@@ -71,7 +71,7 @@ def test_aocd_user_agent_in_req_headers(requests_mock):
     aocd.get_data(year=2018, day=1)
     assert mock.call_count == 1
     headers = mock.last_request._request.headers
-    assert headers["User-Agent"] == "aocd.py/v0.6.0"
+    assert headers["User-Agent"] == "aocd.py/v{}".format(aocd.__version__)
 
 
 def test_data_is_cached_from_successful_request(tmpdir, requests_mock):
