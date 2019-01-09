@@ -19,8 +19,15 @@ def test_import_submit_binds_day_and_year(mocker):
     fake_stack = [("~/2017/q23.py",)]
     mocker.patch("aocd._module.traceback.extract_stack", return_value=fake_stack)
     from aocd import submit
-    assert submit.func is aocd._module.submit
+    assert submit.func is aocd._module.submit  # partially applied
     submit.keywords == {'day': 23, 'year': 2017}
+
+
+def test_import_submit_doesnt_bind_day_and_year_when_introspection_failed(mocker):
+    fake_stack = []
+    mocker.patch("aocd._module.traceback.extract_stack", return_value=fake_stack)
+    from aocd import submit
+    assert submit is aocd._module.submit
 
 
 def test_get_data_via_import_in_interactive_mode(monkeypatch, mocker, freezer):

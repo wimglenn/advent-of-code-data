@@ -20,7 +20,7 @@ import requests
 from termcolor import cprint
 
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 __all__ = [
     "data", "get_data", "get_answer", "main", "submit", "__version__",
     "AocdError", "PuzzleUnsolvedError", "AOC_TZ", "current_day",
@@ -242,16 +242,6 @@ def get_day_and_year():
     don't like weird frame hacks, just use the ``aocd.get_data()`` function
     directly instead and have a nice day!
     """
-    import __main__
-    try:
-        __main__.__file__
-    except AttributeError:
-        log.debug("running within REPL")
-        day = current_day()
-        year = most_recent_year()
-        return day, year
-    else:
-        log.debug("non-interactive")
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     stack = [f[0] for f in traceback.extract_stack()]
@@ -260,7 +250,17 @@ def get_day_and_year():
             abspath = os.path.abspath(name)
             break
     else:
-        raise AocdError("Failed introspection of filename")
+        import __main__
+        try:
+            __main__.__file__
+        except AttributeError:
+            log.debug("running within REPL")
+            day = current_day()
+            year = most_recent_year()
+            return day, year
+        else:
+            log.debug("non-interactive")
+            raise AocdError("Failed introspection of filename")
     years = {int(year) for year in re.findall(pattern_year, abspath)}
     if len(years) > 1:
         raise AocdError("Failed introspection of year")
@@ -419,8 +419,12 @@ class Aocd(object):
             day, year = get_day_and_year()
             return get_data(day=day, year=year)
         if name == "submit":
-            day, year = get_day_and_year()
-            return partial(submit, day=day, year=year)
+            try:
+                day, year = get_day_and_year()
+            except AocdError:
+                return submit
+            else:
+                return partial(submit, day=day, year=year)
         if name in dir(self):
             return globals()[name]
         raise AttributeError
