@@ -1,7 +1,8 @@
 import pytest
 
-import aocd
-from aocd import AocdError
+from aocd.get import current_day
+from aocd.get import most_recent_year
+from aocd.exceptions import AocdError
 
 
 @pytest.mark.parametrize("date_str, expected_year", [
@@ -13,14 +14,14 @@ from aocd import AocdError
 ])
 def test_current_year(date_str, expected_year, freezer):
     freezer.move_to(date_str)
-    year = aocd.most_recent_year()
+    year = most_recent_year()
     assert year == expected_year
 
 
 def test_year_out_of_range(freezer):
     freezer.move_to("2015-11-11")
     with pytest.raises(AocdError("Time travel not supported yet")):
-        aocd.most_recent_year()
+        most_recent_year()
 
 
 @pytest.mark.parametrize("date_str, expected_day", [
@@ -32,11 +33,11 @@ def test_year_out_of_range(freezer):
 ])
 def test_current_day(date_str, expected_day, freezer):
     freezer.move_to(date_str)
-    day = aocd.current_day()
+    day = current_day()
     assert day == expected_day
 
 
 def test_day_out_of_range(freezer):
     freezer.move_to("2015-11-11")
     with pytest.raises(AocdError("current_day is only available in December (EST)")):
-        aocd.current_day()
+        current_day()

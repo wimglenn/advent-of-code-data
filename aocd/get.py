@@ -59,7 +59,7 @@ def get_data(session=None, day=None, year=None):
     delta = t - getattr(get_data, "last_request", t - RATE_LIMIT)
     t_sleep = max(RATE_LIMIT - delta, 0)
     if t_sleep > 0:
-        log.warning("You are being rate-limited. Sleeping %d seconds...", t_sleep)
+        log.warning("You are being rate-limited. Sleeping %.2f seconds...", t_sleep)
         time.sleep(t_sleep)
     response = requests.get(
         url=uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}

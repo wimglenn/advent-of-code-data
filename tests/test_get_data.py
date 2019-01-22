@@ -3,7 +3,7 @@ import logging
 import pytest
 
 import aocd
-from aocd import AocdError
+from aocd.exceptions import AocdError
 
 
 def test_get_from_server(requests_mock):
@@ -53,8 +53,8 @@ def test_server_error(requests_mock, caplog):
     assert mock.called
     assert mock.call_count == 1
     assert caplog.record_tuples == [
-        ('aocd', logging.ERROR, 'got 404 status code'),
-        ('aocd', logging.ERROR, 'Not Found'),
+        ('aocd.get', logging.ERROR, 'got 404 status code'),
+        ('aocd.get', logging.ERROR, 'Not Found'),
     ]
 
 
@@ -71,7 +71,8 @@ def test_aocd_user_agent_in_req_headers(requests_mock):
     aocd.get_data(year=2018, day=1)
     assert mock.call_count == 1
     headers = mock.last_request._request.headers
-    assert headers["User-Agent"] == "aocd.py/v{}".format(aocd.__version__)
+    expected = "advent-of-code-data v{}".format(aocd.__version__)
+    assert headers["User-Agent"] == expected
 
 
 def test_data_is_cached_from_successful_request(tmpdir, requests_mock):
@@ -86,7 +87,7 @@ def test_data_is_cached_from_successful_request(tmpdir, requests_mock):
     assert cached.read() == "fake data for year 2018 day 1"
 
 
-def test_rate_limit(tmpdir, requests_mock, capsys, mocked_sleep, freezer):
+def test_rate_limit(tmpdir, requests_mock, caplog, mocked_sleep, freezer):
     requests_mock.get(
         "https://adventofcode.com/2018/day/1/input",
         [{"text": "first request"}, {"text": "second request"}],
@@ -100,9 +101,8 @@ def test_rate_limit(tmpdir, requests_mock, capsys, mocked_sleep, freezer):
     assert data1 == "first request"
     assert data2 == "second request"
     mocked_sleep.assert_called_with(.5)
-    out, err = capsys.readouterr()
-    assert "You are being rate-limited" in out
-    assert "Sleeping 0.5 seconds..." in out
+    expected = ('aocd.get', 30, 'You are being rate-limited. Sleeping 0.50 seconds...')
+    assert expected in caplog.record_tuples
 
 
 def test_saved_data_multitenancy(tmpdir):

@@ -3,11 +3,9 @@ import errno
 import pytest
 from termcolor import colored
 
-import aocd
-from aocd import AocdError
-
-
-submit = aocd._module.submit
+from aocd.post import submit
+from aocd.utils import ensure_intermediate_dirs
+from aocd.exceptions import AocdError
 
 
 def test_submit_correct_answer(requests_mock, capsys):
@@ -30,7 +28,7 @@ def test_correct_submit_reopens_browser_on_answer_page(mocker, requests_mock):
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    browser_open = mocker.patch("aocd._module.webbrowser.open")
+    browser_open = mocker.patch("aocd.post.webbrowser.open")
     submit(1234, level=1, day=1, year=2018, session="whatever", reopen=True)
     browser_open.assert_called_once_with("https://adventofcode.com/2018/day/1/answer")
 
@@ -221,16 +219,16 @@ def test_submit_puts_level1_by_default(freezer, requests_mock, tmpdir):
 
 
 def test_failure_to_create_dirs_unhandled(mocker):
-    mocker.patch("aocd._module.os.makedirs", side_effect=TypeError)
+    mocker.patch("aocd.utils.os.makedirs", side_effect=TypeError)
     with pytest.raises(TypeError):
-        aocd._module._ensure_intermediate_dirs("/")
-    mocker.patch("aocd._module.os.makedirs", side_effect=[TypeError, OSError])
+        ensure_intermediate_dirs("/")
+    mocker.patch("aocd.utils.os.makedirs", side_effect=[TypeError, OSError])
     with pytest.raises(OSError):
-        aocd._module._ensure_intermediate_dirs("/")
+        ensure_intermediate_dirs("/")
     err = OSError()
     err.errno = errno.EEXIST
-    mocker.patch("aocd._module.os.makedirs", side_effect=[TypeError, err])
-    aocd._module._ensure_intermediate_dirs("/")
+    mocker.patch("aocd.utils.os.makedirs", side_effect=[TypeError, err])
+    ensure_intermediate_dirs("/")
 
 
 def test_cannot_submit_same_bad_answer_twice(requests_mock, capsys):
