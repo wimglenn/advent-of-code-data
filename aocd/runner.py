@@ -106,10 +106,10 @@ def run_for(users, years, days, datasets, timeout=60):
     if datasets:
         datasetpad = len(max(datasets, key=len))
     for year, day, user, dataset in it:
-        progress = "{year}/{day:<2d}   {user:>%d}/{dataset:<%d}" % (userpad, datasetpad)
-        progress = progress.format(year=year, day=day, user=user, dataset=dataset)
         if year == aoc_now.year and day > aoc_now.day:
             continue
+        progress = "{year}/{day:<2d}   {user:>%d}/{dataset:<%d}" % (userpad, datasetpad)
+        progress = progress.format(year=year, day=day, user=user, dataset=dataset)
         token = os.environ["AOC_SESSION"] = datasets[dataset]
         data = get_data(day=day, year=year, session=token)
         entry_point = entry_points[user]
