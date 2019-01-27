@@ -22,7 +22,6 @@ from .get import get_cookie
 from .get import get_data
 from .exceptions import PuzzleUnsolvedError
 from .post import get_answer
-from .post import submit
 
 
 # from https://adventofcode.com/about
@@ -59,14 +58,14 @@ def main():
     )
 
 
-def call_with_timeout(entry_point, timeout, template, dt=0.1, **kwargs):
+def run_with_timeout(entry_point, timeout, template, dt=0.1, **kwargs):
     # TODO : multi-process over the different tokens
-    func = entry_point.load()
     spinner = itertools.cycle(r"\|/-")
     pool = pebble.ProcessPool(max_workers=1)
-    t0 = time.time()
     line = runtime = format_time(0)
     with pool:
+        t0 = time.time()
+        func = entry_point.load()
         future = pool.schedule(func, kwargs=kwargs, timeout=timeout)
         while not future.done():
             line = "\r" + runtime + "   " + template + "   " + next(spinner)
@@ -74,9 +73,11 @@ def call_with_timeout(entry_point, timeout, template, dt=0.1, **kwargs):
             sys.stderr.flush()
             time.sleep(dt)
             runtime = format_time(time.time() - t0)
+        runtime = time.time() - t0
     sys.stderr.write("\r" + " "*len(line) + "\r")
     sys.stderr.flush()
-    return future.result()
+    results = tuple(future.result()) + (runtime,)
+    return results
 
 
 def format_time(t, timeout=60):
@@ -90,7 +91,7 @@ def format_time(t, timeout=60):
     return runtime
 
 
-def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
+def run_for(users, years, days, datasets, timeout=60):
     aoc_now = datetime.now(tz=AOC_TZ)
     all_users_entry_points = iter_entry_points(group='adventofcode.user')
     entry_points = {ep.name: ep for ep in all_users_entry_points if ep.name in users}
@@ -111,9 +112,8 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
         data = get_data(day=day, year=year, session=token)
         entry_point = entry_points[user]
         t0 = time.time()
-        crashed = False
         try:
-            result = call_with_timeout(
+            a, b, t = run_with_timeout(
                 entry_point,
                 timeout=timeout,
                 year=year,
@@ -123,31 +123,13 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
             )
         except Exception as err:
             a = b = repr(err)
-            crashed = True
-        else:
-            a, b = result
-        t = time.time() - t0  # wall time
+            t = time.time() - t0
         expected_a = expected_b = None
         try:
             expected_a = get_answer(day=day, year=year, session=token, level=1)
-        except PuzzleUnsolvedError:
-            pass
-        if expected_a is None and autosubmit and not crashed and a:
-            submit(a, day=day, year=year, session=token, reopen=False, quiet=True, level=1)
-            try:
-                expected_a = get_answer(day=day, year=year, session=token, level=1)
-            except PuzzleUnsolvedError:
-                pass
-        try:
             expected_b = get_answer(day=day, year=year, session=token, level=2)
         except PuzzleUnsolvedError:
             pass
-        if expected_b is None and autosubmit and not crashed and b:
-            submit(b, day=day, year=year, session=token, reopen=False, quiet=True, level=2)
-            try:
-                expected_b = get_answer(day=day, year=year, session=token, level=2)
-            except PuzzleUnsolvedError:
-                pass
         a_correct = str(expected_a) == a
         b_correct = str(expected_b) == b
         a_icon = colored("✔", "green") if a_correct else colored("✖", "red")
