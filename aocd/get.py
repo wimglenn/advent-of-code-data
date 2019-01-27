@@ -116,7 +116,7 @@ def get_cookie():
 
     # or chuck it in a plaintext file at ~/.config/aocd/token
     try:
-        with open(CONF_FNAME) as f:
+        with io.open(CONF_FNAME, encoding="utf-8") as f:
             cookie = f.read().strip()
     except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
