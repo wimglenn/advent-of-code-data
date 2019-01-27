@@ -1,3 +1,9 @@
+# coding: utf-8
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import itertools
 import json
 import logging
@@ -6,7 +12,6 @@ import sys
 import time
 from argparse import ArgumentParser
 from datetime import datetime
-from pathlib import Path
 from pkg_resources import iter_entry_points
 
 import pebble
@@ -29,10 +34,11 @@ def main():
     aoc_now = datetime.now(tz=AOC_TZ)
     all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     all_days = range(1, 26)
-    path = Path("~/.config/aocd/tokens.json").expanduser()
+    path = os.path.expanduser("~/.config/aocd/tokens.json")
     try:
-        all_datasets = json.loads(path.read_text())
-    except FileNotFoundError:
+        with open(path) as f:
+            all_datasets = json.load(f)
+    except OSError:
         all_datasets = {"default": get_cookie()}
     parser = ArgumentParser("AoC runner")
     parser.add_argument("-u", "--users", choices=users)
@@ -53,8 +59,9 @@ def main():
     )
 
 
-def call_with_timeout(func, timeout, template, dt=0.1, **kwargs):
+def call_with_timeout(entry_point, timeout, template, dt=0.1, **kwargs):
     # TODO : multi-process over the different tokens
+    func = entry_point.load()
     spinner = itertools.cycle(r"\|/-")
     pool = pebble.ProcessPool(max_workers=1)
     t0 = time.time()
@@ -89,8 +96,15 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
     entry_points = {ep.name: ep for ep in all_users_entry_points if ep.name in users}
     it = itertools.product(years, days, users, datasets)
     results = "{a_icon} part a: {part_a_answer} {b_icon} part b: {part_b_answer}"
+    userpad = 3
+    datasetpad = 8
+    if entry_points:
+        userpad = max(userpad, len(max(entry_points, key=len)))
+    if datasets:
+        datasetpad = max(datasetpad, len(max(datasets, key=len)))
     for year, day, user, dataset in it:
-        template = "{year}/{day:<2d}   {user}/{dataset:<8}".format(year=year, day=day, user=user, dataset=dataset)
+        template = "{year}/{day:<2d}   {user:>%d}/{dataset:<%d}" % (userpad, datasetpad)
+        template = template.format(year=year, day=day, user=user, dataset=dataset)
         if year == aoc_now.year and day > aoc_now.day:
             continue
         token = os.environ["AOC_SESSION"] = datasets[dataset]
@@ -100,7 +114,7 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
         crashed = False
         try:
             result = call_with_timeout(
-                entry_point.load(),
+                entry_point,
                 timeout=timeout,
                 year=year,
                 day=day,
@@ -145,19 +159,19 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
                 a_icon = colored("?", "magenta")
                 a_correction = "(correct answer is unknown)"
             else:
-                a_correction = f"(expected: {expected_a})"
+                a_correction = "(expected: {})".format(expected_a)
         if not b_correct:
             if expected_b is None:
                 b_icon = colored("?", "magenta")
                 b_correction = "(correct answer is unknown)"
             else:
-                b_correction = f"(expected: {expected_b})"
-        part_a_answer = f"{a} {a_correction}"
-        part_b_answer = f"{b} {b_correction}"
+                b_correction = "(expected: {})".format(expected_b)
+        part_a_answer = "{} {}".format(a, a_correction)
+        part_b_answer = "{} {}".format(b, b_correction)
         template = "   ".join([runtime, template, results])
         line = template.format(
             runtime=runtime.rjust(16),
-            a_icon=a_icon, part_a_answer=part_a_answer.ljust(30),
+            a_icon=a_icon, part_a_answer=part_a_answer.ljust(35),
             b_icon=b_icon, part_b_answer=part_b_answer,
         )
         if day == 25:
