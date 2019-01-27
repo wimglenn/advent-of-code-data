@@ -50,6 +50,16 @@ def main():
     )
     # parser.add_argument("--data")  # TODO: allow custom data for 1 endpoint
     args = parser.parse_args()
+    if not all_datasets:
+        sys.exit(
+            "There are no datasets available.\n"
+            "Either export your AOC_SESSION or list some datasets in {}".format(path)
+        )
+    if not users:
+        sys.exit(
+            "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
+            "See https://github.com/wimglenn/advent-of-code-sample for an example plugin package structure."
+        )
     logging.basicConfig(level=getattr(logging, args.log_level))
     run_for(
         users=args.users or list(users),
