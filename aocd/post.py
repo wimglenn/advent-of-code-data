@@ -28,7 +28,9 @@ from .version import USER_AGENT
 log = logging.getLogger(__name__)
 
 
-def submit(answer, level=None, day=None, year=None, session=None, reopen=True, quiet=False):
+def submit(
+    answer, level=None, day=None, year=None, session=None, reopen=True, quiet=False
+):
     if level not in {1, 2, "1", "2", None}:
         raise AocdError("level must be 1 or 2")
     if session is None:
@@ -47,7 +49,9 @@ def submit(answer, level=None, day=None, year=None, session=None, reopen=True, q
         else:
             log.debug("submitting for part b (part a is already completed)")
             level = 2
-    bad_guesses = get_incorrect_answers(day=day, year=year, level=level, session=session)
+    bad_guesses = get_incorrect_answers(
+        day=day, year=year, level=level, session=session
+    )
     if str(answer) in bad_guesses:
         if not quiet:
             msg = "aocd will not submit that answer again. You've previously guessed {} and the server responded:"
@@ -73,14 +77,23 @@ def submit(answer, level=None, day=None, year=None, session=None, reopen=True, q
         color = "green"
         if reopen:
             webbrowser.open(response.url)  # So you can read part B on the website...
-        save_correct_answer(answer=answer, day=day, year=year, level=level, session=session)
+        save_correct_answer(
+            answer=answer, day=day, year=year, level=level, session=session
+        )
     elif "Did you already complete it" in message:
         color = "yellow"
     elif "That's not the right answer" in message:
         color = "red"
         you_guessed = soup.article.span.code.text
         log.warning("wrong answer %s", you_guessed)
-        save_incorrect_answer(answer=answer, day=day, year=year, level=level, session=session, extra=soup.article.text)
+        save_incorrect_answer(
+            answer=answer,
+            day=day,
+            year=year,
+            level=level,
+            session=session,
+            extra=soup.article.text,
+        )
     elif "You gave an answer too recently" in message:
         wait_pattern = r"You have (?:(\d+)m )?(\d+)s left to wait"
         try:
@@ -94,7 +107,15 @@ def submit(answer, level=None, day=None, year=None, session=None, reopen=True, q
                 wait_time += 60 * int(minutes)
             log.info("Waiting %d seconds to autoretry", wait_time)
             time.sleep(wait_time)
-            return submit(answer=answer, level=level, day=day, year=year, session=session, reopen=reopen, quiet=quiet)
+            return submit(
+                answer=answer,
+                level=level,
+                day=day,
+                year=year,
+                session=session,
+                reopen=reopen,
+                quiet=quiet,
+            )
     if not quiet:
         cprint(message, color=color)
     return response
@@ -138,20 +159,28 @@ def get_answer(day, year, session=None, level=1):
     # check question page for already solved answers
     uri = URI.format(year=year, day=day)
     response = requests.get(
-        uri,
-        cookies={"session": session},
-        headers={"User-Agent": USER_AGENT},
+        uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}
     )
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     response.raise_for_status()
-    paras = [p for p in soup.find_all('p') if p.text.startswith("Your puzzle answer was")]
+    paras = [
+        p for p in soup.find_all("p") if p.text.startswith("Your puzzle answer was")
+    ]
     if paras:
         parta_correct_answer = paras[0].code.text
-        save_correct_answer(answer=parta_correct_answer, day=day, year=year, level=1, session=session)
+        save_correct_answer(
+            answer=parta_correct_answer, day=day, year=year, level=1, session=session
+        )
         if len(paras) > 1:
             _p1, p2 = paras
             partb_correct_answer = p2.code.text
-            save_correct_answer(answer=partb_correct_answer, day=day, year=year, level=2, session=session)
+            save_correct_answer(
+                answer=partb_correct_answer,
+                day=day,
+                year=year,
+                level=2,
+                session=session,
+            )
     if os.path.isfile(answer_fname):
         with open(answer_fname) as f:
             return f.read().strip()

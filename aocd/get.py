@@ -178,6 +178,7 @@ def get_day_and_year():
             break
     else:
         import __main__
+
         try:
             __main__.__file__
         except AttributeError:

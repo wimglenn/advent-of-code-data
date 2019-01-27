@@ -9,10 +9,7 @@ setup(
     long_description_content_type="text/x-rst",
     packages=["aocd"],
     entry_points={
-        "console_scripts": [
-            "aocd=aocd.cli:main",
-            "aoc=aocd.runner:main",
-        ],
+        "console_scripts": ["aocd=aocd.cli:main", "aoc=aocd.runner:main"],
         # https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins
         "adventofcode.user": [],
     },
@@ -28,11 +25,5 @@ setup(
         "Topic :: Software Development :: Libraries",
         "Topic :: Games/Entertainment :: Puzzle Games",
     ],
-    install_requires=[
-        "pytz",
-        "requests",
-        "termcolor",
-        "beautifulsoup4",
-        "pebble",
-    ],
+    install_requires=["pytz", "requests", "termcolor", "beautifulsoup4", "pebble"],
 )

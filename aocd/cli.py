@@ -19,7 +19,7 @@ def main():
         "day",
         nargs="?",
         type=int,
-        choices=range(1,26),
+        choices=range(1, 26),
         default=min(aoc_now.day, 25) if aoc_now.month == 12 else 1,
         help="1-25 (default: %(default)s)",
     )

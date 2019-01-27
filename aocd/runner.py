@@ -29,7 +29,7 @@ from .post import get_answer
 
 
 def main():
-    users = {ep.name: ep for ep in iter_entry_points(group='adventofcode.user')}
+    users = {ep.name: ep for ep in iter_entry_points(group="adventofcode.user")}
     aoc_now = datetime.now(tz=AOC_TZ)
     all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     all_days = range(1, 26)
@@ -45,7 +45,9 @@ def main():
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=all_days)
     parser.add_argument("-D", "--data", nargs="+", choices=all_datasets)
     parser.add_argument("-t", "--timeout", type=int, default=60)
-    parser.add_argument("--log-level", default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
+    parser.add_argument(
+        "--log-level", default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR"]
+    )
     # parser.add_argument("--data")  # TODO: allow custom data for 1 endpoint
     args = parser.parse_args()
     logging.basicConfig(level=getattr(logging, args.log_level))
@@ -74,7 +76,7 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
             time.sleep(dt)
             runtime = format_time(time.time() - t0)
         runtime = time.time() - t0
-    sys.stderr.write("\r" + " "*len(line) + "\r")
+    sys.stderr.write("\r" + " " * len(line) + "\r")
     sys.stderr.flush()
     results = tuple(future.result()) + (runtime,)
     return results
@@ -93,7 +95,7 @@ def format_time(t, timeout=60):
 
 def run_for(users, years, days, datasets, timeout=60):
     aoc_now = datetime.now(tz=AOC_TZ)
-    all_users_entry_points = iter_entry_points(group='adventofcode.user')
+    all_users_entry_points = iter_entry_points(group="adventofcode.user")
     entry_points = {ep.name: ep for ep in all_users_entry_points if ep.name in users}
     it = itertools.product(years, days, users, datasets)
     results = "{a_icon} part a: {part_a_answer} {b_icon} part b: {part_b_answer}"
@@ -152,8 +154,10 @@ def run_for(users, years, days, datasets, timeout=60):
         part_b_answer = "{} {}".format(b, b_correction)
         line = "   ".join([runtime, progress, results])
         line = line.format(
-            a_icon=a_icon, part_a_answer=part_a_answer.ljust(35),
-            b_icon=b_icon, part_b_answer=part_b_answer,
+            a_icon=a_icon,
+            part_a_answer=part_a_answer.ljust(35),
+            b_icon=b_icon,
+            part_b_answer=part_b_answer,
         )
         if day == 25:
             # there's no part b on christmas day
