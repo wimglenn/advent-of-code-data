@@ -37,7 +37,7 @@ def main():
     try:
         with open(path) as f:
             all_datasets = json.load(f)
-    except OSError:
+    except IOError:
         all_datasets = {"default": get_cookie()}
     parser = ArgumentParser("AoC runner")
     parser.add_argument("-u", "--users", choices=users)
@@ -58,7 +58,7 @@ def main():
     )
 
 
-def run_with_timeout(entry_point, timeout, template, dt=0.1, **kwargs):
+def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
     # TODO : multi-process over the different tokens
     spinner = itertools.cycle(r"\|/-")
     pool = pebble.ProcessPool(max_workers=1)
@@ -68,7 +68,7 @@ def run_with_timeout(entry_point, timeout, template, dt=0.1, **kwargs):
         func = entry_point.load()
         future = pool.schedule(func, kwargs=kwargs, timeout=timeout)
         while not future.done():
-            line = "\r" + runtime + "   " + template + "   " + next(spinner)
+            line = "\r" + runtime + "   " + progress + "   " + next(spinner)
             sys.stderr.write(line)
             sys.stderr.flush()
             time.sleep(dt)
@@ -100,12 +100,12 @@ def run_for(users, years, days, datasets, timeout=60):
     userpad = 3
     datasetpad = 8
     if entry_points:
-        userpad = max(userpad, len(max(entry_points, key=len)))
+        userpad = len(max(entry_points, key=len))
     if datasets:
-        datasetpad = max(datasetpad, len(max(datasets, key=len)))
+        datasetpad = len(max(datasets, key=len))
     for year, day, user, dataset in it:
-        template = "{year}/{day:<2d}   {user:>%d}/{dataset:<%d}" % (userpad, datasetpad)
-        template = template.format(year=year, day=day, user=user, dataset=dataset)
+        progress = "{year}/{day:<2d}   {user:>%d}/{dataset:<%d}" % (userpad, datasetpad)
+        progress = progress.format(year=year, day=day, user=user, dataset=dataset)
         if year == aoc_now.year and day > aoc_now.day:
             continue
         token = os.environ["AOC_SESSION"] = datasets[dataset]
@@ -113,17 +113,18 @@ def run_for(users, years, days, datasets, timeout=60):
         entry_point = entry_points[user]
         t0 = time.time()
         try:
-            a, b, t = run_with_timeout(
+            a, b, walltime = run_with_timeout(
                 entry_point,
                 timeout=timeout,
                 year=year,
                 day=day,
                 data=data,
-                template=template,
+                progress=progress,
             )
         except Exception as err:
             a = b = repr(err)
-            t = time.time() - t0
+            walltime = time.time() - t0
+        runtime = format_time(walltime, timeout)
         expected_a = expected_b = None
         try:
             expected_a = get_answer(day=day, year=year, session=token, level=1)
@@ -134,7 +135,6 @@ def run_for(users, years, days, datasets, timeout=60):
         b_correct = str(expected_b) == b
         a_icon = colored("✔", "green") if a_correct else colored("✖", "red")
         b_icon = colored("✔", "green") if b_correct else colored("✖", "red")
-        runtime = format_time(t, timeout)
         a_correction = b_correction = ""
         if not a_correct:
             if expected_a is None:
@@ -150,9 +150,8 @@ def run_for(users, years, days, datasets, timeout=60):
                 b_correction = "(expected: {})".format(expected_b)
         part_a_answer = "{} {}".format(a, a_correction)
         part_b_answer = "{} {}".format(b, b_correction)
-        template = "   ".join([runtime, template, results])
-        line = template.format(
-            runtime=runtime.rjust(16),
+        line = "   ".join([runtime, progress, results])
+        line = line.format(
             a_icon=a_icon, part_a_answer=part_a_answer.ljust(35),
             b_icon=b_icon, part_b_answer=part_b_answer,
         )
