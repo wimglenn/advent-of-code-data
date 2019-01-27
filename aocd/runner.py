@@ -2,6 +2,8 @@ import itertools
 import json
 import logging
 import os
+import sys
+import time
 from argparse import ArgumentParser
 from datetime import datetime
 from pathlib import Path
@@ -9,7 +11,6 @@ from pkg_resources import iter_entry_points
 
 import pebble
 from termcolor import colored
-from time import time
 
 from .utils import AOC_TZ
 from .get import get_cookie
@@ -38,7 +39,7 @@ def main():
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=all_years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=all_days)
     parser.add_argument("-D", "--data", nargs="+", choices=all_datasets)
-    parser.add_argument("-t", "--timeout", type=int, default=300)
+    parser.add_argument("-t", "--timeout", type=int, default=60)
     parser.add_argument("--log-level", default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     # parser.add_argument("--data")  # TODO: allow custom data for 1 endpoint
     args = parser.parse_args()
@@ -52,32 +53,50 @@ def main():
     )
 
 
-def call_with_timeout(func, timeout, **kwargs):
+def call_with_timeout(func, timeout, template, dt=0.1, **kwargs):
     # TODO : multi-process over the different tokens
-    # TODO : ascii spinner
+    spinner = itertools.cycle(r"\|/-")
     pool = pebble.ProcessPool(max_workers=1)
+    t0 = time.time()
+    line = runtime = format_time(0)
     with pool:
         future = pool.schedule(func, kwargs=kwargs, timeout=timeout)
-        return future.result()
+        while not future.done():
+            line = "\r" + runtime + "   " + template + "   " + next(spinner)
+            sys.stderr.write(line)
+            sys.stderr.flush()
+            time.sleep(dt)
+            runtime = format_time(time.time() - t0)
+    sys.stderr.write("\r" + " "*len(line) + "\r")
+    sys.stderr.flush()
+    return future.result()
 
 
-def run_for(users, years, days, datasets, timeout=300, autosubmit=True):
+def format_time(t, timeout=60):
+    if t < timeout / 4:
+        color = "green"
+    elif t < timeout / 2:
+        color = "yellow"
+    else:
+        color = "red"
+    runtime = colored("{: 6.2f}s".format(t), color)
+    return runtime
+
+
+def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
     aoc_now = datetime.now(tz=AOC_TZ)
     all_users_entry_points = iter_entry_points(group='adventofcode.user')
     entry_points = {ep.name: ep for ep in all_users_entry_points if ep.name in users}
     it = itertools.product(years, days, users, datasets)
-    template = (
-        "{runtime}   {year}/{day:<2d}   {user}/{dataset:<7}   "
-        "{a_icon} part a: {part_a_answer} "
-        "{b_icon} part b: {part_b_answer}"
-    )
+    results = "{a_icon} part a: {part_a_answer} {b_icon} part b: {part_b_answer}"
     for year, day, user, dataset in it:
+        template = "{year}/{day:<2d}   {user}/{dataset:<8}".format(year=year, day=day, user=user, dataset=dataset)
         if year == aoc_now.year and day > aoc_now.day:
             continue
         token = os.environ["AOC_SESSION"] = datasets[dataset]
         data = get_data(day=day, year=year, session=token)
         entry_point = entry_points[user]
-        t0 = time()
+        t0 = time.time()
         crashed = False
         try:
             result = call_with_timeout(
@@ -86,13 +105,14 @@ def run_for(users, years, days, datasets, timeout=300, autosubmit=True):
                 year=year,
                 day=day,
                 data=data,
+                template=template,
             )
         except Exception as err:
             a = b = repr(err)
             crashed = True
         else:
             a, b = result
-        t = time() - t0  # wall time
+        t = time.time() - t0  # wall time
         expected_a = expected_b = None
         try:
             expected_a = get_answer(day=day, year=year, session=token, level=1)
@@ -118,12 +138,7 @@ def run_for(users, years, days, datasets, timeout=300, autosubmit=True):
         b_correct = str(expected_b) == b
         a_icon = colored("✔", "green") if a_correct else colored("✖", "red")
         b_icon = colored("✔", "green") if b_correct else colored("✖", "red")
-        if t < 15:
-            runtime = colored(f"{t:.2f}s", "green")
-        elif t < 60:
-            runtime = colored(f"{t:.2f}s", "yellow")
-        else:
-            runtime = colored(f"{t:.2f}s", "red")
+        runtime = format_time(t, timeout)
         a_correction = b_correction = ""
         if not a_correct:
             if expected_a is None:
@@ -139,8 +154,9 @@ def run_for(users, years, days, datasets, timeout=300, autosubmit=True):
                 b_correction = f"(expected: {expected_b})"
         part_a_answer = f"{a} {a_correction}"
         part_b_answer = f"{b} {b_correction}"
+        template = "   ".join([runtime, template, results])
         line = template.format(
-            runtime=runtime.rjust(16), year=year, day=day, user=user, dataset=dataset,
+            runtime=runtime.rjust(16),
             a_icon=a_icon, part_a_answer=part_a_answer.ljust(30),
             b_icon=b_icon, part_b_answer=part_b_answer,
         )
