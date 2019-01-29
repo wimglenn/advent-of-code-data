@@ -39,7 +39,7 @@ def main():
             all_datasets = json.load(f)
     except IOError:
         all_datasets = {"default": get_cookie()}
-    parser = ArgumentParser("AoC runner")
+    parser = ArgumentParser(description="AoC runner")
     parser.add_argument("-u", "--users", choices=users)
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=all_years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=all_days)
