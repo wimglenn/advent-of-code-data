@@ -48,7 +48,6 @@ def main():
     parser.add_argument(
         "--log-level", default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR"]
     )
-    # parser.add_argument("--data")  # TODO: allow custom data for 1 endpoint
     args = parser.parse_args()
     if not all_datasets:
         sys.exit(

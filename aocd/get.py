@@ -171,6 +171,7 @@ def get_day_and_year():
     """
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
+    pattern_site = r"python\d\.\d.site-packages."
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
         if not _skip_frame(name):
@@ -194,6 +195,7 @@ def get_day_and_year():
         raise AocdError("Failed introspection of year")
     year = years.pop() if years else None
     fname = re.sub(pattern_year, "", abspath)
+    fname = re.sub(pattern_site, "", fname)
     try:
         [day] = set(re.findall(pattern_day, fname))
     except ValueError:
@@ -204,4 +206,5 @@ def get_day_and_year():
         assert 1 <= day <= 25, "regex pattern_day must only match numbers in range 1-25"
         log.debug("year=%d day=%d", year, day)
         return day, year
+    log.debug("giving up introspection for %s", abspath)
     raise AocdError("Failed introspection of day")
