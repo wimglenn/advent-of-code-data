@@ -20,15 +20,14 @@ import requests
 
 from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
-from .utils import CONF_FNAME
-from .utils import ensure_intermediate_dirs
-from .utils import URL
 from .version import __version__
 
 
 log = logging.getLogger(__name__)
 
 
+CONF_FNAME = os.path.expanduser("~/.config/aocd/token")
+URL = "https://adventofcode.com/{year}/day/{day}"
 USER_AGENT = "advent-of-code-data v{}".format(__version__)
 
 
@@ -108,7 +107,7 @@ class Puzzle(object):
             log.error(response.text)
             raise AocdError("Unexpected response")
         data = response.text
-        ensure_intermediate_dirs(self.input_data_fname)
+        _ensure_intermediate_dirs(self.input_data_fname)
         with open(self.input_data_fname, "w") as f:
             log.info("saving the puzzle input")
             f.write(data)
@@ -191,14 +190,14 @@ class Puzzle(object):
 
     def _save_correct_answer(self, value, part):
         fname = getattr(self, "answer_{}_fname".format(part))
-        ensure_intermediate_dirs(fname)
+        _ensure_intermediate_dirs(fname)
         with open(fname, "w") as f:
             log.info("saving the correct answer")
             f.write(str(value).strip())
 
     def _save_incorrect_answer(self, value, part, extra=""):
         fname = getattr(self, "bad_guesses_{}_fname".format(part))
-        ensure_intermediate_dirs(fname)
+        _ensure_intermediate_dirs(fname)
         with open(fname, "a") as f:
             log.info("saving the wrong answer")
             f.write(str(value).strip() + " " + extra.replace("\n", " ") + "\n")
@@ -240,3 +239,16 @@ class Puzzle(object):
                     answer, _sep, extra = line.strip().partition(" ")
                     result[answer] = extra
         return result
+
+
+def _ensure_intermediate_dirs(fname):
+    parent = os.path.dirname(fname)
+    try:
+        os.makedirs(parent, exist_ok=True)
+    except TypeError:
+        # exist_ok not avail on Python 2
+        try:
+            os.makedirs(parent)
+        except (IOError, OSError) as err:
+            if err.errno != errno.EEXIST:
+                raise

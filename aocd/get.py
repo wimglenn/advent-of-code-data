@@ -20,9 +20,6 @@ from .utils import AOC_TZ
 log = getLogger(__name__)
 
 
-RATE_LIMIT = 1  # seconds between consecutive requests
-
-
 def get_data(session=None, day=None, year=None):
     """
     Get data for day (1-25) and year (>= 2015)

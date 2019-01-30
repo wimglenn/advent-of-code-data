@@ -87,24 +87,6 @@ def test_data_is_cached_from_successful_request(tmpdir, requests_mock):
     assert cached.read() == "fake data for year 2018 day 1"
 
 
-def test_rate_limit(tmpdir, requests_mock, caplog, mocked_sleep, freezer):
-    requests_mock.get(
-        "https://adventofcode.com/2018/day/1/input",
-        [{"text": "first request"}, {"text": "second request"}],
-    )
-    cached = tmpdir / ".config/aocd/thetesttoken/2018/1.txt"
-    freezer.move_to("2018-12-01 12:00:00.000Z")
-    data1 = aocd.get_data(year=2018, day=1)
-    cached.remove()
-    freezer.move_to("2018-12-01 12:00:00.5000Z")
-    data2 = aocd.get_data(year=2018, day=1)
-    assert data1 == "first request"
-    assert data2 == "second request"
-    mocked_sleep.assert_called_with(.5)
-    expected = ('aocd.get', 30, 'You are being rate-limited. Sleeping 0.50 seconds...')
-    assert expected in caplog.record_tuples
-
-
 def test_saved_data_multitenancy(tmpdir):
     cachedA = tmpdir / ".config/aocd/tokenA/2018/1.txt"
     cachedB = tmpdir / ".config/aocd/tokenB/2018/1.txt"
