@@ -17,11 +17,12 @@ from pkg_resources import iter_entry_points
 import pebble
 from termcolor import colored
 
-from .utils import AOC_TZ
-from .get import get_cookie
-from .get import get_data
+from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
-from .post import get_answer
+from .models import default_user
+from .models import Puzzle
+from .utils import AOC_TZ
+
 
 
 # from https://adventofcode.com/about
@@ -38,7 +39,7 @@ def main():
         with open(path) as f:
             all_datasets = json.load(f)
     except IOError:
-        all_datasets = {"default": get_cookie()}
+        all_datasets = {"default": default_user().token}
     parser = ArgumentParser(description="AoC runner")
     parser.add_argument("-u", "--users", choices=users)
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=all_years)
@@ -102,12 +103,11 @@ def format_time(t, timeout=60):
     return runtime
 
 
-def run_for(users, years, days, datasets, timeout=60):
+def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
     aoc_now = datetime.now(tz=AOC_TZ)
     all_users_entry_points = iter_entry_points(group="adventofcode.user")
     entry_points = {ep.name: ep for ep in all_users_entry_points if ep.name in users}
     it = itertools.product(years, days, users, datasets)
-    results = "{a_icon} part a: {part_a_answer} {b_icon} part b: {part_b_answer}"
     userpad = 3
     datasetpad = 8
     if entry_points:
@@ -119,8 +119,9 @@ def run_for(users, years, days, datasets, timeout=60):
             continue
         progress = "{year}/{day:<2d}   {user:>%d}/{dataset:<%d}" % (userpad, datasetpad)
         progress = progress.format(year=year, day=day, user=user, dataset=dataset)
-        token = os.environ["AOC_SESSION"] = datasets[dataset]
-        data = get_data(day=day, year=year, session=token)
+        os.environ["AOC_SESSION"] = datasets[dataset]
+        puzzle = Puzzle(year=year, day=day)
+        data = puzzle.input_data
         entry_point = entry_points[user]
         t0 = time.time()
         try:
@@ -136,39 +137,33 @@ def run_for(users, years, days, datasets, timeout=60):
             a = b = repr(err)
             walltime = time.time() - t0
         runtime = format_time(walltime, timeout)
-        expected_a = expected_b = None
-        try:
-            expected_a = get_answer(day=day, year=year, session=token, level=1)
-            expected_b = get_answer(day=day, year=year, session=token, level=2)
-        except PuzzleUnsolvedError:
-            pass
-        a_correct = str(expected_a) == a
-        b_correct = str(expected_b) == b
-        a_icon = colored("✔", "green") if a_correct else colored("✖", "red")
-        b_icon = colored("✔", "green") if b_correct else colored("✖", "red")
-        a_correction = b_correction = ""
-        if not a_correct:
-            if expected_a is None:
-                a_icon = colored("?", "magenta")
-                a_correction = "(correct answer is unknown)"
-            else:
-                a_correction = "(expected: {})".format(expected_a)
-        if not b_correct:
-            if expected_b is None:
-                b_icon = colored("?", "magenta")
-                b_correction = "(correct answer is unknown)"
-            else:
-                b_correction = "(expected: {})".format(expected_b)
-        part_a_answer = "{} {}".format(a, a_correction)
-        part_b_answer = "{} {}".format(b, b_correction)
-        line = "   ".join([runtime, progress, results])
-        line = line.format(
-            a_icon=a_icon,
-            part_a_answer=part_a_answer.ljust(35),
-            b_icon=b_icon,
-            part_b_answer=part_b_answer,
-        )
-        if day == 25:
-            # there's no part b on christmas day
-            line = line.split(b_icon)[0].rstrip()
+        result_template = "   {icon} part {part}: {answer}"
+        line = "   ".join([runtime, progress])
+        for answer, part in zip((a, b), "ab"):
+            if day == 25 and part == "b":
+                # there's no part b on christmas day, skip
+                continue
+            expected = None
+            try:
+                expected = getattr(puzzle, "correct_answer_part_{}".format(part))
+            except PuzzleUnsolvedError:
+                if autosubmit:
+                    try:
+                        puzzle.submit_answer(value=answer, part=part, reopen=False, quiet=True)
+                        expected = getattr(puzzle, "correct_answer_part_{}".format(part))
+                    except AocdError:
+                        pass
+            correct = str(expected) == answer
+            icon = colored("✔", "green") if correct else colored("✖", "red")
+            correction = ""
+            if not correct:
+                if expected is None:
+                    icon = colored("?", "magenta")
+                    correction = "(correct answer is unknown)"
+                else:
+                    correction = "(expected: {})".format(expected)
+            answer = "{} {}".format(answer, correction)
+            if part == "a":
+                answer = answer.ljust(35)
+            line += result_template.format(icon=icon, part=part, answer=answer)
         print(line)

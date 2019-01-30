@@ -5,26 +5,16 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import datetime
-import errno
-import io
 import os
 import re
-import sys
-import time
 import traceback
 from logging import getLogger
-from textwrap import dedent
-
-import requests
-from termcolor import cprint
 
 from .exceptions import AocdError
-from .utils import ensure_intermediate_dirs
+from .models import default_user
+from .models import Puzzle
+from .models import User
 from .utils import AOC_TZ
-from .utils import CONF_FNAME
-from .utils import MEMO_FNAME
-from .utils import URI
-from .version import USER_AGENT
 
 
 log = getLogger(__name__)
@@ -39,46 +29,17 @@ def get_data(session=None, day=None, year=None):
     User's session cookie is needed (puzzle inputs differ by user)
     """
     if session is None:
-        session = get_cookie()
+        user = default_user()
+    else:
+        user = User(token=session)
     if day is None:
         day = current_day()
         log.info("current day=%s", day)
     if year is None:
         year = most_recent_year()
         log.info("most recent year=%s", year)
-    uri = URI.format(year=year, day=day) + "/input"
-    memo_fname = MEMO_FNAME.format(session=session, year=year, day=day)
-    try:
-        # use previously received data, if any existing
-        with io.open(memo_fname, encoding="utf-8") as f:
-            data = f.read()
-    except (IOError, OSError) as err:
-        if err.errno != errno.ENOENT:
-            raise
-    else:
-        log.info("reusing existing data %s", memo_fname.replace(session, "<token>"))
-        return data.rstrip("\r\n")
-    log.info("getting data year=%s day=%s", year, day)
-    t = time.time()
-    delta = t - getattr(get_data, "last_request", t - RATE_LIMIT)
-    t_sleep = max(RATE_LIMIT - delta, 0)
-    if t_sleep > 0:
-        log.warning("You are being rate-limited. Sleeping %.2f seconds...", t_sleep)
-        time.sleep(t_sleep)
-    response = requests.get(
-        url=uri, cookies={"session": session}, headers={"User-Agent": USER_AGENT}
-    )
-    get_data.last_request = time.time()
-    if not response.ok:
-        log.error("got %s status code", response.status_code)
-        log.error(response.text)
-        raise AocdError("Unexpected response")
-    data = response.text
-    ensure_intermediate_dirs(memo_fname)
-    with open(memo_fname, "w") as f:
-        log.info("saving the puzzle input")
-        f.write(data)
-    return data.rstrip("\r\n")
+    puzzle = Puzzle(year=year, day=day, user=user)
+    return puzzle.input_data
 
 
 def most_recent_year():
@@ -106,34 +67,6 @@ def current_day():
         raise AocdError("current_day is only available in December (EST)")
     day = min(aoc_now.day, 25)
     return day
-
-
-def get_cookie():
-    # export your session id as AOC_SESSION env var
-    cookie = os.getenv("AOC_SESSION")
-    if cookie:
-        return cookie
-
-    # or chuck it in a plaintext file at ~/.config/aocd/token
-    try:
-        with io.open(CONF_FNAME, encoding="utf-8") as f:
-            cookie = f.read().strip()
-    except (IOError, OSError) as err:
-        if err.errno != errno.ENOENT:
-            raise
-    if cookie:
-        return cookie
-
-    msg = dedent(
-        """\
-        ERROR: AoC session ID is needed to get your puzzle data!
-        You can find it in your browser cookies after login.
-            1) Save the cookie into a text file {}, or
-            2) Export the cookie in environment variable AOC_SESSION
-        """
-    )
-    cprint(msg.format(CONF_FNAME), color="red", file=sys.stderr)
-    raise AocdError("Missing session ID")
 
 
 def _skip_frame(name):

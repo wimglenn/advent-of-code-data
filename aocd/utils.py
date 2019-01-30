@@ -10,7 +10,7 @@ import errno
 import pytz
 
 
-URI = "https://adventofcode.com/{year}/day/{day}"
+URL = "https://adventofcode.com/{year}/day/{day}"
 AOC_TZ = pytz.timezone("America/New_York")
 CONF_FNAME = os.path.expanduser("~/.config/aocd/token")
 MEMO_FNAME = os.path.expanduser("~/.config/aocd/{session}/{year}/{day}.txt")
