@@ -53,8 +53,8 @@ def test_server_error(requests_mock, caplog):
     assert mock.called
     assert mock.call_count == 1
     assert caplog.record_tuples == [
-        ('aocd.get', logging.ERROR, 'got 404 status code'),
-        ('aocd.get', logging.ERROR, 'Not Found'),
+        ('aocd.models', logging.ERROR, 'got 404 status code'),
+        ('aocd.models', logging.ERROR, 'Not Found'),
     ]
 
 

@@ -3,18 +3,14 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def mocked_sleep(mocker):
-    no_sleep_till_brooklyn = mocker.patch("aocd.get.time.sleep")
-    no_sleep_till_brooklyn = mocker.patch("aocd.post.time.sleep")
+    no_sleep_till_brooklyn = mocker.patch("time.sleep")
     return no_sleep_till_brooklyn
 
 
 @pytest.fixture(autouse=True)
 def remove_user_env(tmpdir, monkeypatch):
-    token_file = tmpdir / ".config/aocd/token"
-    memo = tmpdir / ".config/aocd/{session}/{year}/{day}.txt"
-    monkeypatch.setattr("aocd.get.CONF_FNAME", str(token_file))
-    monkeypatch.setattr("aocd.get.MEMO_FNAME", str(memo))
-    monkeypatch.setattr("aocd.post.MEMO_FNAME", str(memo))
+    memo_dir = tmpdir / ".config/aocd"
+    monkeypatch.setattr("aocd.models.CONF_DIR", str(memo_dir))
     monkeypatch.delenv("AOC_SESSION", raising=False)
 
 

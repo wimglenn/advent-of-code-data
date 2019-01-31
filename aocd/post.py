@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 def submit(answer, part=None, day=None, year=None, session=None, reopen=True, quiet=False):
     if part not in {"A", "B", "a", "b", None}:
-        raise AocdError("level must be 1 or 2")
+        raise AocdError('part must be "a" or "b"')
     if session is None:
         user = default_user()
     else:
