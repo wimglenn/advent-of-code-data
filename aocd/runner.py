@@ -24,7 +24,6 @@ from .models import Puzzle
 from .utils import AOC_TZ
 
 
-
 # from https://adventofcode.com/about
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
 
@@ -157,8 +156,12 @@ def run_for(users, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=Tr
                         if part == "b":
                             # this ensures we won't attempt to submit for part b if part a isn't solved yet
                             puzzle.correct_answer_part_a
-                        puzzle.submit_answer(value=answer, part=part, reopen=False, quiet=True)
-                        expected = getattr(puzzle, "correct_answer_part_{}".format(part))
+                        puzzle.submit_answer(
+                            value=answer, part=part, reopen=False, quiet=True
+                        )
+                        expected = getattr(
+                            puzzle, "correct_answer_part_{}".format(part)
+                        )
                     except AocdError:
                         pass
             correct = str(expected) == answer

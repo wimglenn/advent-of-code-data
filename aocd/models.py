@@ -101,7 +101,9 @@ class Puzzle(object):
             log.info("reusing existing data %s", sanitized_fname)
             return data.rstrip("\r\n")
         log.info("getting data year=%s day=%s", self.year, self.day)
-        response = requests.get(url=self.input_data_url, cookies=self._cookies, headers=self._headers)
+        response = requests.get(
+            url=self.input_data_url, cookies=self._cookies, headers=self._headers
+        )
         if not response.ok:
             log.error("got %s status code", response.status_code)
             log.error(response.text)
@@ -156,7 +158,8 @@ class Puzzle(object):
         if "That's the right answer" in message:
             color = "green"
             if reopen:
-                webbrowser.open(response.url)  # So you can read part B on the website...
+                # So you can read part B on the website...
+                webbrowser.open(response.url)
             self._save_correct_answer(value=value, part=part)
         elif "Did you already complete it" in message:
             color = "yellow"
@@ -182,10 +185,7 @@ class Puzzle(object):
                 log.info("Waiting %d seconds to autoretry", wait_time)
                 time.sleep(wait_time)
                 return self.submit_answer(
-                    value=value,
-                    part=part,
-                    reopen=reopen,
-                    quiet=quiet,
+                    value=value, part=part, reopen=reopen, quiet=quiet
                 )
         if not quiet:
             cprint(message, color=color)

@@ -45,7 +45,7 @@ def test_saved_data_is_reused_if_available(tmpdir, requests_mock):
 def test_server_error(requests_mock, caplog):
     mock = requests_mock.get(
         url="https://adventofcode.com/2101/day/1/input",
-        text='Not Found',
+        text="Not Found",
         status_code=404,
     )
     with pytest.raises(AocdError("Unexpected response")):
@@ -53,8 +53,8 @@ def test_server_error(requests_mock, caplog):
     assert mock.called
     assert mock.call_count == 1
     assert caplog.record_tuples == [
-        ('aocd.models', logging.ERROR, 'got 404 status code'),
-        ('aocd.models', logging.ERROR, 'Not Found'),
+        ("aocd.models", logging.ERROR, "got 404 status code"),
+        ("aocd.models", logging.ERROR, "Not Found"),
     ]
 
 
