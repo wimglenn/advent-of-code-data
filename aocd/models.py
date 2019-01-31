@@ -138,7 +138,7 @@ class Puzzle(object):
                 cprint(bad_guesses[str(value)], "red")
             return
         url = self.answer_submit_url
-        log.info("posting to %s", url)
+        log.info("posting %r to %s (part %s)", value, url, part)
         level = {"a": 1, "b": 2}[part]
         response = requests.post(
             url=url,
@@ -162,8 +162,11 @@ class Puzzle(object):
             color = "yellow"
         elif "That's not the right answer" in message:
             color = "red"
-            you_guessed = soup.article.span.code.text
-            log.warning("wrong answer %s", you_guessed)
+            try:
+                context = soup.article.span.code.text
+            except AttributeError:
+                context = soup.article.text
+            log.warning("wrong answer: %s", context)
             self._save_incorrect_answer(value=value, part=part, extra=soup.article.text)
         elif "You gave an answer too recently" in message:
             wait_pattern = r"You have (?:(\d+)m )?(\d+)s left to wait"

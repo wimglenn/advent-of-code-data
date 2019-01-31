@@ -29,6 +29,9 @@ from .utils import AOC_TZ
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
 
 
+DEFAULT_TIMEOUT = 60
+
+
 def main():
     users = {ep.name: ep for ep in iter_entry_points(group="adventofcode.user")}
     aoc_now = datetime.now(tz=AOC_TZ)
@@ -45,7 +48,7 @@ def main():
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=all_years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=all_days)
     parser.add_argument("-D", "--data", nargs="+", choices=all_datasets)
-    parser.add_argument("-t", "--timeout", type=int, default=60)
+    parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
     parser.add_argument(
         "--log-level", default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR"]
     )
@@ -92,18 +95,18 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
     return results
 
 
-def format_time(t, timeout=60):
+def format_time(t, timeout=DEFAULT_TIMEOUT):
     if t < timeout / 4:
         color = "green"
     elif t < timeout / 2:
         color = "yellow"
     else:
         color = "red"
-    runtime = colored("{: 6.2f}s".format(t), color)
+    runtime = colored("{: 7.2f}s".format(t), color)
     return runtime
 
 
-def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
+def run_for(users, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True):
     aoc_now = datetime.now(tz=AOC_TZ)
     all_users_entry_points = iter_entry_points(group="adventofcode.user")
     entry_points = {ep.name: ep for ep in all_users_entry_points if ep.name in users}
@@ -124,6 +127,7 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
         data = puzzle.input_data
         entry_point = entry_points[user]
         t0 = time.time()
+        crashed = False
         try:
             a, b, walltime = run_with_timeout(
                 entry_point,
@@ -134,6 +138,7 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
                 progress=progress,
             )
         except Exception as err:
+            crashed = True
             a = b = repr(err)
             walltime = time.time() - t0
         runtime = format_time(walltime, timeout)
@@ -147,8 +152,11 @@ def run_for(users, years, days, datasets, timeout=60, autosubmit=True):
             try:
                 expected = getattr(puzzle, "correct_answer_part_{}".format(part))
             except PuzzleUnsolvedError:
-                if autosubmit:
+                if autosubmit and not crashed:
                     try:
+                        if part == "b":
+                            # this ensures we won't attempt to submit for part b if part a isn't solved yet
+                            puzzle.correct_answer_part_a
                         puzzle.submit_answer(value=answer, part=part, reopen=False, quiet=True)
                         expected = getattr(puzzle, "correct_answer_part_{}".format(part))
                     except AocdError:
