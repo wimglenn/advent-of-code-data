@@ -60,3 +60,9 @@ class Aocd(object):
 
 
 sys.modules[__name__] = Aocd()
+
+
+if sys.platform == "win32":
+    import colorama
+
+    colorama.init(autoreset=True)
