@@ -91,6 +91,20 @@ Solutions can be executed using `setuptools style plugins <https://setuptools.re
     ('XLZAKBGZ', '10656')
 
 
+Verify your code against multiple different inputs
+--------------------------------------------------
+
+*New in version 0.8.0.*
+
+Ever tried running your code against other people's inputs? AoC is full of tricky edge cases. You may find that sometimes you're only getting the right answer by luck, and your code will fail on some other dataset. Using aocd, you can collect a few different auth tokens for each of your accounts (github/google/reddit/twitter) and verify your answers across multiple datasets.
+
+To see an example of how to setup the entry-point for your code, look at `advent-of-code-sample <https://github.com/wimglenn/advent-of-code-sample>`_.
+
+After dumping a bunch of session tokens into ``~/.config/aocd/tokens.json`` you could do this:
+
+.. image:: https://user-images.githubusercontent.com/6615374/52111602-beb99b80-25c9-11e9-99f4-62743dc8e5a0.png
+
+
 Setup Guide
 -----------
 
