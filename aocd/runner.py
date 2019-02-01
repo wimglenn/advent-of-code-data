@@ -28,6 +28,7 @@ from .utils import AOC_TZ
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
 
 
+AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", "~/.config/aocd"))
 DEFAULT_TIMEOUT = 60
 
 
@@ -36,7 +37,7 @@ def main():
     aoc_now = datetime.now(tz=AOC_TZ)
     all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     all_days = range(1, 26)
-    path = os.path.expanduser("~/.config/aocd/tokens.json")
+    path = AOCD_DIR + "/tokens.json"
     try:
         with open(path) as f:
             all_datasets = json.load(f)
@@ -53,15 +54,19 @@ def main():
     )
     args = parser.parse_args()
     if not all_datasets:
-        sys.exit(
+        print(
             "There are no datasets available.\n"
-            "Either export your AOC_SESSION or list some datasets in {}".format(path)
+            "Either export your AOC_SESSION or list some datasets in {}".format(path),
+            file=sys.stderr,
         )
+        sys.exit(1)
     if not users:
-        sys.exit(
+        print(
             "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
-            "See https://github.com/wimglenn/advent-of-code-sample for an example plugin package structure."
+            "See https://github.com/wimglenn/advent-of-code-sample for an example plugin package structure.",
+            file=sys.stderr,
         )
+        sys.exit(1)
     logging.basicConfig(level=getattr(logging, args.log_level))
     run_for(
         users=args.users or list(users),
@@ -151,17 +156,12 @@ def run_for(users, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=Tr
             try:
                 expected = getattr(puzzle, "correct_answer_part_{}".format(part))
             except PuzzleUnsolvedError:
-                if autosubmit and not crashed:
+                post = part == "a" or (part == "b" and puzzle.part_a_has_been_solved)
+                if autosubmit and not crashed and post:
                     try:
-                        if part == "b":
-                            # this ensures we won't attempt to submit for part b if part a isn't solved yet
-                            puzzle.correct_answer_part_a
-                        puzzle.submit_answer(
-                            value=answer, part=part, reopen=False, quiet=True
-                        )
-                        expected = getattr(
-                            puzzle, "correct_answer_part_{}".format(part)
-                        )
+                        puzzle.submit_answer(answer, part, reopen=False, quiet=True)
+                        attr = "correct_answer_part_{}".format(part)
+                        expected = getattr(puzzle, attr)
                     except AocdError:
                         pass
             correct = str(expected) == answer
