@@ -25,5 +25,12 @@ setup(
         "Topic :: Software Development :: Libraries",
         "Topic :: Games/Entertainment :: Puzzle Games",
     ],
-    install_requires=["pytz", "requests", "termcolor", "beautifulsoup4", "pebble"],
+    install_requires=[
+        "pytz",
+        "requests",
+        "termcolor",
+        "beautifulsoup4",
+        "pebble",
+        'colorama; platform_system == "Windows"',
+    ],
 )
