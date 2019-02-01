@@ -101,12 +101,13 @@ def get_day_and_year():
     """
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
-    pattern_site = r"python\d\.\d.site-packages."
+    pattern_site = r"[Pp]ython\d\.?\d.site-packages."
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
         if not _skip_frame(name):
             abspath = os.path.abspath(name)
             break
+        log.debug("skipping frame %s", name)
     else:
         import __main__
 
