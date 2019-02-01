@@ -98,11 +98,13 @@ Verify your code against multiple different inputs
 
 Ever tried running your code against other people's inputs? AoC is full of tricky edge cases. You may find that sometimes you're only getting the right answer by luck, and your code will fail on some other dataset. Using aocd, you can collect a few different auth tokens for each of your accounts (github/google/reddit/twitter) and verify your answers across multiple datasets.
 
-To see an example of how to setup the entry-point for your code, look at `advent-of-code-sample <https://github.com/wimglenn/advent-of-code-sample>`_.
+To see an example of how to setup the entry-point for your code, look at `advent-of-code-sample <https://github.com/wimglenn/advent-of-code-sample>`_. After dumping a bunch of session tokens into ``~/.config/aocd/tokens.json`` you could do something like this by running the ``aoc`` console script:
 
-After dumping a bunch of session tokens into ``~/.config/aocd/tokens.json`` you could do this:
+.. image:: https://user-images.githubusercontent.com/6615374/52112948-a0559f00-25cd-11e9-88f7-181bd5d9b9f6.png
 
-.. image:: https://user-images.githubusercontent.com/6615374/52111602-beb99b80-25c9-11e9-99f4-62743dc8e5a0.png
+As you can see above, I've actually got an incorrect code for day 20, but the bug only showed up for google token's dataset. Whoops.
+
+Also it looks like my algorithm for `2017/day13 <https://adventofcode.com/2017/day/13>`_ is kinda garbage. Too slow. According to `Aoc FAQ <https://adventofcode.com/about>`_, *every problem has a solution that completes in at most 15 seconds on ten-year-old hardware*. Accordingly, ``aoc`` script will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing ``--timeout``.
 
 
 Setup Guide
