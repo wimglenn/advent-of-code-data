@@ -13,7 +13,7 @@ from aocd.runner import format_time
 
 
 def test_no_plugins_avail(capsys, mocker):
-    mock = mocker.patch("aocd.runner.iter_entry_points", return_value=iter([]))
+    mock = mocker.patch("pkg_resources.iter_entry_points", return_value=iter([]))
     mocker.patch("sys.argv", ["aoc"])
     msg = (
         "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
@@ -48,7 +48,7 @@ def test_main(capsys, mocker, aocd_dir):
     ep1.name = "user1"
     ep2 = mocker.Mock()
     ep2.name = "user2"
-    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep1, ep2]))
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep1, ep2]))
     datasets_file = aocd_dir / "tokens.json"
     datasets_file.write('{"data1": "token1", "data2": "token2"}')
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
@@ -65,7 +65,7 @@ def test_main(capsys, mocker, aocd_dir):
 def fake_entry_point(year, day, data):
     assert year == 2015
     assert day == 1
-    assert data == "test input data"
+    assert data == "testinput"
     return "answer1", "wrong"
 
 
@@ -78,9 +78,11 @@ def test_results(mocker, capsys):
     ep.name = "testuser"
     worker = ep.load.return_value = fake_entry_point
     # worker = ep.load.return_value = lambda year, day, data: ("answer1", "wrong")  # TODO: why doesn't that work?
-    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
     fake_puzzle = mocker.MagicMock()
-    fake_puzzle.input_data = "test input data"
+    fake_puzzle.year = 2015
+    fake_puzzle.day = 1
+    fake_puzzle.input_data = "testinput"
     fake_puzzle.answer_a = "answer1"
     fake_puzzle.answer_b = "answer2"
     fake_puzzle.title = "The Puzzle Title"
@@ -93,7 +95,8 @@ def test_results(mocker, capsys):
     )
     ep.load.assert_called_once()
     out, err = capsys.readouterr()
-    assert "2015/1    testuser/testdataset" in out
+    txt = "2015/1  - The Puzzle Title                           testuser/testdataset"
+    assert txt in out
     assert "part a: answer1 " in out
     assert "part b: wrong (expected: answer2)" in out
     assert "✔" in out
@@ -121,7 +124,7 @@ def test_day_out_of_range(mocker, capsys, freezer):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
-    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
     run_for(
         plugins=["testuser"],
         years=[2018],
@@ -133,13 +136,13 @@ def test_day_out_of_range(mocker, capsys, freezer):
 
 
 def test_run_crashed(aocd_dir, mocker, capsys):
-    aocd_dir.join("titles/2018-25.txt").ensure(file=True).write("The Puzzle Title")
-    aocd_dir.join("thetesttoken/2018/25.txt").ensure(file=True).write("someinput")
-    aocd_dir.join("thetesttoken/2018/25a_answer.txt").ensure(file=True).write("answ")
+    aocd_dir.join("titles/2018_25.txt").ensure(file=True).write("The Puzzle Title")
+    aocd_dir.join("thetesttoken/2018_25_input.txt").ensure(file=True).write("someinput")
+    aocd_dir.join("thetesttoken/2018_25a_answer.txt").ensure(file=True).write("answ")
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = bugged_entry_point
-    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
     run_for(
         plugins=["testuser"],
         years=[2018],
@@ -153,9 +156,9 @@ def test_run_crashed(aocd_dir, mocker, capsys):
 
 
 def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
-    aocd_dir.join("titles/2015-01.txt").ensure(file=True).write("The Puzzle Title")
-    aocd_dir.join("thetesttoken/2015/1.txt").ensure(file=True).write("test input data")
-    aocd_dir.join("thetesttoken/2015/1a_answer.txt").ensure(file=True).write("answer1")
+    aocd_dir.join("titles/2015_01.txt").ensure(file=True).write("The Puzzle Title")
+    aocd_dir.join("thetesttoken/2015_01_input.txt").ensure(file=True).write("testinput")
+    aocd_dir.join("thetesttoken/2015_01a_answer.txt").ensure(file=True).write("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")
     requests_mock.post(
         url="https://adventofcode.com/2015/day/1/answer",
@@ -164,7 +167,7 @@ def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
-    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
     run_for(
         plugins=["testuser"],
         years=[2015],
@@ -177,14 +180,14 @@ def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
 
 
 def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
-    aocd_dir.join("titles/2015-01.txt").ensure(file=True).write("The Puzzle Title")
-    aocd_dir.join("thetesttoken/2015/1.txt").ensure(file=True).write("test input data")
-    aocd_dir.join("thetesttoken/2015/1a_answer.txt").ensure(file=True).write("answer1")
+    aocd_dir.join("titles/2015_01.txt").ensure(file=True).write("The Puzzle Title")
+    aocd_dir.join("thetesttoken/2015_01_input.txt").ensure(file=True).write("testinput")
+    aocd_dir.join("thetesttoken/2015_01a_answer.txt").ensure(file=True).write("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
-    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
     run_for(
         plugins=["testuser"],
         years=[2015],
