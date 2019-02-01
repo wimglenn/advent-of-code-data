@@ -33,34 +33,34 @@ DEFAULT_TIMEOUT = 60
 
 
 def main():
-    users = {ep.name: ep for ep in iter_entry_points(group="adventofcode.user")}
+    plugins = {ep.name: ep for ep in iter_entry_points(group="adventofcode.user")}
     aoc_now = datetime.now(tz=AOC_TZ)
-    all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
-    all_days = range(1, 26)
+    years = range(2015, aoc_now.year + int(aoc_now.month == 12))
+    days = range(1, 26)
     path = AOCD_DIR + "/tokens.json"
     try:
         with open(path) as f:
-            all_datasets = json.load(f)
+            users = json.load(f)
     except IOError:
-        all_datasets = {"default": default_user().token}
+        users = {"default": default_user().token}
     parser = ArgumentParser(description="AoC runner")
-    parser.add_argument("-u", "--users", choices=users)
-    parser.add_argument("-y", "--years", type=int, nargs="+", choices=all_years)
-    parser.add_argument("-d", "--days", type=int, nargs="+", choices=all_days)
-    parser.add_argument("-D", "--data", nargs="+", choices=all_datasets)
+    parser.add_argument("-p", "--plugins", choices=plugins)
+    parser.add_argument("-y", "--years", type=int, nargs="+", choices=years)
+    parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
+    parser.add_argument("-u", "--users", nargs="+", choices=users)
     parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
     parser.add_argument(
         "--log-level", default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR"]
     )
     args = parser.parse_args()
-    if not all_datasets:
+    if not users:
         print(
-            "There are no datasets available.\n"
-            "Either export your AOC_SESSION or list some datasets in {}".format(path),
+            "There are no datasets available to use.\n"
+            "Either export your AOC_SESSION or put some auth tokens into {}".format(path),
             file=sys.stderr,
         )
         sys.exit(1)
-    if not users:
+    if not plugins:
         print(
             "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
             "See https://github.com/wimglenn/advent-of-code-sample for an example plugin package structure.",
@@ -69,10 +69,10 @@ def main():
         sys.exit(1)
     logging.basicConfig(level=getattr(logging, args.log_level))
     run_for(
-        users=args.users or list(users),
-        years=args.years or all_years,
-        days=args.days or all_days,
-        datasets={k: all_datasets[k] for k in (args.data or all_datasets)},
+        plugins=args.plugins or list(plugins),
+        years=args.years or years,
+        days=args.days or days,
+        datasets={k: users[k] for k in (args.users or users)},
         timeout=args.timeout,
     )
 
@@ -110,26 +110,26 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
     return runtime
 
 
-def run_for(users, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True):
+def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True):
     aoc_now = datetime.now(tz=AOC_TZ)
-    all_users_entry_points = iter_entry_points(group="adventofcode.user")
-    entry_points = {ep.name: ep for ep in all_users_entry_points if ep.name in users}
-    it = itertools.product(years, days, users, datasets)
+    all_entry_points = iter_entry_points(group="adventofcode.user")
+    entry_points = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
+    it = itertools.product(years, days, plugins, datasets)
     userpad = 3
     datasetpad = 8
     if entry_points:
         userpad = len(max(entry_points, key=len))
     if datasets:
         datasetpad = len(max(datasets, key=len))
-    for year, day, user, dataset in it:
+    for year, day, plugin, dataset in it:
         if year == aoc_now.year and day > aoc_now.day:
             continue
-        progress = "{year}/{day:<2d}   {user:>%d}/{dataset:<%d}" % (userpad, datasetpad)
-        progress = progress.format(year=year, day=day, user=user, dataset=dataset)
+        progress = "{year}/{day:<2d}   {plugin:>%d}/{dataset:<%d}" % (userpad, datasetpad)
+        progress = progress.format(year=year, day=day, plugin=plugin, dataset=dataset)
         os.environ["AOC_SESSION"] = datasets[dataset]
         puzzle = Puzzle(year=year, day=day)
         data = puzzle.input_data
-        entry_point = entry_points[user]
+        entry_point = entry_points[plugin]
         t0 = time.time()
         crashed = False
         try:

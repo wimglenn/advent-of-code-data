@@ -121,6 +121,10 @@ class Puzzle(object):
         return data.rstrip("\r\n")
 
     @property
+    def answers(self):
+        return self.answer_a, self.answer_b
+
+    @property
     def answer_a(self):
         try:
             return self._get_answer(part="a")
@@ -278,12 +282,12 @@ class Puzzle(object):
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
-    def solve_for(self, username):
+    def solve_for(self, plugin):
         for ep in pkg_resources.iter_entry_points("adventofcode.user"):
-            if ep.name == username:
+            if ep.name == plugin:
                 break
         else:
-            raise AocdError("No entry point found for {}".format(username))
+            raise AocdError("No entry point found for {}".format(plugin))
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 

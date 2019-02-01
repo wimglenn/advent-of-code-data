@@ -32,8 +32,8 @@ def test_no_datasets_avail(capsys, mocker, aocd_dir):
     datasets_file.write("{}")
     mocker.patch("sys.argv", ["aoc"])
     msg = (
-        "There are no datasets available.\n"
-        "Either export your AOC_SESSION or list some datasets in {}\n".format(
+        "There are no datasets available to use.\n"
+        "Either export your AOC_SESSION or put some auth tokens into {}\n".format(
             datasets_file
         )
     )
@@ -55,7 +55,7 @@ def test_main(capsys, mocker, aocd_dir):
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
     main()
     mock.assert_called_once_with(
-        users=["user1", "user2"],
+        plugins=["user1", "user2"],
         years=[2015],
         days=[3, 7],
         datasets={"data1": "token1", "data2": "token2"},
@@ -82,7 +82,7 @@ def test_results(mocker, capsys):
     fake_puzzle.answer_b = "answer2"
     mocker.patch("aocd.runner.Puzzle", return_value=fake_puzzle)
     run_for(
-        users=["testuser"],
+        plugins=["testuser"],
         years=[2015],
         days=[1],
         datasets={"testdataset": "testtoken"},
