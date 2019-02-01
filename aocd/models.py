@@ -8,16 +8,16 @@ import errno
 import io
 import logging
 import os
-import pkg_resources
 import re
 import sys
 import time
 import webbrowser
 from textwrap import dedent
-from termcolor import cprint
 
 import bs4
+import pkg_resources
 import requests
+from termcolor import cprint
 
 from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
@@ -85,8 +85,10 @@ class Puzzle(object):
         self.answer_b_fname = prefix + "b_answer.txt"
         self.bad_guesses_a_fname = prefix + "a_bad_answers.txt"
         self.bad_guesses_b_fname = prefix + "b_bad_answers.txt"
+        self.title_fname = AOCD_DIR + "/titles/{}-{:02d}.txt".format(self.year, self.day)
         self._cookies = {"session": self.user.token}
         self._headers = {"User-Agent": USER_AGENT}
+        self._title = None
 
     @property
     def user(self):
@@ -119,6 +121,26 @@ class Puzzle(object):
             log.info("saving the puzzle input")
             f.write(data)
         return data.rstrip("\r\n")
+
+    @property
+    def title(self):
+        if os.path.isfile(self.title_fname):
+            with io.open(self.title_fname, encoding="utf-8") as f:
+                self._title = f.read().strip()
+        else:
+            response = requests.get(self.url, cookies=self._cookies, headers=self._headers)
+            response.raise_for_status()
+            soup = bs4.BeautifulSoup(response.text, "html.parser")
+            self._save_title(soup=soup)
+        return self._title
+
+    def _repr_pretty_(self, p, cycle):
+        # this is a hook for IPython's pretty-printer
+        if cycle:
+            p.text(repr(self))
+        else:
+            template = "<{0}({1.year}/{1.day}) at {2} - {1.title}>"
+            p.text(template.format(type(self).__name__, self, hex(id(self))))
 
     @property
     def answer_a(self):
@@ -238,6 +260,16 @@ class Puzzle(object):
             log.info("saving the wrong answer")
             f.write(str(value).strip() + " " + extra.replace("\n", " ") + "\n")
 
+    def _save_title(self, soup):
+        txt = soup.h2.text.strip("- ")
+        prefix = "Day {}: ".format(self.day)
+        if not txt.startswith(prefix):
+            raise AocdError("weird heading, wtf?")
+        txt = self._title = txt[len(prefix) :]
+        _ensure_intermediate_dirs(self.title_fname)
+        with io.open(self.title_fname, "w", encoding="utf-8") as f:
+            print(txt, file=f)
+
     def _get_answer(self, part):
         """
         Note: Answers are only revealed after a correct submission. If you've
@@ -249,8 +281,11 @@ class Puzzle(object):
                 return f.read().strip()
         # scrape puzzle page for any previously solved answers
         response = requests.get(self.url, cookies=self._cookies, headers=self._headers)
-        soup = bs4.BeautifulSoup(response.text, "html.parser")
         response.raise_for_status()
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        if self._title is None:
+            # may as well save this while we're here
+            self._save_title(soup=soup)
         hit = "Your puzzle answer was"
         paras = [p for p in soup.find_all("p") if p.text.startswith(hit)]
         if paras:

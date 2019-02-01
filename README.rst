@@ -69,6 +69,8 @@ Input data is via regular attribute access. Example usage:
 
     >>> from aocd.models import Puzzle
     >>> puzzle = Puzzle(year=2017, day=20)
+    >>> puzzle
+    <Puzzle(2017/20) at 0x107322978 - Particle Swarm>
     >>> puzzle.input_data
     'p=<-1027,-979,-188>, v=<7,60,66>, a=<9,1,-7>\np=<-1846,-1539,-1147>, v=<88,145,67>, a=<6,-5,2> ...
 
