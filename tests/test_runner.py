@@ -83,6 +83,7 @@ def test_results(mocker, capsys):
     fake_puzzle.input_data = "test input data"
     fake_puzzle.answer_a = "answer1"
     fake_puzzle.answer_b = "answer2"
+    fake_puzzle.title = "The Puzzle Title"
     mocker.patch("aocd.runner.Puzzle", return_value=fake_puzzle)
     run_for(
         plugins=["testuser"],
@@ -132,6 +133,7 @@ def test_day_out_of_range(mocker, capsys, freezer):
 
 
 def test_run_crashed(aocd_dir, mocker, capsys):
+    aocd_dir.join("titles/2018-25.txt").ensure(file=True).write("The Puzzle Title")
     aocd_dir.join("thetesttoken/2018/25.txt").ensure(file=True).write("someinput")
     aocd_dir.join("thetesttoken/2018/25a_answer.txt").ensure(file=True).write("answ")
     ep = mocker.Mock()
@@ -151,6 +153,7 @@ def test_run_crashed(aocd_dir, mocker, capsys):
 
 
 def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
+    aocd_dir.join("titles/2015-01.txt").ensure(file=True).write("The Puzzle Title")
     aocd_dir.join("thetesttoken/2015/1.txt").ensure(file=True).write("test input data")
     aocd_dir.join("thetesttoken/2015/1a_answer.txt").ensure(file=True).write("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")
@@ -174,6 +177,7 @@ def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
 
 
 def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
+    aocd_dir.join("titles/2015-01.txt").ensure(file=True).write("The Puzzle Title")
     aocd_dir.join("thetesttoken/2015/1.txt").ensure(file=True).write("test input data")
     aocd_dir.join("thetesttoken/2015/1a_answer.txt").ensure(file=True).write("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")

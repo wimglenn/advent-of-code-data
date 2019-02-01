@@ -104,8 +104,9 @@ class Puzzle(object):
             if err.errno != errno.ENOENT:
                 raise
         else:
-            sanitized_fname = self.input_data_fname.replace(self.user.token, "<token>")
-            log.info("reusing existing data %s", sanitized_fname)
+            sanitized = self.user.token[:4] + "..." + self.user.token[-4:]
+            sanitized_path = self.input_data_fname.replace(self.user.token, sanitized)
+            log.info("reusing existing data %s", sanitized_path)
             return data.rstrip("\r\n")
         log.info("getting data year=%s day=%s", self.year, self.day)
         response = requests.get(

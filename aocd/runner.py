@@ -124,23 +124,20 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
     for year, day, plugin, dataset in it:
         if year == aoc_now.year and day > aoc_now.day:
             continue
+        os.environ["AOC_SESSION"] = datasets[dataset]
         puzzle = Puzzle(year=year, day=day)
-        progress = "{0.year}/{0.day:<2d} ({0.title})   {1:>%d}/{2:<%d}"
+        progress = "{0.year}/{0.day:<2d} - {0.title:<40}   {1:>%d}/{2:<%d}"
         progress %= (userpad, datasetpad)
         progress = progress.format(puzzle, plugin, dataset)
-        os.environ["AOC_SESSION"] = datasets[dataset]
-
-        data = puzzle.input_data
-        entry_point = entry_points[plugin]
         t0 = time.time()
         crashed = False
         try:
             a, b, walltime = run_with_timeout(
-                entry_point,
+                entry_point=entry_points[plugin],
                 timeout=timeout,
-                year=year,
-                day=day,
-                data=data,
+                year=puzzle.year,
+                day=puzzle.day,
+                data=puzzle.input_data,
                 progress=progress,
             )
         except Exception as err:

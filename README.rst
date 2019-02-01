@@ -102,13 +102,13 @@ Ever tried running your code against other people's inputs? AoC is full of trick
 
 To see an example of how to setup the entry-point for your code, look at `advent-of-code-sample <https://github.com/wimglenn/advent-of-code-sample>`_. After dumping a bunch of session tokens into ``~/.config/aocd/tokens.json`` you could do something like this by running the ``aoc`` console script:
 
-.. image:: https://user-images.githubusercontent.com/6615374/52112948-a0559f00-25cd-11e9-88f7-181bd5d9b9f6.png
+.. image:: https://user-images.githubusercontent.com/6615374/52138567-26e09f80-2613-11e9-8eaf-c42757bc9b86.png
 
-As you can see above, I've actually got an incorrect code for `2017/day20 <https://adventofcode.com/2017/day/20>`_, but that bug only showed up for google token's dataset. Whoops. Also, it looks like my algorithm for `2017/day13 <https://adventofcode.com/2017/day/13>`_ was kinda garbage. Too slow. According to `AoC FAQ <https://adventofcode.com/about>`_:
+As you can see above, I've actually got an incorrect code for `2017/day20 <https://adventofcode.com/2017/day/20>`_, but that bug only showed up for google token's dataset. Whoops. Also, it looks like my algorithm for `2017 Day 13: Packet Scanners <https://adventofcode.com/2017/day/13>`_ was kinda garbage. Too slow. According to `AoC FAQ <https://adventofcode.com/about>`_:
 
   *every problem has a solution that completes in at most 15 seconds on ten-year-old hardware*
 
-Therefore, ``aoc`` script will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120`` (seconds).
+By the way, the ``aoc`` runner will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120`` (seconds).
 
 
 Setup Guide
