@@ -133,7 +133,7 @@ def test_pprint(freezer, requests_mock, mocker):
     puzzle._repr_pretty_(printer, cycle=False)
     [((pretty,), kwargs)] = printer.text.call_args_list
     assert not kwargs
-    assert pretty.startswith("<Puzzle(2018/1) at 0x")
+    assert pretty.startswith("<Puzzle(2018, 1) at 0x")
     assert pretty.endswith(" - The Puzzle Title>")
 
 
