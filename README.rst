@@ -33,7 +33,7 @@ Thanks!
 Automated submission
 --------------------
 
-New in version 0.4.0. Basic use:
+*New in version 0.4.0.* Basic use:
 
 .. code-block:: python
 
@@ -61,9 +61,9 @@ you have a correct answer!
 OOP-style interfaces
 --------------------
 
-New in version 0.8.0.
+*New in version 0.8.0.*
 
-Getting data is by regular attribute access. Example usage:
+Input data is via regular attribute access. Example usage:
 
 .. code-block:: python
 
@@ -72,7 +72,7 @@ Getting data is by regular attribute access. Example usage:
     >>> puzzle.input_data
     'p=<-1027,-979,-188>, v=<7,60,66>, a=<9,1,-7>\np=<-1846,-1539,-1147>, v=<88,145,67>, a=<6,-5,2> ...
 
-Submitting answers is also by regular attribute access. Any wrong answers are remembered and aocd will prevent you from attempting to submit the same incorrect value twice:
+Submitting answers is also by regular attribute access. Any incorrect answers you submitted are remembered, and aocd will prevent you from attempting to submit the same incorrect value twice:
 
 .. code-block:: python
 
