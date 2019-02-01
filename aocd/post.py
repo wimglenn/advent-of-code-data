@@ -33,11 +33,13 @@ def submit(
     puzzle = Puzzle(year=year, day=day, user=user)
     if part is None:
         # guess if user is submitting for part a or part b
-        if not hasattr(puzzle, "answer_a"):
-            log.debug("submitting for part a")
+        answer_a = getattr(puzzle, "answer_a", None)
+        log.warning("answer a: %s", answer_a)
+        if answer_a is None:
+            log.warning("submitting for part a")
             part = "a"
         else:
-            log.debug("submitting for part b (part a is already completed)")
+            log.warning("submitting for part b (part a is already completed)")
             part = "b"
     part = part.lower()
     response = puzzle._submit(value=answer, part=part, reopen=reopen, quiet=quiet)
