@@ -54,7 +54,8 @@ def main():
     if not users:
         print(
             "There are no datasets available to use.\n"
-            "Either export your AOC_SESSION or put some auth tokens into {}".format(path),
+            "Either export your AOC_SESSION or put some auth "
+            "tokens into {}".format(path),
             file=sys.stderr,
         )
         sys.exit(1)
@@ -122,7 +123,8 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
     for year, day, plugin, dataset in it:
         if year == aoc_now.year and day > aoc_now.day:
             continue
-        progress = "{year}/{day:<2d}   {plugin:>%d}/{dataset:<%d}" % (userpad, datasetpad)
+        progress = "{year}/{day:<2d}   {plugin:>%d}/{dataset:<%d}"
+        progress %= (userpad, datasetpad)
         progress = progress.format(year=year, day=day, plugin=plugin, dataset=dataset)
         os.environ["AOC_SESSION"] = datasets[dataset]
         puzzle = Puzzle(year=year, day=day)

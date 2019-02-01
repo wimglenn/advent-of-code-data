@@ -63,7 +63,8 @@ def test_setattr_doesnt_submit_both_if_done(mocker, aocd_dir):
 def test_solve_no_plugs(mocker):
     mock = mocker.patch("pkg_resources.iter_entry_points", return_value=iter([]))
     puzzle = Puzzle(year=2018, day=1)
-    with pytest.raises(AocdError("Puzzle.solve is only available with unique entry point")):
+    expected = AocdError("Puzzle.solve is only available with unique entry point")
+    with pytest.raises(expected):
         puzzle.solve()
     mock.assert_called_once_with("adventofcode.user")
 
@@ -79,18 +80,18 @@ def test_solve_one_plug(aocd_dir, mocker):
 
 
 def test_solve_for(aocd_dir, mocker):
-    aocd_dir.join("thetesttoken/2018/1.txt").ensure(file=True).write("someinput")
-    my_plug = mocker.Mock()
-    my_plug.name = "myplugin"
-    other_plug = mocker.Mock()
-    other_plug.name = "otherplugin"
-    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([other_plug, my_plug]))
+    aocd_dir.join("thetesttoken/2018/1.txt").ensure(file=True).write("blah")
+    plug1 = mocker.Mock()
+    plug1.name = "myplugin"
+    plug2 = mocker.Mock()
+    plug2.name = "otherplugin"
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([plug2, plug1]))
     puzzle = Puzzle(year=2018, day=1)
     puzzle.solve_for("myplugin")
-    my_plug.load.assert_called_once_with()
-    my_plug.load.return_value.assert_called_once_with(year=2018, day=1, data="someinput")
-    other_plug.load.assert_not_called()
-    other_plug.load.return_value.assert_not_called()
+    plug1.load.assert_called_once_with()
+    plug1.load.return_value.assert_called_once_with(year=2018, day=1, data="blah")
+    plug2.load.assert_not_called()
+    plug2.load.return_value.assert_not_called()
 
 
 def test_solve_for_unfound_user(aocd_dir, mocker):

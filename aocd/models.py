@@ -219,9 +219,7 @@ class Puzzle(object):
                     wait_time += 60 * int(minutes)
                 log.info("Waiting %d seconds to autoretry", wait_time)
                 time.sleep(wait_time)
-                return self._submit(
-                    value=value, part=part, reopen=reopen, quiet=quiet
-                )
+                return self._submit(value=value, part=part, reopen=reopen, quiet=quiet)
         if not quiet:
             cprint(message, color=color)
         return response
