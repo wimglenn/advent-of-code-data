@@ -142,7 +142,7 @@ class Puzzle(object):
         if cycle:
             p.text(repr(self))
         else:
-            template = "<{0}({1.year}/{1.day}) at {2} - {1.title}>"
+            template = "<{0}({1.year}, {1.day}) at {2} - {1.title}>"
             p.text(template.format(type(self).__name__, self, hex(id(self))))
 
     @property
