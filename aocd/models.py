@@ -79,16 +79,18 @@ class Puzzle(object):
         self.url = URL.format(year=self.year, day=self.day)
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
-        prefix = self.user.memo_dir + "/{}/{}".format(self.year, self.day)
-        self.input_data_fname = prefix + ".txt"
+        prefix = self.user.memo_dir + "/{}_{:02d}".format(self.year, self.day)
+        self.input_data_fname = prefix + "_input.txt"
         self.answer_a_fname = prefix + "a_answer.txt"
         self.answer_b_fname = prefix + "b_answer.txt"
-        self.bad_guesses_a_fname = prefix + "a_bad_answers.txt"
-        self.bad_guesses_b_fname = prefix + "b_bad_answers.txt"
-        self.title_fname = AOCD_DIR + "/titles/{}-{:02d}.txt".format(self.year, self.day)
+        self.incorrect_answers_a_fname = prefix + "a_bad_answers.txt"
+        self.incorrect_answers_b_fname = prefix + "b_bad_answers.txt"
+        self.title_fname = AOCD_DIR + "/titles/{}_{:02d}.txt".format(
+            self.year, self.day
+        )
         self._cookies = {"session": self.user.token}
         self._headers = {"User-Agent": USER_AGENT}
-        self._title = None
+        self._title = ""
 
     @property
     def user(self):
@@ -129,9 +131,9 @@ class Puzzle(object):
             with io.open(self.title_fname, encoding="utf-8") as f:
                 self._title = f.read().strip()
         else:
-            response = requests.get(self.url, cookies=self._cookies, headers=self._headers)
-            response.raise_for_status()
-            soup = bs4.BeautifulSoup(response.text, "html.parser")
+            resp = requests.get(self.url, cookies=self._cookies, headers=self._headers)
+            resp.raise_for_status()
+            soup = bs4.BeautifulSoup(resp.text, "html.parser")
             self._save_title(soup=soup)
         return self._title
 
@@ -182,15 +184,15 @@ class Puzzle(object):
         self.answer_a, self.answer_b = val
 
     @property
-    def incorrect_answers_part_a(self):
-        return self._bad_guesses(part="a")
+    def incorrect_answers_a(self):
+        return self._get_bad_guesses(part="a")
 
     @property
-    def incorrect_answers_part_b(self):
-        return self._bad_guesses(part="b")
+    def incorrect_answers_b(self):
+        return self._get_bad_guesses(part="b")
 
     def _submit(self, value, part, reopen=True, quiet=False):
-        bad_guesses = getattr(self, "incorrect_answers_part_" + part)
+        bad_guesses = getattr(self, "incorrect_answers_" + part)
         if str(value) in bad_guesses:
             if not quiet:
                 msg = "aocd will not submit that answer again. You've previously guessed {} and the server responded:"
@@ -250,22 +252,29 @@ class Puzzle(object):
     def _save_correct_answer(self, value, part):
         fname = getattr(self, "answer_{}_fname".format(part))
         _ensure_intermediate_dirs(fname)
+        txt = str(value).strip()
+        msg = "saving the correct answer for %d/%02d part %s: %s"
+        log.info(msg, self.year, self.day, part, txt)
         with open(fname, "w") as f:
-            log.info("saving the correct answer")
-            f.write(str(value).strip())
+            f.write(txt)
 
     def _save_incorrect_answer(self, value, part, extra=""):
-        fname = getattr(self, "bad_guesses_{}_fname".format(part))
+        fname = getattr(self, "incorrect_answers_{}_fname".format(part))
         _ensure_intermediate_dirs(fname)
+        msg = "appending an incorrect answer for %d/%02d part %s"
+        log.info(msg, self.year, self.day, part)
         with open(fname, "a") as f:
-            log.info("saving the wrong answer")
             f.write(str(value).strip() + " " + extra.replace("\n", " ") + "\n")
 
     def _save_title(self, soup):
+        if soup.h2 is None:
+            log.warning("heading not found")
+            return
         txt = soup.h2.text.strip("- ")
         prefix = "Day {}: ".format(self.day)
         if not txt.startswith(prefix):
-            raise AocdError("weird heading, wtf?")
+            log.error("weird heading, wtf? %s", txt)
+            return
         txt = self._title = txt[len(prefix) :]
         _ensure_intermediate_dirs(self.title_fname)
         with io.open(self.title_fname, "w", encoding="utf-8") as f:
@@ -284,7 +293,7 @@ class Puzzle(object):
         response = requests.get(self.url, cookies=self._cookies, headers=self._headers)
         response.raise_for_status()
         soup = bs4.BeautifulSoup(response.text, "html.parser")
-        if self._title is None:
+        if not self._title:
             # may as well save this while we're here
             self._save_title(soup=soup)
         hit = "Your puzzle answer was"
@@ -302,8 +311,8 @@ class Puzzle(object):
         msg = "Answer {}-{}{} is not available".format(self.year, self.day, part)
         raise PuzzleUnsolvedError(msg)
 
-    def _bad_guesses(self, part):
-        fname = getattr(self, "bad_guesses_{}_fname".format(part))
+    def _get_bad_guesses(self, part):
+        fname = getattr(self, "incorrect_answers_{}_fname".format(part))
         result = {}
         if os.path.isfile(fname):
             with open(fname) as f:
@@ -314,14 +323,14 @@ class Puzzle(object):
 
     def solve(self):
         try:
-            [ep] = pkg_resources.iter_entry_points("adventofcode.user")
+            [ep] = pkg_resources.iter_entry_points(group="adventofcode.user")
         except ValueError:
             raise AocdError("Puzzle.solve is only available with unique entry point")
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
     def solve_for(self, plugin):
-        for ep in pkg_resources.iter_entry_points("adventofcode.user"):
+        for ep in pkg_resources.iter_entry_points(group="adventofcode.user"):
             if ep.name == plugin:
                 break
         else:
