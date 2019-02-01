@@ -26,7 +26,7 @@ from .version import __version__
 log = logging.getLogger(__name__)
 
 
-CONF_DIR = os.path.expanduser("~/.config/aocd")
+AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", "~/.config/aocd"))
 URL = "https://adventofcode.com/{year}/day/{day}"
 USER_AGENT = "advent-of-code-data v{}".format(__version__)
 
@@ -37,7 +37,7 @@ class User(object):
 
     @property
     def memo_dir(self):
-        return CONF_DIR + "/" + self.token
+        return AOCD_DIR + "/" + self.token
 
 
 def default_user():
@@ -48,7 +48,7 @@ def default_user():
 
     # or chuck it in a plaintext file at ~/.config/aocd/token
     try:
-        with io.open(CONF_DIR + "/token", encoding="utf-8") as f:
+        with io.open(AOCD_DIR + "/token", encoding="utf-8") as f:
             cookie = f.read().strip()
     except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
@@ -64,7 +64,7 @@ def default_user():
             2) Export the cookie in environment variable AOC_SESSION
         """
     )
-    cprint(msg.format(CONF_DIR + "/token"), color="red", file=sys.stderr)
+    cprint(msg.format(AOCD_DIR + "/token"), color="red", file=sys.stderr)
     raise AocdError("Missing session ID")
 
 
@@ -122,6 +122,24 @@ class Puzzle(object):
     @property
     def correct_answer_part_b(self):
         return self._get_answer(part="b")
+
+    @property
+    def part_a_has_been_solved(self):
+        try:
+            self.correct_answer_part_a
+        except PuzzleUnsolvedError:
+            return False
+        else:
+            return True
+
+    @property
+    def part_b_has_been_solved(self):
+        try:
+            self.correct_answer_part_b
+        except PuzzleUnsolvedError:
+            return False
+        else:
+            return True
 
     @property
     def incorrect_answers_part_a(self):
