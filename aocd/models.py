@@ -121,10 +121,6 @@ class Puzzle(object):
         return data.rstrip("\r\n")
 
     @property
-    def answers(self):
-        return self.answer_a, self.answer_b
-
-    @property
     def answer_a(self):
         try:
             return self._get_answer(part="a")
@@ -153,6 +149,14 @@ class Puzzle(object):
         if getattr(self, "answer_b", None) == val:
             return
         self._submit(value=val, part="b")
+
+    @property
+    def answers(self):
+        return self.answer_a, self.answer_b
+
+    @answers.setter
+    def answers(self, val):
+        self.answer_a, self.answer_b = val
 
     @property
     def incorrect_answers_part_a(self):
@@ -287,7 +291,7 @@ class Puzzle(object):
             if ep.name == plugin:
                 break
         else:
-            raise AocdError("No entry point found for {}".format(plugin))
+            raise AocdError("No entry point found for '{}'".format(plugin))
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 

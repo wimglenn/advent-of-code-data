@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import pytest
 from termcolor import colored
 
-from aocd.exceptions import PuzzleUnsolvedError
 from aocd.runner import main
 from aocd.runner import run_for
 from aocd.runner import format_time
@@ -106,3 +105,64 @@ def test_results(mocker, capsys):
 def test_format_time(t, timeout, expected, color):
     actual = format_time(t, timeout)
     assert actual == colored(expected, color)
+
+
+def test_nothing_to_do():
+    run_for(plugins=[], years=[], days=[], datasets=[])
+
+
+def test_day_out_of_range(mocker, capsys, freezer):
+    freezer.move_to("2018-12-01 12:00:00Z")
+    ep = mocker.Mock()
+    ep.name = "testuser"
+    ep.load.return_value = fake_entry_point
+    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    run_for(plugins=["testuser"], years=[2018], days=[27], datasets={"default": "thetesttoken"})
+    out, err = capsys.readouterr()
+    assert out == err == ""
+
+
+def test_run_crashed(aocd_dir, mocker, capsys):
+    aocd_dir.join("thetesttoken/2018/25.txt").ensure(file=True).write("someinput")
+    aocd_dir.join("thetesttoken/2018/25a_answer.txt").ensure(file=True).write("someanswer")
+    ep = mocker.Mock()
+    ep.name = "testuser"
+    ep.load.return_value = fake_entry_point
+    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    run_for(plugins=["testuser"], years=[2018], days=[25], datasets={"default": "thetesttoken"})
+    out, err = capsys.readouterr()
+    txt = "part a: AssertionError('assert 2018 == 2015') (expected: someanswer)"
+    assert txt in out
+    assert "part b" not in out  # because it's 25 dec, no part b puzzle
+
+
+def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
+    aocd_dir.join("thetesttoken/2015/1.txt").ensure(file=True).write("test input data")
+    aocd_dir.join("thetesttoken/2015/1a_answer.txt").ensure(file=True).write("answer1")
+    requests_mock.get(url="https://adventofcode.com/2015/day/1")
+    requests_mock.post(
+        url="https://adventofcode.com/2015/day/1/answer",
+        text="<article>That's not the right answer</article>",
+    )
+    ep = mocker.Mock()
+    ep.name = "testuser"
+    ep.load.return_value = fake_entry_point
+    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    run_for(plugins=["testuser"], years=[2015], days=[1], datasets={"default": "thetesttoken"})
+    out, err = capsys.readouterr()
+    assert "part a: answer1 " in out
+    assert "part b: wrong (correct answer is unknown)" in out
+
+
+def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
+    aocd_dir.join("thetesttoken/2015/1.txt").ensure(file=True).write("test input data")
+    aocd_dir.join("thetesttoken/2015/1a_answer.txt").ensure(file=True).write("answer1")
+    requests_mock.get(url="https://adventofcode.com/2015/day/1")
+    ep = mocker.Mock()
+    ep.name = "testuser"
+    ep.load.return_value = fake_entry_point
+    mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
+    run_for(plugins=["testuser"], years=[2015], days=[1], datasets={"default": "thetesttoken"}, autosubmit=False)
+    out, err = capsys.readouterr()
+    assert "part a: answer1 " in out
+    assert "part b: wrong (correct answer is unknown)" in out

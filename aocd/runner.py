@@ -17,8 +17,6 @@ from pkg_resources import iter_entry_points
 import pebble
 from termcolor import colored
 
-from .exceptions import AocdError
-from .exceptions import PuzzleUnsolvedError
 from .models import default_user
 from .models import Puzzle
 from .utils import AOC_TZ
@@ -155,13 +153,13 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
             expected = None
             try:
                 expected = getattr(puzzle, "answer_" + part)
-            except PuzzleUnsolvedError:
+            except AttributeError:
                 post = part == "a" or (part == "b" and hasattr(puzzle, "answer_a"))
                 if autosubmit and not crashed and post:
                     try:
                         puzzle._submit(answer, part, reopen=False, quiet=True)
                         expected = getattr(puzzle, "answer_" + part)
-                    except AocdError:
+                    except AttributeError:
                         pass
             correct = str(expected) == answer
             icon = colored("✔", "green") if correct else colored("✖", "red")
