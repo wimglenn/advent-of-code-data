@@ -69,6 +69,10 @@ def fake_entry_point(year, day, data):
     return "answer1", "wrong"
 
 
+def bugged_entry_point(year, day, data):
+    raise Exception(123, 456)
+
+
 def test_results(mocker, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
@@ -132,7 +136,7 @@ def test_run_crashed(aocd_dir, mocker, capsys):
     aocd_dir.join("thetesttoken/2018/25a_answer.txt").ensure(file=True).write("answ")
     ep = mocker.Mock()
     ep.name = "testuser"
-    ep.load.return_value = fake_entry_point
+    ep.load.return_value = bugged_entry_point
     mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
     run_for(
         plugins=["testuser"],
@@ -141,7 +145,7 @@ def test_run_crashed(aocd_dir, mocker, capsys):
         datasets={"default": "thetesttoken"},
     )
     out, err = capsys.readouterr()
-    txt = "part a: AssertionError('assert 2018 == 2015') (expected: answ)"
+    txt = "part a: Exception(123, 456) (expected: answ)"
     assert txt in out
     assert "part b" not in out  # because it's 25 dec, no part b puzzle
 

@@ -11,6 +11,7 @@ import os
 import sys
 import time
 from argparse import ArgumentParser
+from collections import OrderedDict
 from datetime import datetime
 from pkg_resources import iter_entry_points
 
@@ -31,7 +32,8 @@ DEFAULT_TIMEOUT = 60
 
 
 def main():
-    plugins = {ep.name: ep for ep in iter_entry_points(group="adventofcode.user")}
+    entry_points = iter_entry_points(group="adventofcode.user")
+    plugins = OrderedDict([(ep.name, ep) for ep in entry_points])
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
@@ -41,15 +43,14 @@ def main():
             users = json.load(f)
     except IOError:
         users = {"default": default_user().token}
+    log_levels = "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     parser = ArgumentParser(description="AoC runner")
     parser.add_argument("-p", "--plugins", choices=plugins)
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
     parser.add_argument("-u", "--users", nargs="+", choices=users)
     parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
-    parser.add_argument(
-        "--log-level", default="WARNING", choices=["DEBUG", "INFO", "WARNING", "ERROR"]
-    )
+    parser.add_argument("--log-level", default="WARNING", choices=log_levels)
     args = parser.parse_args()
     if not users:
         print(
