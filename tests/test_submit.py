@@ -110,7 +110,7 @@ def test_correct_submit_records_good_answer(requests_mock, tmpdir):
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    answer_fname = tmpdir / ".config/aocd/whatever/2018/1b_answer.txt"
+    answer_fname = tmpdir / ".config/aocd/whatever/2018_01b_answer.txt"
     assert not answer_fname.exists()
     submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
     assert answer_fname.exists()
@@ -123,7 +123,7 @@ def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, 
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018/1a_answer.txt"
+    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018_01a_answer.txt"
     parta_answer.ensure(file=True)
     submit(1234, reopen=False)
     assert post.called
@@ -132,18 +132,18 @@ def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, 
     assert query == ["answer=1234", "level=2"]
 
 
-def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, tmpdir):
+def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, aocd_dir):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = requests_mock.get(
         url="https://adventofcode.com/2018/day/1",
-        text="<p>Your puzzle answer was <code>666</code></p>",
+        text="<h2>Day 1: Yo Dawg</h2> <p>Your puzzle answer was <code>666</code></p>",
     )
     post = requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018/1a_answer.txt"
-    partb_answer = tmpdir / ".config/aocd/thetesttoken/2018/1b_answer.txt"
+    parta_answer = aocd_dir / "thetesttoken/2018_01a_answer.txt"
+    partb_answer = aocd_dir / "thetesttoken/2018_01b_answer.txt"
     assert not parta_answer.exists()
     assert not partb_answer.exists()
     submit(1234, reopen=False)
@@ -151,9 +151,8 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, tmp
     assert partb_answer.exists()
     assert parta_answer.read() == "666"
     assert partb_answer.read() == "1234"
-    assert get.called
+    assert aocd_dir.join("titles/2018_01.txt").read() == "Yo Dawg\n"
     assert get.call_count == 1
-    assert post.called
     assert post.call_count == 1
     query = sorted(post.last_request.text.split("&"))  # form encoded
     assert query == ["answer=1234", "level=2"]
@@ -163,13 +162,16 @@ def test_submit_saves_both_answers_if_possible(freezer, requests_mock, tmpdir):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = requests_mock.get(
         url="https://adventofcode.com/2018/day/1",
-        text="<p>Your puzzle answer was <code>answerA</code></p><p>Your puzzle answer was <code>answerB</code></p>",
+        text=(
+            "<p>Your puzzle answer was <code>answerA</code></p>"
+            "<p>Your puzzle answer was <code>answerB</code></p>"
+        ),
     )
     post = requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer", text="<article></article>"
     )
-    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018/1a_answer.txt"
-    partb_answer = tmpdir / ".config/aocd/thetesttoken/2018/1b_answer.txt"
+    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018_01a_answer.txt"
+    partb_answer = tmpdir / ".config/aocd/thetesttoken/2018_01b_answer.txt"
     assert not parta_answer.exists()
     assert not partb_answer.exists()
     submit("answerB", reopen=False)
@@ -177,9 +179,7 @@ def test_submit_saves_both_answers_if_possible(freezer, requests_mock, tmpdir):
     assert partb_answer.exists()
     assert parta_answer.read() == "answerA"
     assert partb_answer.read() == "answerB"
-    assert get.called
     assert get.call_count == 1
-    assert post.called
     assert post.call_count == 1
     query = sorted(post.last_request.text.split("&"))  # form encoded
     assert query == ["answer=answerB", "level=2"]
@@ -192,7 +192,7 @@ def test_submit_puts_level1_by_default(freezer, requests_mock, tmpdir):
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018/1a_answer.txt"
+    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018_01a_answer.txt"
     assert not parta_answer.exists()
     submit(1234, reopen=False)
     assert get.called
