@@ -58,6 +58,39 @@ get rate-limited by Eric, so don't call submit until you're fairly confident
 you have a correct answer!
 
 
+OOP-style interfaces
+--------------------
+
+New in version 0.8.0.
+
+Getting data is by regular attribute access. Example usage:
+
+.. code-block:: python
+
+    >>> from aocd.models import Puzzle
+    >>> puzzle = Puzzle(year=2017, day=20)
+    >>> puzzle.input_data
+    'p=<-1027,-979,-188>, v=<7,60,66>, a=<9,1,-7>\np=<-1846,-1539,-1147>, v=<88,145,67>, a=<6,-5,2> ...
+
+Submitting answers is also by regular attribute access. Any wrong answers are remembered and aocd will prevent you from attempting to submit the same incorrect value twice:
+
+.. code-block:: python
+
+    >>> puzzle.answer_a = 299
+    That's not the right answer; your answer is too high. If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit. Please wait one minute before trying again. (You guessed 299.) [Return to Day 20]
+    >>> puzzle.answer_a = 299
+    aocd will not submit that answer again. You've previously guessed 299 and the server responded:
+    That's not the right answer; your answer is too high. If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit. Please wait one minute before trying again. (You guessed 299.) [Return to Day 20]
+
+Solutions can be executed using `setuptools style plugins <https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins>`_ for your code, i.e. the ``pkg_resources`` "entry-points". My entry-point name is "wim" so an example for running `my code <https://github.com/wimglenn/advent-of-code-wim/blob/master/setup.py#L30>`_ (after ``pip install advent-of-code-wim``) would be:
+
+.. code-block:: python
+
+    >>> puzzle = Puzzle(year=2018, day=10)
+    >>> puzzle.solve_for("wim")
+    ('XLZAKBGZ', '10656')
+
+
 Setup Guide
 -----------
 
