@@ -74,7 +74,7 @@ class Puzzle(object):
         self.day = day
         if user is None:
             user = default_user()
-        self.user = user
+        self._user = user
         self.url = URL.format(year=self.year, day=self.day)
         self.input_data_url = self.url + "/input"
         self.answer_submit_url = self.url + "/answer"
@@ -86,6 +86,10 @@ class Puzzle(object):
         self.bad_guesses_b_fname = prefix + "b_bad_answers.txt"
         self._cookies = {"session": self.user.token}
         self._headers = {"User-Agent": USER_AGENT}
+
+    @property
+    def user(self):
+        return self._user
 
     @property
     def input_data(self):
@@ -116,30 +120,34 @@ class Puzzle(object):
         return data.rstrip("\r\n")
 
     @property
-    def correct_answer_part_a(self):
-        return self._get_answer(part="a")
-
-    @property
-    def correct_answer_part_b(self):
-        return self._get_answer(part="b")
-
-    @property
-    def part_a_has_been_solved(self):
+    def answer_a(self):
         try:
-            self.correct_answer_part_a
+            return self._get_answer(part="a")
         except PuzzleUnsolvedError:
-            return False
-        else:
-            return True
+            raise AttributeError
 
     @property
-    def part_b_has_been_solved(self):
+    def answer_b(self):
         try:
-            self.correct_answer_part_b
+            return self._get_answer(part="b")
         except PuzzleUnsolvedError:
-            return False
-        else:
-            return True
+            raise AttributeError
+
+    @answer_a.setter
+    def answer_a(self, val):
+        if isinstance(val, int):
+            val = str(val)
+        if getattr(self, "answer_a", None) == val:
+            return
+        self._submit_answer(value=val, part="a")
+
+    @answer_b.setter
+    def answer_b(self, val):
+        if isinstance(val, int):
+            val = str(val)
+        if getattr(self, "answer_b", None) == val:
+            return
+        self._submit_answer(value=val, part="b")
 
     @property
     def incorrect_answers_part_a(self):
@@ -149,7 +157,7 @@ class Puzzle(object):
     def incorrect_answers_part_b(self):
         return self._bad_guesses(part="b")
 
-    def submit_answer(self, value, part, reopen=True, quiet=False):
+    def _submit_answer(self, value, part, reopen=True, quiet=False):
         bad_guesses = getattr(self, "incorrect_answers_part_" + part)
         if str(value) in bad_guesses:
             if not quiet:
@@ -202,7 +210,7 @@ class Puzzle(object):
                     wait_time += 60 * int(minutes)
                 log.info("Waiting %d seconds to autoretry", wait_time)
                 time.sleep(wait_time)
-                return self.submit_answer(
+                return self._submit_answer(
                     value=value, part=part, reopen=reopen, quiet=quiet
                 )
         if not quiet:

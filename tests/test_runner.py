@@ -78,8 +78,8 @@ def test_results(mocker, capsys):
     mocker.patch("aocd.runner.iter_entry_points", return_value=iter([ep]))
     fake_puzzle = mocker.MagicMock()
     fake_puzzle.input_data = "test input data"
-    fake_puzzle.correct_answer_part_a = "answer1"
-    fake_puzzle.correct_answer_part_b = "answer2"
+    fake_puzzle.answer_a = "answer1"
+    fake_puzzle.answer_b = "answer2"
     mocker.patch("aocd.runner.Puzzle", return_value=fake_puzzle)
     run_for(
         users=["testuser"],

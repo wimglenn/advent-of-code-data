@@ -154,14 +154,13 @@ def run_for(users, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=Tr
                 continue
             expected = None
             try:
-                expected = getattr(puzzle, "correct_answer_part_{}".format(part))
+                expected = getattr(puzzle, "answer_" + part)
             except PuzzleUnsolvedError:
-                post = part == "a" or (part == "b" and puzzle.part_a_has_been_solved)
+                post = part == "a" or (part == "b" and hasattr(puzzle, "answer_a"))
                 if autosubmit and not crashed and post:
                     try:
-                        puzzle.submit_answer(answer, part, reopen=False, quiet=True)
-                        attr = "correct_answer_part_{}".format(part)
-                        expected = getattr(puzzle, attr)
+                        puzzle._submit_answer(answer, part, reopen=False, quiet=True)
+                        expected = getattr(puzzle, "answer_" + part)
                     except AocdError:
                         pass
             correct = str(expected) == answer

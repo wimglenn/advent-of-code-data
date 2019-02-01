@@ -6,4 +6,4 @@ def test_get_answer(tmpdir):
     saved.ensure(file=True)
     saved.write("the answer")
     puzzle = Puzzle(day=13, year=2017)
-    assert puzzle.correct_answer_part_b == "the answer"
+    assert puzzle.answer_b == "the answer"

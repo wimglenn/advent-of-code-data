@@ -9,7 +9,6 @@ import logging
 from .get import current_day
 from .get import most_recent_year
 from .exceptions import AocdError
-from .exceptions import PuzzleUnsolvedError
 from .models import default_user
 from .models import Puzzle
 from .models import User
@@ -34,14 +33,12 @@ def submit(
     puzzle = Puzzle(year=year, day=day, user=user)
     if part is None:
         # guess if user is submitting for part a or part b
-        try:
-            puzzle.correct_answer_part_a
-        except PuzzleUnsolvedError:
+        if not hasattr(puzzle, "answer_a"):
             log.debug("submitting for part a")
             part = "a"
         else:
             log.debug("submitting for part b (part a is already completed)")
             part = "b"
     part = part.lower()
-    response = puzzle.submit_answer(value=answer, part=part, reopen=reopen, quiet=quiet)
+    response = puzzle._submit_answer(value=answer, part=part, reopen=reopen, quiet=quiet)
     return response
