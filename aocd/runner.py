@@ -8,12 +8,12 @@ import itertools
 import json
 import logging
 import os
+import pkg_resources
 import sys
 import time
 from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime
-from pkg_resources import iter_entry_points
 
 import pebble
 from termcolor import colored
@@ -32,7 +32,7 @@ DEFAULT_TIMEOUT = 60
 
 
 def main():
-    entry_points = iter_entry_points(group="adventofcode.user")
+    entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
     plugins = OrderedDict([(ep.name, ep) for ep in entry_points])
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
@@ -112,7 +112,7 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
 
 def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True):
     aoc_now = datetime.now(tz=AOC_TZ)
-    all_entry_points = iter_entry_points(group="adventofcode.user")
+    all_entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
     entry_points = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
     it = itertools.product(years, days, plugins, datasets)
     userpad = 3
@@ -173,6 +173,6 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                     correction = "(expected: {})".format(expected)
             answer = "{} {}".format(answer, correction)
             if part == "a":
-                answer = answer.ljust(35)
+                answer = answer.ljust(30)
             line += result_template.format(icon=icon, part=part, answer=answer)
         print(line)
