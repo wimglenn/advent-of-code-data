@@ -8,6 +8,7 @@ import errno
 import io
 import logging
 import os
+import pkg_resources
 import re
 import sys
 import time
@@ -77,7 +78,7 @@ class Puzzle(object):
         self._user = user
         self.url = URL.format(year=self.year, day=self.day)
         self.input_data_url = self.url + "/input"
-        self.answer_submit_url = self.url + "/answer"
+        self.submit_url = self.url + "/answer"
         prefix = self.user.memo_dir + "/{}/{}".format(self.year, self.day)
         self.input_data_fname = prefix + ".txt"
         self.answer_a_fname = prefix + "a_answer.txt"
@@ -126,6 +127,14 @@ class Puzzle(object):
         except PuzzleUnsolvedError:
             raise AttributeError
 
+    @answer_a.setter
+    def answer_a(self, val):
+        if isinstance(val, int):
+            val = str(val)
+        if getattr(self, "answer_a", None) == val:
+            return
+        self._submit(value=val, part="a")
+
     @property
     def answer_b(self):
         try:
@@ -133,21 +142,13 @@ class Puzzle(object):
         except PuzzleUnsolvedError:
             raise AttributeError
 
-    @answer_a.setter
-    def answer_a(self, val):
-        if isinstance(val, int):
-            val = str(val)
-        if getattr(self, "answer_a", None) == val:
-            return
-        self._submit_answer(value=val, part="a")
-
     @answer_b.setter
     def answer_b(self, val):
         if isinstance(val, int):
             val = str(val)
         if getattr(self, "answer_b", None) == val:
             return
-        self._submit_answer(value=val, part="b")
+        self._submit(value=val, part="b")
 
     @property
     def incorrect_answers_part_a(self):
@@ -157,7 +158,7 @@ class Puzzle(object):
     def incorrect_answers_part_b(self):
         return self._bad_guesses(part="b")
 
-    def _submit_answer(self, value, part, reopen=True, quiet=False):
+    def _submit(self, value, part, reopen=True, quiet=False):
         bad_guesses = getattr(self, "incorrect_answers_part_" + part)
         if str(value) in bad_guesses:
             if not quiet:
@@ -165,7 +166,7 @@ class Puzzle(object):
                 print(msg.format(value))
                 cprint(bad_guesses[str(value)], "red")
             return
-        url = self.answer_submit_url
+        url = self.submit_url
         log.info("posting %r to %s (part %s)", value, url, part)
         level = {"a": 1, "b": 2}[part]
         response = requests.post(
@@ -210,7 +211,7 @@ class Puzzle(object):
                     wait_time += 60 * int(minutes)
                 log.info("Waiting %d seconds to autoretry", wait_time)
                 time.sleep(wait_time)
-                return self._submit_answer(
+                return self._submit(
                     value=value, part=part, reopen=reopen, quiet=quiet
                 )
         if not quiet:
@@ -268,6 +269,23 @@ class Puzzle(object):
                     answer, _sep, extra = line.strip().partition(" ")
                     result[answer] = extra
         return result
+
+    def solve(self):
+        try:
+            [ep] = pkg_resources.iter_entry_points("adventofcode.user")
+        except ValueError:
+            raise AocdError("Puzzle.solve is only available with unique entry point")
+        f = ep.load()
+        return f(year=self.year, day=self.day, data=self.input_data)
+
+    def solve_for(self, username):
+        for ep in pkg_resources.iter_entry_points("adventofcode.user"):
+            if ep.name == username:
+                break
+        else:
+            raise AocdError("No entry point found for {}".format(username))
+        f = ep.load()
+        return f(year=self.year, day=self.day, data=self.input_data)
 
 
 def _ensure_intermediate_dirs(fname):

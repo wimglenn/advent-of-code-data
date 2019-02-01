@@ -159,7 +159,7 @@ def run_for(users, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=Tr
                 post = part == "a" or (part == "b" and hasattr(puzzle, "answer_a"))
                 if autosubmit and not crashed and post:
                     try:
-                        puzzle._submit_answer(answer, part, reopen=False, quiet=True)
+                        puzzle._submit(answer, part, reopen=False, quiet=True)
                         expected = getattr(puzzle, "answer_" + part)
                     except AocdError:
                         pass

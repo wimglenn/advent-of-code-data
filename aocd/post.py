@@ -40,5 +40,5 @@ def submit(
             log.debug("submitting for part b (part a is already completed)")
             part = "b"
     part = part.lower()
-    response = puzzle._submit_answer(value=answer, part=part, reopen=reopen, quiet=quiet)
+    response = puzzle._submit(value=answer, part=part, reopen=reopen, quiet=quiet)
     return response
