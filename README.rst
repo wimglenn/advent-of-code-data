@@ -104,7 +104,7 @@ To see an example of how to setup the entry-point for your code, look at `advent
 
 As you can see above, I've actually got an incorrect code for `2017/day20 <https://adventofcode.com/2017/day/20>`_, but that bug only showed up for google token's dataset. Whoops. Also, it looks like my algorithm for `2017/day13 <https://adventofcode.com/2017/day/13>`_ was kinda garbage. Too slow. According to `AoC FAQ <https://adventofcode.com/about>`_:
 
-> *every problem has a solution that completes in at most 15 seconds on ten-year-old hardware*
+  *every problem has a solution that completes in at most 15 seconds on ten-year-old hardware*
 
 Therefore, ``aoc`` script will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120`` (seconds).
 
