@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from aocd.get import current_day
@@ -43,7 +45,9 @@ def test_current_day(date_str, expected_day, freezer):
     assert day == expected_day
 
 
-def test_day_out_of_range(freezer):
+def test_day_out_of_range(freezer, caplog):
     freezer.move_to("2015-11-11")
-    with pytest.raises(AocdError("current_day is only available in December (EST)")):
-        current_day()
+    assert current_day() == 1
+    msg = "current_day is only available in December (EST)"
+    log_event = ("aocd.get", logging.WARNING, msg)
+    assert log_event in caplog.record_tuples
