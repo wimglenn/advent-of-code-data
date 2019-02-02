@@ -93,9 +93,9 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
             time.sleep(dt)
             runtime = format_time(time.time() - t0)
         runtime = time.time() - t0
+        results = tuple(future.result()) + (runtime,)
     sys.stderr.write("\r" + " " * len(line) + "\r")
     sys.stderr.flush()
-    results = tuple(future.result()) + (runtime,)
     return results
 
 
