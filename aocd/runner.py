@@ -81,22 +81,28 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
     # TODO : multi-process over the different tokens
     spinner = itertools.cycle(r"\|/-")
     pool = pebble.ProcessPool(max_workers=1)
-    line = runtime = format_time(0)
+    line = walltime = format_time(0)
     with pool:
         t0 = time.time()
         func = entry_point.load()
         future = pool.schedule(func, kwargs=kwargs, timeout=timeout)
         while not future.done():
-            line = "\r" + runtime + "   " + progress + "   " + next(spinner)
+            line = "\r" + walltime + "   " + progress + "   " + next(spinner)
             sys.stderr.write(line)
             sys.stderr.flush()
             time.sleep(dt)
-            runtime = format_time(time.time() - t0)
-        runtime = time.time() - t0
-        results = tuple(future.result()) + (runtime,)
+            walltime = format_time(time.time() - t0)
+        walltime = time.time() - t0
+        try:
+            a, b = future.result()
+        except Exception as err:
+            a = b = repr(err)
+            crashed = True
+        else:
+            crashed = False
     sys.stderr.write("\r" + " " * len(line) + "\r")
     sys.stderr.flush()
-    return results
+    return a, b, walltime, crashed
 
 
 def format_time(t, timeout=DEFAULT_TIMEOUT):
@@ -129,21 +135,14 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
         progress = "{0.year}/{0.day:<2d} - {0.title:<40}   {1:>%d}/{2:<%d}"
         progress %= (userpad, datasetpad)
         progress = progress.format(puzzle, plugin, dataset)
-        t0 = time.time()
-        crashed = False
-        try:
-            a, b, walltime = run_with_timeout(
-                entry_point=entry_points[plugin],
-                timeout=timeout,
-                year=puzzle.year,
-                day=puzzle.day,
-                data=puzzle.input_data,
-                progress=progress,
-            )
-        except Exception as err:
-            crashed = True
-            a = b = repr(err)
-            walltime = time.time() - t0
+        a, b, walltime, crashed = run_with_timeout(
+            entry_point=entry_points[plugin],
+            timeout=timeout,
+            year=puzzle.year,
+            day=puzzle.day,
+            data=puzzle.input_data,
+            progress=progress,
+        )
         runtime = format_time(walltime, timeout)
         result_template = "   {icon} part {part}: {answer}"
         line = "   ".join([runtime, progress])
