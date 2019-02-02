@@ -67,21 +67,6 @@ def current_day():
     return day
 
 
-def _skip_frame(name):
-    basename = os.path.basename(name)
-    skip = any(
-        [
-            name == __file__,
-            "importlib" in name,  # Python 3 import machinery
-            "/IPython/" in name,  # ipython adds a tonne of stack frames
-            name.startswith("<"),  # crap like <decorator-gen-57>
-            name.endswith("ython3"),  # ipython3 alias
-            not re.search(r"[1-9]", basename),  # no digits in filename
-        ]
-    )
-    return skip
-
-
 def get_day_and_year():
     """
     Returns tuple (day, year).
@@ -102,10 +87,18 @@ def get_day_and_year():
     """
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
-    pattern_site = r"[Pp]ython\d\.?\d.site-packages."
     stack = [f[0] for f in traceback.extract_stack()]
     for name in stack:
-        if not _skip_frame(name):
+        basename = os.path.basename(name)
+        reasons_to_skip_frame = [
+            not re.search(pattern_day, basename),  # no digits in filename
+            name == __file__,  # here
+            "importlib" in name,  # Python 3 import machinery
+            "/IPython/" in name,  # IPython adds a tonne of stack frames
+            name.startswith("<"),  # crap like <decorator-gen-57>
+            name.endswith("ython3"),  # ipython3 alias
+        ]
+        if not any(reasons_to_skip_frame):
             abspath = os.path.abspath(name)
             break
         log.debug("skipping frame %s", name)
@@ -126,10 +119,9 @@ def get_day_and_year():
     if len(years) > 1:
         raise AocdError("Failed introspection of year")
     year = years.pop() if years else None
-    fname = re.sub(pattern_year, "", abspath)
-    fname = re.sub(pattern_site, "", fname)
+    basename_no_years = re.sub(pattern_year, "", basename)
     try:
-        [day] = set(re.findall(pattern_day, fname))
+        [day] = set(re.findall(pattern_day, basename_no_years))
     except ValueError:
         pass
     else:
