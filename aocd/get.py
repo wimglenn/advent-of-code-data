@@ -57,11 +57,12 @@ def most_recent_year():
 def current_day():
     """
     Most recent day, if it's during the Advent of Code. Happy Holidays!
-    Raises exception otherwise.
+    Day 1 is assumed, otherwise.
     """
     aoc_now = datetime.datetime.now(tz=AOC_TZ)
     if aoc_now.month != 12:
-        raise AocdError("current_day is only available in December (EST)")
+        log.warning("current_day is only available in December (EST)")
+        return 1
     day = min(aoc_now.day, 25)
     return day
 
