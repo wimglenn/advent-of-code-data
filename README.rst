@@ -38,12 +38,12 @@ Automated submission
 .. code-block:: python
 
    from aocd import submit
-   submit(my_answer, level=1, day=25, year=2017)
+   submit(my_answer, part="a", day=25, year=2017)
 
 Note that the same filename introspection of year/day also works for automated
-submission. There's also introspection of the "level", i.e. part 1 or part 2,
-aocd can automatically determine if you have already completed part 1 or not,
-and submit an answer for the correct part accordingly. In this case, just use:
+submission. There's also introspection of the "level", i.e. part a or part b,
+aocd can automatically determine if you have already completed part a or not
+and submit your answer for the correct part accordingly. In this case, just use:
 
 .. code-block:: python
 
@@ -100,15 +100,15 @@ Verify your code against multiple different inputs
 
 Ever tried running your code against other people's inputs? AoC is full of tricky edge cases. You may find that sometimes you're only getting the right answer by luck, and your code will fail on some other dataset. Using aocd, you can collect a few different auth tokens for each of your accounts (github/google/reddit/twitter) and verify your answers across multiple datasets.
 
-To see an example of how to setup the entry-point for your code, look at `advent-of-code-sample <https://github.com/wimglenn/advent-of-code-sample>`_. After dumping a bunch of session tokens into ``~/.config/aocd/tokens.json`` you could do something like this by running the ``aoc`` console script:
+To see an example of how to setup the entry-point for your code, look at `advent-of-code-sample <https://github.com/wimglenn/advent-of-code-sample>`_ for some inspiration. After dumping a bunch of session tokens into ``~/.config/aocd/tokens.json`` you could do something like this by running the ``aoc`` console script:
 
 .. image:: https://user-images.githubusercontent.com/6615374/52138567-26e09f80-2613-11e9-8eaf-c42757bc9b86.png
 
-As you can see above, I've actually got an incorrect code for `2017/day20 <https://adventofcode.com/2017/day/20>`_, but that bug only showed up for google token's dataset. Whoops. Also, it looks like my algorithm for `2017 Day 13: Packet Scanners <https://adventofcode.com/2017/day/13>`_ was kinda garbage. Too slow. According to `AoC FAQ <https://adventofcode.com/about>`_:
+As you can see above, I've actually got an incorrect code for `2017 Day 20: Particle Swarm <https://adventofcode.com/2017/day/20>`_, but that bug only showed up for google token's dataset. Whoops. Also, it looks like my algorithm for `2017 Day 13: Packet Scanners <https://adventofcode.com/2017/day/13>`_ was kinda garbage. Too slow. According to `AoC FAQ <https://adventofcode.com/about>`_:
 
   *every problem has a solution that completes in at most 15 seconds on ten-year-old hardware*
 
-By the way, the ``aoc`` runner will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120`` (seconds).
+By the way, the ``aoc`` runner will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120``.
 
 
 Setup Guide
@@ -163,3 +163,14 @@ instead and have a nice day!
    'UULDRRRDDLRLURUUURUURDRUURRDRRURUD...
    >>> get_data(day=24, year=2015)
    '1\n2\n3\n7\n11\n13\n17\n19\n23\n31...
+
+
+Cache invalidation?
+-------------------
+
+``aocd`` saves puzzle inputs, answers, names, and your bad guesses to avoid hitting
+the AoC servers any more often than strictly necessary (this also speeds things up).
+All data is persisted in plain text files under ``~/.config/aocd``. To remove any
+caches, you may simply delete whatever files you want under that directory tree.
+If you'd prefer to use a different path, then export an ``AOCD_DIR`` environment
+variable with the desired location.
