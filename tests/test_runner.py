@@ -93,7 +93,7 @@ def test_results(mocker, capsys):
         days=[1],
         datasets={"testdataset": "testtoken"},
     )
-    ep.load.assert_called_once()
+    ep.load.assert_called_once_with()
     out, err = capsys.readouterr()
     txt = "2015/1  - The Puzzle Title                           testuser/testdataset"
     assert txt in out
