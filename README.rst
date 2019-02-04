@@ -104,7 +104,7 @@ To see an example of how to setup the entry-point for your code, look at `advent
 
 .. image:: https://user-images.githubusercontent.com/6615374/52138567-26e09f80-2613-11e9-8eaf-c42757bc9b86.png
 
-As you can see above, I've actually got an incorrect code for `2017 Day 20: Particle Swarm <https://adventofcode.com/2017/day/20>`_, but that bug only showed up for google token's dataset. Whoops. Also, it looks like my algorithm for `2017 Day 13: Packet Scanners <https://adventofcode.com/2017/day/13>`_ was kinda garbage. Too slow. According to `AoC FAQ <https://adventofcode.com/about>`_:
+As you can see above, I actually had incorrect code for `2017 Day 20: Particle Swarm <https://adventofcode.com/2017/day/20>`_, but that `bug <https://github.com/wimglenn/advent-of-code-wim/commit/31e454270001c6d06b46014fe5dafd03e29507b8>`_ only showed up for the google token's dataset. Whoops. Also, it looks like my algorithm for `2017 Day 13: Packet Scanners <https://adventofcode.com/2017/day/13>`_ was kinda garbage. Too slow. According to `AoC FAQ <https://adventofcode.com/about>`_:
 
   *every problem has a solution that completes in at most 15 seconds on ten-year-old hardware*
 
