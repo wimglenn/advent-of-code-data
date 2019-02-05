@@ -1,3 +1,3 @@
-import pytz
+from dateutil.tz import gettz
 
-AOC_TZ = pytz.timezone("America/New_York")
+AOC_TZ = gettz("America/New_York")
