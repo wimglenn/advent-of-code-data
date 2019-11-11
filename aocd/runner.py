@@ -8,14 +8,15 @@ import itertools
 import json
 import logging
 import os
-import pkg_resources
 import sys
 import time
 from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime
+from tempfile import NamedTemporaryFile
 
 import pebble
+import pkg_resources
 from termcolor import colored
 
 from .models import default_user
@@ -131,18 +132,28 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
         if year == aoc_now.year and day > aoc_now.day:
             continue
         os.environ["AOC_SESSION"] = datasets[dataset]
+        os.environ["AOC_YEAR"] = str(year)
+        os.environ["AOC_DAY"] = str(day)
         puzzle = Puzzle(year=year, day=day)
-        progress = "{0.year}/{0.day:<2d} - {0.title:<40}   {1:>%d}/{2:<%d}"
+        input_data = puzzle.input_data
+        title = puzzle.title
+        progress = "{}/{:<2d} - {:<40}   {:>%d}/{:<%d}"
         progress %= (userpad, datasetpad)
-        progress = progress.format(puzzle, plugin, dataset)
-        a, b, walltime, crashed = run_with_timeout(
-            entry_point=entry_points[plugin],
-            timeout=timeout,
-            year=puzzle.year,
-            day=puzzle.day,
-            data=puzzle.input_data,
-            progress=progress,
-        )
+        progress = progress.format(year, day, title, plugin, dataset)
+        with NamedTemporaryFile(prefix="{}-{:02d}-".format(year, day), mode="w") as f:
+            f.write(input_data)
+            f.flush()
+            os.environ["AOC_FILENAME"] = f.name
+            os.environ["AOC_PUZZLE"] = title
+            a, b, walltime, crashed = run_with_timeout(
+                entry_point=entry_points[plugin],
+                timeout=timeout,
+                year=year,
+                day=day,
+                data=input_data,
+                progress=progress,
+            )
+        assert not os.path.isfile(f.name)
         runtime = format_time(walltime, timeout)
         result_template = "   {icon} part {part}: {answer}"
         line = "   ".join([runtime, progress])
