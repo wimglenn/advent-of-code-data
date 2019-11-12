@@ -82,17 +82,18 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
     # TODO : multi-process over the different tokens
     spinner = itertools.cycle(r"\|/-")
     pool = pebble.ProcessPool(max_workers=1)
-    line = walltime = format_time(0)
+    line = elapsed = format_time(0)
     with pool:
         t0 = time.time()
         func = entry_point.load()
         future = pool.schedule(func, kwargs=kwargs, timeout=timeout)
         while not future.done():
-            line = "\r" + walltime + "   " + progress + "   " + next(spinner)
-            sys.stderr.write(line)
-            sys.stderr.flush()
+            if progress is not None:
+                line = "\r" + elapsed + "   " + progress + "   " + next(spinner)
+                sys.stderr.write(line)
+                sys.stderr.flush()
             time.sleep(dt)
-            walltime = format_time(time.time() - t0)
+            elapsed = format_time(time.time() - t0)
         walltime = time.time() - t0
         try:
             a, b = future.result()
@@ -101,8 +102,9 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
             crashed = True
         else:
             crashed = False
-    sys.stderr.write("\r" + " " * len(line) + "\r")
-    sys.stderr.flush()
+    if progress is not None:
+        sys.stderr.write("\r" + " " * len(line) + "\r")
+        sys.stderr.flush()
     return a, b, walltime, crashed
 
 
@@ -115,6 +117,30 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
         color = "red"
     runtime = colored("{: 7.2f}s".format(t), color)
     return runtime
+
+
+def run_one(year, day, token, entry_point, timeout=DEFAULT_TIMEOUT, progress=None):
+    os.environ["AOC_SESSION"] = token
+    os.environ["AOC_YEAR"] = str(year)
+    os.environ["AOC_DAY"] = str(day)
+    puzzle = Puzzle(year=year, day=day)
+    input_data = puzzle.input_data
+    title = puzzle.title
+    with NamedTemporaryFile(prefix="{}-{:02d}-".format(year, day), mode="w") as f:
+        f.write(input_data)
+        f.flush()
+        os.environ["AOC_FILENAME"] = f.name
+        os.environ["AOC_PUZZLE"] = title
+        a, b, walltime, crashed = run_with_timeout(
+            entry_point=entry_point,
+            timeout=timeout,
+            year=year,
+            day=day,
+            data=input_data,
+            progress=progress,
+        )
+    assert not os.path.isfile(f.name)
+    return a, b, walltime, crashed
 
 
 def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True):
@@ -131,29 +157,22 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
     for year, day, plugin, dataset in it:
         if year == aoc_now.year and day > aoc_now.day:
             continue
-        os.environ["AOC_SESSION"] = datasets[dataset]
-        os.environ["AOC_YEAR"] = str(year)
-        os.environ["AOC_DAY"] = str(day)
+        token = datasets[dataset]
+        entry_point = entry_points[plugin]
+        os.environ["AOC_SESSION"] = token
         puzzle = Puzzle(year=year, day=day)
-        input_data = puzzle.input_data
         title = puzzle.title
         progress = "{}/{:<2d} - {:<40}   {:>%d}/{:<%d}"
         progress %= (userpad, datasetpad)
         progress = progress.format(year, day, title, plugin, dataset)
-        with NamedTemporaryFile(prefix="{}-{:02d}-".format(year, day), mode="w") as f:
-            f.write(input_data)
-            f.flush()
-            os.environ["AOC_FILENAME"] = f.name
-            os.environ["AOC_PUZZLE"] = title
-            a, b, walltime, crashed = run_with_timeout(
-                entry_point=entry_points[plugin],
-                timeout=timeout,
-                year=year,
-                day=day,
-                data=input_data,
-                progress=progress,
-            )
-        assert not os.path.isfile(f.name)
+        a, b, walltime, crashed = run_one(
+            year=year,
+            day=day,
+            token=token,
+            entry_point=entry_point,
+            timeout=timeout,
+            progress=progress,
+        )
         runtime = format_time(walltime, timeout)
         result_template = "   {icon} part {part}: {answer}"
         line = "   ".join([runtime, progress])
@@ -173,6 +192,8 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                     except AttributeError:
                         pass
             correct = str(expected) == answer
+            if crashed:
+                assert not correct
             icon = colored("✔", "green") if correct else colored("✖", "red")
             correction = ""
             if not correct:
