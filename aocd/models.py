@@ -98,6 +98,7 @@ class Puzzle(object):
 
     @property
     def input_data(self):
+        sanitized = "..." + self.user.token[-4:]
         try:
             # use previously received data, if any existing
             with io.open(self.input_data_fname, encoding="utf-8") as f:
@@ -106,22 +107,21 @@ class Puzzle(object):
             if err.errno != errno.ENOENT:
                 raise
         else:
-            sanitized = self.user.token[:4] + "..." + self.user.token[-4:]
             sanitized_path = self.input_data_fname.replace(self.user.token, sanitized)
             log.info("reusing existing data %s", sanitized_path)
             return data.rstrip("\r\n")
-        log.info("getting data year=%s day=%s", self.year, self.day)
+        log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
         response = requests.get(
             url=self.input_data_url, cookies=self._cookies, headers=self._headers
         )
         if not response.ok:
-            log.error("got %s status code", response.status_code)
+            log.error("got %s status code token=%s", response.status_code, sanitized)
             log.error(response.text)
             raise AocdError("Unexpected response")
         data = response.text
         _ensure_intermediate_dirs(self.input_data_fname)
         with open(self.input_data_fname, "w") as f:
-            log.info("saving the puzzle input")
+            log.info("saving the puzzle input token=%s", sanitized)
             f.write(data)
         return data.rstrip("\r\n")
 
@@ -200,7 +200,8 @@ class Puzzle(object):
                 cprint(bad_guesses[str(value)], "red")
             return
         url = self.submit_url
-        log.info("posting %r to %s (part %s)", value, url, part)
+        sanitized = "..." + self.user.token[-4:]
+        log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": 1, "b": 2}[part]
         response = requests.post(
             url=url,
