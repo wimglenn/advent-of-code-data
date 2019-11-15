@@ -32,5 +32,7 @@ setup(
         "beautifulsoup4",
         "pebble",
         'colorama; platform_system == "Windows"',
+        "wimpy",
     ],
+    options={"bdist_wheel": {"universal": "1"}},
 )

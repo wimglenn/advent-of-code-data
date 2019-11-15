@@ -108,7 +108,7 @@ class Puzzle(object):
                 raise
         else:
             sanitized_path = self.input_data_fname.replace(self.user.token, sanitized)
-            log.info("reusing existing data %s", sanitized_path)
+            log.debug("reusing existing data %s", sanitized_path)
             return data.rstrip("\r\n")
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
         response = requests.get(
@@ -286,6 +286,8 @@ class Puzzle(object):
         Note: Answers are only revealed after a correct submission. If you've
         have not already solved the puzzle, AocdError will be raised.
         """
+        if part == "b" and self.day == 25:
+            return None
         answer_fname = getattr(self, "answer_{}_fname".format(part))
         if os.path.isfile(answer_fname):
             with open(answer_fname) as f:

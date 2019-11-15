@@ -9,11 +9,11 @@ import json
 import logging
 import os
 import sys
+import tempfile
 import time
 from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime
-from tempfile import NamedTemporaryFile
 
 import pebble
 import pkg_resources
@@ -93,7 +93,7 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
                 sys.stderr.write(line)
                 sys.stderr.flush()
             time.sleep(dt)
-            elapsed = format_time(time.time() - t0)
+            elapsed = format_time(time.time() - t0, timeout)
         walltime = time.time() - t0
         try:
             a, b = future.result()
@@ -119,18 +119,14 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
     return runtime
 
 
-def run_one(year, day, token, entry_point, timeout=DEFAULT_TIMEOUT, progress=None):
-    os.environ["AOC_SESSION"] = token
-    os.environ["AOC_YEAR"] = str(year)
-    os.environ["AOC_DAY"] = str(day)
-    puzzle = Puzzle(year=year, day=day)
-    input_data = puzzle.input_data
-    title = puzzle.title
-    with NamedTemporaryFile(prefix="{}-{:02d}-".format(year, day), mode="w") as f:
-        f.write(input_data)
-        f.flush()
-        os.environ["AOC_FILENAME"] = f.name
-        os.environ["AOC_PUZZLE"] = title
+def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None):
+    prev = os.getcwd()
+    tmpdir = tempfile.mkdtemp(prefix="{}-{:02d}-".format(year, day))
+    os.chdir(tmpdir)
+    assert not os.path.exists("input.txt")
+    try:
+        with open("input.txt", "w") as f:
+            f.write(input_data)
         a, b, walltime, crashed = run_with_timeout(
             entry_point=entry_point,
             timeout=timeout,
@@ -139,7 +135,10 @@ def run_one(year, day, token, entry_point, timeout=DEFAULT_TIMEOUT, progress=Non
             data=input_data,
             progress=progress,
         )
-    assert not os.path.isfile(f.name)
+    finally:
+        os.unlink("input.txt")
+        os.chdir(prev)
+        os.rmdir(tmpdir)
     return a, b, walltime, crashed
 
 
@@ -168,7 +167,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
         a, b, walltime, crashed = run_one(
             year=year,
             day=day,
-            token=token,
+            input_data=puzzle.input_data,
             entry_point=entry_point,
             timeout=timeout,
             progress=progress,
