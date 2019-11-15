@@ -28,7 +28,7 @@ def test_no_plugins_avail(capsys, mocker):
 
 def test_no_datasets_avail(capsys, mocker, aocd_dir):
     datasets_file = aocd_dir / "tokens.json"
-    datasets_file.write("{}")
+    datasets_file.write_text("{}")
     mocker.patch("sys.argv", ["aoc"])
     msg = (
         "There are no datasets available to use.\n"
@@ -50,7 +50,7 @@ def test_main(capsys, mocker, aocd_dir):
     ep2.name = "user2"
     mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep1, ep2]))
     datasets_file = aocd_dir / "tokens.json"
-    datasets_file.write('{"data1": "token1", "data2": "token2"}')
+    datasets_file.write_text('{"data1": "token1", "data2": "token2"}')
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
     main()
     mock.assert_called_once_with(
@@ -136,9 +136,14 @@ def test_day_out_of_range(mocker, capsys, freezer):
 
 
 def test_run_crashed(aocd_dir, mocker, capsys):
-    aocd_dir.join("titles/2018_25.txt").ensure(file=True).write("The Puzzle Title")
-    aocd_dir.join("thetesttoken/2018_25_input.txt").ensure(file=True).write("someinput")
-    aocd_dir.join("thetesttoken/2018_25a_answer.txt").ensure(file=True).write("answ")
+    title_path = aocd_dir / "titles"
+    title_path.mkdir()
+    title_file = title_path / "2018_25.txt"
+    title_file.write_text("The Puzzle Title")
+    input_path = aocd_dir / "thetesttoken" / "2018_25_input.txt"
+    input_path.write_text("someinput")
+    answer_path = aocd_dir / "thetesttoken" / "2018_25a_answer.txt"
+    answer_path.write_text("answ")
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = bugged_entry_point
@@ -156,9 +161,14 @@ def test_run_crashed(aocd_dir, mocker, capsys):
 
 
 def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
-    aocd_dir.join("titles/2015_01.txt").ensure(file=True).write("The Puzzle Title")
-    aocd_dir.join("thetesttoken/2015_01_input.txt").ensure(file=True).write("testinput")
-    aocd_dir.join("thetesttoken/2015_01a_answer.txt").ensure(file=True).write("answer1")
+    title_path = aocd_dir / "titles"
+    title_path.mkdir()
+    title_file = title_path / "2015_01.txt"
+    title_file.write_text("The Puzzle Title")
+    input_path = aocd_dir / "thetesttoken" / "2015_01_input.txt"
+    input_path.write_text("testinput")
+    answer_path = aocd_dir / "thetesttoken" / "2015_01a_answer.txt"
+    answer_path.write_text("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")
     requests_mock.post(
         url="https://adventofcode.com/2015/day/1/answer",
@@ -180,9 +190,14 @@ def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
 
 
 def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
-    aocd_dir.join("titles/2015_01.txt").ensure(file=True).write("The Puzzle Title")
-    aocd_dir.join("thetesttoken/2015_01_input.txt").ensure(file=True).write("testinput")
-    aocd_dir.join("thetesttoken/2015_01a_answer.txt").ensure(file=True).write("answer1")
+    title_path = aocd_dir / "titles"
+    title_path.mkdir()
+    title_file = title_path / "2015_01.txt"
+    title_file.write_text("The Puzzle Title")
+    input_path = aocd_dir / "thetesttoken" / "2015_01_input.txt"
+    input_path.write_text("testinput")
+    answer_path = aocd_dir / "thetesttoken" / "2015_01a_answer.txt"
+    answer_path.write_text("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")
     ep = mocker.Mock()
     ep.name = "testuser"

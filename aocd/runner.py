@@ -121,8 +121,8 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
 
 def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None):
     prev = os.getcwd()
-    tmpdir = tempfile.mkdtemp(prefix="{}-{:02d}-".format(year, day))
-    os.chdir(tmpdir)
+    scratch = tempfile.mkdtemp(prefix="{}-{:02d}-".format(year, day))
+    os.chdir(scratch)
     assert not os.path.exists("input.txt")
     try:
         with open("input.txt", "w") as f:
@@ -138,7 +138,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
     finally:
         os.unlink("input.txt")
         os.chdir(prev)
-        os.rmdir(tmpdir)
+        os.rmdir(scratch)
     return a, b, walltime, crashed
 
 
