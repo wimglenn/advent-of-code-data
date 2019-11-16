@@ -8,6 +8,7 @@ import pytest
 from termcolor import colored
 
 from aocd.runner import main
+from aocd.runner import run_one
 from aocd.runner import run_for
 from aocd.runner import format_time
 
@@ -213,3 +214,23 @@ def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
     out, err = capsys.readouterr()
     assert "part a: answer1 " in out
     assert "part b: wrong (correct answer is unknown)" in out
+
+
+def file_entry_point(year, day, data):
+    assert year == 2015
+    assert day == 1
+    assert data == "abcxyz"
+    with open("input.txt") as f:
+        assert f.read() == "abcxyz"
+    return 123, "456"
+
+
+def test_load_input_from_file(mocker):
+    ep = mocker.Mock()
+    ep.name = "file_ep_user"
+    ep.load.return_value = file_entry_point
+    a, b, walltime, crashed = run_one(2015, 1, "abcxyz", ep)
+    assert a == "123"
+    assert b == "456"
+    assert 0 < walltime < 1
+    assert not crashed

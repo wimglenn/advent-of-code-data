@@ -102,6 +102,8 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
             crashed = True
         else:
             crashed = False
+            a = str(a)
+            b = str(b)
     if progress is not None:
         sys.stderr.write("\r" + " " * len(line) + "\r")
         sys.stderr.flush()

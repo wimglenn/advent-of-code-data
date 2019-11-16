@@ -63,6 +63,8 @@ def default_user():
         You can find it in your browser cookies after login.
             1) Save the cookie into a text file {}, or
             2) Export the cookie in environment variable AOC_SESSION
+
+        See https://github.com/wimglenn/advent-of-code-wim/issues/1 for more info.
         """
     )
     cprint(msg.format(AOCD_DIR + "/token"), color="red", file=sys.stderr)
