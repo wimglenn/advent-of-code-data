@@ -3,9 +3,9 @@ import errno
 import pytest
 from termcolor import colored
 
-from aocd.post import submit
-from aocd.models import _ensure_intermediate_dirs
 from aocd.exceptions import AocdError
+from aocd.models import _ensure_intermediate_dirs
+from aocd.post import submit
 
 
 def test_submit_correct_answer(requests_mock, capsys):
@@ -149,9 +149,10 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, aoc
     submit(1234, reopen=False)
     assert parta_answer.exists()
     assert partb_answer.exists()
-    assert parta_answer.read() == "666"
-    assert partb_answer.read() == "1234"
-    assert aocd_dir.join("titles/2018_01.txt").read() == "Yo Dawg\n"
+    assert parta_answer.read_text() == "666"
+    assert partb_answer.read_text() == "1234"
+    title_path = aocd_dir / "titles" / "2018_01.txt"
+    assert title_path.read_text() == "Yo Dawg\n"
     assert get.call_count == 1
     assert post.call_count == 1
     query = sorted(post.last_request.text.split("&"))  # form encoded

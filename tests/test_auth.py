@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import pytest
 
 from aocd.exceptions import AocdError
@@ -5,7 +7,7 @@ from aocd.models import default_user
 
 
 def test_no_session_id(test_token, capsys):
-    test_token.remove()
+    test_token.unlink()
     with pytest.raises(AocdError("Missing session ID")):
         default_user()
     out, err = capsys.readouterr()
@@ -20,7 +22,7 @@ def test_get_session_id_from_env(monkeypatch):
 
 
 def test_get_session_id_from_file(test_token):
-    test_token.write("tokenfromfile")
+    test_token.write_text("tokenfromfile")
     user = default_user()
     assert user.token == "tokenfromfile"
 
@@ -32,7 +34,7 @@ def test_env_takes_priority_over_file(monkeypatch, test_token):
 
 
 def test_problem_loading_session_id_is_left_unhandled(test_token):
-    test_token.remove()
-    test_token.ensure_dir()
+    test_token.unlink()
+    test_token.mkdir()
     with pytest.raises(IOError):
         default_user()

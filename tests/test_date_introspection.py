@@ -1,7 +1,7 @@
 import pytest
 
-from aocd.get import get_day_and_year
 from aocd.exceptions import AocdError
+from aocd.get import get_day_and_year
 
 
 def test_get_day_and_year_fail_no_filename_on_stack():

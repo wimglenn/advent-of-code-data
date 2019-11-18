@@ -33,4 +33,5 @@ setup(
         "pebble",
         'colorama; platform_system == "Windows"',
     ],
+    options={"bdist_wheel": {"universal": "1"}},
 )

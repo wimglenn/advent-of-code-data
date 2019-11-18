@@ -7,15 +7,21 @@ from __future__ import unicode_literals
 import sys
 from functools import partial
 
-from .get import get_data
-from .get import get_day_and_year
+from . import cli
+from . import exceptions
+from . import get
+from . import models
+from . import post
+from . import runner
+from . import utils
+from . import version
 from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
+from .get import get_data
+from .get import get_day_and_year
 from .post import submit
 from .utils import AOC_TZ
 from .version import __version__
-
-from . import cli, exceptions, get, models, post, runner, utils, version
 
 
 __all__ = [

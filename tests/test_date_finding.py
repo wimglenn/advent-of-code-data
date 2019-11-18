@@ -2,9 +2,9 @@ import logging
 
 import pytest
 
+from aocd.exceptions import AocdError
 from aocd.get import current_day
 from aocd.get import most_recent_year
-from aocd.exceptions import AocdError
 
 
 @pytest.mark.parametrize(
