@@ -30,6 +30,30 @@ requests client side and rate-limits the get_data function, as
 Thanks!
 
 
+Quickstart
+----------
+
+Install with pip
+
+.. code-block:: bash
+
+   pip install advent-of-code-data
+
+**Puzzle inputs differ by user.**   So export your session ID, for example:
+
+.. code-block:: bash
+
+   export AOC_SESSION=cafef00db01dfaceba5eba11deadbeef
+
+This is a cookie which is set when you login to AoC.  You can find it with
+your browser inspector.  If you're hacking on AoC at all you probably already
+know these kind of tricks, but if you need help with that part then you can
+`look here <https://github.com/wimglenn/advent-of-code/issues/1>`_.
+
+*Note:* If you don't like the env var, you could also put into a text file
+in your home directory (use the filename ``~/.config/aocd/token``).
+
+
 Automated submission
 --------------------
 
@@ -111,32 +135,8 @@ As you can see above, I actually had incorrect code for `2017 Day 20: Particle S
 By the way, the ``aoc`` runner will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120``.
 
 
-Setup Guide
------------
-
-Install with pip
-
-.. code-block:: bash
-
-   pip install advent-of-code-data
-
-**Puzzle inputs differ by user.**   So export your session ID, for example:
-
-.. code-block:: bash
-
-   export AOC_SESSION=cafef00db01dfaceba5eba11deadbeef
-
-This is a cookie which is set when you login to AoC.  You can find it with
-your browser inspector.  If you're hacking on AoC at all you probably already
-know these kind of tricks, but if you need help with that part then you can 
-`look here <https://github.com/wimglenn/advent-of-code/issues/1>`_.
-
-*Note:* If you don't like the env var, you could also put into a text file 
-in your home directory (use the filename ``~/.config/aocd/token``).
-
-
-How does it work?
------------------
+How does this library work?
+---------------------------
 
 It will automatically get today's data at import time, if used within the 
 interactive interpreter.  Otherwise, the date is found by introspection of the
