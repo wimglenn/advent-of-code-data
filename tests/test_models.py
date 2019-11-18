@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
+import os
 import pytest
 
 from aocd.exceptions import AocdError
@@ -168,3 +169,12 @@ def test_pprint_cycle(freezer, requests_mock, mocker):
     [((pretty,), kwargs)] = printer.text.call_args_list
     assert not kwargs
     assert pretty.startswith("<aocd.models.Puzzle object at 0x")
+
+
+def test_aocr_override(monkeypatch, tmp_path):
+    monkeypatch.setenv("AOC_SESSION", ".aocr")
+    fileinput = tmp_path / "input.txt"
+    fileinput.write_text("yello")
+    os.chdir(str(tmp_path))
+    puzzle = Puzzle(year=2015, day=1)
+    assert puzzle.input_data == "yello"

@@ -102,8 +102,9 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
             crashed = True
         else:
             crashed = False
-            a = str(a)
-            b = str(b)
+            # longest correct answer seen so far has been 32 chars
+            a = str(a)[:50]
+            b = str(b)[:50]
     if progress is not None:
         sys.stderr.write("\r" + " " * len(line) + "\r")
         sys.stderr.flush()

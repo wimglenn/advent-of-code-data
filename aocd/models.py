@@ -100,6 +100,9 @@ class Puzzle(object):
 
     @property
     def input_data(self):
+        if self.user.token == ".aocr":
+            with open("input.txt") as f:
+                return f.read()
         sanitized = "..." + self.user.token[-4:]
         try:
             # use previously received data, if any existing
