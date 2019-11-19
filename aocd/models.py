@@ -292,7 +292,7 @@ class Puzzle(object):
         have not already solved the puzzle, AocdError will be raised.
         """
         if part == "b" and self.day == 25:
-            return None
+            return ""
         answer_fname = getattr(self, "answer_{}_fname".format(part))
         if os.path.isfile(answer_fname):
             with open(answer_fname) as f:
