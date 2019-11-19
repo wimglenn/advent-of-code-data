@@ -5,3 +5,4 @@ pytest-raisin
 pytest-freezegun
 pytest-socket
 requests_mock
+coveralls
