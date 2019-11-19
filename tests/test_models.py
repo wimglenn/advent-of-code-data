@@ -27,8 +27,8 @@ def test_get_answer_not_existing_ok_on_25dec(aocd_dir, requests_mock):
     answer_path = aocd_dir / "thetesttoken" / "2017_25a_answer.txt"
     answer_path.write_text("yeah")
     puzzle = Puzzle(day=25, year=2017)
-    assert puzzle.answer_b is None
-    assert puzzle.answers == ("yeah", None)
+    assert not puzzle.answer_b
+    assert puzzle.answers == ("yeah", "")
 
 
 def test_both_puzzle_answers_tuple(aocd_dir):

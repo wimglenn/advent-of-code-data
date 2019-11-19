@@ -19,5 +19,9 @@ install:
 script:
   - pytest
 
+after_success:
+  - coverage combine
+  - coveralls
+
 notifications:
   email: false

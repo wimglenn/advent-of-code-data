@@ -98,17 +98,17 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
         try:
             a, b = future.result()
         except Exception as err:
-            a = b = repr(err)
-            crashed = True
+            a = b = ""
+            error = repr(err)[:50]
         else:
-            crashed = False
+            error = ""
             # longest correct answer seen so far has been 32 chars
             a = str(a)[:50]
             b = str(b)[:50]
     if progress is not None:
         sys.stderr.write("\r" + " " * len(line) + "\r")
         sys.stderr.flush()
-    return a, b, walltime, crashed
+    return a, b, walltime, error
 
 
 def format_time(t, timeout=DEFAULT_TIMEOUT):
@@ -130,7 +130,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
     try:
         with open("input.txt", "w") as f:
             f.write(input_data)
-        a, b, walltime, crashed = run_with_timeout(
+        a, b, walltime, error = run_with_timeout(
             entry_point=entry_point,
             timeout=timeout,
             year=year,
@@ -142,7 +142,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
         os.unlink("input.txt")
         os.chdir(prev)
         os.rmdir(scratch)
-    return a, b, walltime, crashed
+    return a, b, walltime, error
 
 
 def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True):
@@ -167,7 +167,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
         progress = "{}/{:<2d} - {:<40}   {:>%d}/{:<%d}"
         progress %= (userpad, datasetpad)
         progress = progress.format(year, day, title, plugin, dataset)
-        a, b, walltime, crashed = run_one(
+        a, b, walltime, error = run_one(
             year=year,
             day=day,
             input_data=puzzle.input_data,
@@ -176,36 +176,41 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
             progress=progress,
         )
         runtime = format_time(walltime, timeout)
-        result_template = "   {icon} part {part}: {answer}"
         line = "   ".join([runtime, progress])
-        for answer, part in zip((a, b), "ab"):
-            if day == 25 and part == "b":
-                # there's no part b on christmas day, skip
-                continue
-            expected = None
-            try:
-                expected = getattr(puzzle, "answer_" + part)
-            except AttributeError:
-                post = part == "a" or (part == "b" and hasattr(puzzle, "answer_a"))
-                if autosubmit and not crashed and post:
-                    try:
-                        puzzle._submit(answer, part, reopen=False, quiet=True)
-                        expected = getattr(puzzle, "answer_" + part)
-                    except AttributeError:
-                        pass
-            correct = str(expected) == answer
-            if crashed:
-                assert not correct
-            icon = colored("✔", "green") if correct else colored("✖", "red")
-            correction = ""
-            if not correct:
-                if expected is None:
-                    icon = colored("?", "magenta")
-                    correction = "(correct answer is unknown)"
-                else:
-                    correction = "(expected: {})".format(expected)
-            answer = "{} {}".format(answer, correction)
-            if part == "a":
-                answer = answer.ljust(30)
-            line += result_template.format(icon=icon, part=part, answer=answer)
+        if error:
+            assert a == b == ""
+            icon = colored("✖", "red")
+            line += "   {icon} {error}".format(icon=icon, error=error)
+        else:
+            result_template = "   {icon} part {part}: {answer}"
+            for answer, part in zip((a, b), "ab"):
+                if day == 25 and part == "b":
+                    # there's no part b on christmas day, skip
+                    continue
+                expected = None
+                try:
+                    expected = getattr(puzzle, "answer_" + part)
+                except AttributeError:
+                    post = part == "a" or (part == "b" and hasattr(puzzle, "answer_a"))
+                    if autosubmit and post:
+                        try:
+                            puzzle._submit(answer, part, reopen=False, quiet=True)
+                            expected = getattr(puzzle, "answer_" + part)
+                        except AttributeError:
+                            pass
+                correct = str(expected) == answer
+                if error:
+                    assert not correct
+                icon = colored("✔", "green") if correct else colored("✖", "red")
+                correction = ""
+                if not correct:
+                    if expected is None:
+                        icon = colored("?", "magenta")
+                        correction = "(correct answer is unknown)"
+                    else:
+                        correction = "(expected: {})".format(expected)
+                answer = "{} {}".format(answer, correction)
+                if part == "a":
+                    answer = answer.ljust(30)
+                line += result_template.format(icon=icon, part=part, answer=answer)
         print(line)

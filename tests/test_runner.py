@@ -136,7 +136,7 @@ def test_day_out_of_range(mocker, capsys, freezer):
     assert out == err == ""
 
 
-def test_run_crashed(aocd_dir, mocker, capsys):
+def test_run_error(aocd_dir, mocker, capsys):
     title_path = aocd_dir / "titles"
     title_path.mkdir()
     title_file = title_path / "2018_25.txt"
@@ -156,7 +156,8 @@ def test_run_crashed(aocd_dir, mocker, capsys):
         datasets={"default": "thetesttoken"},
     )
     out, err = capsys.readouterr()
-    txt = "part a: Exception(123, 456) (expected: answ)"
+    txt = "Exception(123, 456)"
+    assert "✖" in out
     assert txt in out
     assert "part b" not in out  # because it's 25 dec, no part b puzzle
 
@@ -229,8 +230,8 @@ def test_load_input_from_file(mocker):
     ep = mocker.Mock()
     ep.name = "file_ep_user"
     ep.load.return_value = file_entry_point
-    a, b, walltime, crashed = run_one(2015, 1, "abcxyz", ep)
+    a, b, walltime, error = run_one(2015, 1, "abcxyz", ep)
     assert a == "123"
     assert b == "456"
     assert 0 < walltime < 1
-    assert not crashed
+    assert not error
