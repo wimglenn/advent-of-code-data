@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
 import logging
+from datetime import timedelta
 
 import os
 import pytest
 
 from aocd.exceptions import AocdError
+from aocd.exceptions import PuzzleUnsolvedError
 from aocd.models import Puzzle
 
 
@@ -178,3 +180,59 @@ def test_aocr_override(monkeypatch, tmp_path):
     os.chdir(str(tmp_path))
     puzzle = Puzzle(year=2015, day=1)
     assert puzzle.input_data == "yello"
+
+
+fake_stats_response = """
+<article><p>These are your personal leaderboard statistics.</p>
+<pre>      <span class="leaderboard-daydesc-first">-------Part 1--------</span>
+           <span class="leaderboard-daydesc-both">-------Part 2--------</span>
+Day   <span class="leaderboard-daydesc-first">    Time  Rank  Score</span>
+<span class="leaderboard-daydesc-both">    Time  Rank  Score</span>
+ 25       >24h  2708      0       >24h  1926      0
+  4   00:03:30   158      0   00:04:17    25     76
+  3   00:24:44   729      0   00:36:00   710      0
+  2   01:11:16  4087      0   01:23:27  3494      0
+  1   00:02:00   243      0   00:11:17   733      0
+</pre>
+</article>
+"""
+
+
+def test_get_stats(requests_mock):
+    puzzle = Puzzle(year=2019, day=4)
+    requests_mock.get(
+        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    )
+    stats = puzzle.my_stats
+    assert stats == {
+        "a": {"time": timedelta(minutes=3, seconds=30), "rank": 158, "score": 0},
+        "b": {"time": timedelta(minutes=4, seconds=17), "rank": 25, "score": 76},
+    }
+
+
+def test_get_stats_slow_user(requests_mock):
+    puzzle = Puzzle(year=2019, day=25)
+    requests_mock.get(
+        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    )
+    stats = puzzle.my_stats
+    assert stats == {
+        "a": {"time": timedelta(hours=24), "rank": 2708, "score": 0},
+        "b": {"time": timedelta(hours=24), "rank": 1926, "score": 0},
+    }
+
+
+def test_get_stats_fail(requests_mock):
+    puzzle = Puzzle(year=2019, day=13)
+    requests_mock.get(
+        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    )
+    with pytest.raises(PuzzleUnsolvedError):
+        puzzle.my_stats
+
+
+def test_puzzle_view(mocker):
+    browser_open = mocker.patch("aocd.models.webbrowser.open")
+    puzzle = Puzzle(year=2019, day=4)
+    puzzle.view()
+    browser_open.assert_called_once_with("https://adventofcode.com/2019/day/4")
