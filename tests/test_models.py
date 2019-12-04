@@ -189,6 +189,7 @@ fake_stats_response = """
 Day   <span class="leaderboard-daydesc-first">    Time  Rank  Score</span>
 <span class="leaderboard-daydesc-both">    Time  Rank  Score</span>
  25       >24h  2708      0       >24h  1926      0
+ 24       >24h  2708      0          -     -      -
   4   00:03:30   158      0   00:04:17    25     76
   3   00:24:44   729      0   00:36:00   710      0
   2   01:11:16  4087      0   01:23:27  3494      0
@@ -224,6 +225,15 @@ def test_get_stats_slow_user(requests_mock):
 
 def test_get_stats_fail(requests_mock):
     puzzle = Puzzle(year=2019, day=13)
+    requests_mock.get(
+        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    )
+    with pytest.raises(PuzzleUnsolvedError):
+        puzzle.my_stats
+
+
+def test_get_stats_partial_fail(requests_mock):
+    puzzle = Puzzle(year=2019, day=24)
     requests_mock.get(
         url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
     )

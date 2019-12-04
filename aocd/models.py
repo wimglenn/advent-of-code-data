@@ -361,13 +361,15 @@ class Puzzle(object):
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         stats_txt = soup.article.pre.text
         lines = stats_txt.splitlines()
-        try:
-            [line] = [x for x in lines if x.split()[0] == str(self.day)]
-        except ValueError:
-            log.debug("failed to parse stats\n%s", stats_txt)
+        line = [x for x in lines if x.split()[0] == str(self.day)]
+        if len(line) != 1:
+            log.debug("failed to parse stats table\n%s", stats_txt)
             raise PuzzleUnsolvedError
+        [line] = line
         vals = line.split()
         assert int(vals[0]) == self.day
+        if vals[4] == "-":
+            raise PuzzleUnsolvedError
         result = {
             "a": {
                 "time": _parse_duration(vals[1]),
