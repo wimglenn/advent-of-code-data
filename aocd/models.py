@@ -377,9 +377,9 @@ class Puzzle(object):
                 "score": int(vals[3]),
             },
             "b": {
-                "time": _parse_duration(vals[4]) if vals[4] != "-" else None,
-                "rank": int(vals[5]) if vals[5] != "-" else None,
-                "score": int(vals[6]) if vals[6] != "-" else None,
+                "time": _parse_duration(vals[4]),
+                "rank": int(vals[5]),
+                "score": int(vals[6]),
             },
         }
         return result
