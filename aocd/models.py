@@ -12,6 +12,7 @@ import re
 import sys
 import time
 import webbrowser
+from datetime import timedelta
 from textwrap import dedent
 
 import bs4
@@ -78,7 +79,6 @@ class Puzzle(object):
         if user is None:
             user = default_user()
         self._user = user
-        self.url = URL.format(year=self.year, day=self.day)
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
         prefix = self.user.memo_dir + "/{}_{:02d}".format(self.year, self.day)
@@ -345,6 +345,50 @@ class Puzzle(object):
             raise AocdError("No entry point found for '{}'".format(plugin))
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
+
+    @property
+    def url(self):
+        return URL.format(year=self.year, day=self.day)
+
+    def view(self):
+        webbrowser.open(self.url)
+
+    @property
+    def my_stats(self):
+        url = "https://adventofcode.com/{}/leaderboard/self".format(self.year)
+        response = requests.get(url, cookies=self._cookies, headers=self._headers)
+        response.raise_for_status()
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        stats_txt = soup.article.pre.text
+        lines = stats_txt.splitlines()
+        try:
+            [line] = [x for x in lines if x.split()[0] == str(self.day)]
+        except ValueError:
+            log.debug("failed to parse stats\n%s", stats_txt)
+            raise PuzzleUnsolvedError
+        vals = line.split()
+        assert int(vals[0]) == self.day
+        result = {
+            "a": {
+                "time": _parse_duration(vals[1]),
+                "rank": int(vals[2]),
+                "score": int(vals[3]),
+            },
+            "b": {
+                "time": _parse_duration(vals[4]),
+                "rank": int(vals[5]),
+                "score": int(vals[6]),
+            },
+        }
+        return result
+
+
+def _parse_duration(s):
+    """Parse a string like 01:11:16 (hours, minutes, seconds) into a timedelta"""
+    if s == ">24h":
+        return timedelta(hours=24)
+    h, m, s = [int(x) for x in s.split(":")]
+    return timedelta(hours=h, minutes=m, seconds=s)
 
 
 def _ensure_intermediate_dirs(fname):
