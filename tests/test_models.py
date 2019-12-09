@@ -5,10 +5,12 @@ from datetime import timedelta
 
 import os
 import pytest
+from requests.exceptions import HTTPError
 
 from aocd.exceptions import AocdError
 from aocd.exceptions import PuzzleUnsolvedError
 from aocd.models import Puzzle
+from aocd.models import User
 
 
 def test_get_answer(aocd_dir):
@@ -177,9 +179,13 @@ def test_aocr_override(monkeypatch, tmp_path):
     monkeypatch.setenv("AOC_SESSION", ".aocr")
     fileinput = tmp_path / "input.txt"
     fileinput.write_text("yello")
-    os.chdir(str(tmp_path))
-    puzzle = Puzzle(year=2015, day=1)
-    assert puzzle.input_data == "yello"
+    prev = os.getcwd()
+    try:
+        os.chdir(str(tmp_path))
+        puzzle = Puzzle(year=2015, day=1)
+        assert puzzle.input_data == "yello"
+    finally:
+        os.chdir(prev)
 
 
 fake_stats_response = """
@@ -232,13 +238,15 @@ def test_get_stats_fail(requests_mock):
         puzzle.my_stats
 
 
-def test_get_stats_partial_fail(requests_mock):
+def test_get_stats_partially_complete(requests_mock):
     puzzle = Puzzle(year=2019, day=24)
     requests_mock.get(
         url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
     )
-    with pytest.raises(PuzzleUnsolvedError):
-        puzzle.my_stats
+    stats = puzzle.my_stats
+    assert stats == {
+        "a": {"time": timedelta(hours=24), "rank": 2708, "score": 0},
+    }
 
 
 def test_puzzle_view(mocker):
@@ -246,3 +254,28 @@ def test_puzzle_view(mocker):
     puzzle = Puzzle(year=2019, day=4)
     puzzle.view()
     browser_open.assert_called_once_with("https://adventofcode.com/2019/day/4")
+
+
+def test_easter_eggs(requests_mock):
+    requests_mock.get(
+        url="https://adventofcode.com/2017/day/5",
+        text=(
+            '<article class="day-desc">'
+            "<h2>--- Day 5: A Maze of Twisty Trampolines, All Alike ---</h2>"
+            '<p>An urgent <span title="Later, on its turn, it sends you a '
+            'sorcery.">interrupt</span> arrives from the CPU</p></article>'
+        ),
+    )
+    puzzle = Puzzle(2017, 5)
+    [egg] = puzzle.easter_eggs
+    assert egg.text == "interrupt"
+    assert egg.attrs["title"] == "Later, on its turn, it sends you a sorcery."
+
+
+def test_get_stats_400(requests_mock):
+    requests_mock.get(
+        url="https://adventofcode.com/2015/leaderboard/self", status_code=400,
+    )
+    user = User("testtoken")
+    with pytest.raises(HTTPError):
+        user.get_stats()
