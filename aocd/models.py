@@ -12,6 +12,7 @@ import re
 import sys
 import time
 import webbrowser
+from datetime import datetime
 from datetime import timedelta
 from textwrap import dedent
 
@@ -22,6 +23,7 @@ from termcolor import cprint
 
 from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
+from .utils import AOC_TZ
 from .version import __version__
 
 
@@ -30,7 +32,7 @@ log = logging.getLogger(__name__)
 
 AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", "~/.config/aocd"))
 URL = "https://adventofcode.com/{year}/day/{day}"
-USER_AGENT = "advent-of-code-data v{}".format(__version__)
+USER_AGENT = {"User-Agent": "advent-of-code-data v{}".format(__version__)}
 
 
 class User(object):
@@ -38,8 +40,43 @@ class User(object):
         self.token = token
 
     @property
+    def auth(self):
+        return {"session": self.token}
+
+    @property
     def memo_dir(self):
         return AOCD_DIR + "/" + self.token
+
+    def get_stats(self, years=None):
+        aoc_now = datetime.now(tz=AOC_TZ)
+        if years is None:
+            years = range(2015, aoc_now.year + int(aoc_now.month == 12))
+        days = {str(i) for i in range(1, 26)}
+        results = {}
+        for year in years:
+            url = "https://adventofcode.com/{}/leaderboard/self".format(year)
+            response = requests.get(url, cookies=self.auth, headers=USER_AGENT)
+            response.raise_for_status()
+            soup = bs4.BeautifulSoup(response.text, "html.parser")
+            stats_txt = soup.article.pre.text
+            lines = stats_txt.splitlines()
+            lines = [x for x in lines if x.split()[0] in days]
+            for line in reversed(lines):
+                vals = line.split()
+                day = int(vals[0])
+                results[year, day] = {}
+                results[year, day]["a"] = {
+                    "time": _parse_duration(vals[1]),
+                    "rank": int(vals[2]),
+                    "score": int(vals[3]),
+                }
+                if vals[4] != "-":
+                    results[year, day]["b"] = {
+                        "time": _parse_duration(vals[4]),
+                        "rank": int(vals[5]),
+                        "score": int(vals[6]),
+                    }
+        return results
 
 
 def default_user():
@@ -90,8 +127,6 @@ class Puzzle(object):
         self.title_fname = AOCD_DIR + "/titles/{}_{:02d}.txt".format(
             self.year, self.day
         )
-        self._cookies = {"session": self.user.token}
-        self._headers = {"User-Agent": USER_AGENT}
         self._title = ""
 
     @property
@@ -116,9 +151,7 @@ class Puzzle(object):
             log.debug("reusing existing data %s", sanitized_path)
             return data.rstrip("\r\n")
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
-        response = requests.get(
-            url=self.input_data_url, cookies=self._cookies, headers=self._headers
-        )
+        response = requests.get(url=self.input_data_url, cookies=self.user.auth, headers=USER_AGENT)
         if not response.ok:
             log.error("got %s status code token=%s", response.status_code, sanitized)
             log.error(response.text)
@@ -136,10 +169,7 @@ class Puzzle(object):
             with io.open(self.title_fname, encoding="utf-8") as f:
                 self._title = f.read().strip()
         else:
-            resp = requests.get(self.url, cookies=self._cookies, headers=self._headers)
-            resp.raise_for_status()
-            soup = bs4.BeautifulSoup(resp.text, "html.parser")
-            self._save_title(soup=soup)
+            self._save_title()
         return self._title
 
     def _repr_pretty_(self, p, cycle):
@@ -210,8 +240,8 @@ class Puzzle(object):
         level = {"a": 1, "b": 2}[part]
         response = requests.post(
             url=url,
-            cookies=self._cookies,
-            headers=self._headers,
+            cookies=self.user.auth,
+            headers=USER_AGENT,
             data={"level": level, "answer": value},
         )
         if not response.ok:
@@ -272,7 +302,9 @@ class Puzzle(object):
         with open(fname, "a") as f:
             f.write(str(value).strip() + " " + extra.replace("\n", " ") + "\n")
 
-    def _save_title(self, soup):
+    def _save_title(self, soup=None):
+        if soup is None:
+            soup = self._soup()
         if soup.h2 is None:
             log.warning("heading not found")
             return
@@ -298,9 +330,7 @@ class Puzzle(object):
             with open(answer_fname) as f:
                 return f.read().strip()
         # scrape puzzle page for any previously solved answers
-        response = requests.get(self.url, cookies=self._cookies, headers=self._headers)
-        response.raise_for_status()
-        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        soup = self._soup()
         if not self._title:
             # may as well save this while we're here
             self._save_title(soup=soup)
@@ -355,34 +385,24 @@ class Puzzle(object):
 
     @property
     def my_stats(self):
-        url = "https://adventofcode.com/{}/leaderboard/self".format(self.year)
-        response = requests.get(url, cookies=self._cookies, headers=self._headers)
+        stats = self.user.get_stats(years=[self.year])
+        if (self.year, self.day) not in stats:
+            raise PuzzleUnsolvedError
+        result = stats[self.year, self.day]
+        return result
+
+    def _soup(self):
+        response = requests.get(self.url, cookies=self.user.auth, headers=USER_AGENT)
         response.raise_for_status()
         soup = bs4.BeautifulSoup(response.text, "html.parser")
-        stats_txt = soup.article.pre.text
-        lines = stats_txt.splitlines()
-        line = [x for x in lines if x.split()[0] == str(self.day)]
-        if len(line) != 1:
-            log.debug("failed to parse stats table\n%s", stats_txt)
-            raise PuzzleUnsolvedError
-        [line] = line
-        vals = line.split()
-        assert int(vals[0]) == self.day
-        if vals[4] == "-":
-            raise PuzzleUnsolvedError
-        result = {
-            "a": {
-                "time": _parse_duration(vals[1]),
-                "rank": int(vals[2]),
-                "score": int(vals[3]),
-            },
-            "b": {
-                "time": _parse_duration(vals[4]),
-                "rank": int(vals[5]),
-                "score": int(vals[6]),
-            },
-        }
-        return result
+        return soup
+
+    @property
+    def easter_eggs(self):
+        soup = self._soup()
+        # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
+        eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
+        return eggs
 
 
 def _parse_duration(s):

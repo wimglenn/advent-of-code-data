@@ -232,13 +232,15 @@ def test_get_stats_fail(requests_mock):
         puzzle.my_stats
 
 
-def test_get_stats_partial_fail(requests_mock):
+def test_get_stats_partially_complete(requests_mock):
     puzzle = Puzzle(year=2019, day=24)
     requests_mock.get(
         url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
     )
-    with pytest.raises(PuzzleUnsolvedError):
-        puzzle.my_stats
+    stats = puzzle.my_stats
+    assert stats == {
+        "a": {"time": timedelta(hours=24), "rank": 2708, "score": 0},
+    }
 
 
 def test_puzzle_view(mocker):

@@ -20,6 +20,8 @@ log = logging.getLogger(__name__)
 def submit(
     answer, part=None, day=None, year=None, session=None, reopen=True, quiet=False
 ):
+    if answer in {u"", b"", None, b"None", u"None"}:
+        raise AocdError("cowardly refusing to submit non-answer: {!r}".format(answer))
     if part not in {"A", "B", "a", "b", None}:
         raise AocdError('part must be "a" or "b"')
     if session is None:
