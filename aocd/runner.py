@@ -199,8 +199,6 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                         except AttributeError:
                             pass
                 correct = expected is not None and str(expected) == answer
-                if error:
-                    assert not correct
                 icon = colored("✔", "green") if correct else colored("✖", "red")
                 correction = ""
                 if not correct:

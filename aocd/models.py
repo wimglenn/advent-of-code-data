@@ -151,7 +151,9 @@ class Puzzle(object):
             log.debug("reusing existing data %s", sanitized_path)
             return data.rstrip("\r\n")
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
-        response = requests.get(url=self.input_data_url, cookies=self.user.auth, headers=USER_AGENT)
+        response = requests.get(
+            url=self.input_data_url, cookies=self.user.auth, headers=USER_AGENT
+        )
         if not response.ok:
             log.error("got %s status code token=%s", response.status_code, sanitized)
             log.error(response.text)

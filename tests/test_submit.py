@@ -230,3 +230,8 @@ def test_cannot_submit_same_bad_answer_twice(requests_mock, capsys):
     assert mock.call_count == 1
     out, err = capsys.readouterr()
     assert "aocd will not submit that answer again" in out
+
+
+def test_will_not_submit_null():
+    with pytest.raises(AocdError("cowardly refusing to submit non-answer: None")):
+        submit(None)

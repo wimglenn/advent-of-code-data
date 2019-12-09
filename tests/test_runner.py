@@ -70,6 +70,13 @@ def fake_entry_point(year, day, data):
     return "answer1", "wrong"
 
 
+def xmas_entry_point(year, day, data):
+    assert year == 2015
+    assert day == 25
+    assert data == "testinput"
+    return "answer1", ""
+
+
 def bugged_entry_point(year, day, data):
     raise Exception(123, 456)
 
@@ -100,6 +107,35 @@ def test_results(mocker, capsys):
     assert txt in out
     assert "part a: answer1 " in out
     assert "part b: wrong (expected: answer2)" in out
+    assert "✔" in out
+
+
+def test_results_xmas(mocker, capsys):
+    ep = mocker.Mock()
+    ep.name = "testuser"
+    ep.load.return_value = xmas_entry_point
+    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
+    fake_puzzle = mocker.MagicMock(
+        year=2015,
+        day=25,
+        input_data="testinput",
+        answer_a="answer1",
+        answer_b="not_used",
+        title="The Puzzle Title",
+    )
+    mocker.patch("aocd.runner.Puzzle", return_value=fake_puzzle)
+    run_for(
+        plugins=["testuser"],
+        years=[2015],
+        days=[25],
+        datasets={"testdataset": "testtoken"},
+    )
+    ep.load.assert_called_once_with()
+    out, err = capsys.readouterr()
+    txt = "2015/25 - The Puzzle Title                           testuser/testdataset"
+    assert txt in out
+    assert "part a: answer1 " in out
+    assert "part b" not in out
     assert "✔" in out
 
 
