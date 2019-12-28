@@ -224,7 +224,7 @@ def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
     )
     out, err = capsys.readouterr()
     assert "part a: answer1 " in out
-    assert "part b: wrong (correct answer is unknown)" in out
+    assert "part b: wrong (correct answer unknown)" in out
 
 
 def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
@@ -250,7 +250,7 @@ def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
     )
     out, err = capsys.readouterr()
     assert "part a: answer1 " in out
-    assert "part b: wrong (correct answer is unknown)" in out
+    assert "part b: wrong (correct answer unknown)" in out
 
 
 def file_entry_point(year, day, data):

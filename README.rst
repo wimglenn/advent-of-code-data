@@ -25,7 +25,14 @@ Get your puzzle data with a single import statement:
 
    from aocd import data
 
-Might be useful for lazy Pythonistas and speedhackers.  
+Might be useful for lazy Pythonistas and speedhackers.
+
+If you'd just like to print or keep your own input files, there's a shell entry point for that:
+
+.. code-block:: bash
+
+   aocd > input.txt  # saves today's data
+   aocd 13 2018 > day13.txt  # save some other day's data
 
 **Note:  Please use version 0.3+ of this library.**  It memoizes successful
 requests client side and rate-limits the get_data function, as

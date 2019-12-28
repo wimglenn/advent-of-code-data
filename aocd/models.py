@@ -49,8 +49,11 @@ class User(object):
 
     def get_stats(self, years=None):
         aoc_now = datetime.now(tz=AOC_TZ)
+        all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
+        if isinstance(years, int) and years in all_years:
+            years = (years,)
         if years is None:
-            years = range(2015, aoc_now.year + int(aoc_now.month == 12))
+            years = all_years
         days = {str(i) for i in range(1, 26)}
         results = {}
         for year in years:
@@ -229,13 +232,21 @@ class Puzzle(object):
         return self._get_bad_guesses(part="b")
 
     def _submit(self, value, part, reopen=True, quiet=False):
+        if value in {u"", b"", None, b"None", u"None"}:
+            raise AocdError("cowardly refusing to submit non-answer: {!r}".format(value))
+        value = str(value)
+        if part not in {"A", "B", "a", "b"}:
+            raise AocdError('part must be "a" or "b"')
+        part = part.lower()
         bad_guesses = getattr(self, "incorrect_answers_" + part)
-        if str(value) in bad_guesses:
+        if value in bad_guesses:
             if not quiet:
                 msg = "aocd will not submit that answer again. You've previously guessed {} and the server responded:"
                 print(msg.format(value))
-                cprint(bad_guesses[str(value)], "red")
+                cprint(bad_guesses[value], "red")
             return
+        if part == "b" and value == getattr(self, "answer_a", None):
+            raise AocdError("cowardly refusing to re-submit answer_a ({}) for part b".format(value))
         url = self.submit_url
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
@@ -258,7 +269,15 @@ class Puzzle(object):
             if reopen:
                 # So you can read part B on the website...
                 webbrowser.open(response.url)
-            self._save_correct_answer(value=value, part=part)
+            if not (self.day == 25 and part == "b"):
+                self._save_correct_answer(value=value, part=part)
+            if self.day == 25 and part == "a":
+                log.debug("checking if got 49 stars already...")
+                my_stats = self.user.get_stats(self.year)
+                n_stars = sum(len(val) for val in my_stats.values())
+                if n_stars == 49:
+                    log.info("Got 49 stars already, getting 50th...")
+                    self._submit(value="done", part="b", reopen=reopen, quiet=quiet)
         elif "Did you already complete it" in message:
             color = "yellow"
         elif "That's not the right answer" in message:
@@ -290,7 +309,7 @@ class Puzzle(object):
     def _save_correct_answer(self, value, part):
         fname = getattr(self, "answer_{}_fname".format(part))
         _ensure_intermediate_dirs(fname)
-        txt = str(value).strip()
+        txt = value.strip()
         msg = "saving the correct answer for %d/%02d part %s: %s"
         log.info(msg, self.year, self.day, part, txt)
         with open(fname, "w") as f:
@@ -302,7 +321,7 @@ class Puzzle(object):
         msg = "appending an incorrect answer for %d/%02d part %s"
         log.info(msg, self.year, self.day, part)
         with open(fname, "a") as f:
-            f.write(str(value).strip() + " " + extra.replace("\n", " ") + "\n")
+            f.write(value.strip() + " " + extra.replace("\n", " ") + "\n")
 
     def _save_title(self, soup=None):
         if soup is None:
