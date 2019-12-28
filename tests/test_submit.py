@@ -58,13 +58,13 @@ def test_submit_when_already_solved(requests_mock, capsys):
 
 
 def test_submitted_too_recently_autoretry(requests_mock, capsys, mocked_sleep):
-    html1 = """<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. <a href="/2015/day/25">[Return to Day 25]</a></p></article>"""
+    html1 = """<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. <a href="/2015/day/24">[Return to Day 24]</a></p></article>"""
     html2 = "<article>That's the right answer. Yeah!!</article>"
     requests_mock.post(
-        "https://adventofcode.com/2015/day/25/answer",
+        "https://adventofcode.com/2015/day/24/answer",
         [{"text": html1}, {"text": html2}],
     )
-    submit(1234, part="a", year=2015, day=25, reopen=False)
+    submit(1234, part="a", year=2015, day=24, reopen=False)
     mocked_sleep.assert_called_once_with(30)
     out, err = capsys.readouterr()
     msg = "That's the right answer. Yeah!!"
@@ -73,13 +73,13 @@ def test_submitted_too_recently_autoretry(requests_mock, capsys, mocked_sleep):
 
 
 def test_submitted_too_recently_autoretry_quiet(requests_mock, capsys, mocked_sleep):
-    html1 = """<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 3m 30s left to wait. <a href="/2015/day/25">[Return to Day 25]</a></p></article>"""
+    html1 = """<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 3m 30s left to wait. <a href="/2015/day/24">[Return to Day 24]</a></p></article>"""
     html2 = "<article>That's the right answer. Yeah!!</article>"
     requests_mock.post(
-        "https://adventofcode.com/2015/day/25/answer",
+        "https://adventofcode.com/2015/day/24/answer",
         [{"text": html1}, {"text": html2}],
     )
-    submit(1234, part="a", year=2015, day=25, reopen=False, quiet=True)
+    submit(1234, part="a", year=2015, day=24, reopen=False, quiet=True)
     mocked_sleep.assert_called_once_with(3 * 60 + 30)
     out, err = capsys.readouterr()
     assert out == err == ""
@@ -106,6 +106,7 @@ def test_submit_wrong_answer(requests_mock, capsys):
 
 
 def test_correct_submit_records_good_answer(requests_mock, tmpdir):
+    requests_mock.get(url="https://adventofcode.com/2018/day/1")
     requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
@@ -115,6 +116,19 @@ def test_correct_submit_records_good_answer(requests_mock, tmpdir):
     submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
     assert answer_fname.exists()
     assert answer_fname.read() == "1234"
+
+
+def test_submit_correct_part_a_answer_for_part_b_blocked(requests_mock, tmpdir):
+    requests_mock.get(
+        url="https://adventofcode.com/2018/day/1",
+        text="<h2>Day 1: Yo Dawg</h2> <p>Your puzzle answer was <code>1234</code></p>",
+    )
+    requests_mock.post(
+        url="https://adventofcode.com/2018/day/1/answer",
+        text="<article>That's the right answer</article>",
+    )
+    with pytest.raises(AocdError("cowardly refusing to re-submit answer_a (1234) for part b")):
+        submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
 
 
 def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, tmpdir):
@@ -234,4 +248,4 @@ def test_cannot_submit_same_bad_answer_twice(requests_mock, capsys):
 
 def test_will_not_submit_null():
     with pytest.raises(AocdError("cowardly refusing to submit non-answer: None")):
-        submit(None)
+        submit(None, part="a")

@@ -204,7 +204,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                 if not correct:
                     if expected is None:
                         icon = colored("?", "magenta")
-                        correction = "(correct answer is unknown)"
+                        correction = "(correct answer unknown)"
                     else:
                         correction = "(expected: {})".format(expected)
                 answer = "{} {}".format(answer, correction)
