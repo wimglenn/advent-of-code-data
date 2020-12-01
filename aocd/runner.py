@@ -19,6 +19,7 @@ import pebble
 import pkg_resources
 from termcolor import colored
 
+from .exceptions import AocdError
 from .models import default_user
 from .models import Puzzle
 from .utils import AOC_TZ
@@ -30,6 +31,7 @@ from .utils import AOC_TZ
 
 AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", "~/.config/aocd"))
 DEFAULT_TIMEOUT = 60
+log = logging.getLogger(__name__)
 
 
 def main():
@@ -195,6 +197,9 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                     if autosubmit and post:
                         try:
                             puzzle._submit(answer, part, reopen=False, quiet=True)
+                        except AocdError as err:
+                            log.warning("error submitting - %s", err)
+                        try:
                             expected = getattr(puzzle, "answer_" + part)
                         except AttributeError:
                             pass
