@@ -9,7 +9,11 @@ setup(
     long_description_content_type="text/x-rst",
     packages=["aocd"],
     entry_points={
-        "console_scripts": ["aocd=aocd.cli:main", "aoc=aocd.runner:main"],
+        "console_scripts": [
+            "aocd=aocd.cli:main",
+            "aoc=aocd.runner:main",
+            "aocd-token=aocd.cookies:scrape_session_tokens"
+        ],
         # https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins
         "adventofcode.user": [],
     },

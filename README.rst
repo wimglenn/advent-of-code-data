@@ -63,6 +63,13 @@ know these kind of tricks, but if you need help with that part then you can
 *Note:* If you don't like the env var, you could also put into a text file
 in your home directory (use the filename ``~/.config/aocd/token``).
 
+*New in version 0.9.0.* There's a utility script ``aocd-token`` which attempts to
+find session tokens from your browser's cookie storage. This feature is experimental
+and requires you to additionally install the package ``browser-cookie3``. Only Chrome
+and Firefox browsers are currently supported. On macOS, you may get an authentication
+dialog requesting permission, since Python is attempting to access browser storage files.
+This is expected, the script *is* actually scraping those private files to get the
+session token(s).
 
 Automated submission
 --------------------

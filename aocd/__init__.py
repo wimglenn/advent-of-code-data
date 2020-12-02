@@ -8,6 +8,7 @@ import sys
 from functools import partial
 
 from . import cli
+from . import cookies
 from . import exceptions
 from . import get
 from . import models
@@ -26,6 +27,7 @@ from .version import __version__
 
 __all__ = [
     "cli",
+    "cookies",
     "exceptions",
     "get",
     "models",
