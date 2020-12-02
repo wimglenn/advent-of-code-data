@@ -131,6 +131,9 @@ class Puzzle(object):
             self.year, self.day
         )
         self._title = ""
+        self.soup = self._soup()
+        self.article_1 = self.soup.findAll("article", {"class": "day-desc"})[0]
+        self.article_2 = self.soup.findAll("article", {"class": "day-desc"})[1]
 
     @property
     def user(self):
@@ -325,7 +328,7 @@ class Puzzle(object):
 
     def _save_title(self, soup=None):
         if soup is None:
-            soup = self._soup()
+            soup = self.soup
         if soup.h2 is None:
             log.warning("heading not found")
             return
@@ -351,7 +354,7 @@ class Puzzle(object):
             with open(answer_fname) as f:
                 return f.read().strip()
         # scrape puzzle page for any previously solved answers
-        soup = self._soup()
+        soup = self.soup
         if not self._title:
             # may as well save this while we're here
             self._save_title(soup=soup)
@@ -411,7 +414,7 @@ class Puzzle(object):
             raise PuzzleUnsolvedError
         result = stats[self.year, self.day]
         return result
-
+    
     def _soup(self):
         response = requests.get(self.url, cookies=self.user.auth, headers=USER_AGENT)
         response.raise_for_status()
@@ -420,7 +423,7 @@ class Puzzle(object):
 
     @property
     def easter_eggs(self):
-        soup = self._soup()
+        soup = self.soup
         # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
