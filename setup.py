@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(
-    name="advent-of-code-muh-data",
+    name="advent-of-code-data",
     version="0.8.5",
     description="Get your puzzle data with a single import",
     long_description=open("README.rst").read(),

@@ -414,7 +414,7 @@ class Puzzle(object):
             raise PuzzleUnsolvedError
         result = stats[self.year, self.day]
         return result
-    
+ 
     def _soup(self):
         response = requests.get(self.url, cookies=self.user.auth, headers=USER_AGENT)
         response.raise_for_status()
