@@ -132,8 +132,13 @@ class Puzzle(object):
         )
         self._title = ""
         self.soup = self._soup()
-        self.article_1 = self.soup.findAll("article", {"class": "day-desc"})[0]
-        self.article_2 = self.soup.findAll("article", {"class": "day-desc"})[1]
+        self.articles = self.soup.findAll("article", {"class": "day-desc"})
+        if len(self.articles) > 0:
+            self.article_1 = self.articles[0]
+        if len(self.articles) > 1:
+            self.article_2 = self.articles[1]
+        if len(self.articles) > 2:
+            self.article_3 = self.articles[2]
 
     @property
     def user(self):
