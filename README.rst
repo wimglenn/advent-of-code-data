@@ -67,8 +67,8 @@ in your home directory (use the filename ``~/.config/aocd/token``).
 find session tokens from your browser's cookie storage. This feature is experimental
 and requires you to additionally install the package ``browser-cookie3``. Only Chrome
 and Firefox browsers are currently supported. On macOS, you may get an authentication
-dialog requesting permission, since Python is attempting to access browser storage files.
-This is expected, the script *is* actually scraping those private files to get the
+dialog requesting permission, since Python is attempting to read browser storage files.
+This is expected, the script *is* actually scraping those private files to access AoC
 session token(s).
 
 Automated submission
@@ -125,13 +125,16 @@ Submitting answers is also by regular attribute access. Any incorrect answers yo
     aocd will not submit that answer again. You've previously guessed 299 and the server responded:
     That's not the right answer; your answer is too high. If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit. Please wait one minute before trying again. (You guessed 299.) [Return to Day 20]
 
-Solutions can be executed using `setuptools style plugins <https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins>`_ for your code, i.e. the ``pkg_resources`` "entry-points". My entry-point name is "wim" so an example for running `my code <https://github.com/wimglenn/advent-of-code-wim/blob/master/setup.py#L30>`_ (after ``pip install advent-of-code-wim``) would be:
+Your own solutions can be executed by writing and using an `entry-point <https://packaging.python.org/specifications/entry-points/>`_ into your code, registered in the group ``"adventofcode.user"``. Your entry-point should resolve to a callable, and it will be called with three keyword arguments: ``year``, ``day``, and ``data``. For example, `my entry-point is called "wim" <https://github.com/wimglenn/advent-of-code-wim/blob/d033366c16fba50e413f2fa7df32e8a0eac9542f/setup.py#L36>`_ and running against `my code <https://github.com/wimglenn/advent-of-code-wim/blob/master/aoc_wim/__init__.py>`_ (after ``pip install advent-of-code-wim``) would be like this:
 
 .. code-block:: python
 
     >>> puzzle = Puzzle(year=2018, day=10)
     >>> puzzle.solve_for("wim")
     ('XLZAKBGZ', '10656')
+
+
+If you've never written a plugin before, see https://entrypoints.readthedocs.io/ for more info about plugin systems based on Python entry-points.
 
 
 Verify your code against multiple different inputs
