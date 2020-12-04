@@ -92,7 +92,7 @@ def default_user():
     # or chuck it in a plaintext file at ~/.config/aocd/token
     try:
         with io.open(AOCD_DIR + "/token", encoding="utf-8") as f:
-            cookie = f.read().strip()
+            cookie = f.read().split()[0]
     except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
             raise
