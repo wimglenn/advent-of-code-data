@@ -71,6 +71,9 @@ class Aocd(object):
         else:
             return partial(submit, day=day, year=year)
 
+    def _lines(self):
+        raw = self._data()
+        return raw.splitlines()
     def __getattr__(self, name):
         func = self._specials.get(name, None)
         if func is not None:
