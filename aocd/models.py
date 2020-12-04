@@ -252,6 +252,10 @@ class Puzzle(object):
             raise AocdError("cowardly refusing to re-submit answer_a ({}) for part b".format(value))
         url = self.submit_url
         sanitized = "..." + self.user.token[-4:]
+        check_guess = self._check_guess_against_existing(value, part)
+        if check_guess is not None: 
+            print(check_guess)
+            return
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": 1, "b": 2}[part]
         response = requests.post(
@@ -308,6 +312,21 @@ class Puzzle(object):
         if not quiet:
             cprint(message, color=color)
         return response
+
+    def _check_guess_against_existing(self, guess, part):
+        try:
+            answer = self._get_answer(part=part)
+            if answer == "":
+                return None
+        except PuzzleUnsolvedError:
+            return None
+
+        if answer == guess:
+            template = "Part {part} already solved with same answer: {answer}"
+        else:
+            template = "Part {part} already solved with different answer: {answer}"
+
+        return template.format(part=part, answer=answer)
 
     def _save_correct_answer(self, value, part):
         fname = getattr(self, "answer_{}_fname".format(part))
