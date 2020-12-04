@@ -55,3 +55,16 @@ def test_get_lines_via_import(mocker):
     assert lines[0] == "line 1"
     assert lines[1] == "line 2"
     assert lines[2] == "line 3"
+
+
+def test_get_numbers_via_import(mocker):
+    fake_stack = [("~/2017/q23.py",)]
+    mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
+    mock = mocker.patch("aocd._module.get_data", return_value="1\n2\n3")
+    from aocd import numbers
+
+    mock.assert_called_once_with(day=23, year=2017)
+    assert len(numbers) == 3
+    assert numbers[0] == 1
+    assert numbers[1] == 2
+    assert numbers[2] == 3
