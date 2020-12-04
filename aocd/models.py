@@ -23,6 +23,7 @@ from termcolor import cprint
 
 from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
+from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
 from .version import __version__
 
@@ -158,6 +159,8 @@ class Puzzle(object):
             url=self.input_data_url, cookies=self.user.auth, headers=USER_AGENT
         )
         if not response.ok:
+            if response.status_code == 404:
+                raise PuzzleLockedError("{}/{:02d} not available yet".format(self.year, self.day))
             log.error("got %s status code token=%s", response.status_code, sanitized)
             log.error(response.text)
             raise AocdError("Unexpected response")

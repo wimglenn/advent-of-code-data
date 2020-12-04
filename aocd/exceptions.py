@@ -9,5 +9,9 @@ class AocdError(Exception):
     """base exception for this package"""
 
 
+class PuzzleLockedError(AocdError):
+    """trying to access input before the unlock"""
+
+
 class PuzzleUnsolvedError(AocdError):
     """answer is unknown because user has not solved puzzle yet"""

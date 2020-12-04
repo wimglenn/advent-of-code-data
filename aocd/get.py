@@ -11,16 +11,18 @@ import traceback
 from logging import getLogger
 
 from .exceptions import AocdError
+from .exceptions import PuzzleLockedError
 from .models import default_user
 from .models import Puzzle
 from .models import User
 from .utils import AOC_TZ
+from .utils import blocker
 
 
 log = getLogger(__name__)
 
 
-def get_data(session=None, day=None, year=None):
+def get_data(session=None, day=None, year=None, block=False):
     """
     Get data for day (1-25) and year (>= 2015)
     User's session cookie is needed (puzzle inputs differ by user)
@@ -36,7 +38,14 @@ def get_data(session=None, day=None, year=None):
         year = most_recent_year()
         log.info("most recent year=%s", year)
     puzzle = Puzzle(year=year, day=day, user=user)
-    return puzzle.input_data
+    try:
+        return puzzle.input_data
+    except PuzzleLockedError:
+        if not block:
+            raise
+        q = block == "q"
+        blocker(quiet=q)
+        return puzzle.input_data
 
 
 def most_recent_year():

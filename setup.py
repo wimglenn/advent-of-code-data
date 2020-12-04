@@ -36,6 +36,7 @@ setup(
         "beautifulsoup4",
         "pebble",
         'colorama; platform_system == "Windows"',
+        "tzlocal",
     ],
     options={"bdist_wheel": {"universal": "1"}},
 )

@@ -4,6 +4,7 @@ import pytest
 
 import aocd
 from aocd.exceptions import AocdError
+from aocd.exceptions import PuzzleLockedError
 
 
 def test_get_from_server(requests_mock):
@@ -45,17 +46,29 @@ def test_saved_data_is_reused_if_available(tmpdir, requests_mock):
 def test_server_error(requests_mock, caplog):
     mock = requests_mock.get(
         url="https://adventofcode.com/2101/day/1/input",
-        text="Not Found",
-        status_code=404,
+        text="AWS meltdown",
+        status_code=500,
     )
     with pytest.raises(AocdError("Unexpected response")):
         aocd.get_data(year=2101, day=1)
     assert mock.called
     assert mock.call_count == 1
     assert caplog.record_tuples == [
-        ("aocd.models", logging.ERROR, "got 404 status code token=...oken"),
-        ("aocd.models", logging.ERROR, "Not Found"),
+        ("aocd.models", logging.ERROR, "got 500 status code token=...oken"),
+        ("aocd.models", logging.ERROR, "AWS meltdown"),
     ]
+
+
+def test_puzzle_not_available_yet(requests_mock, caplog):
+    mock = requests_mock.get(
+        url="https://adventofcode.com/2101/day/1/input",
+        text="Not Found",
+        status_code=404,
+    )
+    with pytest.raises(PuzzleLockedError("2101/01 not available yet")):
+        aocd.get_data(year=2101, day=1)
+    assert mock.called
+    assert mock.call_count == 1
 
 
 def test_session_token_in_req_headers(requests_mock):
