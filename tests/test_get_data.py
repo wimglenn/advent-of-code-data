@@ -71,6 +71,20 @@ def test_puzzle_not_available_yet(requests_mock, caplog):
     assert mock.call_count == 1
 
 
+def test_puzzle_not_available_yet_block(requests_mock, caplog, mocker):
+    mock = requests_mock.get(
+        url="https://adventofcode.com/2101/day/1/input",
+        text="Not Found",
+        status_code=404,
+    )
+    blocker = mocker.patch("aocd._module.get.blocker")
+    with pytest.raises(PuzzleLockedError("2101/01 not available yet")):
+        aocd.get_data(year=2101, day=1, block="q")
+    assert mock.called
+    assert mock.call_count == 2
+    blocker.assert_called_once_with(quiet=True)
+
+
 def test_session_token_in_req_headers(requests_mock):
     mock = requests_mock.get("https://adventofcode.com/2018/day/1/input")
     aocd.get_data(year=2018, day=1)
