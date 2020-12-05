@@ -51,10 +51,7 @@ def test_get_lines_via_import(mocker):
     from aocd import lines
 
     mock.assert_called_once_with(day=23, year=2017)
-    assert len(lines) == 3
-    assert lines[0] == "line 1"
-    assert lines[1] == "line 2"
-    assert lines[2] == "line 3"
+    assert lines == ["line 1", "line 2", "line 3"]
 
 
 def test_get_numbers_via_import(mocker):
@@ -64,7 +61,4 @@ def test_get_numbers_via_import(mocker):
     from aocd import numbers
 
     mock.assert_called_once_with(day=23, year=2017)
-    assert len(numbers) == 3
-    assert numbers[0] == 1
-    assert numbers[1] == 2
-    assert numbers[2] == 3
+    assert numbers == [1, 2, 3]

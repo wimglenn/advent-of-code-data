@@ -264,12 +264,11 @@ def file_entry_point(year, day, data):
 
 
 def test_load_input_from_file(mocker):
-    max_time = 2 if sys.platform == "win32" else 1
     ep = mocker.Mock()
     ep.name = "file_ep_user"
     ep.load.return_value = file_entry_point
     a, b, walltime, error = run_one(2015, 1, "abcxyz", ep)
     assert a == "123"
     assert b == "456"
-    assert 0 < walltime < max_time
+    assert 0 < walltime < 2
     assert not error
