@@ -30,3 +30,28 @@ def test_token(aocd_dir):
     token_dir.mkdir()
     token_file.write_text("thetesttoken")
     return token_file
+
+
+@pytest.fixture(autouse=True)
+def answer_not_cached(request, mocker):
+    install = True
+    rv = None
+
+    mark = request.node.get_closest_marker('answer_not_cached')
+    if mark:
+        install = mark.kwargs.get('install', True)
+        rv = mark.kwargs.get('rv', None)
+
+    if install is False: return
+
+    from aocd.models import Puzzle
+    check = mocker.patch.object(Puzzle, '_check_guess_against_existing')
+    check.return_value = rv
+    return check
+
+
+@pytest.fixture
+def get_answer(mocker):
+    from aocd.models import Puzzle
+    answer = mocker.patch.object(Puzzle, '_get_answer')
+    return answer

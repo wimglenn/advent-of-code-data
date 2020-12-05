@@ -249,3 +249,13 @@ def test_cannot_submit_same_bad_answer_twice(requests_mock, capsys):
 def test_will_not_submit_null():
     with pytest.raises(AocdError("cowardly refusing to submit non-answer: None")):
         submit(None, part="a")
+
+
+@pytest.mark.answer_not_cached(rv='value')
+def test_submit_guess_against_saved(requests_mock, capsys):
+    post = requests_mock.post(
+        url="https://adventofcode.com/2018/day/1/answer",
+        text="<article>That's the right answer. Yeah!!</article>",
+    )
+    submit(1234, part="a", day=1, year=2018, session="whatever", reopen=False)
+    assert post.call_count == 0

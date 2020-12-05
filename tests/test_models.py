@@ -279,3 +279,42 @@ def test_get_stats_400(requests_mock):
     user = User("testtoken")
     with pytest.raises(HTTPError):
         user.get_stats()
+
+
+@pytest.mark.answer_not_cached(install=False)
+def test_check_guess_against_unsolved(get_answer):
+    get_answer.side_effect=PuzzleUnsolvedError("")
+
+    puzzle = Puzzle(year=2019, day=4)
+    rv = puzzle._check_guess_against_existing("one", "a")
+
+    assert rv is None
+
+
+@pytest.mark.answer_not_cached(install=False)
+def test_check_guess_against_empty(get_answer):
+    get_answer.return_value = ""
+
+    puzzle = Puzzle(year=2019, day=4)
+    rv = puzzle._check_guess_against_existing("one", "a")
+
+    assert rv is None
+
+
+@pytest.mark.answer_not_cached(install=False)
+def test_check_guess_against_saved_correct(get_answer):
+    get_answer.return_value = "one"
+
+    puzzle = Puzzle(year=2019, day=4)
+    rv = puzzle._check_guess_against_existing("one", "a")
+
+    assert rv == "Part a already solved with same answer: one"
+
+@pytest.mark.answer_not_cached(install=False)
+def test_check_guess_against_saved_incorrect(get_answer):
+    get_answer.return_value = "two"
+
+    puzzle = Puzzle(year=2019, day=4)
+    rv = puzzle._check_guess_against_existing("one", "a")
+
+    assert rv == "Part a already solved with different answer: two"
