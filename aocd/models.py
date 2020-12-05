@@ -19,6 +19,7 @@ from textwrap import dedent
 import bs4
 import pkg_resources
 import requests
+from termcolor import colored
 from termcolor import cprint
 
 from .exceptions import AocdError
@@ -31,7 +32,7 @@ from .version import __version__
 log = logging.getLogger(__name__)
 
 
-AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", "~/.config/aocd"))
+AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", os.path.join("~", ".config", "aocd")))
 URL = "https://adventofcode.com/{year}/day/{day}"
 USER_AGENT = {"User-Agent": "advent-of-code-data v{}".format(__version__)}
 
@@ -326,7 +327,7 @@ class Puzzle(object):
         if answer == guess:
             template = "Part {part} already solved with same answer: {answer}"
         else:
-            template = "Part {part} already solved with different answer: {answer}"
+            template = colored("Part {part} already solved with different answer: {answer}", "red")
 
         return template.format(part=part, answer=answer)
 
@@ -366,7 +367,7 @@ class Puzzle(object):
     def _get_answer(self, part):
         """
         Note: Answers are only revealed after a correct submission. If you've
-        have not already solved the puzzle, AocdError will be raised.
+        have not already solved the puzzle, PuzzleUnsolvedError will be raised.
         """
         if part == "b" and self.day == 25:
             return ""

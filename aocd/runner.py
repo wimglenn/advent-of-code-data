@@ -20,6 +20,7 @@ import pkg_resources
 from termcolor import colored
 
 from .exceptions import AocdError
+from .models import AOCD_DIR
 from .models import default_user
 from .models import Puzzle
 from .utils import AOC_TZ
@@ -29,7 +30,6 @@ from .utils import AOC_TZ
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
 
 
-AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", "~/.config/aocd"))
 DEFAULT_TIMEOUT = 60
 log = logging.getLogger(__name__)
 

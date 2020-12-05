@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import logging
 
-from .exceptions import AocdError
 from .get import current_day
 from .get import most_recent_year
 from .models import default_user
