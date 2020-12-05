@@ -40,7 +40,7 @@ def main():
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
-    path = AOCD_DIR + "/tokens.json"
+    path = os.path.join(AOCD_DIR, "tokens.json")
     try:
         with open(path) as f:
             users = json.load(f)

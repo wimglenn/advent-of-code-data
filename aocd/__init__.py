@@ -48,22 +48,44 @@ __all__ = [
 class Aocd(object):
     _module = sys.modules[__name__]
 
+    def __init__(self):
+        self._specials = {
+            'data': self._data,
+            'submit': self._submit,
+            'lines': self._lines,
+            'numbers': self._numbers,
+        }
+
     def __dir__(self):
         return __all__
 
-    def __getattr__(self, name):
-        if name == "data":
+    def _data(self):
+        day, year = get_day_and_year()
+        return get_data(day=day, year=year)
+
+    def _submit(self):
+        try:
             day, year = get_day_and_year()
-            return get_data(day=day, year=year)
-        if name == "submit":
-            try:
-                day, year = get_day_and_year()
-            except AocdError:
-                return submit
-            else:
-                return partial(submit, day=day, year=year)
+        except AocdError:
+            return submit
+        else:
+            return partial(submit, day=day, year=year)
+
+    def _lines(self):
+        raw = self._data()
+        return raw.splitlines()
+
+    def _numbers(self):
+        return [int(line) for line in self._lines()]
+
+    def __getattr__(self, name):
+        func = self._specials.get(name, None)
+        if func is not None:
+            return func()
+
         if name in dir(self):
             return globals()[name]
+
         raise AttributeError
 
 

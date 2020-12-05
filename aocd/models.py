@@ -46,7 +46,7 @@ class User(object):
 
     @property
     def memo_dir(self):
-        return AOCD_DIR + "/" + self.token
+        return os.path.join(AOCD_DIR, self.token)
 
     def get_stats(self, years=None):
         aoc_now = datetime.now(tz=AOC_TZ)
@@ -91,7 +91,7 @@ def default_user():
 
     # or chuck it in a plaintext file at ~/.config/aocd/token
     try:
-        with io.open(AOCD_DIR + "/token", encoding="utf-8") as f:
+        with io.open(os.path.join(AOCD_DIR, "token"), encoding="utf-8") as f:
             cookie = f.read().split()[0]
     except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
@@ -109,7 +109,7 @@ def default_user():
         See https://github.com/wimglenn/advent-of-code-wim/issues/1 for more info.
         """
     )
-    cprint(msg.format(AOCD_DIR + "/token"), color="red", file=sys.stderr)
+    cprint(msg.format(os.path.join(AOCD_DIR, "token")), color="red", file=sys.stderr)
     raise AocdError("Missing session ID")
 
 
@@ -128,8 +128,10 @@ class Puzzle(object):
         self.answer_b_fname = prefix + "b_answer.txt"
         self.incorrect_answers_a_fname = prefix + "a_bad_answers.txt"
         self.incorrect_answers_b_fname = prefix + "b_bad_answers.txt"
-        self.title_fname = AOCD_DIR + "/titles/{}_{:02d}.txt".format(
-            self.year, self.day
+        self.title_fname = os.path.join(
+            AOCD_DIR, 
+            "titles", 
+            "{}_{:02d}.txt".format(self.year, self.day)
         )
         self._title = ""
 
