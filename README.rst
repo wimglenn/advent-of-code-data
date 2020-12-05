@@ -34,6 +34,15 @@ If you'd just like to print or keep your own input files, there's a shell entry 
    aocd > input.txt  # saves today's data
    aocd 13 2018 > day13.txt  # save some other day's data
 
+*New in version 0.9.0.* Two convenience transforms (maybe more to come later):
+
+.. code-block:: python
+
+   from aocd import lines  # like data.splitlines()
+   from aocd import numbers  # like [int(n) for n in data.splitlines()]
+
+And a ``block`` keyword to ``aocd.get_data()``. If your input is not available yet this will block and display a countdown until the next unlock time.
+
 **Note:  Please use version 0.3+ of this library.**  It memoizes successful
 requests client side and rate-limits the get_data function, as
 `requested by the AoC author <https://www.reddit.com/r/adventofcode/comments/3v64sb/aoc_is_fragile_please_be_gentle/>`_.

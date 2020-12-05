@@ -130,8 +130,8 @@ class Puzzle(object):
         self.incorrect_answers_a_fname = prefix + "a_bad_answers.txt"
         self.incorrect_answers_b_fname = prefix + "b_bad_answers.txt"
         self.title_fname = os.path.join(
-            AOCD_DIR, 
-            "titles", 
+            AOCD_DIR,
+            "titles",
             "{}_{:02d}.txt".format(self.year, self.day)
         )
         self._title = ""
@@ -256,7 +256,7 @@ class Puzzle(object):
         url = self.submit_url
         sanitized = "..." + self.user.token[-4:]
         check_guess = self._check_guess_against_existing(value, part)
-        if check_guess is not None: 
+        if check_guess is not None:
             print(check_guess)
             return
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
