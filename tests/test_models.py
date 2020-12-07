@@ -23,7 +23,7 @@ def test_get_answer(aocd_dir):
 def test_get_answer_not_existing(aocd_dir, requests_mock):
     requests_mock.get("https://adventofcode.com/2017/day/13")
     puzzle = Puzzle(day=13, year=2017)
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError("answer_b")):
         puzzle.answer_b
 
 
