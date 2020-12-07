@@ -234,7 +234,7 @@ class Puzzle(object):
             return bool(getattr(self, "answer_a", None))
         if part == "b":
             return bool(getattr(self, "answer_b", None))
-        raise AttributeError
+        raise AocdError('part must be "a" or "b"')
 
     @property
     def answers(self):
