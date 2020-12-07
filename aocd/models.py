@@ -196,7 +196,7 @@ class Puzzle(object):
         try:
             return self._get_answer(part="a")
         except PuzzleUnsolvedError:
-            raise AttributeError
+            raise AttributeError("answer_a")
 
     @answer_a.setter
     def answer_a(self, val):
@@ -215,7 +215,7 @@ class Puzzle(object):
         try:
             return self._get_answer(part="b")
         except PuzzleUnsolvedError:
-            raise AttributeError
+            raise AttributeError("answer_b")
 
     @answer_b.setter
     def answer_b(self, val):

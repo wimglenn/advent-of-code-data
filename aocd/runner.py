@@ -197,7 +197,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                 try:
                     expected = getattr(puzzle, "answer_" + part)
                 except AttributeError:
-                    post = part == "a" or (part == "b" and hasattr(puzzle, "answer_a"))
+                    post = part == "a" or (part == "b" and puzzle.answered_a)
                     if autosubmit and post:
                         try:
                             puzzle._submit(answer, part, reopen=reopen, quiet=True)
