@@ -82,7 +82,7 @@ def test_puzzle_not_available_yet_block(requests_mock, caplog, mocker):
         aocd.get_data(year=2101, day=1, block="q")
     assert mock.called
     assert mock.call_count == 2
-    blocker.assert_called_once_with(quiet=True)
+    blocker.assert_called_once_with(quiet=True, until=(2101, 1))
 
 
 def test_session_token_in_req_headers(requests_mock):

@@ -15,7 +15,7 @@ def test_blocker(capsys):
 cpython = platform.python_implementation() == "CPython"
 
 
-@pytest.mark.skipif(not cpython, reason="freezegun is not working on pypy")
+@pytest.mark.xfail(not cpython, reason="freezegun auto-tick is not working on pypy")
 def test_blocker_quiet(capsys):
     with freeze_time("2020-11-30 23:59:59.8-05:00", auto_tick_seconds=1):
         blocker(dt=0.2, quiet=True)

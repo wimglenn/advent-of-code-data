@@ -53,6 +53,8 @@ def main():
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
     parser.add_argument("-u", "--users", nargs="+", choices=users)
     parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
+    parser.add_argument("-s", "--no-submit", action="store_true", help="disable autosubmit")
+    parser.add_argument("-r", "--reopen", action="store_true", help="open browser on NEW solves")
     parser.add_argument("--log-level", default="WARNING", choices=log_levels)
     args = parser.parse_args()
     if not users:
@@ -77,6 +79,8 @@ def main():
         days=args.days or days,
         datasets={k: users[k] for k in (args.users or users)},
         timeout=args.timeout,
+        autosubmit=not args.no_submit,
+        reopen=args.reopen,
     )
 
 
@@ -147,7 +151,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
     return a, b, walltime, error
 
 
-def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True):
+def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True, reopen=False):
     aoc_now = datetime.now(tz=AOC_TZ)
     all_entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
     entry_points = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
@@ -196,7 +200,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                     post = part == "a" or (part == "b" and hasattr(puzzle, "answer_a"))
                     if autosubmit and post:
                         try:
-                            puzzle._submit(answer, part, reopen=False, quiet=True)
+                            puzzle._submit(answer, part, reopen=reopen, quiet=True)
                         except AocdError as err:
                             log.warning("error submitting - %s", err)
                         try:
