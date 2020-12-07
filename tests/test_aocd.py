@@ -1,4 +1,5 @@
 import aocd
+import pytest
 
 
 def test_get_data_imported_from_class():
@@ -62,3 +63,8 @@ def test_get_numbers_via_import(mocker):
 
     mock.assert_called_once_with(day=23, year=2017)
     assert numbers == [1, 2, 3]
+
+
+def test_attribute_errors_have_context():
+    with pytest.raises(AttributeError("nope")):
+        aocd.nope

@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="advent-of-code-data",
-    version="0.9.1",
+    version="0.9.2",
     description="Get your puzzle data with a single import",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
