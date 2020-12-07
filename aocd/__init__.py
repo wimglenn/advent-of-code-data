@@ -70,7 +70,7 @@ class Aocd(object):
             return transform(self.data)
         if name in dir(self):
             return globals()[name]
-        raise AttributeError
+        raise AttributeError(name)
 
 
 sys.modules[__name__] = Aocd()
