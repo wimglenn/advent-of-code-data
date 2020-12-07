@@ -60,6 +60,8 @@ def test_main(capsys, mocker, aocd_dir):
         days=[3, 7],
         datasets={"data1": "token1", "data2": "token2"},
         timeout=60,
+        autosubmit=True,
+        reopen=False,
     )
 
 

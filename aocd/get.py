@@ -44,7 +44,7 @@ def get_data(session=None, day=None, year=None, block=False):
         if not block:
             raise
         q = block == "q"
-        blocker(quiet=q)
+        blocker(quiet=q, until=(year, day))
         return puzzle.input_data
 
 
