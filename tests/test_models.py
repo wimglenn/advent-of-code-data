@@ -44,6 +44,24 @@ def test_both_puzzle_answers_tuple(aocd_dir):
     assert puzzle.answers == ("1234", "wxyz")
 
 
+def test_answered(aocd_dir):
+    answer_a_path = aocd_dir / "thetesttoken" / "2016_07a_answer.txt"
+    answer_b_path = aocd_dir / "thetesttoken" / "2016_07b_answer.txt"
+    puzzle = Puzzle(year=2016, day=7)
+    answer_a_path.write_text("foo")
+    answer_b_path.write_text("")
+    assert puzzle.answered_a is True
+    assert puzzle.answered("a") is True
+    assert puzzle.answered_b is False
+    assert puzzle.answered("b") is False
+    answer_a_path.write_text("")
+    answer_b_path.write_text("bar")
+    assert puzzle.answered_a is False
+    assert puzzle.answered("a") is False
+    assert puzzle.answered_b is True
+    assert puzzle.answered("b") is True
+
+
 def test_setattr_submits(mocker, requests_mock):
     requests_mock.get("https://adventofcode.com/2017/day/7")
     puzzle = Puzzle(year=2017, day=7)

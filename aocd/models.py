@@ -207,6 +207,10 @@ class Puzzle(object):
         self._submit(value=val, part="a")
 
     @property
+    def answered_a(self):
+        return bool(getattr(self, "answer_a", None))
+
+    @property
     def answer_b(self):
         try:
             return self._get_answer(part="b")
@@ -220,6 +224,17 @@ class Puzzle(object):
         if getattr(self, "answer_b", None) == val:
             return
         self._submit(value=val, part="b")
+
+    @property
+    def answered_b(self):
+        return bool(getattr(self, "answer_b", None))
+
+    def answered(self, part):
+        if part == "a":
+            return bool(getattr(self, "answer_a", None))
+        if part == "b":
+            return bool(getattr(self, "answer_b", None))
+        raise AocdError('part must be "a" or "b"')
 
     @property
     def answers(self):
