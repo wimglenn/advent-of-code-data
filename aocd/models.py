@@ -26,6 +26,7 @@ from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
 from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
+from .utils import _ensure_intermediate_dirs
 from .version import __version__
 
 
@@ -472,16 +473,3 @@ def _parse_duration(s):
         return timedelta(hours=24)
     h, m, s = [int(x) for x in s.split(":")]
     return timedelta(hours=h, minutes=m, seconds=s)
-
-
-def _ensure_intermediate_dirs(fname):
-    parent = os.path.dirname(fname)
-    try:
-        os.makedirs(parent, exist_ok=True)
-    except TypeError:
-        # exist_ok not avail on Python 2
-        try:
-            os.makedirs(parent)
-        except (IOError, OSError) as err:
-            if err.errno != errno.EEXIST:
-                raise

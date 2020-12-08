@@ -1,3 +1,5 @@
+import errno
+import os
 import sys
 import time
 import tzlocal
@@ -6,6 +8,19 @@ from itertools import cycle
 from dateutil.tz import gettz
 
 AOC_TZ = gettz("America/New_York")
+
+
+def _ensure_intermediate_dirs(fname):
+    parent = os.path.dirname(os.path.expanduser(fname))
+    try:
+        os.makedirs(parent, exist_ok=True)
+    except TypeError:
+        # exist_ok not avail on Python 2
+        try:
+            os.makedirs(parent)
+        except (IOError, OSError) as err:
+            if err.errno != errno.EEXIST:
+                raise
 
 
 def blocker(quiet=False, dt=0.1, datefmt="%-I:%M %p", until=None):

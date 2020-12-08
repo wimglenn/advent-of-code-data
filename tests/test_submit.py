@@ -4,8 +4,8 @@ import pytest
 from termcolor import colored
 
 from aocd.exceptions import AocdError
-from aocd.models import _ensure_intermediate_dirs
 from aocd.post import submit
+from aocd.utils import _ensure_intermediate_dirs
 
 
 def test_submit_correct_answer(requests_mock, capsys):
