@@ -351,7 +351,16 @@ class Puzzle(object):
         fname = getattr(self, "answer_{}_fname".format(part))
         _ensure_intermediate_dirs(fname)
         txt = value.strip()
-        msg = "saving the correct answer for %d/%02d part %s: %s"
+        msg = "saving"
+        if os.path.isfile(fname):
+            with open(fname) as f:
+                prev = f.read()
+            if txt == prev:
+                msg = "the correct answer for %d/%02d part %s was already saved"
+                log.debug(msg, self.year, self.day, part)
+                return
+            msg = "overwriting"
+        msg += " the correct answer for %d/%02d part %s: %s"
         log.info(msg, self.year, self.day, part, txt)
         with open(fname, "w") as f:
             f.write(txt)
