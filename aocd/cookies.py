@@ -7,6 +7,7 @@ import sys
 import bs4
 import requests
 
+from aocd.models import AOCD_DIR
 from aocd.utils import _ensure_intermediate_dirs
 
 
@@ -39,9 +40,8 @@ def get_owner(token):
 
 
 def scrape_session_tokens():
-    aocd_dir = os.path.expanduser(os.environ.get("AOCD_DIR", "~/.config/aocd"))
-    aocd_token_file = os.path.join(aocd_dir, "token")
-    aocd_tokens_file = os.path.join(aocd_dir, "tokens.json")
+    aocd_token_file = os.path.join(AOCD_DIR, "token")
+    aocd_tokens_file = os.path.join(AOCD_DIR, "tokens.json")
 
     parser = argparse.ArgumentParser(description="Scrapes AoC session tokens from your browser's cookie storage")
     parser.add_argument("-v", "--verbose", action="count", help="increased logging (may be specified multiple)")
