@@ -85,22 +85,37 @@ def scrape_session_tokens():
     try:
         import browser_cookie3 as bc3  # soft dependency
     except ImportError:
-        sys.exit("To use this feature you must install browser-cookie3")
+        sys.exit("To use this feature you must pip install browser-cookie3")
 
     log.info("checking browser cookies storage for auth tokens, this might pop up an auth dialog!")
     log.info("checking chrome cookie jar...")
-    cookie_jar_chrome = bc3.chrome(domain_name=".adventofcode.com")
-    chrome = [c for c in cookie_jar_chrome if c.name == "session"]
-    log.info("%d candidates from chrome", len(chrome))
+    try:
+        chrome = bc3.chrome(domain_name=".adventofcode.com")
+    except Exception as err:
+        log.debug("Couldn't scrape chrome - %s: %s", type(err), err)
+        chrome = []
+    else:
+        chrome = [c for c in chrome if c.name == "session"]
+        log.info("%d candidates from chrome", len(chrome))
 
     log.info("checking firefox cookie jar...")
-    cookie_jar_firefox = bc3.firefox(domain_name=".adventofcode.com")
-    firefox = [c for c in cookie_jar_firefox if c.name == "session"]
-    log.info("%d candidates from firefox", len(firefox))
+    try:
+        firefox = bc3.firefox(domain_name=".adventofcode.com")
+    except Exception as err:
+        log.debug("Couldn't scrape firefox - %s: %s", type(err), err)
+        firefox = []
+    else:
+        firefox = [c for c in firefox if c.name == "session"]
+        log.info("%d candidates from firefox", len(firefox))
+
+    # order preserving de-dupe
+    tokens = list({}.fromkeys([c.value for c in chrome + firefox]))
+    removed = len(chrome + firefox) - len(tokens)
+    if removed:
+        log.info("Removed %d duplicate%s", removed, "s"[:removed-1])
 
     working = {}  # map of {token: auth source}
-    for cookie in chrome + firefox:
-        token = cookie.value
+    for token in tokens:
         owner = get_owner(token)
         if owner is not None:
             working[token] = owner
