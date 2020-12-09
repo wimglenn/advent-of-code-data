@@ -124,7 +124,8 @@ class Puzzle(object):
         self._user = user
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
-        prefix = self.user.memo_dir + "/{}_{:02d}".format(self.year, self.day)
+        fname = "{}_{:02d}".format(self.year, self.day)
+        prefix = os.path.join(self.user.memo_dir, fname)
         self.input_data_fname = prefix + "_input.txt"
         self.answer_a_fname = prefix + "a_answer.txt"
         self.answer_b_fname = prefix + "b_answer.txt"
