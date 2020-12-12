@@ -113,17 +113,13 @@ def get_day_and_year():
         log.debug("skipping frame %s", name)
     else:
         import __main__
-
-        try:
-            __main__.__file__
-        except AttributeError:
+        if getattr(__main__, "__file__", "<input>") == "<input>":
             log.debug("running within REPL")
             day = current_day()
             year = most_recent_year()
             return day, year
-        else:
-            log.debug("non-interactive")
-            raise AocdError("Failed introspection of filename")
+        log.debug("non-interactive")
+        raise AocdError("Failed introspection of filename")
     years = {int(year) for year in re.findall(pattern_year, abspath)}
     if len(years) > 1:
         raise AocdError("Failed introspection of year")

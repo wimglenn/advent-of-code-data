@@ -91,6 +91,7 @@ def scrape_session_tokens():
     log.info("checking chrome cookie jar...")
     try:
         chrome = bc3.chrome(domain_name=".adventofcode.com")
+        # TODO: check non-default profile for chrome/linux
     except Exception as err:
         log.debug("Couldn't scrape chrome - %s: %s", type(err), err)
         chrome = []
