@@ -106,24 +106,22 @@ def get_day_and_year():
             "/IPython/" in name,  # IPython adds a tonne of stack frames
             name.startswith("<"),  # crap like <decorator-gen-57>
             name.endswith("ython3"),  # ipython3 alias
+            basename.startswith("pydev_ipython_console"),  # PyCharm Python Console
         ]
         if not any(reasons_to_skip_frame):
+            log.debug("stack crawl found %s", name)
             abspath = os.path.abspath(name)
             break
         log.debug("skipping frame %s", name)
     else:
         import __main__
-
-        try:
-            __main__.__file__
-        except AttributeError:
+        if getattr(__main__, "__file__", "<input>") == "<input>":
             log.debug("running within REPL")
             day = current_day()
             year = most_recent_year()
             return day, year
-        else:
-            log.debug("non-interactive")
-            raise AocdError("Failed introspection of filename")
+        log.debug("non-interactive")
+        raise AocdError("Failed introspection of filename")
     years = {int(year) for year in re.findall(pattern_year, abspath)}
     if len(years) > 1:
         raise AocdError("Failed introspection of year")
