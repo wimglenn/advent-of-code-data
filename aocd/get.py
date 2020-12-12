@@ -106,8 +106,10 @@ def get_day_and_year():
             "/IPython/" in name,  # IPython adds a tonne of stack frames
             name.startswith("<"),  # crap like <decorator-gen-57>
             name.endswith("ython3"),  # ipython3 alias
+            basename.startswith("pydev_ipython_console"),  # PyCharm Python Console
         ]
         if not any(reasons_to_skip_frame):
+            log.debug("stack crawl found %s", name)
             abspath = os.path.abspath(name)
             break
         log.debug("skipping frame %s", name)
