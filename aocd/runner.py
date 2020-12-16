@@ -73,7 +73,7 @@ def main():
         )
         sys.exit(1)
     logging.basicConfig(level=getattr(logging, args.log_level))
-    run_for(
+    rc = run_for(
         plugins=args.plugins or list(plugins),
         years=args.years or years,
         days=args.days or days,
@@ -82,6 +82,7 @@ def main():
         autosubmit=not args.no_submit,
         reopen=args.reopen,
     )
+    sys.exit(rc)
 
 
 def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
@@ -158,6 +159,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
     it = itertools.product(years, days, plugins, datasets)
     userpad = 3
     datasetpad = 8
+    n_incorrect = 0
     if entry_points:
         userpad = len(max(entry_points, key=len))
     if datasets:
@@ -186,6 +188,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
         if error:
             assert a == b == ""
             icon = colored("✖", "red")
+            n_incorrect += 1
             line += "   {icon} {error}".format(icon=icon, error=error)
         else:
             result_template = "   {icon} part {part}: {answer}"
@@ -211,6 +214,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                 icon = colored("✔", "green") if correct else colored("✖", "red")
                 correction = ""
                 if not correct:
+                    n_incorrect += 1
                     if expected is None:
                         icon = colored("?", "magenta")
                         correction = "(correct answer unknown)"
@@ -221,3 +225,4 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                     answer = answer.ljust(30)
                 line += result_template.format(icon=icon, part=part, answer=answer)
         print(line)
+    return n_incorrect

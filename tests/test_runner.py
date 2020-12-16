@@ -44,7 +44,7 @@ def test_no_datasets_avail(capsys, mocker, aocd_dir):
 
 
 def test_main(capsys, mocker, aocd_dir):
-    mock = mocker.patch("aocd.runner.run_for")
+    mock = mocker.patch("aocd.runner.run_for", return_value=0)
     ep1 = mocker.Mock()
     ep1.name = "user1"
     ep2 = mocker.Mock()
@@ -53,7 +53,8 @@ def test_main(capsys, mocker, aocd_dir):
     datasets_file = aocd_dir / "tokens.json"
     datasets_file.write_text('{"data1": "token1", "data2": "token2"}')
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
-    main()
+    with pytest.raises(SystemExit(0)):
+        main()
     mock.assert_called_once_with(
         plugins=["user1", "user2"],
         years=[2015],
