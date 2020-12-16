@@ -1,3 +1,4 @@
+--editable .
 pytest
 pytest-cov
 pytest-mock

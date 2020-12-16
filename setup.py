@@ -1,9 +1,15 @@
+import os
 from setuptools import setup
+
+
+src_version = os.path.join(os.path.dirname(__file__), "aocd", "version.py")
+with open(src_version) as f:
+    version = f.read().strip().split()[-1][1:-1]
 
 
 setup(
     name="advent-of-code-data",
-    version="0.9.4",
+    version=version,
     description="Get your puzzle data with a single import",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",

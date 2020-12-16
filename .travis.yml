@@ -13,9 +13,8 @@ python:
   - "nightly"
 
 install:
-  - pip install --upgrade pytest setuptools
-  - pip install --editable .
-  - pip install -r tests/requirements.txt
+  - pip install --upgrade pip pytest setuptools
+  - pip install --use-feature=2020-resolver -r tests/requirements.txt
 
 script:
   - pytest
