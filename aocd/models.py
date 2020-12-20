@@ -274,7 +274,10 @@ class Puzzle(object):
         sanitized = "..." + self.user.token[-4:]
         check_guess = self._check_guess_against_existing(value, part)
         if check_guess is not None:
-            print(check_guess)
+            if quiet:
+                log.info(check_guess)
+            else:
+                print(check_guess)
             return
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": 1, "b": 2}[part]
@@ -295,6 +298,7 @@ class Puzzle(object):
             color = "green"
             if reopen:
                 # So you can read part B on the website...
+                log.info("reopening %s", response.url)
                 webbrowser.open(response.url)
             if not (self.day == 25 and part == "b"):
                 self._save_correct_answer(value=value, part=part)

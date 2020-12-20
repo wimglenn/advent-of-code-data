@@ -50,8 +50,9 @@ def blocker(quiet=False, dt=0.1, datefmt="%-I:%M %p", until=None):
     localzone = tzlocal.get_localzone()
     while datetime.now(tz=AOC_TZ) < unlock:
         local_unlock = unlock.astimezone(tz=localzone)
-        msg = "{} Unlock day {} at {:%s} ({:.0f}s remaining)" % datefmt
-        remaining = (unlock - datetime.now(tz=AOC_TZ)).total_seconds()
+        msg = "{} Unlock day {} at {:%s} ({} remaining)" % datefmt
+        remaining = unlock - datetime.now(tz=AOC_TZ)
+        remaining = str(remaining).split(".")[0]  # trim microseconds
         if not quiet:
             sys.stdout.write(msg.format(next(spinner), unlock.day, local_unlock, remaining))
             sys.stdout.flush()
