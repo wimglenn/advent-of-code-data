@@ -298,8 +298,9 @@ class Puzzle(object):
             color = "green"
             if reopen:
                 # So you can read part B on the website...
-                log.info("reopening %s", response.url)
-                webbrowser.open(response.url)
+                part_b_url = self.url + "#part2"
+                log.info("reopening to %s", part_b_url)
+                webbrowser.open(part_b_url)
             if not (self.day == 25 and part == "b"):
                 self._save_correct_answer(value=value, part=part)
             if self.day == 25 and part == "a":
