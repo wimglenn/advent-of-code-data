@@ -30,7 +30,7 @@ def test_correct_submit_reopens_browser_on_answer_page(mocker, requests_mock):
     )
     browser_open = mocker.patch("webbrowser.open")
     submit(1234, part="a", day=1, year=2018, session="whatever", reopen=True)
-    browser_open.assert_called_once_with("https://adventofcode.com/2018/day/1/answer")
+    browser_open.assert_called_once_with("https://adventofcode.com/2018/day/1#part2")
 
 
 def test_submit_bogus_part():
