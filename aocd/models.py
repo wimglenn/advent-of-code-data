@@ -258,9 +258,9 @@ class Puzzle(object):
         if value in {u"", b"", None, b"None", u"None"}:
             raise AocdError("cowardly refusing to submit non-answer: {!r}".format(value))
         value = str(value)
-        if part not in {"A", "B", "a", "b"}:
+        part = str(part).replace("1", "a").replace("2", "b").lower()
+        if part not in {"a", "b"}:
             raise AocdError('part must be "a" or "b"')
-        part = part.lower()
         bad_guesses = getattr(self, "incorrect_answers_" + part)
         if value in bad_guesses:
             if not quiet:
