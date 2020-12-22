@@ -23,7 +23,7 @@ def _ensure_intermediate_dirs(fname):
                 raise
 
 
-def blocker(quiet=False, dt=0.1, datefmt="%-I:%M %p", until=None):
+def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
     """
     This function just blocks until the next puzzle unlocks.
     Pass `quiet=True` to disable the spinner etc.
@@ -48,13 +48,18 @@ def blocker(quiet=False, dt=0.1, datefmt="%-I:%M %p", until=None):
         return
     spinner = cycle(r"\|/-")
     localzone = tzlocal.get_localzone()
+    local_unlock = unlock.astimezone(tz=localzone)
+    if datefmt is None:
+        # %-I does not work on Windows, strip leading zeros manually
+        local_unlock = local_unlock.strftime("%I:%M %p").lstrip("0")
+    else:
+        local_unlock = local_unlock.strftime(datefmt)
+    msg = "{} Unlock day %s at %s ({} remaining)" % (unlock.day, local_unlock)
     while datetime.now(tz=AOC_TZ) < unlock:
-        local_unlock = unlock.astimezone(tz=localzone)
-        msg = "{} Unlock day {} at {:%s} ({} remaining)" % datefmt
         remaining = unlock - datetime.now(tz=AOC_TZ)
         remaining = str(remaining).split(".")[0]  # trim microseconds
         if not quiet:
-            sys.stdout.write(msg.format(next(spinner), unlock.day, local_unlock, remaining))
+            sys.stdout.write(msg.format(next(spinner), remaining))
             sys.stdout.flush()
         time.sleep(dt)
         if not quiet:
