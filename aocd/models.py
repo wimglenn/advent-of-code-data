@@ -304,12 +304,14 @@ class Puzzle(object):
             if not (self.day == 25 and part == "b"):
                 self._save_correct_answer(value=value, part=part)
             if self.day == 25 and part == "a":
-                log.debug("checking if got 49 stars already...")
+                log.debug("checking if got 49 stars already for year %s...", self.year)
                 my_stats = self.user.get_stats(self.year)
                 n_stars = sum(len(val) for val in my_stats.values())
                 if n_stars == 49:
                     log.info("Got 49 stars already, getting 50th...")
                     self._submit(value="done", part="b", reopen=reopen, quiet=quiet)
+                else:
+                    log.info("Got %d stars, need %d more for part b", n_stars, 49 - n_stars)
         elif "Did you already complete it" in message:
             color = "yellow"
         elif "That's not the right answer" in message:
