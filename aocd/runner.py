@@ -15,7 +15,7 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime
 
-import pebble
+import pebble.concurrent
 import pkg_resources
 from termcolor import colored
 
@@ -85,33 +85,37 @@ def main():
     sys.exit(rc)
 
 
+@pebble.concurrent.process(daemon=False)
+def _process_wrapper(f, *args, **kwargs):
+    # allows to run f in a process which can be killed if it misbehaves
+    return f(*args, **kwargs)
+
+
 def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
     # TODO : multi-process over the different tokens
     spinner = itertools.cycle(r"\|/-")
-    pool = pebble.ProcessPool(max_workers=1)
     line = elapsed = format_time(0)
-    with pool:
-        t0 = time.time()
-        func = entry_point.load()
-        future = pool.schedule(func, kwargs=kwargs, timeout=timeout)
-        while not future.done():
-            if progress is not None:
-                line = "\r" + elapsed + "   " + progress + "   " + next(spinner)
-                sys.stderr.write(line)
-                sys.stderr.flush()
-            time.sleep(dt)
-            elapsed = format_time(time.time() - t0, timeout)
-        walltime = time.time() - t0
-        try:
-            a, b = future.result()
-        except Exception as err:
-            a = b = ""
-            error = repr(err)[:50]
-        else:
-            error = ""
-            # longest correct answer seen so far has been 32 chars
-            a = str(a)[:50]
-            b = str(b)[:50]
+    t0 = time.time()
+    func = entry_point.load()
+    future = _process_wrapper(func, **kwargs)
+    while not future.done():
+        if progress is not None:
+            line = "\r" + elapsed + "   " + progress + "   " + next(spinner)
+            sys.stderr.write(line)
+            sys.stderr.flush()
+        time.sleep(dt)
+        elapsed = format_time(time.time() - t0, timeout)
+    walltime = time.time() - t0
+    try:
+        a, b = future.result()
+    except Exception as err:
+        a = b = ""
+        error = repr(err)[:50]
+    else:
+        error = ""
+        # longest correct answer seen so far has been 32 chars
+        a = str(a)[:50]
+        b = str(b)[:50]
     if progress is not None:
         sys.stderr.write("\r" + " " * len(line) + "\r")
         sys.stderr.flush()
