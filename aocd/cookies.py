@@ -1,4 +1,5 @@
 import argparse
+import glob
 import json
 import logging
 import os
@@ -64,7 +65,9 @@ def scrape_session_tokens():
                 tokens["AOC_SESSION"] = os.environ["AOC_SESSION"]
             if os.path.isfile(aocd_token_file):
                 with open(aocd_token_file) as f:
-                    tokens[aocd_token_file] = f.read().split()[0]
+                    txt = f.read().strip()
+                    if txt:
+                        tokens[aocd_token_file] = txt.split()[0]
             if os.path.isfile(aocd_tokens_file):
                 with open(aocd_tokens_file) as f:
                     tokens.update(json.load(f))
@@ -89,15 +92,17 @@ def scrape_session_tokens():
 
     log.info("checking browser cookies storage for auth tokens, this might pop up an auth dialog!")
     log.info("checking chrome cookie jar...")
-    try:
-        chrome = bc3.chrome(domain_name=".adventofcode.com")
-        # TODO: check non-default profile for chrome/linux
-    except Exception as err:
-        log.debug("Couldn't scrape chrome - %s: %s", type(err), err)
-        chrome = []
-    else:
-        chrome = [c for c in chrome if c.name == "session"]
-        log.info("%d candidates from chrome", len(chrome))
+    cookie_files = glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies")) + [None]
+    chrome_cookies = []
+    for cookie_file in cookie_files:
+        try:
+            chrome = bc3.chrome(cookie_file=cookie_file, domain_name=".adventofcode.com")
+        except Exception as err:
+            log.debug("Couldn't scrape chrome - %s: %s", type(err), err)
+        else:
+            chrome_cookies += [c for c in chrome if c.name == "session"]
+    log.info("%d candidates from chrome", len(chrome_cookies))
+    chrome = chrome_cookies
 
     log.info("checking firefox cookie jar...")
     try:
