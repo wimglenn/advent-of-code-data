@@ -12,8 +12,8 @@ Advent of Code data
 .. |womm| image:: https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg
 .. _womm: https://github.com/nikku/works-on-my-machine
 
-.. |actions| image:: https://github.com/wimglenn/advent-of-code-data/actions/workflows/main.yml/badge.svg
-.. _actions: https://github.com/wimglenn/advent-of-code-data/actions/workflows/main.yml
+.. |actions| image:: https://github.com/wimglenn/advent-of-code-data/actions/workflows/tests.yml/badge.svg
+.. _actions: https://github.com/wimglenn/advent-of-code-data/actions/workflows/tests.yml
 
 .. |codecov| image:: https://codecov.io/gh/wimglenn/advent-of-code-data/branch/master/graph/badge.svg
 .. _codecov: https://codecov.io/gh/wimglenn/advent-of-code-data
