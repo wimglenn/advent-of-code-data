@@ -1,7 +1,7 @@
 Advent of Code data
 ===================
 
-|pyversions|_ |pypi|_ |womm|_ |travis|_ |coveralls|_
+|pyversions|_ |pypi|_ |womm|_ |actions|_ |codecov|_
 
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/advent-of-code-data.svg
 .. _pyversions: 
@@ -12,11 +12,11 @@ Advent of Code data
 .. |womm| image:: https://cdn.rawgit.com/nikku/works-on-my-machine/v0.2.0/badge.svg
 .. _womm: https://github.com/nikku/works-on-my-machine
 
-.. |travis| image:: https://img.shields.io/travis/wimglenn/advent-of-code-data.svg?branch=master
-.. _travis: https://travis-ci.com/wimglenn/advent-of-code-data
+.. |actions| image:: https://github.com/wimglenn/advent-of-code-data/actions/workflows/main.yml/badge.svg
+.. _actions: https://github.com/wimglenn/advent-of-code-data/actions/workflows/main.yml
 
-.. |coveralls| image:: https://coveralls.io/repos/github/wimglenn/advent-of-code-data/badge.svg?branch=master
-.. _coveralls: https://coveralls.io/github/wimglenn/advent-of-code-data?branch=master
+.. |codecov| image:: https://codecov.io/gh/wimglenn/advent-of-code-data/branch/master/graph/badge.svg
+.. _codecov: https://codecov.io/gh/wimglenn/advent-of-code-data
 
 
 Get your puzzle data with a single import statement:
