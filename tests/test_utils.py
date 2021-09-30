@@ -1,6 +1,8 @@
 import platform
 import pytest
+from aocd.exceptions import DeadTokenError
 from aocd.utils import blocker
+from aocd.utils import get_owner
 from freezegun import freeze_time
 
 
@@ -22,3 +24,15 @@ def test_blocker_quiet(capsys):
         blocker(dt=0.2, quiet=True)
     out, err = capsys.readouterr()
     assert not out
+
+
+def test_get_owner_not_logged_in(requests_mock):
+    requests_mock.get("https://adventofcode.com/settings", status_code=302)
+    with pytest.raises(DeadTokenError):
+        get_owner("not_logged_in")
+
+
+def test_get_owner(requests_mock):
+    requests_mock.get("https://adventofcode.com/settings", text="<code>123-456-9c3a0172</code>")
+    owner = get_owner("not_logged_in")
+    assert owner == "unknown.unknown.123"

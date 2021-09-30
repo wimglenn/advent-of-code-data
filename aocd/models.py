@@ -82,7 +82,7 @@ class User(object):
 
     @property
     def memo_dir(self):
-        return os.path.join(AOCD_DIR, format(self.id))
+        return os.path.join(AOCD_DIR, self.id)
 
     def get_stats(self, years=None):
         aoc_now = datetime.now(tz=AOC_TZ)
