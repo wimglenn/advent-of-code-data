@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import pytest
 
+from aocd.models import User
+
 
 @pytest.fixture(autouse=True)
 def mocked_sleep(mocker):
@@ -52,3 +54,6 @@ def detect_user_id(requests_mock):
         "https://adventofcode.com/settings",
         text="<span>Link to testauth/testuser</span><code>000</code>",
     )
+    yield
+    if getattr(User, "_token2id", None) is not None:
+        User._token2id = None
