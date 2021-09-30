@@ -17,9 +17,8 @@ def main():
     aoc_now = datetime.datetime.now(tz=AOC_TZ)
     days = range(1, 26)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
-    desc = "Advent of Code Data v{}".format(__version__)
     parser = argparse.ArgumentParser(
-        description=desc,
+        description="Advent of Code Data v{}".format(__version__),
         usage="aocd [day 1-25] [year 2015-{}]".format(years[-1]),
     )
     parser.add_argument(
