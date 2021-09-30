@@ -69,7 +69,7 @@ class User(object):
             owner = get_owner(self.token)
             log.debug("got owner=%s, adding to memo", owner)
             User._token2id[self.token] = owner
-            with io.open(fname, "w", encoding="utf-8") as f:
+            with open(fname, "w") as f:
                 json.dump(User._token2id, f, sort_keys=True, indent=2)
         else:
             owner = User._token2id[self.token]
