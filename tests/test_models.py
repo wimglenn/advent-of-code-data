@@ -337,3 +337,4 @@ def test_owner_cache(aocd_dir):
     user = User(token="bleh")
     user_id = user.id
     assert user_id == "a.u.n"
+    assert str(user) == "<User a.u.n (token=...bleh)>"
