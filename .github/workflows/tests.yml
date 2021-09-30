@@ -26,7 +26,8 @@ jobs:
       - name: "Install"
         run: |
           python -VV
-          python -m pip install -r tests/requirements.txt
+          python -m pip install -q -r tests/requirements.txt
+          python -m pip freeze --all
       - name: "Run tests for ${{ matrix.python-version }} on ${{ matrix.os }}"
         run: python -m pytest
 
