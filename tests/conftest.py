@@ -20,7 +20,7 @@ def aocd_dir(tmp_path):
 def remove_user_env(aocd_dir, monkeypatch):
     monkeypatch.setattr("aocd.runner.AOCD_DIR", str(aocd_dir))
     monkeypatch.setattr("aocd.models.AOCD_DIR", str(aocd_dir))
-    monkeypatch.delenv("AOC_SESSION", raising=False)
+    monkeypatch.delenv(str("AOC_SESSION"), raising=False)
 
 
 @pytest.fixture(autouse=True)
