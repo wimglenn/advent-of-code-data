@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import errno
 import io
+import json
 import logging
 import os
 import re
@@ -27,6 +28,7 @@ from .exceptions import PuzzleUnsolvedError
 from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
 from .utils import _ensure_intermediate_dirs
+from .utils import get_owner
 from .version import __version__
 
 
@@ -39,16 +41,48 @@ USER_AGENT = {"User-Agent": "advent-of-code-data v{}".format(__version__)}
 
 
 class User(object):
+
+    _token2id = None
+
     def __init__(self, token):
         self.token = token
+        self._owner = "unknown.unknown.0"
 
     @property
     def auth(self):
         return {"session": self.token}
 
     @property
+    def id(self):
+        fname = os.path.join(AOCD_DIR, "token2id.json")
+        if User._token2id is None:
+            try:
+                with io.open(fname, encoding="utf-8") as f:
+                    log.debug("loading user id memo from %s", fname)
+                    User._token2id = json.load(f)
+            except (IOError, OSError) as err:
+                if err.errno != errno.ENOENT:
+                    raise
+                User._token2id = {}
+        if self.token not in User._token2id:
+            log.debug("token not found in memo, attempting to determine user id")
+            owner = get_owner(self.token)
+            log.debug("got owner=%s, adding to memo", owner)
+            User._token2id[self.token] = owner
+            with open(fname, "w") as f:
+                json.dump(User._token2id, f, sort_keys=True, indent=2)
+        else:
+            owner = User._token2id[self.token]
+        if self._owner == "unknown.unknown.0":
+            self._owner = owner
+        return owner
+
+    def __str__(self):
+        return "<{} {} (token=...{})>".format(type(self).__name__, self._owner, self.token[-4:])
+
+    @property
     def memo_dir(self):
-        return os.path.join(AOCD_DIR, self.token)
+        return os.path.join(AOCD_DIR, self.id)
 
     def get_stats(self, years=None):
         aoc_now = datetime.now(tz=AOC_TZ)

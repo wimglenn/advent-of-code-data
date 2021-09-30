@@ -1,5 +1,8 @@
+import bs4
 import errno
+import logging
 import os
+import requests
 import sys
 import time
 import tzlocal
@@ -7,6 +10,10 @@ from datetime import datetime
 from itertools import cycle
 from dateutil.tz import gettz
 
+from .exceptions import DeadTokenError
+
+
+log = logging.getLogger(__name__)
 AOC_TZ = gettz("America/New_York")
 
 
@@ -68,3 +75,37 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
         # clears the "Unlock day" countdown line from the terminal
         sys.stdout.write("\r".ljust(80) + "\n")
         sys.stdout.flush()
+
+
+def get_owner(token):
+    """parse owner of the token. raises DeadTokenError if the token is expired/invalid.
+    returns a string like authtype.username.userid"""
+    url = "https://adventofcode.com/settings"
+    response = requests.get(url, cookies={"session": token}, allow_redirects=False)
+    if response.status_code != 200:
+        # bad tokens will 302 redirect to main page
+        log.info("session %s is dead - status_code=%s", token, response.status_code)
+        raise DeadTokenError("the auth token ...{} is expired or not functioning".format(token[-4:]))
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    auth_source = "unknown"
+    username = "unknown"
+    userid = soup.code.text.split("-")[0]
+    for span in soup.find_all("span"):
+        if span.text.startswith("Link to "):
+            auth_source = span.text[8:]
+            auth_source = auth_source.replace("https://twitter.com/", "twitter/")
+            auth_source = auth_source.replace("https://github.com/", "github/")
+            auth_source = auth_source.replace("https://www.reddit.com/u/", "reddit/")
+            auth_source, sep, username = auth_source.partition("/")
+            if not sep:
+                log.warning("problem in parsing %s", span.text)
+                auth_source = username = "unknown"
+            log.debug("found %r", span.text)
+        elif span.img is not None:
+            if "googleusercontent.com" in span.img.attrs.get("src", ""):
+                log.debug("found google user content img, getting google username")
+                auth_source = "google"
+                username = span.text
+                break
+    result = ".".join([auth_source, username, userid])
+    return result

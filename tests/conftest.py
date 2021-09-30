@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import pytest
 
+from aocd.models import User
+
 
 @pytest.fixture(autouse=True)
 def mocked_sleep(mocker):
@@ -20,14 +22,15 @@ def aocd_dir(tmp_path):
 def remove_user_env(aocd_dir, monkeypatch):
     monkeypatch.setattr("aocd.runner.AOCD_DIR", str(aocd_dir))
     monkeypatch.setattr("aocd.models.AOCD_DIR", str(aocd_dir))
-    monkeypatch.delenv("AOC_SESSION", raising=False)
+    monkeypatch.setattr("aocd.cookies.AOCD_DIR", str(aocd_dir))
+    monkeypatch.delenv(str("AOC_SESSION"), raising=False)
 
 
 @pytest.fixture(autouse=True)
 def test_token(aocd_dir):
     token_file = aocd_dir / "token"
-    token_dir = aocd_dir / "thetesttoken"
-    token_dir.mkdir()
+    cache_dir = aocd_dir / "testauth.testuser.000"
+    cache_dir.mkdir()
     token_file.write_text("thetesttoken")
     return token_file
 
@@ -44,3 +47,14 @@ def answer_not_cached(request, mocker):
 
     if install:
         mocker.patch("aocd.models.Puzzle._check_guess_against_existing", return_value=rv)
+
+
+@pytest.fixture(autouse=True)
+def detect_user_id(requests_mock):
+    requests_mock.get(
+        "https://adventofcode.com/settings",
+        text="<span>Link to testauth/testuser</span><code>000</code>",
+    )
+    yield
+    if getattr(User, "_token2id", None) is not None:
+        User._token2id = None

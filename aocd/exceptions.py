@@ -15,3 +15,7 @@ class PuzzleLockedError(AocdError):
 
 class PuzzleUnsolvedError(AocdError):
     """answer is unknown because user has not solved puzzle yet"""
+
+
+class DeadTokenError(AocdError):
+    """the auth is expired/incorrect"""

@@ -152,7 +152,10 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
     finally:
         os.unlink("input.txt")
         os.chdir(prev)
-        os.rmdir(scratch)
+        try:
+            os.rmdir(scratch)
+        except Exception as err:
+            log.warning("failed to remove scratch %s (%s: %s)", scratch, type(err), err)
     return a, b, walltime, error
 
 

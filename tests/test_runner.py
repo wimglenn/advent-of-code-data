@@ -180,9 +180,9 @@ def test_run_error(aocd_dir, mocker, capsys):
     title_path.mkdir()
     title_file = title_path / "2018_25.txt"
     title_file.write_text("The Puzzle Title")
-    input_path = aocd_dir / "thetesttoken" / "2018_25_input.txt"
+    input_path = aocd_dir / "testauth.testuser.000" / "2018_25_input.txt"
     input_path.write_text("someinput")
-    answer_path = aocd_dir / "thetesttoken" / "2018_25a_answer.txt"
+    answer_path = aocd_dir / "testauth.testuser.000" / "2018_25a_answer.txt"
     answer_path.write_text("answ")
     ep = mocker.Mock()
     ep.name = "testuser"
@@ -206,9 +206,9 @@ def test_run_and_autosubmit(aocd_dir, mocker, capsys, requests_mock):
     title_path.mkdir()
     title_file = title_path / "2015_01.txt"
     title_file.write_text("The Puzzle Title")
-    input_path = aocd_dir / "thetesttoken" / "2015_01_input.txt"
+    input_path = aocd_dir / "testauth.testuser.000" / "2015_01_input.txt"
     input_path.write_text("testinput")
-    answer_path = aocd_dir / "thetesttoken" / "2015_01a_answer.txt"
+    answer_path = aocd_dir / "testauth.testuser.000" / "2015_01a_answer.txt"
     answer_path.write_text("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")
     requests_mock.post(
@@ -235,9 +235,9 @@ def test_run_and_no_autosubmit(aocd_dir, mocker, capsys, requests_mock):
     title_path.mkdir()
     title_file = title_path / "2015_01.txt"
     title_file.write_text("The Puzzle Title")
-    input_path = aocd_dir / "thetesttoken" / "2015_01_input.txt"
+    input_path = aocd_dir / "testauth.testuser.000" / "2015_01_input.txt"
     input_path.write_text("testinput")
-    answer_path = aocd_dir / "thetesttoken" / "2015_01a_answer.txt"
+    answer_path = aocd_dir / "testauth.testuser.000" / "2015_01a_answer.txt"
     answer_path.write_text("answer1")
     requests_mock.get(url="https://adventofcode.com/2015/day/1")
     ep = mocker.Mock()
@@ -272,5 +272,5 @@ def test_load_input_from_file(mocker):
     a, b, walltime, error = run_one(2015, 1, "abcxyz", ep)
     assert a == "123"
     assert b == "456"
-    assert 0 < walltime < 2
+    assert 0 < walltime < 60
     assert not error

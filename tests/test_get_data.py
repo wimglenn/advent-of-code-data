@@ -35,7 +35,7 @@ def test_saved_data_is_reused_if_available(tmpdir, requests_mock):
         url="https://adventofcode.com/2018/day/1/input",
         text="fake data for year 2018 day 1",
     )
-    cached = tmpdir / ".config/aocd/thetesttoken/2018_01_input.txt"
+    cached = tmpdir / ".config/aocd/testauth.testuser.000/2018_01_input.txt"
     cached.ensure(file=True)
     cached.write("saved data for year 2018 day 1")
     data = aocd.get_data(year=2018, day=1)
@@ -107,26 +107,15 @@ def test_data_is_cached_from_successful_request(tmpdir, requests_mock):
         url="https://adventofcode.com/2018/day/1/input",
         text="fake data for year 2018 day 1",
     )
-    cached = tmpdir / ".config/aocd/thetesttoken/2018_01_input.txt"
+    cached = tmpdir / ".config/aocd/testauth.testuser.000/2018_01_input.txt"
     assert not cached.exists()
     aocd.get_data(year=2018, day=1)
     assert cached.exists()
     assert cached.read() == "fake data for year 2018 day 1"
 
 
-def test_saved_data_multitenancy(tmpdir):
-    cachedA = tmpdir / ".config/aocd/tokenA/2018_01_input.txt"
-    cachedB = tmpdir / ".config/aocd/tokenB/2018_01_input.txt"
-    cachedA.ensure(file=True)
-    cachedA.write("data for user A")
-    cachedB.ensure(file=True)
-    cachedB.write("data for user B")
-    data = aocd.get_data(session="tokenB", year=2018, day=1)
-    assert data == "data for user B"
-
-
 def test_corrupted_cache(tmpdir):
-    cached = tmpdir / ".config/aocd/thetesttoken/2018_01_input.txt"
+    cached = tmpdir / ".config/aocd/testauth.testuser.000/2018_01_input.txt"
     cached.ensure_dir()
     with pytest.raises(IOError):
         aocd.get_data(year=2018, day=1)
