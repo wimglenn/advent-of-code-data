@@ -272,5 +272,5 @@ def test_load_input_from_file(mocker):
     a, b, walltime, error = run_one(2015, 1, "abcxyz", ep)
     assert a == "123"
     assert b == "456"
-    assert 0 < walltime < 10
+    assert 0 < walltime < 60
     assert not error
