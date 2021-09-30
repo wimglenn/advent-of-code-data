@@ -194,7 +194,7 @@ def test_pprint_cycle(freezer, requests_mock, mocker):
 
 
 def test_aocr_override(monkeypatch, tmp_path):
-    monkeypatch.setenv(str("AOC_SESSION"), ".aocr")
+    monkeypatch.setenv(str("AOC_SESSION"), str(".aocr"))
     fileinput = tmp_path / "input.txt"
     fileinput.write_text("yello")
     prev = os.getcwd()
