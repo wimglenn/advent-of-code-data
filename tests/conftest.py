@@ -26,8 +26,8 @@ def remove_user_env(aocd_dir, monkeypatch):
 @pytest.fixture(autouse=True)
 def test_token(aocd_dir):
     token_file = aocd_dir / "token"
-    token_dir = aocd_dir / "thetesttoken"
-    token_dir.mkdir()
+    cache_dir = aocd_dir / "testauth.testuser.000"
+    cache_dir.mkdir()
     token_file.write_text("thetesttoken")
     return token_file
 
@@ -44,3 +44,8 @@ def answer_not_cached(request, mocker):
 
     if install:
         mocker.patch("aocd.models.Puzzle._check_guess_against_existing", return_value=rv)
+
+
+@pytest.fixture(autouse=True)
+def test_user_id(mocker):
+    mocker.patch("aocd.models.User.id", "testauth.testuser.000")

@@ -111,7 +111,7 @@ def test_correct_submit_records_good_answer(requests_mock, tmpdir):
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    answer_fname = tmpdir / ".config/aocd/whatever/2018_01b_answer.txt"
+    answer_fname = tmpdir / ".config/aocd/testauth.testuser.000/2018_01b_answer.txt"
     assert not answer_fname.exists()
     submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
     assert answer_fname.exists()
@@ -137,7 +137,7 @@ def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, 
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018_01a_answer.txt"
+    parta_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01a_answer.txt"
     parta_answer.ensure(file=True)
     submit(1234, reopen=False)
     assert post.called
@@ -156,8 +156,8 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, aoc
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = aocd_dir / "thetesttoken/2018_01a_answer.txt"
-    partb_answer = aocd_dir / "thetesttoken/2018_01b_answer.txt"
+    parta_answer = aocd_dir / "testauth.testuser.000" / "2018_01a_answer.txt"
+    partb_answer = aocd_dir / "testauth.testuser.000" / "2018_01b_answer.txt"
     assert not parta_answer.exists()
     assert not partb_answer.exists()
     submit(1234, reopen=False)
@@ -185,8 +185,8 @@ def test_submit_saves_both_answers_if_possible(freezer, requests_mock, tmpdir):
     post = requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer", text="<article></article>"
     )
-    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018_01a_answer.txt"
-    partb_answer = tmpdir / ".config/aocd/thetesttoken/2018_01b_answer.txt"
+    parta_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01a_answer.txt"
+    partb_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01b_answer.txt"
     assert not parta_answer.exists()
     assert not partb_answer.exists()
     submit("answerB", reopen=False)
@@ -207,7 +207,7 @@ def test_submit_puts_level1_by_default(freezer, requests_mock, tmpdir):
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = tmpdir / ".config/aocd/thetesttoken/2018_01a_answer.txt"
+    parta_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01a_answer.txt"
     assert not parta_answer.exists()
     submit(1234, reopen=False)
     assert get.called

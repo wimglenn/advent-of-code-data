@@ -5,39 +5,13 @@ import logging
 import os
 import sys
 
-import bs4
-import requests
-
+from aocd.exceptions import DeadTokenError
 from aocd.models import AOCD_DIR
 from aocd.utils import _ensure_intermediate_dirs
+from aocd.utils import get_owner
 
 
 log = logging.getLogger(__name__)
-
-
-def get_owner(token):
-    """parse owner of the token. returns None if the token is expired/invalid"""
-    url = "https://adventofcode.com/settings"
-    response = requests.get(url, cookies={"session": token}, allow_redirects=False)
-    if response.status_code != 200:
-        # bad tokens will 302 redirect to main page
-        log.info("session %s is dead - status_code=%s", token, response.status_code)
-        return
-    result = "unknown/unknown"
-    soup = bs4.BeautifulSoup(response.text, "html.parser")
-    for span in soup.find_all("span"):
-        if span.text.startswith("Link to "):
-            auth_source = span.text[8:]
-            auth_source = auth_source.replace("https://twitter.com/", "twitter/")
-            auth_source = auth_source.replace("https://github.com/", "github/")
-            auth_source = auth_source.replace("https://www.reddit.com/u/", "reddit/")
-            log.debug("found %r", span.text)
-            result = auth_source
-        elif span.img is not None:
-            if "googleusercontent.com" in span.img.attrs.get("src", ""):
-                log.debug("found google user content img, getting google username")
-                result = "google/" + span.text
-    return result
 
 
 def scrape_session_tokens():
@@ -77,11 +51,14 @@ def scrape_session_tokens():
             sys.exit("no existing tokens found")
         log.debug("%d tokens to check", len(tokens))
         for name, token in tokens.items():
-            owner = get_owner(token)
-            if owner is None:
+            try:
+                owner = get_owner(token)
+            except DeadTokenError:
                 print("{} ({}) is dead".format(token, name))
             else:
-                print("{} ({}) is live - {}".format(token, name, owner))
+                print("{} ({}) is alive".format(token, name))
+                if name != owner:
+                    log.info("{} ({}) is owned by {}".format(token, name, owner))
         sys.exit(0)
 
     log.debug("checking for installation of browser-cookie3 package")
@@ -122,8 +99,11 @@ def scrape_session_tokens():
 
     working = {}  # map of {token: auth source}
     for token in tokens:
-        owner = get_owner(token)
-        if owner is not None:
+        try:
+            owner = get_owner(token)
+        except DeadTokenError:
+            pass
+        else:
             working[token] = owner
 
     if not working:

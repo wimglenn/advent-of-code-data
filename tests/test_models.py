@@ -14,7 +14,7 @@ from aocd.models import User
 
 
 def test_get_answer(aocd_dir):
-    saved = aocd_dir / "thetesttoken" / "2017_13b_answer.txt"
+    saved = aocd_dir / "testauth.testuser.000" / "2017_13b_answer.txt"
     saved.write_text("the answer")
     puzzle = Puzzle(day=13, year=2017)
     assert puzzle.answer_b == "the answer"
@@ -28,7 +28,7 @@ def test_get_answer_not_existing(aocd_dir, requests_mock):
 
 
 def test_get_answer_not_existing_ok_on_25dec(aocd_dir, requests_mock):
-    answer_path = aocd_dir / "thetesttoken" / "2017_25a_answer.txt"
+    answer_path = aocd_dir / "testauth.testuser.000" / "2017_25a_answer.txt"
     answer_path.write_text("yeah")
     puzzle = Puzzle(day=25, year=2017)
     assert not puzzle.answer_b
@@ -36,8 +36,8 @@ def test_get_answer_not_existing_ok_on_25dec(aocd_dir, requests_mock):
 
 
 def test_both_puzzle_answers_tuple(aocd_dir):
-    answer_a_path = aocd_dir / "thetesttoken" / "2016_06a_answer.txt"
-    answer_b_path = aocd_dir / "thetesttoken" / "2016_06b_answer.txt"
+    answer_a_path = aocd_dir / "testauth.testuser.000" / "2016_06a_answer.txt"
+    answer_b_path = aocd_dir / "testauth.testuser.000" / "2016_06b_answer.txt"
     answer_a_path.write_text("1234")
     answer_b_path.write_text("wxyz")
     puzzle = Puzzle(year=2016, day=6)
@@ -45,8 +45,8 @@ def test_both_puzzle_answers_tuple(aocd_dir):
 
 
 def test_answered(aocd_dir):
-    answer_a_path = aocd_dir / "thetesttoken" / "2016_07a_answer.txt"
-    answer_b_path = aocd_dir / "thetesttoken" / "2016_07b_answer.txt"
+    answer_a_path = aocd_dir / "testauth.testuser.000" / "2016_07a_answer.txt"
+    answer_b_path = aocd_dir / "testauth.testuser.000" / "2016_07b_answer.txt"
     puzzle = Puzzle(year=2016, day=7)
     answer_a_path.write_text("foo")
     answer_b_path.write_text("")
@@ -71,7 +71,7 @@ def test_setattr_submits(mocker, requests_mock):
 
 
 def test_setattr_doesnt_submit_if_already_done(mocker, aocd_dir):
-    answer_path = aocd_dir / "thetesttoken" / "2017_07a_answer.txt"
+    answer_path = aocd_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("someval")
     puzzle = Puzzle(year=2017, day=7)
     mock = mocker.patch("aocd.models.Puzzle._submit")
@@ -81,7 +81,7 @@ def test_setattr_doesnt_submit_if_already_done(mocker, aocd_dir):
 
 def test_setattr_submit_both(aocd_dir, mocker, requests_mock):
     requests_mock.get("https://adventofcode.com/2017/day/7")
-    answer_path = aocd_dir / "thetesttoken" / "2017_07a_answer.txt"
+    answer_path = aocd_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("4321")
     puzzle = Puzzle(year=2017, day=7)
     mock = mocker.patch("aocd.models.Puzzle._submit")
@@ -90,8 +90,8 @@ def test_setattr_submit_both(aocd_dir, mocker, requests_mock):
 
 
 def test_setattr_doesnt_submit_both_if_done(mocker, aocd_dir):
-    answer_a_path = aocd_dir / "thetesttoken" / "2017_07a_answer.txt"
-    answer_b_path = aocd_dir / "thetesttoken" / "2017_07b_answer.txt"
+    answer_a_path = aocd_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
+    answer_b_path = aocd_dir / "testauth.testuser.000" / "2017_07b_answer.txt"
     answer_a_path.write_text("ansA")
     answer_b_path.write_text("321")
     puzzle = Puzzle(year=2017, day=7)
@@ -110,7 +110,7 @@ def test_solve_no_plugs(mocker):
 
 
 def test_solve_one_plug(aocd_dir, mocker):
-    input_path = aocd_dir / "thetesttoken" / "2018_01_input.txt"
+    input_path = aocd_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("someinput")
     ep = mocker.Mock()
     ep.name = "myplugin"
@@ -121,7 +121,7 @@ def test_solve_one_plug(aocd_dir, mocker):
 
 
 def test_solve_for(aocd_dir, mocker):
-    input_path = aocd_dir / "thetesttoken" / "2018_01_input.txt"
+    input_path = aocd_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("blah")
     plug1 = mocker.Mock()
     plug1.name = "myplugin"
@@ -137,7 +137,7 @@ def test_solve_for(aocd_dir, mocker):
 
 
 def test_solve_for_unfound_user(aocd_dir, mocker):
-    input_path = aocd_dir / "thetesttoken" / "2018_01_input.txt"
+    input_path = aocd_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("someinput")
     other_plug = mocker.Mock()
     other_plug.name = "otherplugin"
