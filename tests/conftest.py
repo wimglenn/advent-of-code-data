@@ -47,5 +47,8 @@ def answer_not_cached(request, mocker):
 
 
 @pytest.fixture(autouse=True)
-def test_user_id(mocker):
-    mocker.patch("aocd.models.User.id", "testauth.testuser.000")
+def detect_user_id(requests_mock):
+    requests_mock.get(
+        "https://adventofcode.com/settings",
+        text="<span>Link to testauth/testuser</span><code>000</code>",
+    )
