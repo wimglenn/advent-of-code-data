@@ -333,7 +333,7 @@ def test_check_guess_against_saved_incorrect(mocker):
 
 def test_owner_cache(aocd_dir):
     cache = aocd_dir / "token2id.json"
-    cache.write_text(u'{"bleh": "a.u.n"}')
+    cache.write_text('{"bleh": "a.u.n"}')
     user = User(token="bleh")
     user_id = user.id
     assert user_id == "a.u.n"
