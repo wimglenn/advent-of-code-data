@@ -29,7 +29,7 @@ jobs:
           python -m pip install -q -r tests/requirements.txt
           python -m pip freeze --all
       - name: "Run tests for ${{ matrix.python-version }} on ${{ matrix.os }}"
-        run: python -m pytest
+        run: python -m pytest --durations=10
 
       - name: Upload coverage to Codecov
         uses: "codecov/codecov-action@v1"

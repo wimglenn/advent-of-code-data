@@ -99,6 +99,7 @@ def get_owner(token):
             auth_source, sep, username = auth_source.partition("/")
             if not sep:
                 log.warning("problem in parsing %s", span.text)
+                auth_source = username = "unknown"
             log.debug("found %r", span.text)
         elif span.img is not None:
             if "googleusercontent.com" in span.img.attrs.get("src", ""):
