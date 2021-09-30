@@ -8,7 +8,7 @@ def test_main_invalid_date(mocker, capsys):
     with pytest.raises(SystemExit(1)):
         main()
     out, err = capsys.readouterr()
-    assert "usage: aocd [-h] [day] [year]" in out
+    assert out.startswith("usage: aocd [day 1-25] [year 2015-")
 
 
 def test_main_valid_date(mocker, capsys):

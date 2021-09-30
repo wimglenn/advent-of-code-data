@@ -10,13 +10,17 @@ import datetime
 from .get import get_data
 from .get import most_recent_year
 from .utils import AOC_TZ
+from .version import __version__
 
 
 def main():
     aoc_now = datetime.datetime.now(tz=AOC_TZ)
     days = range(1, 26)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
-    parser = argparse.ArgumentParser(description="Advent of Code Data")
+    parser = argparse.ArgumentParser(
+        description="Advent of Code Data v{}".format(__version__),
+        usage="aocd [day 1-25] [year 2015-{}]".format(years[-1]),
+    )
     parser.add_argument(
         "day",
         nargs="?",
@@ -30,6 +34,11 @@ def main():
         type=int,
         default=most_recent_year(),
         help="2015-{} (default: %(default)s)".format(years[-1]),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s v{}".format(__version__),
     )
     args = parser.parse_args()
     if args.day in years and args.year in days:
