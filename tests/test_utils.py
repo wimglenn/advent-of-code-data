@@ -45,3 +45,12 @@ def test_get_owner_and_username(requests_mock):
     )
     owner = get_owner("not_logged_in")
     assert owner == "reddit.wim.123"
+
+
+def test_get_owner_google(requests_mock):
+    requests_mock.get(
+        "https://adventofcode.com/settings",
+        text='<span><img src="https://lh3.googleusercontent.com/...">wim</span><code>1-2</code>',
+    )
+    owner = get_owner("not_logged_in")
+    assert owner == "google.wim.1"
