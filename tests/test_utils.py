@@ -32,7 +32,16 @@ def test_get_owner_not_logged_in(requests_mock):
         get_owner("not_logged_in")
 
 
-def test_get_owner(requests_mock):
+def test_get_owner_user_id(requests_mock):
     requests_mock.get("https://adventofcode.com/settings", text="<code>123-456-9c3a0172</code>")
     owner = get_owner("not_logged_in")
     assert owner == "unknown.unknown.123"
+
+
+def test_get_owner_and_username(requests_mock):
+    requests_mock.get(
+        "https://adventofcode.com/settings",
+        text="<span>Link to https://www.reddit.com/u/wim</span><code>123-456-9c3a0172</code>",
+    )
+    owner = get_owner("not_logged_in")
+    assert owner == "reddit.wim.123"
