@@ -53,7 +53,6 @@ def main():
     parser.add_argument("--log-level", default="WARNING", choices=log_levels)
     args = parser.parse_args()
 
-    print('USERS', users)
     if not users:
         path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
         print(
