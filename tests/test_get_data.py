@@ -37,7 +37,7 @@ def test_saved_data_is_reused_if_available(aocd_data_dir, requests_mock):
     )
     cached = aocd_data_dir / "testauth.testuser.000/2018_01_input.txt"
     cached.touch()
-    cached.write_text("saved data for year 2018 day 1")
+    cached.write_text(u"saved data for year 2018 day 1")
     data = aocd.get_data(year=2018, day=1)
     assert data == "saved data for year 2018 day 1"
     assert not mock.called
