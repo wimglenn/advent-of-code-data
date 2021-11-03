@@ -34,8 +34,8 @@ from .version import __version__
 
 log = logging.getLogger(__name__)
 
-
-AOCD_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", os.path.join("~", ".config", "aocd")))
+AOCD_DATA_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", os.path.join("~", ".config", "aocd")))
+AOCD_CONFIG_DIR = os.path.expanduser(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR))
 URL = "https://adventofcode.com/{year}/day/{day}"
 USER_AGENT = {"User-Agent": "advent-of-code-data v{}".format(__version__)}
 
@@ -54,7 +54,7 @@ class User(object):
 
     @property
     def id(self):
-        fname = os.path.join(AOCD_DIR, "token2id.json")
+        fname = os.path.join(AOCD_DATA_DIR, "token2id.json")
         if User._token2id is None:
             try:
                 with io.open(fname, encoding="utf-8") as f:
@@ -82,7 +82,7 @@ class User(object):
 
     @property
     def memo_dir(self):
-        return os.path.join(AOCD_DIR, self.id)
+        return os.path.join(AOCD_DATA_DIR, self.id)
 
     def get_stats(self, years=None):
         aoc_now = datetime.now(tz=AOC_TZ)
@@ -127,7 +127,7 @@ def default_user():
 
     # or chuck it in a plaintext file at ~/.config/aocd/token
     try:
-        with io.open(os.path.join(AOCD_DIR, "token"), encoding="utf-8") as f:
+        with io.open(os.path.join(AOCD_CONFIG_DIR, "token"), encoding="utf-8") as f:
             cookie = f.read().split()[0]
     except (IOError, OSError) as err:
         if err.errno != errno.ENOENT:
@@ -145,7 +145,7 @@ def default_user():
         See https://github.com/wimglenn/advent-of-code-wim/issues/1 for more info.
         """
     )
-    cprint(msg.format(os.path.join(AOCD_DIR, "token")), color="red", file=sys.stderr)
+    cprint(msg.format(os.path.join(AOCD_CONFIG_DIR, "token")), color="red", file=sys.stderr)
     raise AocdError("Missing session ID")
 
 
@@ -166,7 +166,7 @@ class Puzzle(object):
         self.incorrect_answers_a_fname = prefix + "a_bad_answers.txt"
         self.incorrect_answers_b_fname = prefix + "b_bad_answers.txt"
         self.title_fname = os.path.join(
-            AOCD_DIR,
+            AOCD_DATA_DIR,
             "titles",
             "{}_{:02d}.txt".format(self.year, self.day)
         )
@@ -524,3 +524,13 @@ def _parse_duration(s):
         return timedelta(hours=24)
     h, m, s = [int(x) for x in s.split(":")]
     return timedelta(hours=h, minutes=m, seconds=s)
+
+
+def load_users():
+    path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
+    try:
+        with open(path) as f:
+            users = json.load(f)
+    except IOError:
+        users = {"default": default_user().token}
+    return users

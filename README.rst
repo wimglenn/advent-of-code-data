@@ -69,8 +69,10 @@ your browser inspector.  If you're hacking on AoC at all you probably already
 know these kind of tricks, but if you need help with that part then you can
 `look here <https://github.com/wimglenn/advent-of-code/issues/1>`_.
 
-*Note:* If you don't like the env var, you could also put into a text file
-in your home directory (use the filename ``~/.config/aocd/token``).
+*Note:* If you don't like the env var, you could also put your token(s) into a
+text file. By default this is ``~/.config/aocd/token`` or
+``~/.config/aocd/tokens.json``. You can change the directory of these files by
+setting the ``AOCD_CONFIG_DIR`` environment variable.
 
 *New in version 0.9.0.* There's a utility script ``aocd-token`` which attempts to
 find session tokens from your browser's cookie storage. This feature is experimental
@@ -203,3 +205,9 @@ All data is persisted in plain text files under ``~/.config/aocd``. To remove an
 caches, you may simply delete whatever files you want under that directory tree.
 If you'd prefer to use a different path, then export an ``AOCD_DIR`` environment
 variable with the desired location.
+
+By default, your token files are also stored in ``~/.config/aocd``, if the
+``AOCD_DIR`` environment variable is set, this supercedes this path. To allow
+configuration and the cache to exist in separate locations, you can use the
+the environment variable ``AOCD_CONFIG_DIR`` to set the location of your ``token``
+or ``tokens.json`` file.
