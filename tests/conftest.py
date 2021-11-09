@@ -12,24 +12,32 @@ def mocked_sleep(mocker):
 
 
 @pytest.fixture
-def aocd_dir(tmp_path):
-    data_dir = tmp_path / ".config" / "aocd"
+def aocd_data_dir(tmp_path):
+    data_dir = tmp_path / ".config" / "aocd-data"
+    data_dir.mkdir(parents=True)
+    return data_dir
+
+
+@pytest.fixture
+def aocd_config_dir(tmp_path):
+    data_dir = tmp_path / ".config" / "aocd-config"
     data_dir.mkdir(parents=True)
     return data_dir
 
 
 @pytest.fixture(autouse=True)
-def remove_user_env(aocd_dir, monkeypatch):
-    monkeypatch.setattr("aocd.runner.AOCD_DIR", str(aocd_dir))
-    monkeypatch.setattr("aocd.models.AOCD_DIR", str(aocd_dir))
-    monkeypatch.setattr("aocd.cookies.AOCD_DIR", str(aocd_dir))
+def remove_user_env(aocd_data_dir, monkeypatch, aocd_config_dir):
+    monkeypatch.setattr("aocd.runner.AOCD_CONFIG_DIR", str(aocd_config_dir))
+    monkeypatch.setattr("aocd.models.AOCD_DATA_DIR", str(aocd_data_dir))
+    monkeypatch.setattr("aocd.models.AOCD_CONFIG_DIR", str(aocd_config_dir))
+    monkeypatch.setattr("aocd.cookies.AOCD_CONFIG_DIR", str(aocd_config_dir))
     monkeypatch.delenv(str("AOC_SESSION"), raising=False)
 
 
 @pytest.fixture(autouse=True)
-def test_token(aocd_dir):
-    token_file = aocd_dir / "token"
-    cache_dir = aocd_dir / "testauth.testuser.000"
+def test_token(aocd_config_dir, aocd_data_dir):
+    token_file = aocd_config_dir / "token"
+    cache_dir = aocd_data_dir / "testauth.testuser.000"
     cache_dir.mkdir()
     token_file.write_text("thetesttoken")
     return token_file

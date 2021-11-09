@@ -13,40 +13,40 @@ from aocd.models import Puzzle
 from aocd.models import User
 
 
-def test_get_answer(aocd_dir):
-    saved = aocd_dir / "testauth.testuser.000" / "2017_13b_answer.txt"
+def test_get_answer(aocd_data_dir):
+    saved = aocd_data_dir / "testauth.testuser.000" / "2017_13b_answer.txt"
     saved.write_text("the answer")
     puzzle = Puzzle(day=13, year=2017)
     assert puzzle.answer_b == "the answer"
 
 
-def test_get_answer_not_existing(aocd_dir, requests_mock):
+def test_get_answer_not_existing(aocd_data_dir, requests_mock):
     requests_mock.get("https://adventofcode.com/2017/day/13")
     puzzle = Puzzle(day=13, year=2017)
     with pytest.raises(AttributeError("answer_b")):
         puzzle.answer_b
 
 
-def test_get_answer_not_existing_ok_on_25dec(aocd_dir, requests_mock):
-    answer_path = aocd_dir / "testauth.testuser.000" / "2017_25a_answer.txt"
+def test_get_answer_not_existing_ok_on_25dec(aocd_data_dir):
+    answer_path = aocd_data_dir / "testauth.testuser.000" / "2017_25a_answer.txt"
     answer_path.write_text("yeah")
     puzzle = Puzzle(day=25, year=2017)
     assert not puzzle.answer_b
     assert puzzle.answers == ("yeah", "")
 
 
-def test_both_puzzle_answers_tuple(aocd_dir):
-    answer_a_path = aocd_dir / "testauth.testuser.000" / "2016_06a_answer.txt"
-    answer_b_path = aocd_dir / "testauth.testuser.000" / "2016_06b_answer.txt"
+def test_both_puzzle_answers_tuple(aocd_data_dir):
+    answer_a_path = aocd_data_dir / "testauth.testuser.000" / "2016_06a_answer.txt"
+    answer_b_path = aocd_data_dir / "testauth.testuser.000" / "2016_06b_answer.txt"
     answer_a_path.write_text("1234")
     answer_b_path.write_text("wxyz")
     puzzle = Puzzle(year=2016, day=6)
     assert puzzle.answers == ("1234", "wxyz")
 
 
-def test_answered(aocd_dir):
-    answer_a_path = aocd_dir / "testauth.testuser.000" / "2016_07a_answer.txt"
-    answer_b_path = aocd_dir / "testauth.testuser.000" / "2016_07b_answer.txt"
+def test_answered(aocd_data_dir):
+    answer_a_path = aocd_data_dir / "testauth.testuser.000" / "2016_07a_answer.txt"
+    answer_b_path = aocd_data_dir / "testauth.testuser.000" / "2016_07b_answer.txt"
     puzzle = Puzzle(year=2016, day=7)
     answer_a_path.write_text("foo")
     answer_b_path.write_text("")
@@ -70,8 +70,8 @@ def test_setattr_submits(mocker, requests_mock):
     mock.assert_called_once_with(part="a", value="4321")
 
 
-def test_setattr_doesnt_submit_if_already_done(mocker, aocd_dir):
-    answer_path = aocd_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
+def test_setattr_doesnt_submit_if_already_done(mocker, aocd_data_dir):
+    answer_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("someval")
     puzzle = Puzzle(year=2017, day=7)
     mock = mocker.patch("aocd.models.Puzzle._submit")
@@ -79,9 +79,9 @@ def test_setattr_doesnt_submit_if_already_done(mocker, aocd_dir):
     mock.assert_not_called()
 
 
-def test_setattr_submit_both(aocd_dir, mocker, requests_mock):
+def test_setattr_submit_both(aocd_data_dir, mocker, requests_mock):
     requests_mock.get("https://adventofcode.com/2017/day/7")
-    answer_path = aocd_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
+    answer_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("4321")
     puzzle = Puzzle(year=2017, day=7)
     mock = mocker.patch("aocd.models.Puzzle._submit")
@@ -89,9 +89,9 @@ def test_setattr_submit_both(aocd_dir, mocker, requests_mock):
     mock.assert_called_once_with(part="b", value="zyxw")
 
 
-def test_setattr_doesnt_submit_both_if_done(mocker, aocd_dir):
-    answer_a_path = aocd_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
-    answer_b_path = aocd_dir / "testauth.testuser.000" / "2017_07b_answer.txt"
+def test_setattr_doesnt_submit_both_if_done(mocker, aocd_data_dir):
+    answer_a_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
+    answer_b_path = aocd_data_dir / "testauth.testuser.000" / "2017_07b_answer.txt"
     answer_a_path.write_text("ansA")
     answer_b_path.write_text("321")
     puzzle = Puzzle(year=2017, day=7)
@@ -109,8 +109,8 @@ def test_solve_no_plugs(mocker):
     mock.assert_called_once_with(group="adventofcode.user")
 
 
-def test_solve_one_plug(aocd_dir, mocker):
-    input_path = aocd_dir / "testauth.testuser.000" / "2018_01_input.txt"
+def test_solve_one_plug(aocd_data_dir, mocker):
+    input_path = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("someinput")
     ep = mocker.Mock()
     ep.name = "myplugin"
@@ -120,8 +120,8 @@ def test_solve_one_plug(aocd_dir, mocker):
     ep.load.return_value.assert_called_once_with(year=2018, day=1, data="someinput")
 
 
-def test_solve_for(aocd_dir, mocker):
-    input_path = aocd_dir / "testauth.testuser.000" / "2018_01_input.txt"
+def test_solve_for(aocd_data_dir, mocker):
+    input_path = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("blah")
     plug1 = mocker.Mock()
     plug1.name = "myplugin"
@@ -136,8 +136,8 @@ def test_solve_for(aocd_dir, mocker):
     plug2.load.return_value.assert_not_called()
 
 
-def test_solve_for_unfound_user(aocd_dir, mocker):
-    input_path = aocd_dir / "testauth.testuser.000" / "2018_01_input.txt"
+def test_solve_for_unfound_user(aocd_data_dir, mocker):
+    input_path = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("someinput")
     other_plug = mocker.Mock()
     other_plug.name = "otherplugin"
@@ -331,8 +331,8 @@ def test_check_guess_against_saved_incorrect(mocker):
     assert "Part a already solved with different answer: two" in rv
 
 
-def test_owner_cache(aocd_dir):
-    cache = aocd_dir / "token2id.json"
+def test_owner_cache(aocd_data_dir):
+    cache = aocd_data_dir / "token2id.json"
     cache.write_text('{"bleh": "a.u.n"}')
     user = User(token="bleh")
     user_id = user.id

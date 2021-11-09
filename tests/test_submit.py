@@ -105,17 +105,17 @@ def test_submit_wrong_answer(requests_mock, capsys):
     assert msg in out
 
 
-def test_correct_submit_records_good_answer(requests_mock, tmpdir):
+def test_correct_submit_records_good_answer(requests_mock, aocd_data_dir):
     requests_mock.get(url="https://adventofcode.com/2018/day/1")
     requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    answer_fname = tmpdir / ".config/aocd/testauth.testuser.000/2018_01b_answer.txt"
+    answer_fname = aocd_data_dir / "testauth.testuser.000/2018_01b_answer.txt"
     assert not answer_fname.exists()
     submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
     assert answer_fname.exists()
-    assert answer_fname.read() == "1234"
+    assert answer_fname.read_text() == "1234"
 
 
 def test_submit_correct_part_a_answer_for_part_b_blocked(requests_mock, tmpdir):
@@ -131,14 +131,14 @@ def test_submit_correct_part_a_answer_for_part_b_blocked(requests_mock, tmpdir):
         submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
 
 
-def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, tmpdir):
+def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, aocd_data_dir):
     freezer.move_to("2018-12-01 12:00:00Z")
     post = requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01a_answer.txt"
-    parta_answer.ensure(file=True)
+    parta_answer = aocd_data_dir / "testauth.testuser.000/2018_01a_answer.txt"
+    parta_answer.touch()
     submit(1234, reopen=False)
     assert post.called
     assert post.call_count == 1
@@ -146,7 +146,8 @@ def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, 
     assert query == ["answer=1234", "level=2"]
 
 
-def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, aocd_dir):
+def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock,
+                                                     aocd_data_dir):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = requests_mock.get(
         url="https://adventofcode.com/2018/day/1",
@@ -156,8 +157,8 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, aoc
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = aocd_dir / "testauth.testuser.000" / "2018_01a_answer.txt"
-    partb_answer = aocd_dir / "testauth.testuser.000" / "2018_01b_answer.txt"
+    parta_answer = aocd_data_dir / "testauth.testuser.000" / "2018_01a_answer.txt"
+    partb_answer = aocd_data_dir / "testauth.testuser.000" / "2018_01b_answer.txt"
     assert not parta_answer.exists()
     assert not partb_answer.exists()
     submit(1234, reopen=False)
@@ -165,7 +166,7 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, aoc
     assert partb_answer.exists()
     assert parta_answer.read_text() == "666"
     assert partb_answer.read_text() == "1234"
-    title_path = aocd_dir / "titles" / "2018_01.txt"
+    title_path = aocd_data_dir / "titles" / "2018_01.txt"
     assert title_path.read_text() == "Yo Dawg\n"
     assert get.call_count == 1
     assert post.call_count == 1
@@ -173,7 +174,7 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, requests_mock, aoc
     assert query == ["answer=1234", "level=2"]
 
 
-def test_submit_saves_both_answers_if_possible(freezer, requests_mock, tmpdir):
+def test_submit_saves_both_answers_if_possible(freezer, requests_mock, aocd_data_dir):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = requests_mock.get(
         url="https://adventofcode.com/2018/day/1",
@@ -185,29 +186,29 @@ def test_submit_saves_both_answers_if_possible(freezer, requests_mock, tmpdir):
     post = requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer", text="<article></article>"
     )
-    parta_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01a_answer.txt"
-    partb_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01b_answer.txt"
+    parta_answer = aocd_data_dir / "testauth.testuser.000/2018_01a_answer.txt"
+    partb_answer = aocd_data_dir / "testauth.testuser.000/2018_01b_answer.txt"
     assert not parta_answer.exists()
     assert not partb_answer.exists()
     submit("answerB", reopen=False)
     assert parta_answer.exists()
     assert partb_answer.exists()
-    assert parta_answer.read() == "answerA"
-    assert partb_answer.read() == "answerB"
+    assert parta_answer.read_text() == "answerA"
+    assert partb_answer.read_text() == "answerB"
     assert get.call_count == 1
     assert post.call_count == 1
     query = sorted(post.last_request.text.split("&"))  # form encoded
     assert query == ["answer=answerB", "level=2"]
 
 
-def test_submit_puts_level1_by_default(freezer, requests_mock, tmpdir):
+def test_submit_puts_level1_by_default(freezer, requests_mock, aocd_data_dir):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = requests_mock.get(url="https://adventofcode.com/2018/day/1")
     post = requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    parta_answer = tmpdir / ".config/aocd/testauth.testuser.000/2018_01a_answer.txt"
+    parta_answer = aocd_data_dir / "testauth.testuser.000/2018_01a_answer.txt"
     assert not parta_answer.exists()
     submit(1234, reopen=False)
     assert get.called
@@ -217,7 +218,7 @@ def test_submit_puts_level1_by_default(freezer, requests_mock, tmpdir):
     query = sorted(post.last_request.text.split("&"))  # form encoded
     assert query == ["answer=1234", "level=1"]
     assert parta_answer.exists()
-    assert parta_answer.read() == "1234"
+    assert parta_answer.read_text() == "1234"
 
 
 def test_failure_to_create_dirs_unhandled(mocker):

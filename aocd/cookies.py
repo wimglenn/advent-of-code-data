@@ -6,7 +6,7 @@ import os
 import sys
 
 from aocd.exceptions import DeadTokenError
-from aocd.models import AOCD_DIR
+from aocd.models import AOCD_CONFIG_DIR
 from aocd.utils import _ensure_intermediate_dirs
 from aocd.utils import get_owner
 
@@ -15,8 +15,8 @@ log = logging.getLogger(__name__)
 
 
 def scrape_session_tokens():
-    aocd_token_file = os.path.join(AOCD_DIR, "token")
-    aocd_tokens_file = os.path.join(AOCD_DIR, "tokens.json")
+    aocd_token_file = os.path.join(AOCD_CONFIG_DIR, "token")
+    aocd_tokens_file = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
 
     parser = argparse.ArgumentParser(description="Scrapes AoC session tokens from your browser's cookie storage")
     parser.add_argument("-v", "--verbose", action="count", help="increased logging (may be specified multiple)")

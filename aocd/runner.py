@@ -17,11 +17,11 @@ from datetime import datetime
 
 import pebble.concurrent
 import pkg_resources
+from models import AOCD_CONFIG_DIR, default_user
 from termcolor import colored
 
 from .exceptions import AocdError
-from .models import AOCD_DIR
-from .models import default_user
+from .models import AOCD_CONFIG_DIR
 from .models import Puzzle
 from .utils import AOC_TZ
 
@@ -40,12 +40,9 @@ def main():
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
-    path = os.path.join(AOCD_DIR, "tokens.json")
-    try:
-        with open(path) as f:
-            users = json.load(f)
-    except IOError:
-        users = {"default": default_user().token}
+
+    users = _load_users()
+
     log_levels = "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     parser = ArgumentParser(description="AoC runner")
     parser.add_argument("-p", "--plugins", choices=plugins)
@@ -57,7 +54,9 @@ def main():
     parser.add_argument("-r", "--reopen", action="store_true", help="open browser on NEW solves")
     parser.add_argument("--log-level", default="WARNING", choices=log_levels)
     args = parser.parse_args()
+
     if not users:
+        path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
         print(
             "There are no datasets available to use.\n"
             "Either export your AOC_SESSION or put some auth "
@@ -233,3 +232,13 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                 line += result_template.format(icon=icon, part=part, answer=answer)
         print(line)
     return n_incorrect
+
+
+def _load_users():
+    path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
+    try:
+        with open(path) as f:
+            users = json.load(f)
+    except IOError:
+        users = {"default": default_user().token}
+    return users

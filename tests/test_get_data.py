@@ -30,14 +30,14 @@ def test_get_data_uses_current_date_if_unspecified(requests_mock, freezer):
     assert mock.call_count == 1
 
 
-def test_saved_data_is_reused_if_available(tmpdir, requests_mock):
+def test_saved_data_is_reused_if_available(aocd_data_dir, requests_mock):
     mock = requests_mock.get(
         url="https://adventofcode.com/2018/day/1/input",
         text="fake data for year 2018 day 1",
     )
-    cached = tmpdir / ".config/aocd/testauth.testuser.000/2018_01_input.txt"
-    cached.ensure(file=True)
-    cached.write("saved data for year 2018 day 1")
+    cached = aocd_data_dir / "testauth.testuser.000/2018_01_input.txt"
+    cached.touch()
+    cached.write_text(u"saved data for year 2018 day 1")
     data = aocd.get_data(year=2018, day=1)
     assert data == "saved data for year 2018 day 1"
     assert not mock.called
@@ -102,20 +102,20 @@ def test_aocd_user_agent_in_req_headers(requests_mock):
     assert headers["User-Agent"] == expected
 
 
-def test_data_is_cached_from_successful_request(tmpdir, requests_mock):
+def test_data_is_cached_from_successful_request(aocd_data_dir, requests_mock):
     requests_mock.get(
         url="https://adventofcode.com/2018/day/1/input",
         text="fake data for year 2018 day 1",
     )
-    cached = tmpdir / ".config/aocd/testauth.testuser.000/2018_01_input.txt"
+    cached = aocd_data_dir / "testauth.testuser.000/2018_01_input.txt"
     assert not cached.exists()
     aocd.get_data(year=2018, day=1)
     assert cached.exists()
-    assert cached.read() == "fake data for year 2018 day 1"
+    assert cached.read_text() == "fake data for year 2018 day 1"
 
 
-def test_corrupted_cache(tmpdir):
-    cached = tmpdir / ".config/aocd/testauth.testuser.000/2018_01_input.txt"
-    cached.ensure_dir()
+def test_corrupted_cache(aocd_data_dir):
+    cached = aocd_data_dir / "testauth.testuser.000/2018_01_input.txt"
+    cached.mkdir(parents=True)
     with pytest.raises(IOError):
         aocd.get_data(year=2018, day=1)
