@@ -170,6 +170,8 @@ As you can see above, I actually had incorrect code for `2017 Day 20: Particle S
 
 By the way, the ``aoc`` runner will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120``.
 
+*New in version 1.1.0:*  Added option ``--quiet`` to suppress any output from plugins so it doesn't mess up the ``aoc`` runner's display.
+
 
 How does this library work?
 ---------------------------
@@ -211,6 +213,6 @@ caches, you may simply delete whatever files you want under that directory tree.
 If you'd prefer to use a different path, then export an ``AOCD_DIR`` environment
 variable with the desired location.
 
-By default, your token files are also stored under ``~/.config/aocd``, If you want the
-token(s) and cached inputs/answers to exist in separate locations, you can set the environment
-variable ``AOCD_CONFIG_DIR`` to specify a different location for the token(s).
+*New in version 1.1.0:* By default, your token files are also stored under ``~/.config/aocd``.
+If you want the token(s) and cached inputs/answers to exist in separate locations, you can set
+the environment variable ``AOCD_CONFIG_DIR`` to specify a different location for the token(s).
