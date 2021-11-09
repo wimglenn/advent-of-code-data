@@ -331,8 +331,8 @@ def test_check_guess_against_saved_incorrect(mocker):
     assert "Part a already solved with different answer: two" in rv
 
 
-def test_owner_cache(aocd_data_dir):
-    cache = aocd_data_dir / "token2id.json"
+def test_owner_cache(aocd_config_dir):
+    cache = aocd_config_dir / "token2id.json"
     cache.write_text('{"bleh": "a.u.n"}')
     user = User(token="bleh")
     user_id = user.id

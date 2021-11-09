@@ -20,9 +20,9 @@ def aocd_data_dir(tmp_path):
 
 @pytest.fixture
 def aocd_config_dir(tmp_path):
-    data_dir = tmp_path / ".config" / "aocd-config"
-    data_dir.mkdir(parents=True)
-    return data_dir
+    token_dir = tmp_path / ".config" / "aocd-config"
+    token_dir.mkdir(parents=True)
+    return token_dir
 
 
 @pytest.fixture(autouse=True)

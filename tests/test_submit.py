@@ -118,7 +118,7 @@ def test_correct_submit_records_good_answer(requests_mock, aocd_data_dir):
     assert answer_fname.read_text() == "1234"
 
 
-def test_submit_correct_part_a_answer_for_part_b_blocked(requests_mock, tmpdir):
+def test_submit_correct_part_a_answer_for_part_b_blocked(requests_mock):
     requests_mock.get(
         url="https://adventofcode.com/2018/day/1",
         text="<h2>Day 1: Yo Dawg</h2> <p>Your puzzle answer was <code>1234</code></p>",

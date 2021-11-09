@@ -17,11 +17,11 @@ from datetime import datetime
 
 import pebble.concurrent
 import pkg_resources
-from models import AOCD_CONFIG_DIR, default_user
 from termcolor import colored
 
 from .exceptions import AocdError
 from .models import AOCD_CONFIG_DIR
+from .models import default_user
 from .models import Puzzle
 from .utils import AOC_TZ
 
@@ -40,9 +40,7 @@ def main():
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
-
     users = _load_users()
-
     log_levels = "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     parser = ArgumentParser(description="AoC runner")
     parser.add_argument("-p", "--plugins", choices=plugins)

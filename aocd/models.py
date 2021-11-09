@@ -54,7 +54,7 @@ class User(object):
 
     @property
     def id(self):
-        fname = os.path.join(AOCD_DATA_DIR, "token2id.json")
+        fname = os.path.join(AOCD_CONFIG_DIR, "token2id.json")
         if User._token2id is None:
             try:
                 with io.open(fname, encoding="utf-8") as f:

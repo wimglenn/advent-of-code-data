@@ -69,10 +69,9 @@ your browser inspector.  If you're hacking on AoC at all you probably already
 know these kind of tricks, but if you need help with that part then you can
 `look here <https://github.com/wimglenn/advent-of-code/issues/1>`_.
 
-*Note:* If you don't like the env var, you could also put your token(s) into a
-text file. By default this is ``~/.config/aocd/token`` or
-``~/.config/aocd/tokens.json``. You can change the directory of these files by
-setting the ``AOCD_CONFIG_DIR`` environment variable.
+*Note:* If you don't like the env var, you could also keep your token(s) in files.
+By default the location is ``~/.config/aocd/token``. Set the ``AOCD_DIR`` environment
+variable to some existing directory if you wish to use another location to store token(s).
 
 *New in version 0.9.0.* There's a utility script ``aocd-token`` which attempts to
 find session tokens from your browser's cookie storage. This feature is experimental
@@ -81,6 +80,12 @@ and Firefox browsers are currently supported. On macOS, you may get an authentic
 dialog requesting permission, since Python is attempting to read browser storage files.
 This is expected, the script *is* actually scraping those private files to access AoC
 session token(s).
+
+If this utility script was able to locate your token, you can save it to file with:
+
+.. code-block:: bash
+
+   $ aocd-token > ~/.config/aocd/token
 
 Automated submission
 --------------------
@@ -206,8 +211,6 @@ caches, you may simply delete whatever files you want under that directory tree.
 If you'd prefer to use a different path, then export an ``AOCD_DIR`` environment
 variable with the desired location.
 
-By default, your token files are also stored in ``~/.config/aocd``, if the
-``AOCD_DIR`` environment variable is set, this supercedes this path. To allow
-configuration and the cache to exist in separate locations, you can use the
-the environment variable ``AOCD_CONFIG_DIR`` to set the location of your ``token``
-or ``tokens.json`` file.
+By default, your token files are also stored under ``~/.config/aocd``, If you want the
+token(s) and cached inputs/answers to exist in separate locations, you can set the environment
+variable ``AOCD_CONFIG_DIR`` to specify a different location for the token(s).
