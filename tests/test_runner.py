@@ -63,6 +63,7 @@ def test_main(capsys, mocker, aocd_config_dir):
         timeout=60,
         autosubmit=True,
         reopen=False,
+        capture=False,
     )
 
 
@@ -87,8 +88,7 @@ def bugged_entry_point(year, day, data):
 def test_results(mocker, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
-    worker = ep.load.return_value = fake_entry_point
-    # worker = ep.load.return_value = lambda year, day, data: ("answer1", "wrong")  # TODO: why doesn't that work?
+    ep.load.return_value = fake_entry_point
     mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
     fake_puzzle = mocker.MagicMock()
     fake_puzzle.year = 2015

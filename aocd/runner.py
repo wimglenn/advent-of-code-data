@@ -43,13 +43,14 @@ def main():
     users = _load_users()
     log_levels = "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     parser = ArgumentParser(description="AoC runner")
-    parser.add_argument("-p", "--plugins", choices=plugins)
+    parser.add_argument("-p", "--plugins", nargs="+", choices=plugins)
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
     parser.add_argument("-u", "--users", nargs="+", choices=users)
     parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
     parser.add_argument("-s", "--no-submit", action="store_true", help="disable autosubmit")
     parser.add_argument("-r", "--reopen", action="store_true", help="open browser on NEW solves")
+    parser.add_argument("-q", "--quiet", action="store_true", help="capture output from runner")
     parser.add_argument("--log-level", default="WARNING", choices=log_levels)
     args = parser.parse_args()
 
@@ -78,23 +79,35 @@ def main():
         timeout=args.timeout,
         autosubmit=not args.no_submit,
         reopen=args.reopen,
+        capture=args.quiet,
     )
     sys.exit(rc)
 
 
 @pebble.concurrent.process(daemon=False)
-def _process_wrapper(f, *args, **kwargs):
+def _process_wrapper(f, capture=False, *args, **kwargs):
     # allows to run f in a process which can be killed if it misbehaves
-    return f(*args, **kwargs)
+    prev_stdout = sys.stdout
+    prev_stderr = sys.stderr
+    if capture:
+        hush = open(os.devnull, "w")
+        sys.stdout = sys.stderr = hush
+    try:
+        result = f(*args, **kwargs)
+    finally:
+        if capture:
+            sys.stdout = prev_stdout
+            sys.stderr = prev_stderr
+            hush.close()
+    return result
 
 
-def run_with_timeout(entry_point, timeout, progress, dt=0.1, **kwargs):
-    # TODO : multi-process over the different tokens
+def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kwargs):
     spinner = itertools.cycle(r"\|/-")
     line = elapsed = format_time(0)
     t0 = time.time()
     func = entry_point.load()
-    future = _process_wrapper(func, **kwargs)
+    future = _process_wrapper(func, capture=capture, **kwargs)
     while not future.done():
         if progress is not None:
             line = "\r" + elapsed + "   " + progress + "   " + next(spinner)
@@ -130,7 +143,7 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
     return runtime
 
 
-def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None):
+def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False):
     prev = os.getcwd()
     scratch = tempfile.mkdtemp(prefix="{}-{:02d}-".format(year, day))
     os.chdir(scratch)
@@ -145,6 +158,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
             day=day,
             data=input_data,
             progress=progress,
+            capture=capture,
         )
     finally:
         os.unlink("input.txt")
@@ -156,7 +170,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
     return a, b, walltime, error
 
 
-def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True, reopen=False):
+def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True, reopen=False, capture=False):
     aoc_now = datetime.now(tz=AOC_TZ)
     all_entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
     entry_points = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
@@ -186,6 +200,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
             entry_point=entry_point,
             timeout=timeout,
             progress=progress,
+            capture=capture,
         )
         runtime = format_time(walltime, timeout)
         line = "   ".join([runtime, progress])
