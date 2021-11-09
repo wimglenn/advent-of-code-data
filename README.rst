@@ -213,6 +213,6 @@ caches, you may simply delete whatever files you want under that directory tree.
 If you'd prefer to use a different path, then export an ``AOCD_DIR`` environment
 variable with the desired location.
 
-By default, your token files are also stored under ``~/.config/aocd``, If you want the
-token(s) and cached inputs/answers to exist in separate locations, you can set the environment
-variable ``AOCD_CONFIG_DIR`` to specify a different location for the token(s).
+*New in version 1.1.0:* By default, your token files are also stored under ``~/.config/aocd``.
+If you want the token(s) and cached inputs/answers to exist in separate locations, you can set
+the environment variable ``AOCD_CONFIG_DIR`` to specify a different location for the token(s).
