@@ -84,7 +84,11 @@ def main():
     sys.exit(rc)
 
 
-@pebble.concurrent.process(daemon=False)
+def _timeout_wrapper(f, capture=False, timeout=DEFAULT_TIMEOUT, *args, **kwargs):
+    func = pebble.concurrent.process(daemon=False, timeout=timeout)(_process_wrapper)
+    return func(f, capture, *args, **kwargs)
+
+
 def _process_wrapper(f, capture=False, *args, **kwargs):
     # allows to run f in a process which can be killed if it misbehaves
     prev_stdout = sys.stdout
@@ -107,7 +111,7 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kw
     line = elapsed = format_time(0)
     t0 = time.time()
     func = entry_point.load()
-    future = _process_wrapper(func, capture=capture, **kwargs)
+    future = _timeout_wrapper(func, capture=capture, timeout=timeout, **kwargs)
     while not future.done():
         if progress is not None:
             line = "\r" + elapsed + "   " + progress + "   " + next(spinner)
