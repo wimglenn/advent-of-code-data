@@ -5,4 +5,4 @@ pytest-mock
 pytest-raisin
 pytest-freezegun
 pytest-socket
-requests_mock
+requests-mock
