@@ -38,8 +38,8 @@ If you'd just like to print or keep your own input files, there's a shell entry 
 
 .. code-block:: python
 
-   from aocd import lines  # like data.splitlines()
-   from aocd import numbers  # like [int(n) for n in data.splitlines()]
+   from aocd.transforms import lines  # like data.splitlines()
+   from aocd.transforms import numbers  # like [int(n) for n in data.splitlines()]
 
 And a ``block`` keyword to ``aocd.get_data()``. If your input is not available yet this will block and display a countdown until the next unlock time.
 
