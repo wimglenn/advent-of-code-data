@@ -221,7 +221,7 @@ class Puzzle(object):
             return data.rstrip("\r\n")
         soup = self._soup()
         try:
-            data = soup.find("pre").text
+            data = soup.pre.text
         except Exception:
             log.info("unable to find example data year=%s day=%s", self.year, self.day)
             data = ""
