@@ -193,19 +193,6 @@ def test_pprint_cycle(freezer, requests_mock, mocker):
     assert pretty.startswith("<aocd.models.Puzzle object at 0x")
 
 
-def test_aocr_override(monkeypatch, tmp_path):
-    monkeypatch.setenv(str("AOC_SESSION"), str(".aocr"))
-    fileinput = tmp_path / "input.txt"
-    fileinput.write_text("yello")
-    prev = os.getcwd()
-    try:
-        os.chdir(str(tmp_path))
-        puzzle = Puzzle(year=2015, day=1)
-        assert puzzle.input_data == "yello"
-    finally:
-        os.chdir(prev)
-
-
 fake_stats_response = """
 <article><p>These are your personal leaderboard statistics.</p>
 <pre>      <span class="leaderboard-daydesc-first">-------Part 1--------</span>

@@ -34,19 +34,22 @@ If you'd just like to print or keep your own input files, there's a shell entry 
    aocd > input.txt  # saves today's data
    aocd 13 2018 > day13.txt  # save some other day's data
 
-*New in version 0.9.0.* Two convenience transforms (maybe more to come later):
+There are currently two convenience transforms (maybe more to come later):
 
 .. code-block:: python
 
    from aocd import lines  # like data.splitlines()
    from aocd import numbers  # like [int(n) for n in data.splitlines()]
 
-And a ``block`` keyword to ``aocd.get_data()``. If your input is not available yet this will block and display a countdown until the next unlock time.
+If all that sounds too magical, there is a simple getter function to just return your raw data.
 
-**Note:  Please use version 0.3+ of this library.**  It memoizes successful
-requests client side and rate-limits the get_data function, as
-`requested by the AoC author <https://www.reddit.com/r/adventofcode/comments/3v64sb/aoc_is_fragile_please_be_gentle/>`_.
-Thanks!
+.. code-block:: python
+
+   >>> from aocd import get_data
+   >>> get_data(day=24, year=2015)
+   '1\n2\n3\n7\n11\n13\n17\n19\n23\n31...
+
+Note that ``aocd`` will cache puzzle inputs and answers (including incorrect guesses) clientside, to save unnecessary requests to the server.
 
 
 Quickstart
@@ -193,14 +196,6 @@ unambiguously recognisable as AoC years (2015+) or days (1-25).
 A filename like ``problem_one.py`` will not work, so don't do that.  If
 you don't like weird frame hacks, just use the ``aocd.get_data()`` function 
 instead and have a nice day!
-
-.. code-block:: python
-
-   >>> from aocd import get_data
-   >>> get_data(day=2)
-   'UULDRRRDDLRLURUUURUURDRUURRDRRURUD...
-   >>> get_data(day=24, year=2015)
-   '1\n2\n3\n7\n11\n13\n17\n19\n23\n31...
 
 
 Cache invalidation?
