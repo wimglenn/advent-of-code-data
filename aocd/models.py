@@ -162,6 +162,7 @@ class Puzzle(object):
         fname = "{}_{:02d}".format(self.year, self.day)
         prefix = os.path.join(self.user.memo_dir, fname)
         self.input_data_fname = prefix + "_input.txt"
+        self.example_input_data_fname = prefix + "_example_input.txt"
         self.answer_a_fname = prefix + "a_answer.txt"
         self.answer_b_fname = prefix + "b_answer.txt"
         self.incorrect_answers_a_fname = prefix + "a_bad_answers.txt"
@@ -179,10 +180,6 @@ class Puzzle(object):
 
     @property
     def input_data(self):
-        if self.user.token == ".aocr":
-            with open("input.txt") as f:
-                return f.read()
-        sanitized = "..." + self.user.token[-4:]
         try:
             # use previously received data, if any existing
             with io.open(self.input_data_fname, encoding="utf-8") as f:
@@ -191,9 +188,9 @@ class Puzzle(object):
             if err.errno != errno.ENOENT:
                 raise
         else:
-            sanitized_path = self.input_data_fname.replace(self.user.token, sanitized)
-            log.debug("reusing existing data %s", sanitized_path)
+            log.debug("reusing existing data %s", self.input_data_fname)
             return data.rstrip("\r\n")
+        sanitized = "..." + self.user.token[-4:]
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
         response = requests.get(
             url=self.input_data_url, cookies=self.user.auth, headers=USER_AGENT
@@ -208,6 +205,28 @@ class Puzzle(object):
         _ensure_intermediate_dirs(self.input_data_fname)
         with open(self.input_data_fname, "w") as f:
             log.info("saving the puzzle input token=%s", sanitized)
+            f.write(data)
+        return data.rstrip("\r\n")
+
+    @property
+    def example_data(self):
+        try:
+            with io.open(self.example_input_data_fname, encoding="utf-8") as f:
+                data = f.read()
+        except (IOError, OSError) as err:
+            if err.errno != errno.ENOENT:
+                raise
+        else:
+            log.debug("reusing existing example data %s", self.example_input_data_fname)
+            return data.rstrip("\r\n")
+        soup = self._soup()
+        try:
+            data = soup.find("pre").text
+        except Exception:
+            log.info("unable to find example data year=%s day=%s", self.year, self.day)
+            data = ""
+        with open(self.example_input_data_fname, "w") as f:
+            log.info("saving the example data")
             f.write(data)
         return data.rstrip("\r\n")
 
@@ -306,7 +325,6 @@ class Puzzle(object):
         if part == "b" and value == getattr(self, "answer_a", None):
             raise AocdError("cowardly refusing to re-submit answer_a ({}) for part b".format(value))
         url = self.submit_url
-        sanitized = "..." + self.user.token[-4:]
         check_guess = self._check_guess_against_existing(value, part)
         if check_guess is not None:
             if quiet:
@@ -314,6 +332,7 @@ class Puzzle(object):
             else:
                 print(check_guess)
             return
+        sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": 1, "b": 2}[part]
         response = requests.post(
@@ -435,7 +454,7 @@ class Puzzle(object):
     def _get_answer(self, part):
         """
         Note: Answers are only revealed after a correct submission. If you've
-        have not already solved the puzzle, PuzzleUnsolvedError will be raised.
+        not already solved the puzzle, PuzzleUnsolvedError will be raised.
         """
         if part == "b" and self.day == 25:
             return ""
@@ -525,5 +544,3 @@ def _parse_duration(s):
         return timedelta(hours=24)
     h, m, s = [int(x) for x in s.split(":")]
     return timedelta(hours=h, minutes=m, seconds=s)
-
-
