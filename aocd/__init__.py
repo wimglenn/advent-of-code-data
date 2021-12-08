@@ -45,7 +45,7 @@ __all__ = [
     "PuzzleUnsolvedError",
     "AOC_TZ",
 ]
-__all__.extend(transforms.__all__)
+__all__ += transforms.__all__
 
 
 class Aocd(object):
