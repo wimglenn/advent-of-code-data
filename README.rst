@@ -39,7 +39,7 @@ There are currently two convenience transforms (maybe more to come later):
 .. code-block:: python
 
    from aocd import lines  # like data.splitlines()
-   from aocd import numbers  # like [int(n) for n in data.splitlines()]
+   from aocd import numbers  # uses regex pattern -?\d+ to extract integers from data
 
 If all that sounds too magical, there is a simple getter function to just return your raw data.
 
