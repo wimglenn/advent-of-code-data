@@ -544,3 +544,13 @@ def _parse_duration(s):
         return timedelta(hours=24)
     h, m, s = [int(x) for x in s.split(":")]
     return timedelta(hours=h, minutes=m, seconds=s)
+
+
+def _load_users():
+    path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
+    try:
+        with open(path) as f:
+            users = json.load(f)
+    except IOError:
+        users = {"default": default_user().token}
+    return users

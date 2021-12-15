@@ -18,7 +18,7 @@ def test_main_valid_date(mocker, capsys):
     out, err = capsys.readouterr()
     assert err == ""
     assert out == "stuff\n"
-    getter.assert_called_once_with(year=2015, day=8)
+    getter.assert_called_once_with(session=None, year=2015, day=8)
 
 
 def test_main_valid_date_forgiving(mocker, capsys):
@@ -28,4 +28,29 @@ def test_main_valid_date_forgiving(mocker, capsys):
     out, err = capsys.readouterr()
     assert err == ""
     assert out == "stuff\n"
-    getter.assert_called_once_with(year=2015, day=8)
+    getter.assert_called_once_with(session=None, year=2015, day=8)
+
+
+def test_main_user_guess(mocker, capsys):
+    fake_users = {
+        "bill": "b",
+        "teddy": "t",
+    }
+    mocker.patch("aocd.cli._load_users", return_value=fake_users)
+    mocker.patch("sys.argv", ["aocd", "2015", "8", "-u", "ted"])
+    getter = mocker.patch("aocd.cli.get_data", return_value="stuff")
+    main()
+    getter.assert_called_once_with(session="t", year=2015, day=8)
+
+
+def test_main_user_ambiguous(mocker, capsys):
+    fake_users = {
+        "billy": "b",
+        "teddy": "t",
+    }
+    mocker.patch("aocd.cli._load_users", return_value=fake_users)
+    mocker.patch("sys.argv", ["aocd", "2015", "8", "-u", "y"])
+    with pytest.raises(SystemExit(2)):
+        main()
+    out, err = capsys.readouterr()
+    assert "aocd: error: argument -u/--user: y ambiguous (could be billy, teddy)" in err
