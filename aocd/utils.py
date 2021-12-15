@@ -1,3 +1,4 @@
+import argparse
 import bs4
 import errno
 import logging
@@ -108,4 +109,16 @@ def get_owner(token):
                 username = span.text
                 break
     result = ".".join([auth_source, username, userid])
+    return result
+
+
+def _cli_guess(choice, choices):
+    if choice in choices:
+        return choice
+    candidates = [c for c in choices if choice in c]
+    if len(candidates) > 1:
+        raise argparse.ArgumentTypeError("{} ambiguous (could be {})".format(choice, ", ".join(candidates)))
+    elif not candidates:
+        raise argparse.ArgumentTypeError("invalid choice {!r} (choose from {})".format(choice, ", ".join(choices)))
+    [result] = candidates
     return result

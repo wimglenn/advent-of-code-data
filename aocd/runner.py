@@ -5,7 +5,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import itertools
-import json
 import logging
 import os
 import sys
@@ -17,13 +16,15 @@ from datetime import datetime
 
 import pebble.concurrent
 import pkg_resources
+from functools import partial
 from termcolor import colored
 
 from .exceptions import AocdError
 from .models import AOCD_CONFIG_DIR
-from .models import default_user
+from .models import _load_users
 from .models import Puzzle
 from .utils import AOC_TZ
+from .utils import _cli_guess
 
 
 # from https://adventofcode.com/about
@@ -46,7 +47,7 @@ def main():
     parser.add_argument("-p", "--plugins", nargs="+", choices=plugins)
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
-    parser.add_argument("-u", "--users", nargs="+", choices=users)
+    parser.add_argument("-u", "--users", nargs="+", choices=users, type=partial(_cli_guess, choices=users))
     parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
     parser.add_argument("-s", "--no-submit", action="store_true", help="disable autosubmit")
     parser.add_argument("-r", "--reopen", action="store_true", help="open browser on NEW solves")
@@ -249,13 +250,3 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                 line += result_template.format(icon=icon, part=part, answer=answer)
         print(line)
     return n_incorrect
-
-
-def _load_users():
-    path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
-    try:
-        with open(path) as f:
-            users = json.load(f)
-    except IOError:
-        users = {"default": default_user().token}
-    return users
