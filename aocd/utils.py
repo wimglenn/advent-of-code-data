@@ -119,6 +119,6 @@ def _cli_guess(choice, choices):
     if len(candidates) > 1:
         raise argparse.ArgumentTypeError("{} ambiguous (could be {})".format(choice, ", ".join(candidates)))
     elif not candidates:
-        raise argparse.ArgumentTypeError("invalid choice: {!r} (choose from {})".format(choice, ", ".join(choices)))
+        raise argparse.ArgumentTypeError("invalid choice {!r} (choose from {})".format(choice, ", ".join(choices)))
     [result] = candidates
     return result
