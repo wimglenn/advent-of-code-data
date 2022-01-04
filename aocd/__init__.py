@@ -47,6 +47,9 @@ __all__ = [
 ]
 __all__ += transforms.__all__
 
+# Add declaration for magic attribute `data` to make it discoverable by static analysis tools.
+data = ""
+
 
 class Aocd(object):
     _module = sys.modules[__name__]
