@@ -90,7 +90,7 @@ def get_owner(token):
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     auth_source = "unknown"
     username = "unknown"
-    userid = soup.code.text.split("-")[0]
+    userid = soup.code.text.split("-")[1]
     for span in soup.find_all("span"):
         if span.text.startswith("Link to "):
             auth_source = span.text[8:]

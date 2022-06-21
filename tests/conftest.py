@@ -61,7 +61,7 @@ def answer_not_cached(request, mocker):
 def detect_user_id(requests_mock):
     requests_mock.get(
         "https://adventofcode.com/settings",
-        text="<span>Link to testauth/testuser</span><code>000</code>",
+        text="<span>Link to testauth/testuser</span><code>ownerproof-000</code>",
     )
     yield
     if getattr(User, "_token2id", None) is not None:
