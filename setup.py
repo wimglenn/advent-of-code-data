@@ -41,7 +41,6 @@ setup(
         "termcolor",
         "beautifulsoup4",
         "pebble",
-        "pebble < 5; python_version < '3'",
         'colorama; platform_system == "Windows"',
         "tzlocal",
     ],
