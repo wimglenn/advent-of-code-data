@@ -274,3 +274,11 @@ def test_load_input_from_file(mocker):
     assert b == "456"
     assert 0 < walltime < 60
     assert not error
+
+
+def test_scratch_cleanup_failure(mocker):
+    ep = mocker.Mock()
+    ep.name = "file_ep_user"
+    ep.load.return_value = file_entry_point
+    mocker.patch("os.rmdir", side_effect=OSError)
+    run_one(2015, 1, "abcxyz", ep)
