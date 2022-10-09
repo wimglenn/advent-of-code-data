@@ -19,3 +19,7 @@ class PuzzleUnsolvedError(AocdError):
 
 class DeadTokenError(AocdError):
     """the auth is expired/incorrect"""
+
+
+class UnknownUserError(AocdError):
+    """the token for this userid was not found in the cache"""

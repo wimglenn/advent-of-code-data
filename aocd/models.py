@@ -24,6 +24,7 @@ from termcolor import colored
 from termcolor import cprint
 
 from .exceptions import AocdError
+from .exceptions import UnknownUserError
 from .exceptions import PuzzleUnsolvedError
 from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
@@ -47,6 +48,15 @@ class User(object):
     def __init__(self, token):
         self.token = token
         self._owner = "unknown.unknown.0"
+
+    @classmethod
+    def from_id(cls, id):
+        users = _load_users()
+        if id not in users:
+            raise UnknownUserError("User with id {!r} is not known".format(id))
+        user = cls(users[id])
+        user._owner = id
+        return user
 
     @property
     def auth(self):

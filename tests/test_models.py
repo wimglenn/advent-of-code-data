@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 import logging
 from datetime import timedelta
 
-import os
 import pytest
 from requests.exceptions import HTTPError
 
 from aocd.exceptions import AocdError
+from aocd.exceptions import UnknownUserError
 from aocd.exceptions import PuzzleUnsolvedError
 from aocd.models import Puzzle
 from aocd.models import User
@@ -325,3 +325,17 @@ def test_owner_cache(aocd_config_dir):
     user_id = user.id
     assert user_id == "a.u.n"
     assert str(user) == "<User a.u.n (token=...bleh)>"
+
+
+def test_user_from_id(aocd_config_dir):
+    cache = aocd_config_dir / "tokens.json"
+    cache.write_text('{"github.testuser.123456":"testtoken"}')
+    user = User.from_id("github.testuser.123456")
+    assert user.token == "testtoken"
+
+
+def test_user_from_unknown_id(aocd_config_dir):
+    cache = aocd_config_dir / "tokens.json"
+    cache.write_text('{"github.testuser.123456":"testtoken"}')
+    with pytest.raises(UnknownUserError("User with id 'blah' is not known")):
+        User.from_id("blah")
