@@ -53,7 +53,7 @@ class User(object):
     def from_id(cls, id):
         users = _load_users()
         if id not in users:
-            raise UnknownUserError("User with id {!r} is not known".format(id))
+            raise UnknownUserError("User with id '{}' is not known".format(id))
         user = cls(users[id])
         user._owner = id
         return user
