@@ -1,6 +1,6 @@
 import os
-from setuptools import setup
 
+from setuptools import setup
 
 src_version = os.path.join(os.path.dirname(__file__), "aocd", "version.py")
 with open(src_version) as f:
@@ -9,16 +9,18 @@ with open(src_version) as f:
 
 setup(
     name="advent-of-code-data",
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*",
     version=version,
     description="Get your puzzle data with a single import",
     long_description=open("README.rst").read(),
     long_description_content_type="text/x-rst",
+    package_data={"aocd": ["py.typed", "*.pyi"]},
     packages=["aocd"],
     entry_points={
         "console_scripts": [
             "aocd=aocd.cli:main",
             "aoc=aocd.runner:main",
-            "aocd-token=aocd.cookies:scrape_session_tokens"
+            "aocd-token=aocd.cookies:scrape_session_tokens",
         ],
         # https://setuptools.readthedocs.io/en/latest/setuptools.html#dynamic-discovery-of-services-and-plugins
         "adventofcode.user": [],
@@ -41,7 +43,7 @@ setup(
         "termcolor",
         "beautifulsoup4",
         "pebble",
-        'colorama; platform_system == "Windows"',
+        "colorama; platform_system == 'Windows'",
         "tzlocal",
     ],
     options={"bdist_wheel": {"universal": "1"}},

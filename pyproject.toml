@@ -1,0 +1,10 @@
+[tool.mypy]
+strict = true
+
+# ignore missing imports for libraries w/o type info
+[[tool.mypy.overrides]]
+module = [
+    "pkg_resources",
+    "bs4",
+]
+ignore_missing_imports = true
