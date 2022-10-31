@@ -7,6 +7,7 @@ import pytest
 from requests.exceptions import HTTPError
 
 from aocd.exceptions import AocdError
+from aocd.exceptions import DeadTokenError
 from aocd.exceptions import UnknownUserError
 from aocd.exceptions import PuzzleUnsolvedError
 from aocd.models import Puzzle
@@ -220,6 +221,18 @@ def test_get_stats(requests_mock):
         "a": {"time": timedelta(minutes=3, seconds=30), "rank": 158, "score": 0},
         "b": {"time": timedelta(minutes=4, seconds=17), "rank": 25, "score": 76},
     }
+
+
+def test_get_stats_when_token_expired(requests_mock):
+    # sadly, it just returns the global leaderboard, rather than a http 4xx
+    user = User("token12345678")
+    requests_mock.get(
+        url="https://adventofcode.com/2019/leaderboard/self",
+        text="<article><p>Below is the <em>Advent of Code 2021</em> overall leaderboard</p></article>"
+    )
+    expected_msg = "the auth token ...5678 is expired or not functioning"
+    with pytest.raises(DeadTokenError(expected_msg)):
+        user.get_stats(years=[2019])
 
 
 def test_get_stats_slow_user(requests_mock):

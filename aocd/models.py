@@ -24,6 +24,7 @@ from termcolor import colored
 from termcolor import cprint
 
 from .exceptions import AocdError
+from .exceptions import DeadTokenError
 from .exceptions import UnknownUserError
 from .exceptions import PuzzleUnsolvedError
 from .exceptions import PuzzleLockedError
@@ -109,6 +110,9 @@ class User(object):
             response = requests.get(url, cookies=self.auth, headers=USER_AGENT)
             response.raise_for_status()
             soup = bs4.BeautifulSoup(response.text, "html.parser")
+            if soup.article.pre is None and "overall leaderboard" in soup.article.text:
+                msg = "the auth token ...{} is expired or not functioning"
+                raise DeadTokenError(msg.format(self.token[-4:]))
             stats_txt = soup.article.pre.text
             lines = stats_txt.splitlines()
             lines = [x for x in lines if x.split()[0] in days]
