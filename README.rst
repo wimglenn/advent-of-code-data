@@ -15,7 +15,7 @@ Advent of Code data
 .. |actions| image:: https://github.com/wimglenn/advent-of-code-data/actions/workflows/tests.yml/badge.svg
 .. _actions: https://github.com/wimglenn/advent-of-code-data/actions/workflows/tests.yml
 
-.. |codecov| image:: https://codecov.io/gh/wimglenn/advent-of-code-data/branch/master/graph/badge.svg
+.. |codecov| image:: https://codecov.io/gh/wimglenn/advent-of-code-data/branch/main/graph/badge.svg
 .. _codecov: https://codecov.io/gh/wimglenn/advent-of-code-data
 
 
@@ -144,7 +144,7 @@ Submitting answers is also by regular attribute access. Any incorrect answers yo
     aocd will not submit that answer again. You've previously guessed 299 and the server responded:
     That's not the right answer; your answer is too high. If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit. Please wait one minute before trying again. (You guessed 299.) [Return to Day 20]
 
-Your own solutions can be executed by writing and using an `entry-point <https://packaging.python.org/specifications/entry-points/>`_ into your code, registered in the group ``"adventofcode.user"``. Your entry-point should resolve to a callable, and it will be called with three keyword arguments: ``year``, ``day``, and ``data``. For example, `my entry-point is called "wim" <https://github.com/wimglenn/advent-of-code-wim/blob/d033366c16fba50e413f2fa7df32e8a0eac9542f/setup.py#L36>`_ and running against `my code <https://github.com/wimglenn/advent-of-code-wim/blob/master/aoc_wim/__init__.py>`_ (after ``pip install advent-of-code-wim``) would be like this:
+Your own solutions can be executed by writing and using an `entry-point <https://packaging.python.org/specifications/entry-points/>`_ into your code, registered in the group ``"adventofcode.user"``. Your entry-point should resolve to a callable, and it will be called with three keyword arguments: ``year``, ``day``, and ``data``. For example, `my entry-point is called "wim" <https://github.com/wimglenn/advent-of-code-wim/blob/d033366c16fba50e413f2fa7df32e8a0eac9542f/setup.py#L36>`_ and running against `my code <https://github.com/wimglenn/advent-of-code-wim/blob/main/aoc_wim/__init__.py>`_ (after ``pip install advent-of-code-wim``) would be like this:
 
 .. code-block:: python
 
