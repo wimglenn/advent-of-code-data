@@ -9,7 +9,6 @@ with open(src_version) as f:
 
 setup(
     name="advent-of-code-data",
-    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*",
     version=version,
     description="Get your puzzle data with a single import",
     long_description=open("README.rst").read(),
