@@ -3,6 +3,6 @@ pytest
 pytest-cov
 pytest-mock
 pytest-raisin
-pytest-freezegun
+pytest-freezer
 pytest-socket
 requests-mock
