@@ -16,6 +16,55 @@ from aocd.utils import get_owner
 log = logging.getLogger(__name__)
 
 
+def get_working_tokens():
+    log.debug("checking for installation of browser-cookie3 package")
+    try:
+        import browser_cookie3 as bc3  # soft dependency
+    except ImportError:
+        sys.exit("To use this feature you must pip install browser-cookie3")
+
+    log.info("checking browser cookies storage for auth tokens, this might pop up an auth dialog!")
+    log.info("checking chrome cookie jar...")
+    cookie_files = glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies")) + [None]
+    chrome_cookies = []
+    for cookie_file in cookie_files:
+        try:
+            chrome = bc3.chrome(cookie_file=cookie_file, domain_name=".adventofcode.com")
+        except Exception as err:
+            log.debug("Couldn't scrape chrome - %s: %s", type(err), err)
+        else:
+            chrome_cookies += [c for c in chrome if c.name == "session"]
+    log.info("%d candidates from chrome", len(chrome_cookies))
+    chrome = chrome_cookies
+
+    log.info("checking firefox cookie jar...")
+    try:
+        firefox = bc3.firefox(domain_name=".adventofcode.com")
+    except Exception as err:
+        log.debug("Couldn't scrape firefox - %s: %s", type(err), err)
+        firefox = []
+    else:
+        firefox = [c for c in firefox if c.name == "session"]
+        log.info("%d candidates from firefox", len(firefox))
+
+    # order preserving de-dupe
+    tokens = list({}.fromkeys([c.value for c in chrome + firefox]))
+    removed = len(chrome + firefox) - len(tokens)
+    if removed:
+        log.info("Removed %d duplicate%s", removed, "s"[:removed-1])
+
+    result = {}  # map of {token: auth source}
+    for token in tokens:
+        try:
+            owner = get_owner(token)
+        except DeadTokenError:
+            pass
+        else:
+            result[token] = owner
+
+    return result
+
+
 def scrape_session_tokens():
     aocd_token_file = os.path.join(AOCD_CONFIG_DIR, "token")
     aocd_tokens_file = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
@@ -63,51 +112,7 @@ def scrape_session_tokens():
                     log.info("{} ({}) is owned by {}".format(token, name, owner))
         sys.exit(0)
 
-    log.debug("checking for installation of browser-cookie3 package")
-    try:
-        import browser_cookie3 as bc3  # soft dependency
-    except ImportError:
-        sys.exit("To use this feature you must pip install browser-cookie3")
-
-    log.info("checking browser cookies storage for auth tokens, this might pop up an auth dialog!")
-    log.info("checking chrome cookie jar...")
-    cookie_files = glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies")) + [None]
-    chrome_cookies = []
-    for cookie_file in cookie_files:
-        try:
-            chrome = bc3.chrome(cookie_file=cookie_file, domain_name=".adventofcode.com")
-        except Exception as err:
-            log.debug("Couldn't scrape chrome - %s: %s", type(err), err)
-        else:
-            chrome_cookies += [c for c in chrome if c.name == "session"]
-    log.info("%d candidates from chrome", len(chrome_cookies))
-    chrome = chrome_cookies
-
-    log.info("checking firefox cookie jar...")
-    try:
-        firefox = bc3.firefox(domain_name=".adventofcode.com")
-    except Exception as err:
-        log.debug("Couldn't scrape firefox - %s: %s", type(err), err)
-        firefox = []
-    else:
-        firefox = [c for c in firefox if c.name == "session"]
-        log.info("%d candidates from firefox", len(firefox))
-
-    # order preserving de-dupe
-    tokens = list({}.fromkeys([c.value for c in chrome + firefox]))
-    removed = len(chrome + firefox) - len(tokens)
-    if removed:
-        log.info("Removed %d duplicate%s", removed, "s"[:removed-1])
-
-    working = {}  # map of {token: auth source}
-    for token in tokens:
-        try:
-            owner = get_owner(token)
-        except DeadTokenError:
-            pass
-        else:
-            working[token] = owner
-
+    working = get_working_tokens()
     if not working:
         sys.exit("could not find any working tokens in browser cookies, sorry :(")
 
