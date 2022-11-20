@@ -110,6 +110,8 @@ class User(object):
             response = requests.get(url, cookies=self.auth, headers=USER_AGENT)
             response.raise_for_status()
             soup = bs4.BeautifulSoup(response.text, "html.parser")
+            if soup.article is None and "You haven't collected any stars" in soup.main.text:
+                continue
             if soup.article.pre is None and "overall leaderboard" in soup.article.text:
                 msg = "the auth token ...{} is expired or not functioning"
                 raise DeadTokenError(msg.format(self.token[-4:]))
