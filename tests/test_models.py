@@ -228,11 +228,20 @@ def test_get_stats_when_token_expired(requests_mock):
     user = User("token12345678")
     requests_mock.get(
         url="https://adventofcode.com/2019/leaderboard/self",
-        text="<article><p>Below is the <em>Advent of Code 2021</em> overall leaderboard</p></article>"
+        text="<article><p>Below is the <em>Advent of Code 2019</em> overall leaderboard</p></article>"
     )
     expected_msg = "the auth token ...5678 is expired or not functioning"
     with pytest.raises(DeadTokenError(expected_msg)):
         user.get_stats(years=[2019])
+
+
+def test_get_stats_when_no_stars_yet(requests_mock):
+    user = User("token12345678")
+    requests_mock.get(
+        url="https://adventofcode.com/2019/leaderboard/self",
+        text="<main>You haven't collected any stars... yet.</main>"
+    )
+    assert user.get_stats(years=[2019]) == {}
 
 
 def test_get_stats_slow_user(requests_mock):
