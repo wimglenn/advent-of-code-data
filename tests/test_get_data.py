@@ -1,6 +1,10 @@
 import logging
 
 import pytest
+import io
+import os
+import threading
+from six import PY2
 
 import aocd
 from aocd.exceptions import AocdError
@@ -119,3 +123,44 @@ def test_corrupted_cache(aocd_data_dir):
     cached.mkdir(parents=True)
     with pytest.raises(IOError):
         aocd.get_data(year=2018, day=1)
+
+def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
+    requests_mock.get(
+        url="https://adventofcode.com/2018/day/1/input",
+        text="fake data for year 2018 day 1",
+    )
+    open_evt = threading.Event()
+    write_evt = threading.Event()
+
+    real_os_open = os.open
+    fds = {}
+    def logging_os_open(path, *args, **kwargs):
+        ret = real_os_open(path, *args, **kwargs)
+        fds[ret] = path
+        return ret
+    mocker.patch('os.open', side_effect=logging_os_open)
+
+    def generate_open(real_open):
+        def open_impl(file, *args, **kwargs):
+            res = real_open(file, *args, **kwargs)
+            filename = fds[file] if isinstance(file, int) else file
+            if 'aocd-data' not in filename:
+                return res
+            open_evt.set()
+            real_write = res.write
+            def write(*args, **kwargs):
+                write_evt.wait()
+                real_write(*args, **kwargs)
+            res.write = write
+            return res
+        return open_impl
+    mocker.patch('io.open', side_effect=generate_open(io.open))
+    mocker.patch('__builtin__.open' if PY2 else 'builtins.open', create=True, side_effect=generate_open(open))
+
+    t = threading.Thread(target=aocd.get_data, kwargs={'year': 2018, 'day': 1})
+    t.start()
+    open_evt.wait()
+    mocker.stopall()
+    data = aocd.get_data(year=2018, day=1)
+    write_evt.set()
+    assert data == "fake data for year 2018 day 1"

@@ -11,6 +11,7 @@ import logging
 import os
 import re
 import sys
+import tempfile
 import time
 import webbrowser
 from datetime import datetime
@@ -219,9 +220,17 @@ class Puzzle(object):
             raise AocdError("Unexpected response")
         data = response.text
         _ensure_intermediate_dirs(self.input_data_fname)
-        with open(self.input_data_fname, "w") as f:
-            log.info("saving the puzzle input token=%s", sanitized)
+        with tempfile.NamedTemporaryFile(
+                mode='w', dir=os.path.dirname(self.input_data_fname), delete=False) as f:
+            tmp_name = f.name
+            log.info("saving the puzzle input token=%s to %s", sanitized, tmp_name)
             f.write(data)
+        try:
+            os.rename(tmp_name, self.input_data_fname)
+        except FileExistsError:
+            log.warning("example data at %s already exists; deleting temporary %s",
+                    self.input_data_fname, tmp_name)
+            os.unlink(tmp_name)
         return data.rstrip("\r\n")
 
     @property
@@ -241,9 +250,17 @@ class Puzzle(object):
         except Exception:
             log.info("unable to find example data year=%s day=%s", self.year, self.day)
             data = ""
-        with open(self.example_input_data_fname, "w") as f:
-            log.info("saving the example data")
+        with tempfile.NamedTemporaryFile(
+                mode='w', dir=os.path.dirname(self.example_input_data_fname), delete=False) as f:
+            tmp_name = f.name
+            log.info("saving the example data to %s", tmp_name)
             f.write(data)
+        try:
+            os.rename(tmp_name, self.example_input_data_fname)
+        except FileExistsError:
+            log.warning("example data at %s already exists; deleting temporary %s",
+                    self.example_input_data_fname, tmp_name)
+            os.unlink(tmp_name)
         return data.rstrip("\r\n")
 
     @property
