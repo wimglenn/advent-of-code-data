@@ -16,6 +16,7 @@ import webbrowser
 from datetime import datetime
 from datetime import timedelta
 from textwrap import dedent
+from dotenv import load_dotenv
 
 import bs4
 import pkg_resources
@@ -35,6 +36,7 @@ from .version import __version__
 
 
 log = logging.getLogger(__name__)
+load_dotenv()
 
 AOCD_DATA_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", os.path.join("~", ".config", "aocd")))
 AOCD_CONFIG_DIR = os.path.expanduser(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR))
