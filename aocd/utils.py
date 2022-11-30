@@ -115,7 +115,10 @@ def get_owner(token):
 def atomic_write_file(fname, contents_str):
     """Atomically write a string to a file by writing it to a temporary file, and then
     renaming it to the final destination name. This solves a race condition where existence
-    of a file doesn't necessarily mean the contents are all correct yet."""
+    of a file doesn't necessarily mean the contents are all correct yet.
+
+    Note that the behavior of writing *different* files to the same filename is undefined, as
+    there's no portable 'rename and replace' behavior in Python 2.7."""
     _ensure_intermediate_dirs(fname)
     with tempfile.NamedTemporaryFile(mode='w', dir=os.path.dirname(fname), delete=False) as f:
         tmp_name = f.name
@@ -123,10 +126,12 @@ def atomic_write_file(fname, contents_str):
         f.write(contents_str)
     try:
         os.rename(tmp_name, fname)
-    except FileExistsError:
-        log.warning('cannot rename %s (temporary) to %s as it already exists; deleting the temporary', tmp_name, fname)
-        os.unlink(tmp_name)
-
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            log.warning('cannot rename %s (temporary) to %s as it already exists; deleting the temporary', tmp_name, fname)
+            os.unlink(tmp_name)
+        else:
+            raise
 
 def _cli_guess(choice, choices):
     if choice in choices:

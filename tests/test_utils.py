@@ -2,6 +2,7 @@ import platform
 import sys
 import pytest
 from aocd.exceptions import DeadTokenError
+from aocd.utils import atomic_write_file
 from aocd.utils import blocker
 from aocd.utils import get_owner
 from freezegun import freeze_time
@@ -62,3 +63,12 @@ def test_get_owner_google(requests_mock):
     )
     owner = get_owner("...")
     assert owner == "google.wim.1"
+
+def test_atomic_write_file(aocd_data_dir):
+    target = aocd_data_dir / "foo/bar/baz.txt"
+    # Python 2.7 requires inputs to os.path.expanduser to be strings, not PosixPath (which is missing startswith)
+    atomic_write_file(str(target), "9cdfc92d-c0d2-4af7-87e2-06e49619b30e")
+    assert target.read_text() == "9cdfc92d-c0d2-4af7-87e2-06e49619b30e"
+    atomic_write_file(str(target), "91b80012-3cee-4cbe-8242-460a081c9d73")
+    # It's actually OS-dependent which file wins. But we want to make sure we have coverage
+    # of the unhappy path.
