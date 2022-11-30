@@ -219,7 +219,7 @@ class Puzzle(object):
             log.error(response.text)
             raise AocdError("Unexpected response")
         data = response.text
-        log.info('saving the puzzle input token=%s', sanitized)
+        log.info("saving the puzzle input token=%s", sanitized)
         atomic_write_file(self.input_data_fname, data)
         return data.rstrip("\r\n")
 

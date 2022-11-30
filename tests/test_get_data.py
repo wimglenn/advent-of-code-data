@@ -1,10 +1,10 @@
-import logging
-
-import pytest
 import io
+import logging
 import os
 import sys
 import threading
+
+import pytest
 
 import aocd
 from aocd.exceptions import AocdError
@@ -45,6 +45,7 @@ def test_saved_data_is_reused_if_available(aocd_data_dir, requests_mock):
     data = aocd.get_data(year=2018, day=1)
     assert data == "saved data for year 2018 day 1"
     assert not mock.called
+
 
 def test_server_error(requests_mock, caplog):
     mock = requests_mock.get(
@@ -123,6 +124,7 @@ def test_corrupted_cache(aocd_data_dir):
     with pytest.raises(IOError):
         aocd.get_data(year=2018, day=1)
 
+
 def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
     requests_mock.get(
         url="https://adventofcode.com/2018/day/1/input",
@@ -137,7 +139,7 @@ def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
         ret = real_os_open(path, *args, **kwargs)
         fds[ret] = path
         return ret
-    mocker.patch('os.open', side_effect=logging_os_open)
+    mocker.patch("os.open", side_effect=logging_os_open)
 
     # This doesn't use unittest.mock_open because we actually do want the faked object to be functional.
     # We don't want fake results or to assert things are called in a certain order; we just want the
@@ -146,7 +148,7 @@ def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
         def open_impl(file, *args, **kwargs):
             res = real_open(file, *args, **kwargs)
             filename = fds[file] if isinstance(file, int) else file
-            if 'aocd-data' not in filename:
+            if "aocd-data" not in filename:
                 return res
             open_evt.set()
             real_write = res.write
@@ -156,11 +158,11 @@ def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
             res.write = write
             return res
         return open_impl
-    mocker.patch('io.open', side_effect=generate_open(io.open))
+    mocker.patch("io.open", side_effect=generate_open(io.open))
     PY2 = sys.version_info.major < 3
-    mocker.patch('__builtin__.open' if PY2 else 'builtins.open', side_effect=generate_open(open))
+    mocker.patch("__builtin__.open" if PY2 else "builtins.open", side_effect=generate_open(open))
 
-    t = threading.Thread(target=aocd.get_data, kwargs={'year': 2018, 'day': 1})
+    t = threading.Thread(target=aocd.get_data, kwargs={"year": 2018, "day": 1})
     t.start()
     # This doesn't quite work on python 2 because the io.open patch doesn't seem to work.
     # We still get coverage by making sure the right thing happens in py3, though.
