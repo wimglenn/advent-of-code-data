@@ -46,7 +46,6 @@ def test_saved_data_is_reused_if_available(aocd_data_dir, requests_mock):
     assert data == "saved data for year 2018 day 1"
     assert not mock.called
 
-
 def test_server_error(requests_mock, caplog):
     mock = requests_mock.get(
         url="https://adventofcode.com/2101/day/1/input",
@@ -140,6 +139,9 @@ def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
         return ret
     mocker.patch('os.open', side_effect=logging_os_open)
 
+    # This doesn't use unittest.mock_open because we actually do want the faked object to be functional.
+    # We don't want fake results or to assert things are called in a certain order; we just want the
+    # write operation to be slow.
     def generate_open(real_open):
         def open_impl(file, *args, **kwargs):
             res = real_open(file, *args, **kwargs)

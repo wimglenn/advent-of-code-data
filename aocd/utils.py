@@ -5,6 +5,7 @@ import logging
 import os
 import requests
 import sys
+import tempfile
 import time
 import tzlocal
 from datetime import datetime
@@ -110,6 +111,21 @@ def get_owner(token):
                 break
     result = ".".join([auth_source, username, userid])
     return result
+
+def atomic_write_file(fname, contents_str):
+    """Atomically write a string to a file by writing it to a temporary file, and then
+    renaming it to the final destination name. This solves a race condition where existence
+    of a file doesn't necessarily mean the contents are all correct yet."""
+    _ensure_intermediate_dirs(fname)
+    with tempfile.NamedTemporaryFile(mode='w', dir=os.path.dirname(fname), delete=False) as f:
+        tmp_name = f.name
+        log.info('writing to %s', tmp_name)
+        f.write(contents_str)
+    try:
+        os.rename(tmp_name, fname)
+    except FileExistsError:
+        log.warning('cannot rename %s (temporary) to %s as it already exists; deleting the temporary', tmp_name, fname)
+        os.unlink(tmp_name)
 
 
 def _cli_guess(choice, choices):

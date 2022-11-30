@@ -11,7 +11,6 @@ import logging
 import os
 import re
 import sys
-import tempfile
 import time
 import webbrowser
 from datetime import datetime
@@ -31,6 +30,7 @@ from .exceptions import PuzzleUnsolvedError
 from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
 from .utils import _ensure_intermediate_dirs
+from .utils import atomic_write_file
 from .utils import get_owner
 from .version import __version__
 
@@ -219,18 +219,8 @@ class Puzzle(object):
             log.error(response.text)
             raise AocdError("Unexpected response")
         data = response.text
-        _ensure_intermediate_dirs(self.input_data_fname)
-        with tempfile.NamedTemporaryFile(
-                mode='w', dir=os.path.dirname(self.input_data_fname), delete=False) as f:
-            tmp_name = f.name
-            log.info("saving the puzzle input token=%s to %s", sanitized, tmp_name)
-            f.write(data)
-        try:
-            os.rename(tmp_name, self.input_data_fname)
-        except FileExistsError:
-            log.warning("example data at %s already exists; deleting temporary %s",
-                    self.input_data_fname, tmp_name)
-            os.unlink(tmp_name)
+        log.info('saving the puzzle input token=%s', sanitized)
+        atomic_write_file(self.input_data_fname, data)
         return data.rstrip("\r\n")
 
     @property
@@ -250,17 +240,7 @@ class Puzzle(object):
         except Exception:
             log.info("unable to find example data year=%s day=%s", self.year, self.day)
             data = ""
-        with tempfile.NamedTemporaryFile(
-                mode='w', dir=os.path.dirname(self.example_input_data_fname), delete=False) as f:
-            tmp_name = f.name
-            log.info("saving the example data to %s", tmp_name)
-            f.write(data)
-        try:
-            os.rename(tmp_name, self.example_input_data_fname)
-        except FileExistsError:
-            log.warning("example data at %s already exists; deleting temporary %s",
-                    self.example_input_data_fname, tmp_name)
-            os.unlink(tmp_name)
+        atomic_write_file(self.example_input_data_fname, data)
         return data.rstrip("\r\n")
 
     @property

@@ -22,7 +22,7 @@ from .utils import blocker
 log = getLogger(__name__)
 
 
-def get_data(session=None, day=None, year=None, block=False):
+def get_data(session=None, day=None, year=None, block=False, example=False):
     """
     Get data for day (1-25) and year (>= 2015)
     User's session cookie is needed (puzzle inputs differ by user)
