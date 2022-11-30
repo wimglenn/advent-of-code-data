@@ -240,6 +240,7 @@ class Puzzle(object):
         except Exception:
             log.info("unable to find example data year=%s day=%s", self.year, self.day)
             data = ""
+        log.info("saving the example data")
         atomic_write_file(self.example_input_data_fname, data)
         return data.rstrip("\r\n")
 
