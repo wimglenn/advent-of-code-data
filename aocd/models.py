@@ -30,6 +30,7 @@ from .exceptions import PuzzleUnsolvedError
 from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
 from .utils import _ensure_intermediate_dirs
+from .utils import atomic_write_file
 from .utils import get_owner
 from .version import __version__
 
@@ -218,10 +219,8 @@ class Puzzle(object):
             log.error(response.text)
             raise AocdError("Unexpected response")
         data = response.text
-        _ensure_intermediate_dirs(self.input_data_fname)
-        with open(self.input_data_fname, "w") as f:
-            log.info("saving the puzzle input token=%s", sanitized)
-            f.write(data)
+        log.info('saving the puzzle input token=%s', sanitized)
+        atomic_write_file(self.input_data_fname, data)
         return data.rstrip("\r\n")
 
     @property
@@ -241,9 +240,8 @@ class Puzzle(object):
         except Exception:
             log.info("unable to find example data year=%s day=%s", self.year, self.day)
             data = ""
-        with open(self.example_input_data_fname, "w") as f:
-            log.info("saving the example data")
-            f.write(data)
+        log.info("saving the example data")
+        atomic_write_file(self.example_input_data_fname, data)
         return data.rstrip("\r\n")
 
     @property

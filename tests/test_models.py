@@ -361,3 +361,19 @@ def test_user_from_unknown_id(aocd_config_dir):
     cache.write_text('{"github.testuser.123456":"testtoken"}')
     with pytest.raises(UnknownUserError("User with id 'blah' is not known")):
         User.from_id("blah")
+
+def test_example_data_cache(aocd_data_dir, requests_mock):
+    mock = requests_mock.get(
+        url="https://adventofcode.com/2018/day/1",
+        text="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
+    )
+    cached = aocd_data_dir / "testauth.testuser.000/2018_01_example_input.txt"
+    assert not cached.exists()
+    puzzle = Puzzle(day=1, year=2018)
+    assert puzzle.example_data == "1\n2\n3"
+    assert mock.called
+    assert cached.read_text() == "1\n2\n3\n"
+    requests_mock.reset()
+    assert puzzle.example_data == "1\n2\n3"
+    assert not mock.called
+
