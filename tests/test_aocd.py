@@ -9,7 +9,7 @@ def test_get_data_imported_from_class():
 
 
 def test_get_data_via_import(mocker):
-    fake_stack = [("~/2017/q23.py",)]
+    fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mock = mocker.patch("aocd._module.get_data", return_value="test data")
     from aocd import data
@@ -19,7 +19,7 @@ def test_get_data_via_import(mocker):
 
 
 def test_import_submit_binds_day_and_year(mocker):
-    fake_stack = [("~/2017/q23.py",)]
+    fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     from aocd import submit
 
@@ -46,7 +46,7 @@ def test_get_data_via_import_in_interactive_mode(monkeypatch, mocker, freezer):
 
 
 def test_get_lines_via_import(mocker):
-    fake_stack = [("~/2017/q23.py",)]
+    fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mock = mocker.patch("aocd._module.get_data", return_value="line 1\nline 2\nline 3")
     from aocd import lines
@@ -56,7 +56,7 @@ def test_get_lines_via_import(mocker):
 
 
 def test_get_numbers_via_import(mocker):
-    fake_stack = [("~/2017/q23.py",)]
+    fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mock = mocker.patch("aocd._module.get_data", return_value="1\n2\n3")
     from aocd import numbers

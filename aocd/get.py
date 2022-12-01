@@ -96,23 +96,25 @@ def get_day_and_year():
     """
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
-    stack = [f[0] for f in traceback.extract_stack()]
-    for name in stack:
-        basename = os.path.basename(name)
+    for frame in traceback.extract_stack():
+        filename = frame[0]
+        linetxt = frame[-1] or ""
+        basename = os.path.basename(filename)
         reasons_to_skip_frame = [
             not re.search(pattern_day, basename),  # no digits in filename
-            name == __file__,  # here
-            "importlib" in name,  # Python 3 import machinery
-            "/IPython/" in name,  # IPython adds a tonne of stack frames
-            name.startswith("<"),  # crap like <decorator-gen-57>
-            name.endswith("ython3"),  # ipython3 alias
+            filename == __file__,  # here
+            "importlib" in filename,  # Python 3 import machinery
+            "/IPython/" in filename,  # IPython adds a tonne of stack frames
+            filename.startswith("<"),  # crap like <decorator-gen-57>
+            filename.endswith("ython3"),  # ipython3 alias
             basename.startswith("pydev_ipython_console"),  # PyCharm Python Console
+            "aocd" not in linetxt,
         ]
         if not any(reasons_to_skip_frame):
-            log.debug("stack crawl found %s", name)
-            abspath = os.path.abspath(name)
+            log.debug("stack crawl found %s", filename)
+            abspath = os.path.abspath(filename)
             break
-        log.debug("skipping frame %s", name)
+        log.debug("skipping frame %s", filename)
     else:
         import __main__
         if getattr(__main__, "__file__", "<input>") == "<input>":
@@ -135,7 +137,7 @@ def get_day_and_year():
         assert not day.startswith("0"), "regex pattern_day must prevent any leading 0"
         day = int(day)
         assert 1 <= day <= 25, "regex pattern_day must only match numbers in range 1-25"
-        log.debug("year=%d day=%d", year, day)
+        log.debug("year=%s day=%s", year or "?", day)
         return day, year
     log.debug("giving up introspection for %s", abspath)
     raise AocdError("Failed introspection of day")
