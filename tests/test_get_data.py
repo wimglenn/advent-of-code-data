@@ -102,7 +102,7 @@ def test_aocd_user_agent_in_req_headers(requests_mock):
     aocd.get_data(year=2018, day=1)
     assert mock.call_count == 1
     headers = mock.last_request._request.headers
-    expected = "advent-of-code-data v{}".format(aocd.__version__)
+    expected = "github.com/wimglenn/advent-of-code-data v{} by hey@wimglenn.com".format(aocd.__version__)
     assert headers["User-Agent"] == expected
 
 
