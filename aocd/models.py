@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 AOCD_DATA_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", os.path.join("~", ".config", "aocd")))
 AOCD_CONFIG_DIR = os.path.expanduser(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR))
 URL = "https://adventofcode.com/{year}/day/{day}"
-USER_AGENT = {"User-Agent": "advent-of-code-data v{}".format(__version__)}
+USER_AGENT = {"User-Agent": "github.com/wimglenn/advent-of-code-data v{} by hey@wimglenn.com".format(__version__)}
 
 
 class User(object):
