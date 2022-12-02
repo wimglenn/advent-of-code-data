@@ -17,6 +17,7 @@ from .models import Puzzle
 from .models import User
 from .utils import AOC_TZ
 from .utils import blocker
+from ._ipykernel import get_ipynb_path
 
 
 log = getLogger(__name__)
@@ -109,11 +110,22 @@ def get_day_and_year():
             filename.endswith("ython3"),  # ipython3 alias
             basename.startswith("pydev_ipython_console"),  # PyCharm Python Console
             "aocd" not in linetxt,
+            "ipykernel" in filename,
         ]
         if not any(reasons_to_skip_frame):
             log.debug("stack crawl found %s", filename)
             abspath = os.path.abspath(filename)
             break
+        elif "ipykernel" in filename:
+            log.debug("stack crawl found %s, attempting to detect an .ipynb", filename)
+            try:
+                abspath = get_ipynb_path()
+            except Exception as err:
+                log.debug("failed getting .ipynb path with %s %s", type(err), err)
+            else:
+                if abspath and re.search(pattern_day, abspath):
+                    basename = os.path.basename(abspath)
+                    break
         log.debug("skipping frame %s", filename)
     else:
         import __main__
