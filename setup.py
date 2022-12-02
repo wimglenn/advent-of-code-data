@@ -45,4 +45,5 @@ setup(
         "tzlocal",
     ],
     options={"bdist_wheel": {"universal": "1"}},
+    extras_require={"nb": ["IPython", "jupyter-server"]}
 )
