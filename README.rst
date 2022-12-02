@@ -61,6 +61,12 @@ Install with pip
 
    pip install advent-of-code-data
 
+If you want to use this within a Jupyter notebook, there are some extra deps:
+
+.. code-block:: bash
+
+   pip install 'advent-of-code-data[nb]'
+
 **Puzzle inputs differ by user.**   So export your session ID, for example:
 
 .. code-block:: bash
