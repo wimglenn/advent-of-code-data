@@ -135,7 +135,7 @@ def get_day_and_year():
                 if abspath and re.search(pattern_day, abspath):
                     basename = os.path.basename(abspath)
                     break
-        elif re.search(os.sep + os.sep.join([r"20\d\d", r"[0-2]?\d", ".*.py"]), filename):
+        elif re.search(os.sep + os.sep.join([r"20\d\d", r"[0-2]?\d", r".*\.py$"]), filename):
             year = day = None
             for part in filename.split(os.sep):
                 if not part.isdigit():
