@@ -97,6 +97,7 @@ def get_day_and_year():
     """
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
+    pattern_path = re.escape(os.sep) + re.escape(os.sep).join([r"20\d\d", r"[0-2]?\d", r".*\.py$"])
     visited = []
 
     def giveup(msg):
@@ -135,7 +136,7 @@ def get_day_and_year():
                 if abspath and re.search(pattern_day, abspath):
                     basename = os.path.basename(abspath)
                     break
-        elif re.search(os.sep + os.sep.join([r"20\d\d", r"[0-2]?\d", r".*\.py$"]), filename):
+        elif re.search(pattern_path, filename):
             year = day = None
             for part in filename.split(os.sep):
                 if not part.isdigit():
