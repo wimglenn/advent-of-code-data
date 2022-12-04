@@ -61,3 +61,11 @@ def test_ipynb_fail_no_numbers_in_ipynb_filename(mocker):
     mocker.patch("aocd.get.get_ipynb_path", "puzzle.py")
     with pytest.raises(AocdError("Failed introspection of filename")):
         get_day_and_year()
+
+
+def test_no_numbers_in_py_filename_but_date_in_abspath(mocker):
+    fake_stack = [("adventofcode/2022/02/main.py", 1, "<test>", "from aocd import data")]
+    mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
+    day, year = get_day_and_year()
+    assert day == 2
+    assert year == 2022

@@ -97,6 +97,14 @@ def get_day_and_year():
     """
     pattern_year = r"201[5-9]|202[0-9]"
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
+    visited = []
+
+    def giveup(msg):
+        log.info("introspection failure")
+        for fname in visited:
+            log.info("stack crawl visited %s", fname)
+        return AocdError(msg)
+
     for frame in traceback.extract_stack():
         filename = frame[0]
         linetxt = frame[-1] or ""
@@ -112,6 +120,7 @@ def get_day_and_year():
             "aocd" not in linetxt,
             "ipykernel" in filename,
         ]
+        visited.append(filename)
         if not any(reasons_to_skip_frame):
             log.debug("stack crawl found %s", filename)
             abspath = os.path.abspath(filename)
@@ -126,6 +135,18 @@ def get_day_and_year():
                 if abspath and re.search(pattern_day, abspath):
                     basename = os.path.basename(abspath)
                     break
+        elif re.search(os.sep + os.sep.join([r"20\d\d", r"[0-2]?\d", ".*.py"]), filename):
+            year = day = None
+            for part in filename.split(os.sep):
+                if not part.isdigit():
+                    continue
+                if len(part) == 4:
+                    year = int(part)
+                elif 1 <= len(part) <= 2:
+                    day = int(part)
+            if year is not None and day is not None:
+                log.debug("year=%s day=%s filename=%s", year, day, filename)
+                return day, year
         log.debug("skipping frame %s", filename)
     else:
         import __main__
@@ -135,10 +156,10 @@ def get_day_and_year():
             year = most_recent_year()
             return day, year
         log.debug("non-interactive")
-        raise AocdError("Failed introspection of filename")
+        raise giveup("Failed introspection of filename")
     years = {int(year) for year in re.findall(pattern_year, abspath)}
     if len(years) > 1:
-        raise AocdError("Failed introspection of year")
+        raise giveup("Failed introspection of year")
     year = years.pop() if years else None
     basename_no_years = re.sub(pattern_year, "", basename)
     try:
@@ -152,4 +173,4 @@ def get_day_and_year():
         log.debug("year=%s day=%s", year or "?", day)
         return day, year
     log.debug("giving up introspection for %s", abspath)
-    raise AocdError("Failed introspection of day")
+    raise giveup("Failed introspection of day")
