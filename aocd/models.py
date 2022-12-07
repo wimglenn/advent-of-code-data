@@ -270,8 +270,12 @@ class Puzzle(object):
 
     @answer_a.setter
     def answer_a(self, val):
-        if isinstance(val, int):
+        if isinstance(val, float) and val.is_integer(): # change regarding issue #97
+            log.warning("coercing float value")
+            val = str(int(val))
+        elif isinstance(val, int):
             val = str(val)
+
         if getattr(self, "answer_a", None) == val:
             return
         self._submit(value=val, part="a")
@@ -289,8 +293,12 @@ class Puzzle(object):
 
     @answer_b.setter
     def answer_b(self, val):
-        if isinstance(val, int):
+        if isinstance(val, float) and val.is_integer(): # change regarding issue #97
+            log.warning("coercing float value")
+            val = str(int(val))
+        elif isinstance(val, int):
             val = str(val)
+
         if getattr(self, "answer_b", None) == val:
             return
         self._submit(value=val, part="b")
