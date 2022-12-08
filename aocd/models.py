@@ -261,6 +261,14 @@ class Puzzle(object):
             template = "<{0}({1.year}, {1.day}) at {2} - {1.title}>"
             p.text(template.format(type(self).__name__, self, hex(id(self))))
 
+    def _coerce_val(self, val):
+        if isinstance(val, float) and val.is_integer():
+            log.warning("coerced value %r for %d/%02d", val, self.year, self.day)
+            val = int(val)
+        if isinstance(val, int):
+            val = str(val)
+        return val
+
     @property
     def answer_a(self):
         try:
@@ -270,12 +278,7 @@ class Puzzle(object):
 
     @answer_a.setter
     def answer_a(self, val):
-        if isinstance(val, float) and val.is_integer(): # change regarding issue #97
-            log.warning("coercing float value")
-            val = str(int(val))
-        elif isinstance(val, int):
-            val = str(val)
-
+        val = self._coerce_val(val)
         if getattr(self, "answer_a", None) == val:
             return
         self._submit(value=val, part="a")
@@ -293,12 +296,7 @@ class Puzzle(object):
 
     @answer_b.setter
     def answer_b(self, val):
-        if isinstance(val, float) and val.is_integer(): # change regarding issue #97
-            log.warning("coercing float value")
-            val = str(int(val))
-        elif isinstance(val, int):
-            val = str(val)
-
+        val = self._coerce_val(val)
         if getattr(self, "answer_b", None) == val:
             return
         self._submit(value=val, part="b")
@@ -333,7 +331,8 @@ class Puzzle(object):
     def _submit(self, value, part, reopen=True, quiet=False):
         if value in {u"", b"", None, b"None", u"None"}:
             raise AocdError("cowardly refusing to submit non-answer: {!r}".format(value))
-        value = str(value)
+        if not isinstance(value, str):
+            value = self._coerce_val(value)
         part = str(part).replace("1", "a").replace("2", "b").lower()
         if part not in {"a", "b"}:
             raise AocdError('part must be "a" or "b"')

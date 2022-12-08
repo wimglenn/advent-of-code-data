@@ -1,4 +1,5 @@
 import errno
+import logging
 
 import pytest
 from termcolor import colored
@@ -252,11 +253,19 @@ def test_will_not_submit_null():
         submit(None, part="a")
 
 
-@pytest.mark.answer_not_cached(rv='value')
+@pytest.mark.answer_not_cached(rv="value")
 def test_submit_guess_against_saved(requests_mock, capsys):
-    post = requests_mock.post(
-        url="https://adventofcode.com/2018/day/1/answer",
-        text="<article>That's the right answer. Yeah!!</article>",
-    )
+    post = requests_mock.post(url="https://adventofcode.com/2018/day/1/answer")
     submit(1234, part="a", day=1, year=2018, session="whatever", reopen=False)
     assert post.call_count == 0
+
+
+def test_submit_float_warns(requests_mock, capsys, caplog):
+    post = requests_mock.post(
+        url="https://adventofcode.com/2022/day/8/answer",
+        text="<article>yeah</article>",
+    )
+    submit(1234.0, part="a", day=8, year=2022, session="whatever", reopen=False)
+    assert post.call_count == 1
+    log_record = ("aocd.models", logging.WARNING, "coerced value 1234.0 for 2022/08")
+    assert log_record in caplog.record_tuples
