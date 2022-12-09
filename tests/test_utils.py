@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from aocd.exceptions import DeadTokenError
 from aocd.utils import atomic_write_file
 from aocd.utils import blocker
+from aocd.utils import different_rate
 from aocd.utils import get_owner
 
 
@@ -74,3 +75,12 @@ def test_atomic_write_file(aocd_data_dir):
     assert target.read_text() == "123"
     atomic_write_file(str(target), "456")  # clobber existing
     assert target.read_text() == "456"
+
+
+def test_mutual_rate():
+    assert different_rate("111", "222") == 0
+    assert different_rate("111", "111") == 0
+    assert different_rate("111a", "a") == 0.5
+    assert different_rate("1+1", "1") == 0.5
+    assert different_rate("111", "a") == 1
+    assert different_rate("111a", "") == 1

@@ -366,14 +366,24 @@ def test_user_from_unknown_id(aocd_config_dir):
 def test_example_data_cache(aocd_data_dir, requests_mock):
     mock = requests_mock.get(
         url="https://adventofcode.com/2018/day/1",
-        text="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
+        text="""<article>
+            <pre><code>1+2+3\n</code></pre><pre><code>annotated</code></pre>
+            <pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>
+        </article>""",
+    )
+    # for the example input-data-heuristic, we need the actual input data to compare
+    mock_input = requests_mock.get(
+        url="https://adventofcode.com/2018/day/1/input",
+        text="1\n2\n3",
     )
     cached = aocd_data_dir / "testauth.testuser.000/2018_01_example_input.txt"
     assert not cached.exists()
     puzzle = Puzzle(day=1, year=2018)
     assert puzzle.example_data == "1\n2\n3"
     assert mock.called
-    assert cached.read_text() == "1\n2\n3\n"
+    assert mock_input.called
+    assert cached.read_text() == "1\n2\n3"
     requests_mock.reset()
     assert puzzle.example_data == "1\n2\n3"
     assert not mock.called
+    assert not mock_input.called

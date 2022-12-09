@@ -31,6 +31,7 @@ from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
 from .utils import _ensure_intermediate_dirs
 from .utils import atomic_write_file
+from .utils import different_rate
 from .utils import get_owner
 from .version import __version__
 
@@ -236,7 +237,16 @@ class Puzzle(object):
             return data.rstrip("\r\n")
         soup = self._soup()
         try:
-            data = soup.pre.text
+            # training data is in the first <article>, the 2nd is unlocked after beating the lvel
+            candidates = [c.text.rstrip("\r\n") for c in soup.article.find_all("code")]
+            if len(candidates) == 1:
+                data = candidates[0]
+            elif len(candidates) == 0:
+                data = ""
+            else:
+                scores = [different_rate(self.input_data, c) for c in candidates]
+                data = candidates[scores.index(min(scores))]
+            assert len(data) > 1
         except Exception:
             log.info("unable to find example data year=%s day=%s", self.year, self.day)
             data = ""

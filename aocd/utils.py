@@ -15,7 +15,6 @@ from dateutil.tz import gettz
 
 from .exceptions import DeadTokenError
 
-
 log = logging.getLogger(__name__)
 AOC_TZ = gettz("America/New_York")
 
@@ -136,3 +135,22 @@ def _cli_guess(choice, choices):
         raise argparse.ArgumentTypeError("invalid choice {!r} (choose from {})".format(choice, ", ".join(choices)))
     [result] = candidates
     return result
+
+
+def _simplify(s: str):
+    """ Special characters should match exactly, for letters, same class matching is good enough """
+    if s.isupper():
+        return "A"
+    elif s.islower():
+        return "a"
+    elif s.isdigit():
+        return "1"
+    else:
+        return s
+
+
+def different_rate(a: str, b: str):
+    """ Ratio of different to common character classes. see tests for examples """
+    a = set(map(_simplify, a))
+    b = set(map(_simplify, b))
+    return len((a | b) - (a & b)) / len(a | b)
