@@ -1,8 +1,6 @@
 # coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import errno
 import io
@@ -13,27 +11,23 @@ import re
 import sys
 import time
 import webbrowser
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from textwrap import dedent
 
 import bs4
 import pkg_resources
 import requests
-from termcolor import colored
-from termcolor import cprint
+from numpy import complexfloating as np_complex
+from numpy import floating as np_float
+from numpy import integer as np_int
+from numpy import timedelta64 as np_timedelta
+from termcolor import colored, cprint
 
-from .exceptions import AocdError
-from .exceptions import DeadTokenError
-from .exceptions import UnknownUserError
-from .exceptions import PuzzleUnsolvedError
-from .exceptions import PuzzleLockedError
-from .utils import AOC_TZ
-from .utils import _ensure_intermediate_dirs
-from .utils import atomic_write_file
-from .utils import get_owner
+from .exceptions import (AocdError, DeadTokenError, PuzzleLockedError,
+                         PuzzleUnsolvedError, UnknownUserError)
+from .utils import (AOC_TZ, _ensure_intermediate_dirs, atomic_write_file,
+                    get_owner)
 from .version import __version__
-
 
 log = logging.getLogger(__name__)
 
@@ -262,10 +256,14 @@ class Puzzle(object):
             p.text(template.format(type(self).__name__, self, hex(id(self))))
 
     def _coerce_val(self, val):
-        if isinstance(val, float) and val.is_integer():
+        if isinstance(val, np_complex) and val.imag == 0:
+            val = val.real
+        if isinstance(val, np_float):
+            val = float(val)
+        if isinstance(val, np_timedelta) or (isinstance(val, (float)) and val.is_integer()):
             log.warning("coerced value %r for %d/%02d", val, self.year, self.day)
             val = int(val)
-        if isinstance(val, int):
+        if isinstance(val, (int, np_int)):
             val = str(val)
         return val
 

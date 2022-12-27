@@ -42,6 +42,7 @@ setup(
         "beautifulsoup4",
         "pebble",
         'colorama; platform_system == "Windows"',
+        "numpy",
         "tzlocal",
     ],
     options={"bdist_wheel": {"universal": "1"}},

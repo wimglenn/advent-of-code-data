@@ -1,6 +1,9 @@
 import errno
+import inspect
 import logging
+import sys
 
+import numpy
 import pytest
 from termcolor import colored
 
@@ -269,3 +272,55 @@ def test_submit_float_warns(requests_mock, capsys, caplog):
     assert post.call_count == 1
     log_record = ("aocd.models", logging.WARNING, "coerced value 1234.0 for 2022/08")
     assert log_record in caplog.record_tuples
+
+
+def test_submit_numpy_types_coercion(requests_mock, capsys, caplog):
+    """
+    First, loop through all members of numpy to find instantiatable subclasses of
+    np.number. Certain subtypes like np.floating and np.integer are not explicitly
+    abstract classes but still can't be instantiated; the __new__ check sniffs these
+    out.
+
+    From there, declare instances of every subtype and attempt to submit them. They
+    should all produce query strings without decimal parts.
+    """
+    numpy_types = []
+    for (_, np_type) in inspect.getmembers(sys.modules["numpy"]):
+        if (
+            inspect.isclass(np_type)
+            and issubclass(np_type, numpy.number)
+            and np_type.__new__ != object.__new__
+        ):
+            numpy_types.append(np_type)
+    for np_type in numpy_types:
+        post = requests_mock.post(
+            url="https://adventofcode.com/2022/day/8/answer",
+            text="<article>yeah</article>",
+        )
+        val = 127.0                       # casting val > 127 fails for numpy.int8
+        if np_type == numpy.timedelta64:  # numpy.timedelta64 is the only subclass that
+            val = int(val)                # can't accept a float for its constructor
+        submit(
+            np_type(val), part="a", day=8, year=2022, session="whatever", reopen=False
+        )
+        assert post.called
+        assert post.call_count == 1
+        query = sorted(post.last_request.text.split("&"))  # form encoded
+        assert query == ["answer=127", "level=1"]
+        if issubclass(np_type, numpy.inexact):
+            log_record = (
+                "aocd.models",
+                logging.WARNING,
+                "coerced value 127.0 for 2022/08",
+            )
+            assert log_record in caplog.record_tuples
+        elif issubclass(np_type, numpy.timedelta64):
+            log_record = (
+                "aocd.models",
+                logging.WARNING,
+                "coerced value numpy.timedelta64(127) for 2022/08",
+            )
+            assert log_record in caplog.record_tuples
+        else:
+            assert not caplog.record_tuples
+        caplog.clear()
