@@ -25,8 +25,9 @@ def test_current_year(date_str, expected_year, freezer):
 
 def test_year_out_of_range(freezer):
     freezer.move_to("2015-11-11")
-    with pytest.raises(AocdError("Time travel not supported yet")):
+    with pytest.raises(AocdError) as exc_info:
         most_recent_year()
+    assert "Time travel not supported yet" == str(exc_info.value)
 
 
 @pytest.mark.parametrize(

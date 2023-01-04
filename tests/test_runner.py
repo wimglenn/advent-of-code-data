@@ -20,8 +20,9 @@ def test_no_plugins_avail(capsys, mocker):
         "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
         "See https://github.com/wimglenn/advent-of-code-sample for an example plugin package structure.\n"
     )
-    with pytest.raises(SystemExit(1)):
+    with pytest.raises(SystemExit) as exc_info:
         main()
+    assert "1" == str(exc_info.value)
     out, err = capsys.readouterr()
     assert msg in err
     mock.assert_called_once_with(group="adventofcode.user")
@@ -37,8 +38,9 @@ def test_no_datasets_avail(capsys, mocker, aocd_config_dir):
             datasets_file
         )
     )
-    with pytest.raises(SystemExit(1)):
+    with pytest.raises(SystemExit) as exc_info:
         main()
+    assert "1" == str(exc_info.value)
     out, err = capsys.readouterr()
     assert msg in err
 
@@ -53,8 +55,9 @@ def test_main(capsys, mocker, aocd_config_dir):
     datasets_file = aocd_config_dir / "tokens.json"
     datasets_file.write_text('{"data1": "token1", "data2": "token2"}')
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
-    with pytest.raises(SystemExit(0)):
+    with pytest.raises(SystemExit) as exc_info:
         main()
+    assert "0" == str(exc_info.value)
     mock.assert_called_once_with(
         plugins=["user1", "user2"],
         years=[2015],

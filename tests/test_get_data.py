@@ -53,8 +53,9 @@ def test_server_error(requests_mock, caplog):
         text="AWS meltdown",
         status_code=500,
     )
-    with pytest.raises(AocdError("Unexpected response")):
+    with pytest.raises(AocdError) as exc_info:
         aocd.get_data(year=2101, day=1)
+    assert "Unexpected response" == str(exc_info.value)
     assert mock.called
     assert mock.call_count == 1
     assert caplog.record_tuples == [
@@ -69,8 +70,9 @@ def test_puzzle_not_available_yet(requests_mock, caplog):
         text="Not Found",
         status_code=404,
     )
-    with pytest.raises(PuzzleLockedError("2101/01 not available yet")):
+    with pytest.raises(PuzzleLockedError) as exc_info:
         aocd.get_data(year=2101, day=1)
+    assert "2101/01 not available yet" == str(exc_info.value)
     assert mock.called
     assert mock.call_count == 1
 
@@ -82,8 +84,9 @@ def test_puzzle_not_available_yet_block(requests_mock, caplog, mocker):
         status_code=404,
     )
     blocker = mocker.patch("aocd._module.get.blocker")
-    with pytest.raises(PuzzleLockedError("2101/01 not available yet")):
+    with pytest.raises(PuzzleLockedError) as exc_info:
         aocd.get_data(year=2101, day=1, block="q")
+    assert "2101/01 not available yet" == str(exc_info.value)
     assert mock.called
     assert mock.call_count == 2
     blocker.assert_called_once_with(quiet=True, until=(2101, 1))

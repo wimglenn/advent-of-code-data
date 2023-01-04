@@ -35,8 +35,9 @@ def test_correct_submit_reopens_browser_on_answer_page(mocker, requests_mock):
 
 
 def test_submit_bogus_part():
-    with pytest.raises(AocdError('part must be "a" or "b"')):
+    with pytest.raises(AocdError) as exc_info:
         submit(1234, part="c")
+    assert 'part must be "a" or "b"' == str(exc_info.value)
 
 
 def test_server_error(requests_mock, freezer):
@@ -44,8 +45,9 @@ def test_server_error(requests_mock, freezer):
     requests_mock.post(
         url="https://adventofcode.com/2018/day/1/answer", status_code=500
     )
-    with pytest.raises(AocdError("Non-200 response for POST: <Response [500]>")):
+    with pytest.raises(AocdError) as exc_info:
         submit(1234, part="a")
+    assert "Non-200 response for POST: <Response [500]>" == str(exc_info.value)
 
 
 def test_submit_when_already_solved(requests_mock, capsys):
@@ -128,8 +130,9 @@ def test_submit_correct_part_a_answer_for_part_b_blocked(requests_mock):
         url="https://adventofcode.com/2018/day/1/answer",
         text="<article>That's the right answer</article>",
     )
-    with pytest.raises(AocdError("cowardly refusing to re-submit answer_a (1234) for part b")):
+    with pytest.raises(AocdError) as exc_info:
         submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
+    assert "cowardly refusing to re-submit answer_a (1234) for part b" == str(exc_info.value)
 
 
 def test_submits_for_partb_when_already_submitted_parta(freezer, requests_mock, aocd_data_dir):
@@ -249,8 +252,9 @@ def test_cannot_submit_same_bad_answer_twice(requests_mock, capsys):
 
 
 def test_will_not_submit_null():
-    with pytest.raises(AocdError("cowardly refusing to submit non-answer: None")):
+    with pytest.raises(AocdError) as exc_info:
         submit(None, part="a")
+    assert "cowardly refusing to submit non-answer: None" == str(exc_info.value)
 
 
 @pytest.mark.answer_not_cached(rv="value")

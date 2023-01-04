@@ -7,8 +7,9 @@ from aocd.get import get_day_and_year
 
 
 def test_get_day_and_year_fail_no_filename_on_stack():
-    with pytest.raises(AocdError("Failed introspection of filename")):
+    with pytest.raises(AocdError) as exc_info:
         get_day_and_year()
+    assert "Failed introspection of filename" == str(exc_info.value)
 
 
 def test_get_day_and_year_from_stack(mocker):
@@ -22,22 +23,25 @@ def test_get_day_and_year_from_stack(mocker):
 def test_year_is_ambiguous(mocker):
     fake_stack = [("~/2016/2017_q01.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    with pytest.raises(AocdError("Failed introspection of year")):
+    with pytest.raises(AocdError) as exc_info:
         get_day_and_year()
+    assert "Failed introspection of year" == str(exc_info.value)
 
 
 def test_day_is_unknown(mocker):
     fake_stack = [("~/2016.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    with pytest.raises(AocdError("Failed introspection of day")):
+    with pytest.raises(AocdError) as exc_info:
         get_day_and_year()
+    assert "Failed introspection of day" == str(exc_info.value)
 
 
 def test_day_is_invalid(mocker):
     fake_stack = [("~/2016/q27.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    with pytest.raises(AocdError("Failed introspection of day")):
+    with pytest.raises(AocdError) as exc_info:
         get_day_and_year()
+    assert "Failed introspection of day" == str(exc_info.value)
 
 
 def test_ipynb_ok(mocker):
@@ -53,16 +57,18 @@ def test_ipynb_fail(mocker):
     fake_stack = [("ipykernel/123456789.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mocker.patch("aocd.get.get_ipynb_path", side_effect=ImportError)
-    with pytest.raises(AocdError("Failed introspection of filename")):
+    with pytest.raises(AocdError) as exc_info:
         get_day_and_year()
+    assert "Failed introspection of filename" == str(exc_info.value)
 
 
 def test_ipynb_fail_no_numbers_in_ipynb_filename(mocker):
     fake_stack = [("ipykernel/123456789.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mocker.patch("aocd.get.get_ipynb_path", "puzzle.py")
-    with pytest.raises(AocdError("Failed introspection of filename")):
+    with pytest.raises(AocdError) as exc_info:
         get_day_and_year()
+    assert "Failed introspection of filename" == str(exc_info.value)
 
 
 def test_no_numbers_in_py_filename_but_date_in_abspath(mocker):

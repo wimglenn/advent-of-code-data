@@ -5,8 +5,9 @@ from aocd.cli import main
 
 def test_main_invalid_date(mocker, capsys):
     mocker.patch("sys.argv", ["aocd", "1", "2014"])
-    with pytest.raises(SystemExit(1)):
+    with pytest.raises(SystemExit) as exc_info:
         main()
+    assert "1" == str(exc_info.value)
     out, err = capsys.readouterr()
     assert out.startswith("usage: aocd [day 1-25] [year 2015-")
 
@@ -50,8 +51,9 @@ def test_main_user_ambiguous(mocker, capsys):
     }
     mocker.patch("aocd.cli._load_users", return_value=fake_users)
     mocker.patch("sys.argv", ["aocd", "2015", "8", "-u", "y"])
-    with pytest.raises(SystemExit(2)):
+    with pytest.raises(SystemExit) as exc_info:
         main()
+    assert "2" == str(exc_info.value)
     out, err = capsys.readouterr()
     assert "aocd: error: argument -u/--user: y ambiguous (could be billy, teddy)" in err
 
@@ -75,7 +77,8 @@ def test_main_user_wat(mocker, capsys):
     }
     mocker.patch("aocd.cli._load_users", return_value=fake_users)
     mocker.patch("sys.argv", ["aocd", "2015", "8", "-u", "z"])
-    with pytest.raises(SystemExit(2)):
+    with pytest.raises(SystemExit) as exc_info:
         main()
+    assert "2" == str(exc_info.value)
     out, err = capsys.readouterr()
     assert "aocd: error: argument -u/--user: invalid choice 'z' (choose from bill, teddy)" in err

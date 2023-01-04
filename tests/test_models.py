@@ -24,8 +24,9 @@ def test_get_answer(aocd_data_dir):
 def test_get_answer_not_existing(aocd_data_dir, requests_mock):
     requests_mock.get("https://adventofcode.com/2017/day/13")
     puzzle = Puzzle(day=13, year=2017)
-    with pytest.raises(AttributeError("answer_b")):
+    with pytest.raises(AttributeError) as exc_info:
         puzzle.answer_b
+    assert "answer_b" == str(exc_info.value)
 
 
 def test_get_answer_not_existing_ok_on_25dec(aocd_data_dir):
@@ -104,9 +105,9 @@ def test_setattr_doesnt_submit_both_if_done(mocker, aocd_data_dir):
 def test_solve_no_plugs(mocker):
     mock = mocker.patch("pkg_resources.iter_entry_points", return_value=iter([]))
     puzzle = Puzzle(year=2018, day=1)
-    expected = AocdError("Puzzle.solve is only available with unique entry point")
-    with pytest.raises(expected):
+    with pytest.raises(AocdError) as exc_info:
         puzzle.solve()
+    assert "Puzzle.solve is only available with unique entry point" == str(exc_info.value)
     mock.assert_called_once_with(group="adventofcode.user")
 
 
@@ -144,8 +145,9 @@ def test_solve_for_unfound_user(aocd_data_dir, mocker):
     other_plug.name = "otherplugin"
     mocker.patch("pkg_resources.iter_entry_points", return_value=iter([other_plug]))
     puzzle = Puzzle(year=2018, day=1)
-    with pytest.raises(AocdError("No entry point found for 'myplugin'")):
+    with pytest.raises(AocdError) as exc_info:
         puzzle.solve_for("myplugin")
+    assert "No entry point found for 'myplugin'" == str(exc_info.value)
     other_plug.load.assert_not_called()
     other_plug.load.return_value.assert_not_called()
 
@@ -231,8 +233,9 @@ def test_get_stats_when_token_expired(requests_mock):
         text="<article><p>Below is the <em>Advent of Code 2019</em> overall leaderboard</p></article>"
     )
     expected_msg = "the auth token ...5678 is expired or not functioning"
-    with pytest.raises(DeadTokenError(expected_msg)):
+    with pytest.raises(DeadTokenError) as exc_info:
         user.get_stats(years=[2019])
+    assert expected_msg == str(exc_info.value)
 
 
 def test_get_stats_when_no_stars_yet(requests_mock):
@@ -359,8 +362,9 @@ def test_user_from_id(aocd_config_dir):
 def test_user_from_unknown_id(aocd_config_dir):
     cache = aocd_config_dir / "tokens.json"
     cache.write_text('{"github.testuser.123456":"testtoken"}')
-    with pytest.raises(UnknownUserError("User with id 'blah' is not known")):
+    with pytest.raises(UnknownUserError) as exc_info:
         User.from_id("blah")
+    assert "User with id 'blah' is not known" == str(exc_info.value)
 
 
 def test_example_data_cache(aocd_data_dir, requests_mock):

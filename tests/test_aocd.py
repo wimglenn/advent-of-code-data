@@ -66,5 +66,6 @@ def test_get_numbers_via_import(mocker):
 
 
 def test_attribute_errors_have_context():
-    with pytest.raises(AttributeError("nope")):
+    with pytest.raises(AttributeError) as exc_info:
         aocd.nope
+    assert "nope" == str(exc_info.value)

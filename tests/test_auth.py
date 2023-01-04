@@ -6,8 +6,9 @@ from aocd.models import default_user
 
 def test_no_session_id(test_token, capsys):
     test_token.unlink()
-    with pytest.raises(AocdError("Missing session ID")):
+    with pytest.raises(AocdError) as exc_info:
         default_user()
+    assert "Missing session ID" == str(exc_info.value)
     out, err = capsys.readouterr()
     assert out == ""
     assert "ERROR: AoC session ID is needed to get your puzzle data!" in err
