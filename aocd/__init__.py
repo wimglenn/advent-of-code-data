@@ -14,58 +14,30 @@ from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
 from .get import get_data
 from .get import get_day_and_year
-from .post import submit
+from .post import submit as _impartial_submit
 from .utils import AOC_TZ
 
 
-__all__ = [
-    "cli",
-    "cookies",
-    "exceptions",
-    "get",
-    "models",
-    "post",
-    "runner",
-    "utils",
-    "data",
-    "get_data",
-    "submit",
-    "AocdError",
-    "PuzzleUnsolvedError",
-    "AOC_TZ",
-    "_ipykernel",
-]
-
-# Add declaration for magic attribute `data` to make it discoverable by static analysis tools.
-data = ""
-
-
-class Aocd(object):
-    _module = sys.modules[__name__]
-
-    def __dir__(self):
-        return __all__
-
-    def __getattr__(self, name):
-        if name == "data":
+def __getattr__(name):
+    if name == "data":
+        day, year = get_day_and_year()
+        return get_data(day=day, year=year)
+    if name == "submit":
+        try:
             day, year = get_day_and_year()
-            return get_data(day=day, year=year)
-        if name == "submit":
-            try:
-                day, year = get_day_and_year()
-            except AocdError:
-                return submit
-            else:
-                return partial(submit, day=day, year=year)
-        if name in dir(self):
-            return globals()[name]
-        raise AttributeError(name)
+        except AocdError:
+            return _impartial_submit
+        else:
+            return partial(_impartial_submit, day=day, year=year)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
-
-sys.modules[__name__] = Aocd()
 
 
 if sys.platform == "win32":
     import colorama
 
     colorama.init(autoreset=True)
+
+
+# hackish - this tricks __getattr__ not to invoke importlib._bootstrap._handle_fromlist
+del sys.modules[__name__].__path__

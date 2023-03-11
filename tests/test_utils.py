@@ -1,5 +1,4 @@
 import platform
-import sys
 
 import pytest
 from freezegun import freeze_time
@@ -11,13 +10,8 @@ from aocd.utils import get_owner
 
 
 cpython = platform.python_implementation() == "CPython"
-winblows = sys.platform == "win32"
-py27 = sys.version_info[:2] == (2, 7)
-py27_on_windows = py27 and winblows
-# see https://github.com/spulec/freezegun/issues/253
 
 
-@pytest.mark.xfail(py27_on_windows, reason="freezegun tick is not working on py2.7 windows")
 @pytest.mark.xfail(not cpython, reason="freezegun tick is not working on pypy")
 def test_blocker(capsys):
     with freeze_time("2020-11-30 23:59:59.8-05:00", tick=True):

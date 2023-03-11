@@ -38,7 +38,7 @@ URL = "https://adventofcode.com/{year}/day/{day}"
 USER_AGENT = {"User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"}
 
 
-class User(object):
+class User:
 
     _token2id = None
 
@@ -162,7 +162,7 @@ def default_user():
     raise AocdError("Missing session ID")
 
 
-class Puzzle(object):
+class Puzzle:
     def __init__(self, year, day, user=None):
         self.year = year
         self.day = day
