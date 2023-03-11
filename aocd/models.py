@@ -1,9 +1,3 @@
-# coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import errno
 import io
 import json
@@ -15,10 +9,10 @@ import time
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
+from importlib.metadata import entry_points
 from textwrap import dedent
 
 import bs4
-import pkg_resources
 import requests
 from termcolor import colored
 from termcolor import cprint
@@ -515,14 +509,14 @@ class Puzzle(object):
 
     def solve(self):
         try:
-            [ep] = pkg_resources.iter_entry_points(group="adventofcode.user")
+            [ep] = entry_points(group="adventofcode.user")
         except ValueError:
             raise AocdError("Puzzle.solve is only available with unique entry point")
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
     def solve_for(self, plugin):
-        for ep in pkg_resources.iter_entry_points(group="adventofcode.user"):
+        for ep in entry_points(group="adventofcode.user"):
             if ep.name == plugin:
                 break
         else:

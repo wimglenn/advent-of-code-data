@@ -1,9 +1,3 @@
-# coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import itertools
 import logging
 import os
@@ -13,9 +7,9 @@ import time
 from argparse import ArgumentParser
 from collections import OrderedDict
 from datetime import datetime
+from importlib.metadata import entry_points
 
 import pebble.concurrent
-import pkg_resources
 from functools import partial
 from termcolor import colored
 
@@ -36,8 +30,8 @@ log = logging.getLogger(__name__)
 
 
 def main():
-    entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
-    plugins = OrderedDict([(ep.name, ep) for ep in entry_points])
+    eps = entry_points(group="adventofcode.user")
+    plugins = OrderedDict([(ep.name, ep) for ep in eps])
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
@@ -176,22 +170,24 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
 
 
 def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True, reopen=False, capture=False):
+    if timeout == 0:
+        timeout = float("inf")
     aoc_now = datetime.now(tz=AOC_TZ)
-    all_entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
-    entry_points = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
+    all_entry_points = entry_points(group="adventofcode.user")
+    eps = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
     it = itertools.product(years, days, plugins, datasets)
     userpad = 3
     datasetpad = 8
     n_incorrect = 0
-    if entry_points:
-        userpad = len(max(entry_points, key=len))
+    if eps:
+        userpad = len(max(eps, key=len))
     if datasets:
         datasetpad = len(max(datasets, key=len))
     for year, day, plugin, dataset in it:
         if year == aoc_now.year and day > aoc_now.day:
             continue
         token = datasets[dataset]
-        entry_point = entry_points[plugin]
+        entry_point = eps[plugin]
         os.environ["AOC_SESSION"] = token
         puzzle = Puzzle(year=year, day=day)
         title = puzzle.title
