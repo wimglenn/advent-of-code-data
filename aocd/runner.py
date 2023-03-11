@@ -54,7 +54,7 @@ def main():
         print(
             "There are no datasets available to use.\n"
             "Either export your AOC_SESSION or put some auth "
-            "tokens into {}".format(path),
+            f"tokens into {path}",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -176,13 +176,10 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
     all_entry_points = entry_points(group="adventofcode.user")
     eps = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
     it = itertools.product(years, days, plugins, datasets)
-    userpad = 3
-    datasetpad = 8
     n_incorrect = 0
-    if eps:
-        userpad = len(max(eps, key=len))
-    if datasets:
-        datasetpad = len(max(datasets, key=len))
+    # padding values for alignment
+    wp = len(max(eps, key=len)) if eps else 3
+    wd = len(max(datasets, key=len)) if datasets else 8
     for year, day, plugin, dataset in it:
         if year == aoc_now.year and day > aoc_now.day:
             continue
@@ -191,9 +188,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
         os.environ["AOC_SESSION"] = token
         puzzle = Puzzle(year=year, day=day)
         title = puzzle.title
-        progress = "{}/{:<2d} - {:<40}   {:>%d}/{:<%d}"
-        progress %= (userpad, datasetpad)
-        progress = progress.format(year, day, title, plugin, dataset)
+        progress = f"{year}/{day:<2d} - {title:<40}   {plugin:>{wp}}/{dataset:<{wd}}"
         a, b, walltime, error = run_one(
             year=year,
             day=day,
@@ -211,7 +206,6 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
             n_incorrect += 1
             line += f"   {icon} {error}"
         else:
-            result_template = "   {icon} part {part}: {answer}"
             for answer, part in zip((a, b), "ab"):
                 if day == 25 and part == "b":
                     # there's no part b on christmas day, skip
@@ -243,6 +237,6 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                 answer = f"{answer} {correction}"
                 if part == "a":
                     answer = answer.ljust(30)
-                line += result_template.format(icon=icon, part=part, answer=answer)
+                line += f"   {icon} part {part}: {answer}"
         print(line)
     return n_incorrect

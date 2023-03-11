@@ -117,8 +117,8 @@ def scrape_session_tokens():
         sys.exit("could not find any working tokens in browser cookies, sorry :(")
 
     log.debug("found %d live tokens", len(working))
-    for cookie in working.items():
-        print("%s <- %s" % cookie)
+    for token, auth_source in working.items():
+        print(f"{token} <- {auth_source}")
 
     if "AOC_SESSION" not in os.environ:
         if not os.path.isfile(aocd_token_file):

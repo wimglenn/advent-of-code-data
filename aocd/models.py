@@ -109,8 +109,8 @@ class User:
             if soup.article is None and "You haven't collected any stars" in soup.main.text:
                 continue
             if soup.article.pre is None and "overall leaderboard" in soup.article.text:
-                msg = "the auth token ...{} is expired or not functioning"
-                raise DeadTokenError(msg.format(self.token[-4:]))
+                msg = f"the auth token ...{self.token[-4:]} is expired or not functioning"
+                raise DeadTokenError(msg)
             stats_txt = soup.article.pre.text
             lines = stats_txt.splitlines()
             lines = [x for x in lines if x.split()[0] in days]
@@ -149,16 +149,16 @@ def default_user():
         return User(token=cookie)
 
     msg = dedent(
-        """\
+        f"""\
         ERROR: AoC session ID is needed to get your puzzle data!
         You can find it in your browser cookies after login.
-            1) Save the cookie into a text file {}, or
+            1) Save the cookie into a text file {os.path.join(AOCD_CONFIG_DIR, "token")}, or
             2) Export the cookie in environment variable AOC_SESSION
 
         See https://github.com/wimglenn/advent-of-code-wim/issues/1 for more info.
         """
     )
-    cprint(msg.format(os.path.join(AOCD_CONFIG_DIR, "token")), color="red", file=sys.stderr)
+    cprint(msg, color="red", file=sys.stderr)
     raise AocdError("Missing session ID")
 
 
@@ -253,8 +253,8 @@ class Puzzle:
         if cycle:
             p.text(repr(self))
         else:
-            template = "<{0}({1.year}, {1.day}) at {2} - {1.title}>"
-            p.text(template.format(type(self).__name__, self, hex(id(self))))
+            txt = f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
+            p.text(txt)
 
     def _coerce_val(self, val):
         if isinstance(val, float) and val.is_integer():
@@ -334,8 +334,7 @@ class Puzzle:
         bad_guesses = getattr(self, "incorrect_answers_" + part)
         if value in bad_guesses:
             if not quiet:
-                msg = "aocd will not submit that answer again. You've previously guessed {} and the server responded:"
-                print(msg.format(value))
+                print(f"aocd will not submit that answer again. You've previously guessed {value} and the server responded:")
                 cprint(bad_guesses[value], "red")
             return
         if part == "b" and value == getattr(self, "answer_a", None):
@@ -417,13 +416,10 @@ class Puzzle:
                 return None
         except PuzzleUnsolvedError:
             return None
-
         if answer == guess:
-            template = "Part {part} already solved with same answer: {answer}"
+            return f"Part {part} already solved with same answer: {answer}"
         else:
-            template = colored("Part {part} already solved with different answer: {answer}", "red")
-
-        return template.format(part=part, answer=answer)
+            return colored(f"Part {part} already solved with different answer: {answer}", "red")
 
     def _save_correct_answer(self, value, part):
         fname = getattr(self, f"answer_{part}_fname")
