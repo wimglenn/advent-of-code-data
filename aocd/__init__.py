@@ -10,7 +10,6 @@ from . import post
 from . import runner
 from . import transforms
 from . import utils
-from . import version
 from . import _ipykernel
 from .exceptions import AocdError
 from .exceptions import PuzzleUnsolvedError
@@ -18,7 +17,6 @@ from .get import get_data
 from .get import get_day_and_year
 from .post import submit
 from .utils import AOC_TZ
-from .version import __version__
 
 
 __all__ = [
@@ -30,12 +28,10 @@ __all__ = [
     "post",
     "runner",
     "utils",
-    "version",
     "data",
     "get_data",
     "submit",
     "transforms",
-    "__version__",
     "AocdError",
     "PuzzleUnsolvedError",
     "AOC_TZ",

@@ -20,7 +20,7 @@ def test_get_session_id_from_env(monkeypatch):
 
 
 def test_get_session_id_from_file(test_token):
-    test_token.write_text(u"tokenfromfile")
+    test_token.write_text("tokenfromfile")
     user = default_user()
     assert user.token == "tokenfromfile"
 

@@ -10,6 +10,7 @@ import webbrowser
 from datetime import datetime
 from datetime import timedelta
 from importlib.metadata import entry_points
+from importlib.metadata import version
 from textwrap import dedent
 
 import bs4
@@ -26,15 +27,15 @@ from .utils import AOC_TZ
 from .utils import _ensure_intermediate_dirs
 from .utils import atomic_write_file
 from .utils import get_owner
-from .version import __version__
 
 
 log = logging.getLogger(__name__)
 
+_v = version("advent-of-code-data")
 AOCD_DATA_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", os.path.join("~", ".config", "aocd")))
 AOCD_CONFIG_DIR = os.path.expanduser(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR))
 URL = "https://adventofcode.com/{year}/day/{day}"
-USER_AGENT = {"User-Agent": "github.com/wimglenn/advent-of-code-data v{} by hey@wimglenn.com".format(__version__)}
+USER_AGENT = {"User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"}
 
 
 class User(object):
@@ -323,7 +324,7 @@ class Puzzle(object):
         return self._get_bad_guesses(part="b")
 
     def _submit(self, value, part, reopen=True, quiet=False):
-        if value in {u"", b"", None, b"None", u"None"}:
+        if value in {"", b"", None, b"None", "None"}:
             raise AocdError("cowardly refusing to submit non-answer: {!r}".format(value))
         if not isinstance(value, str):
             value = self._coerce_val(value)

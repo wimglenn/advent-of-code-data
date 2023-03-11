@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import threading
+from importlib.metadata import version
 
 import pytest
 
@@ -41,7 +42,7 @@ def test_saved_data_is_reused_if_available(aocd_data_dir, requests_mock):
     )
     cached = aocd_data_dir / "testauth.testuser.000/2018_01_input.txt"
     cached.touch()
-    cached.write_text(u"saved data for year 2018 day 1")
+    cached.write_text("saved data for year 2018 day 1")
     data = aocd.get_data(year=2018, day=1)
     assert data == "saved data for year 2018 day 1"
     assert not mock.called
@@ -102,7 +103,8 @@ def test_aocd_user_agent_in_req_headers(requests_mock):
     aocd.get_data(year=2018, day=1)
     assert mock.call_count == 1
     headers = mock.last_request._request.headers
-    expected = "github.com/wimglenn/advent-of-code-data v{} by hey@wimglenn.com".format(aocd.__version__)
+    v = version("advent-of-code-data")
+    expected = f"github.com/wimglenn/advent-of-code-data v{v} by hey@wimglenn.com"
     assert headers["User-Agent"] == expected
 
 
