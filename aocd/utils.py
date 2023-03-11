@@ -88,7 +88,7 @@ def get_owner(token):
     if response.status_code != 200:
         # bad tokens will 302 redirect to main page
         log.info("session %s is dead - status_code=%s", token, response.status_code)
-        raise DeadTokenError("the auth token ...{} is expired or not functioning".format(token[-4:]))
+        raise DeadTokenError(f"the auth token ...{token[-4:]} is expired or not functioning")
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     auth_source = "unknown"
     username = "unknown"
@@ -131,8 +131,8 @@ def _cli_guess(choice, choices):
         return choice
     candidates = [c for c in choices if choice in c]
     if len(candidates) > 1:
-        raise argparse.ArgumentTypeError("{} ambiguous (could be {})".format(choice, ", ".join(candidates)))
+        raise argparse.ArgumentTypeError(f"{choice} ambiguous (could be {', '.join(candidates)})")
     elif not candidates:
-        raise argparse.ArgumentTypeError("invalid choice {!r} (choose from {})".format(choice, ", ".join(choices)))
+        raise argparse.ArgumentTypeError(f"invalid choice {choice!r} (choose from {', '.join(choices)})")
     [result] = candidates
     return result

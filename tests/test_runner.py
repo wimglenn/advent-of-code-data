@@ -22,14 +22,12 @@ def test_no_plugins_avail(capsys, mocker):
 
 
 def test_no_datasets_avail(capsys, mocker, aocd_config_dir):
-    datasets_file = aocd_config_dir / "tokens.json"
-    datasets_file.write_text("{}")
+    tokens_file = aocd_config_dir / "tokens.json"
+    tokens_file.write_text("{}")
     mocker.patch("sys.argv", ["aoc"])
     msg = (
         "There are no datasets available to use.\n"
-        "Either export your AOC_SESSION or put some auth tokens into {}\n".format(
-            datasets_file
-        )
+        f"Either export your AOC_SESSION or put some auth tokens into {tokens_file}\n"
     )
     with pytest.raises(SystemExit(1)):
         main()
@@ -44,8 +42,8 @@ def test_main(capsys, mocker, aocd_config_dir):
     ep2 = mocker.Mock()
     ep2.name = "user2"
     mocker.patch("aocd.runner.entry_points", return_value=[ep1, ep2])
-    datasets_file = aocd_config_dir / "tokens.json"
-    datasets_file.write_text('{"data1": "token1", "data2": "token2"}')
+    tokens_file = aocd_config_dir / "tokens.json"
+    tokens_file.write_text('{"data1": "token1", "data2": "token2"}')
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
     with pytest.raises(SystemExit(0)):
         main()

@@ -105,11 +105,11 @@ def scrape_session_tokens():
             try:
                 owner = get_owner(token)
             except DeadTokenError:
-                cprint("{} ({}) is dead".format(token, name), color="red")
+                cprint(f"{token} ({name}) is dead", color="red")
             else:
-                print("{} ({}) is alive".format(token, name))
+                print(f"{token} ({name}) is alive")
                 if name != owner:
-                    log.info("{} ({}) is owned by {}".format(token, name, owner))
+                    log.info(f"{token} ({name}) is owned by {owner}")
         sys.exit(0)
 
     working = get_working_tokens()

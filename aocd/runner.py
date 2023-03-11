@@ -138,13 +138,13 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
         color = "yellow"
     else:
         color = "red"
-    runtime = colored("{: 7.2f}s".format(t), color)
+    runtime = colored(f"{t: 7.2f}s", color)
     return runtime
 
 
 def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False):
     prev = os.getcwd()
-    scratch = tempfile.mkdtemp(prefix="{}-{:02d}-".format(year, day))
+    scratch = tempfile.mkdtemp(prefix=f"{year}-{day:02d}-")
     os.chdir(scratch)
     assert not os.path.exists("input.txt")
     try:
@@ -209,7 +209,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
             assert a == b == ""
             icon = colored("✖", "red")
             n_incorrect += 1
-            line += "   {icon} {error}".format(icon=icon, error=error)
+            line += f"   {icon} {error}"
         else:
             result_template = "   {icon} part {part}: {answer}"
             for answer, part in zip((a, b), "ab"):
@@ -239,8 +239,8 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                         icon = colored("?", "magenta")
                         correction = "(correct answer unknown)"
                     else:
-                        correction = "(expected: {})".format(expected)
-                answer = "{} {}".format(answer, correction)
+                        correction = f"(expected: {expected})"
+                answer = f"{answer} {correction}"
                 if part == "a":
                     answer = answer.ljust(30)
                 line += result_template.format(icon=icon, part=part, answer=answer)

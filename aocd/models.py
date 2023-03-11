@@ -50,7 +50,7 @@ class User:
     def from_id(cls, id):
         users = _load_users()
         if id not in users:
-            raise UnknownUserError("User with id '{}' is not known".format(id))
+            raise UnknownUserError(f"User with id '{id}' is not known")
         user = cls(users[id])
         user._owner = id
         return user
@@ -86,7 +86,7 @@ class User:
         return owner
 
     def __str__(self):
-        return "<{} {} (token=...{})>".format(type(self).__name__, self._owner, self.token[-4:])
+        return f"<{type(self).__name__} {self._owner} (token=...{self.token[-4:]})>"
 
     @property
     def memo_dir(self):
@@ -102,7 +102,7 @@ class User:
         days = {str(i) for i in range(1, 26)}
         results = {}
         for year in years:
-            url = "https://adventofcode.com/{}/leaderboard/self".format(year)
+            url = f"https://adventofcode.com/{year}/leaderboard/self"
             response = requests.get(url, cookies=self.auth, headers=USER_AGENT)
             response.raise_for_status()
             soup = bs4.BeautifulSoup(response.text, "html.parser")
@@ -171,7 +171,7 @@ class Puzzle:
         self._user = user
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
-        fname = "{}_{:02d}".format(self.year, self.day)
+        fname = f"{self.year}_{self.day:02d}"
         prefix = os.path.join(self.user.memo_dir, fname)
         self.input_data_fname = prefix + "_input.txt"
         self.example_input_data_fname = prefix + "_example_input.txt"
@@ -182,7 +182,7 @@ class Puzzle:
         self.title_fname = os.path.join(
             AOCD_DATA_DIR,
             "titles",
-            "{}_{:02d}.txt".format(self.year, self.day)
+            f"{self.year}_{self.day:02d}.txt"
         )
         self._title = ""
 
@@ -209,7 +209,7 @@ class Puzzle:
         )
         if not response.ok:
             if response.status_code == 404:
-                raise PuzzleLockedError("{}/{:02d} not available yet".format(self.year, self.day))
+                raise PuzzleLockedError(f"{self.year}/{self.day:02d} not available yet")
             log.error("got %s status code token=%s", response.status_code, sanitized)
             log.error(response.text)
             raise AocdError("Unexpected response")
@@ -325,7 +325,7 @@ class Puzzle:
 
     def _submit(self, value, part, reopen=True, quiet=False):
         if value in {"", b"", None, b"None", "None"}:
-            raise AocdError("cowardly refusing to submit non-answer: {!r}".format(value))
+            raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
             value = self._coerce_val(value)
         part = str(part).replace("1", "a").replace("2", "b").lower()
@@ -339,7 +339,7 @@ class Puzzle:
                 cprint(bad_guesses[value], "red")
             return
         if part == "b" and value == getattr(self, "answer_a", None):
-            raise AocdError("cowardly refusing to re-submit answer_a ({}) for part b".format(value))
+            raise AocdError(f"cowardly refusing to re-submit answer_a ({value}) for part b")
         url = self.submit_url
         check_guess = self._check_guess_against_existing(value, part)
         if check_guess is not None:
@@ -360,7 +360,7 @@ class Puzzle:
         if not response.ok:
             log.error("got %s status code", response.status_code)
             log.error(response.text)
-            raise AocdError("Non-200 response for POST: {}".format(response))
+            raise AocdError(f"Non-200 response for POST: {response}")
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         message = soup.article.text
         color = None
@@ -426,7 +426,7 @@ class Puzzle:
         return template.format(part=part, answer=answer)
 
     def _save_correct_answer(self, value, part):
-        fname = getattr(self, "answer_{}_fname".format(part))
+        fname = getattr(self, f"answer_{part}_fname")
         _ensure_intermediate_dirs(fname)
         txt = value.strip()
         msg = "saving"
@@ -444,7 +444,7 @@ class Puzzle:
             f.write(txt)
 
     def _save_incorrect_answer(self, value, part, extra=""):
-        fname = getattr(self, "incorrect_answers_{}_fname".format(part))
+        fname = getattr(self, f"incorrect_answers_{part}_fname")
         _ensure_intermediate_dirs(fname)
         msg = "appending an incorrect answer for %d/%02d part %s"
         log.info(msg, self.year, self.day, part)
@@ -458,7 +458,7 @@ class Puzzle:
             log.warning("heading not found")
             return
         txt = soup.h2.text.strip("- ")
-        prefix = "Day {}: ".format(self.day)
+        prefix = f"Day {self.day}: "
         if not txt.startswith(prefix):
             log.error("weird heading, wtf? %s", txt)
             return
@@ -474,7 +474,7 @@ class Puzzle:
         """
         if part == "b" and self.day == 25:
             return ""
-        answer_fname = getattr(self, "answer_{}_fname".format(part))
+        answer_fname = getattr(self, f"answer_{part}_fname")
         if os.path.isfile(answer_fname):
             with open(answer_fname) as f:
                 return f.read().strip()
@@ -495,11 +495,11 @@ class Puzzle:
         if os.path.isfile(answer_fname):
             with open(answer_fname) as f:
                 return f.read().strip()
-        msg = "Answer {}-{}{} is not available".format(self.year, self.day, part)
+        msg = f"Answer {self.year}-{self.day}{part} is not available"
         raise PuzzleUnsolvedError(msg)
 
     def _get_bad_guesses(self, part):
-        fname = getattr(self, "incorrect_answers_{}_fname".format(part))
+        fname = getattr(self, f"incorrect_answers_{part}_fname")
         result = {}
         if os.path.isfile(fname):
             with open(fname) as f:
@@ -521,7 +521,7 @@ class Puzzle:
             if ep.name == plugin:
                 break
         else:
-            raise AocdError("No entry point found for '{}'".format(plugin))
+            raise AocdError(f"No entry point found for {plugin!r}")
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
