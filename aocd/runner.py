@@ -5,7 +5,6 @@ import sys
 import tempfile
 import time
 from argparse import ArgumentParser
-from collections import OrderedDict
 from datetime import datetime
 from importlib.metadata import entry_points
 
@@ -31,7 +30,7 @@ log = logging.getLogger(__name__)
 
 def main():
     eps = entry_points(group="adventofcode.user")
-    plugins = OrderedDict([(ep.name, ep) for ep in eps])
+    plugins = {ep.name: ep for ep in eps}
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
