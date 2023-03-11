@@ -8,7 +8,6 @@ from . import get
 from . import models
 from . import post
 from . import runner
-from . import transforms
 from . import utils
 from . import _ipykernel
 from .exceptions import AocdError
@@ -31,13 +30,11 @@ __all__ = [
     "data",
     "get_data",
     "submit",
-    "transforms",
     "AocdError",
     "PuzzleUnsolvedError",
     "AOC_TZ",
     "_ipykernel",
 ]
-__all__ += transforms.__all__
 
 # Add declaration for magic attribute `data` to make it discoverable by static analysis tools.
 data = ""
@@ -60,9 +57,6 @@ class Aocd(object):
                 return submit
             else:
                 return partial(submit, day=day, year=year)
-        if name in transforms.__all__:
-            transform = getattr(transforms, name)
-            return transform(self.data)
         if name in dir(self):
             return globals()[name]
         raise AttributeError(name)

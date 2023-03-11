@@ -45,26 +45,6 @@ def test_get_data_via_import_in_interactive_mode(monkeypatch, mocker, freezer):
     assert data == "repl data"
 
 
-def test_get_lines_via_import(mocker):
-    fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
-    mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    mock = mocker.patch("aocd._module.get_data", return_value="line 1\nline 2\nline 3")
-    from aocd import lines
-
-    mock.assert_called_once_with(day=23, year=2017)
-    assert lines == ["line 1", "line 2", "line 3"]
-
-
-def test_get_numbers_via_import(mocker):
-    fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
-    mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    mock = mocker.patch("aocd._module.get_data", return_value="1\n2\n3")
-    from aocd import numbers
-
-    mock.assert_called_once_with(day=23, year=2017)
-    assert numbers == [1, 2, 3]
-
-
 def test_attribute_errors_have_context():
     with pytest.raises(AttributeError("nope")):
         aocd.nope
