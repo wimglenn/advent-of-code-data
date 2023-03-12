@@ -34,5 +34,5 @@ def test_env_takes_priority_over_file(monkeypatch, test_token):
 def test_problem_loading_session_id_is_left_unhandled(test_token):
     test_token.unlink()
     test_token.mkdir()
-    with pytest.raises(IsADirectoryError):
+    with pytest.raises(OSError):
         default_user()

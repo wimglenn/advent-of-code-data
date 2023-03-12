@@ -122,7 +122,7 @@ def test_data_is_cached_from_successful_request(aocd_data_dir, requests_mock):
 def test_corrupted_cache(aocd_data_dir):
     cached = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     cached.mkdir(parents=True)
-    with pytest.raises(IsADirectoryError):
+    with pytest.raises(OSError):
         aocd.get_data(year=2018, day=1)
 
 
