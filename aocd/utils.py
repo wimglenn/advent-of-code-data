@@ -1,5 +1,7 @@
 import argparse
 import logging
+import os
+import platform
 import shutil
 import sys
 import tempfile
@@ -130,6 +132,8 @@ def _cli_guess(choice, choices):
 
 
 _ansi_colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+if platform.system() == "Windows":
+    os.system("color")  # makes ANSI colors work in the windows cmd window
 
 
 def colored(txt, color):
