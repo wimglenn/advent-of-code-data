@@ -18,6 +18,7 @@ dependencies = [
     "beautifulsoup4",
     "pebble",
     "requests",
+    'tzdata ; platform_system == "Windows"',
 ]
 
 [[project.authors]]
