@@ -1,5 +1,4 @@
 import argparse
-import curses
 import logging
 import shutil
 import sys
@@ -130,12 +129,15 @@ def _cli_guess(choice, choices):
     return result
 
 
+_ansi_colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+
+
 def colored(txt, color):
     if color is None:
         return txt
-    code = 30 + getattr(curses, f"COLOR_{color.upper()}")
+    code = _ansi_colors.index(color.casefold())
     reset = "\x1b[0m"
-    return f"\x1b[{code}m{txt}{reset}"
+    return f"\x1b[{code + 30}m{txt}{reset}"
 
 
 def get_plugins(group="adventofcode.user"):
