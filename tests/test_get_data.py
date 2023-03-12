@@ -112,7 +112,7 @@ def test_data_is_cached_from_successful_request(aocd_data_dir, requests_mock):
         url="https://adventofcode.com/2018/day/1/input",
         text="fake data for year 2018 day 1",
     )
-    cached = aocd_data_dir / "testauth.testuser.000/2018_01_input.txt"
+    cached = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     assert not cached.exists()
     aocd.get_data(year=2018, day=1)
     assert cached.exists()
@@ -120,9 +120,9 @@ def test_data_is_cached_from_successful_request(aocd_data_dir, requests_mock):
 
 
 def test_corrupted_cache(aocd_data_dir):
-    cached = aocd_data_dir / "testauth.testuser.000/2018_01_input.txt"
+    cached = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     cached.mkdir(parents=True)
-    with pytest.raises(IOError):
+    with pytest.raises(IsADirectoryError):
         aocd.get_data(year=2018, day=1)
 
 
@@ -149,7 +149,7 @@ def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
         def open_impl(file, *args, **kwargs):
             res = real_open(file, *args, **kwargs)
             filename = fds[file] if isinstance(file, int) else file
-            if "aocd-data" not in filename:
+            if "aocd-data" not in str(filename):
                 return res
             open_evt.set()
             real_write = res.write
@@ -160,7 +160,6 @@ def test_race_on_download_data(mocker, aocd_data_dir, requests_mock):
             return res
         return open_impl
     mocker.patch("io.open", side_effect=generate_open(io.open))
-    mocker.patch("builtins.open", side_effect=generate_open(open))
 
     t = threading.Thread(target=aocd.get_data, kwargs={"year": 2018, "day": 1})
     t.start()

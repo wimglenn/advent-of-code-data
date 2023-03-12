@@ -62,9 +62,8 @@ def test_get_owner_google(requests_mock):
 
 
 def test_atomic_write_file(aocd_data_dir):
-    target = aocd_data_dir / "foo/bar/baz.txt"
-    # Python 2.7 requires inputs to os.path.expanduser to be strings, not PosixPath (which is missing startswith)
-    atomic_write_file(str(target), "123")  # no clobber
+    target = aocd_data_dir / "foo" / "bar" / "baz.txt"
+    atomic_write_file(target, "123")  # no clobber
     assert target.read_text() == "123"
-    atomic_write_file(str(target), "456")  # clobber existing
+    atomic_write_file(target, "456")  # clobber existing
     assert target.read_text() == "456"

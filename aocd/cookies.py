@@ -65,8 +65,8 @@ def get_working_tokens():
 
 
 def scrape_session_tokens():
-    aocd_token_file = os.path.join(AOCD_CONFIG_DIR, "token")
-    aocd_tokens_file = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
+    aocd_token_path = AOCD_CONFIG_DIR / "token"
+    aocd_tokens_path = AOCD_CONFIG_DIR / "tokens.json"
 
     parser = argparse.ArgumentParser(description="Scrapes AoC session tokens from your browser's cookie storage")
     parser.add_argument("-v", "--verbose", action="count", help="increased logging (may be specified multiple)")
@@ -87,14 +87,12 @@ def scrape_session_tokens():
             tokens = {}
             if os.environ.get("AOC_SESSION"):
                 tokens["AOC_SESSION"] = os.environ["AOC_SESSION"]
-            if os.path.isfile(aocd_token_file):
-                with open(aocd_token_file) as f:
-                    txt = f.read().strip()
-                    if txt:
-                        tokens[aocd_token_file] = txt.split()[0]
-            if os.path.isfile(aocd_tokens_file):
-                with open(aocd_tokens_file) as f:
-                    tokens.update(json.load(f))
+            if aocd_token_path.is_file():
+                txt = aocd_token_path.read_text().strip()
+                if txt:
+                    tokens[aocd_token_path] = txt.split()[0]
+            if aocd_tokens_path.is_file():
+                tokens.update(json.loads(aocd_tokens_path.read_text()))
         else:
             tokens = {"CLI": args.check}
         if not tokens:
@@ -120,10 +118,9 @@ def scrape_session_tokens():
         print(f"{token} <- {auth_source}")
 
     if "AOC_SESSION" not in os.environ:
-        if not os.path.isfile(aocd_token_file):
+        if not aocd_token_path.is_file():
             if len(working) == 1:
                 [(token, auth_source)] = working.items()
-                _ensure_intermediate_dirs(aocd_token_file)
-                with open(aocd_token_file, "w") as f:
-                    f.write(token)
-                    log.info("wrote %s session to %s", auth_source, aocd_token_file)
+                _ensure_intermediate_dirs(aocd_token_path)
+                aocd_token_path.write_text(token)
+                log.info("wrote %s session to %s", auth_source, aocd_token_path)

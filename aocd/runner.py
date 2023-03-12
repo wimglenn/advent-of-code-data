@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
 from importlib.metadata import entry_points
+from pathlib import Path
 
 import pebble.concurrent
 
@@ -49,7 +50,7 @@ def main():
     args = parser.parse_args()
 
     if not users:
-        path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
+        path = AOCD_CONFIG_DIR / "tokens.json"
         print(
             "There are no datasets available to use.\n"
             "Either export your AOC_SESSION or put some auth "
@@ -145,10 +146,10 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
     prev = os.getcwd()
     scratch = tempfile.mkdtemp(prefix=f"{year}-{day:02d}-")
     os.chdir(scratch)
-    assert not os.path.exists("input.txt")
+    input_path = Path("input.txt")
+    assert not input_path.exists()
     try:
-        with open("input.txt", "w") as f:
-            f.write(input_data)
+        input_path.write_text(input_data)
         a, b, walltime, error = run_with_timeout(
             entry_point=entry_point,
             timeout=timeout,
@@ -159,7 +160,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
             capture=capture,
         )
     finally:
-        os.unlink("input.txt")
+        input_path.unlink(missing_ok=True)
         os.chdir(prev)
         try:
             os.rmdir(scratch)

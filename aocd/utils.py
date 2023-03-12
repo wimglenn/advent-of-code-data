@@ -1,14 +1,13 @@
 import argparse
 import curses
-import errno
 import logging
-import os
 import shutil
 import sys
 import tempfile
 import time
 from datetime import datetime
 from itertools import cycle
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import bs4
@@ -22,16 +21,7 @@ AOC_TZ = ZoneInfo("America/New_York")
 
 
 def _ensure_intermediate_dirs(fname):
-    parent = os.path.dirname(os.path.expanduser(fname))
-    try:
-        os.makedirs(parent, exist_ok=True)
-    except TypeError:
-        # exist_ok not avail on Python 2
-        try:
-            os.makedirs(parent)
-        except (IOError, OSError) as err:
-            if err.errno != errno.EEXIST:
-                raise
+    Path(fname).expanduser().parent.mkdir(parents=True, exist_ok=True)
 
 
 def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
@@ -120,7 +110,7 @@ def atomic_write_file(fname, contents_str):
     renaming it to the final destination name. This solves a race condition where existence
     of a file doesn't necessarily mean the contents are all correct yet."""
     _ensure_intermediate_dirs(fname)
-    with tempfile.NamedTemporaryFile(mode="w", dir=os.path.dirname(fname), delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", dir=fname.parent, delete=False) as f:
         log.debug("writing to tempfile @ %s", f.name)
         f.write(contents_str)
     log.debug("moving %s -> %s", f.name, fname)
