@@ -5,11 +5,11 @@ import logging
 import os
 import sys
 
-from aocd.exceptions import DeadTokenError
-from aocd.models import AOCD_CONFIG_DIR
-from aocd.utils import _ensure_intermediate_dirs
-from aocd.utils import colored
-from aocd.utils import get_owner
+from .exceptions import DeadTokenError
+from .models import AOCD_CONFIG_DIR
+from .utils import _ensure_intermediate_dirs
+from .utils import colored
+from .utils import get_owner
 
 
 log = logging.getLogger(__name__)
