@@ -15,13 +15,9 @@ classifiers = [
     "Topic :: Games/Entertainment :: Puzzle Games",
 ]
 dependencies = [
-    "python-dateutil",
-    "requests",
-    "termcolor",
     "beautifulsoup4",
     "pebble",
-    'colorama; platform_system == "Windows"',
-    "tzlocal",
+    "requests",
 ]
 
 [[project.authors]]

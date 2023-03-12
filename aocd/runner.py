@@ -10,7 +10,6 @@ from importlib.metadata import entry_points
 
 import pebble.concurrent
 from functools import partial
-from termcolor import colored
 
 from .exceptions import AocdError
 from .models import AOCD_CONFIG_DIR
@@ -18,6 +17,7 @@ from .models import _load_users
 from .models import Puzzle
 from .utils import AOC_TZ
 from .utils import _cli_guess
+from .utils import colored
 
 
 # from https://adventofcode.com/about

@@ -11,11 +11,9 @@ from . import runner
 from . import utils
 from . import _ipykernel
 from .exceptions import AocdError
-from .exceptions import PuzzleUnsolvedError
 from .get import get_data
 from .get import get_day_and_year
 from .post import submit as _impartial_submit
-from .utils import AOC_TZ
 
 
 def __getattr__(name):
@@ -32,12 +30,7 @@ def __getattr__(name):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-
-if sys.platform == "win32":
-    import colorama
-
-    colorama.init(autoreset=True)
-
-
-# hackish - this tricks __getattr__ not to invoke importlib._bootstrap._handle_fromlist
+# pretend we're not a package, now that relative imports have been resolved.
+# hackish - this prevents the import statement `from aocd import data` from going into
+# importlib._bootstrap._handle_fromlist, which can cause __getattr__ to be called twice
 del sys.modules[__name__].__path__

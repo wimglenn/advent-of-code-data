@@ -1,10 +1,10 @@
 import pytest
-from termcolor import colored
 
 from aocd.runner import format_time
 from aocd.runner import main
 from aocd.runner import run_for
 from aocd.runner import run_one
+from aocd.utils import colored
 
 
 def test_no_plugins_avail(capsys, mocker):

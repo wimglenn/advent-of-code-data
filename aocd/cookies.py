@@ -5,11 +5,10 @@ import logging
 import os
 import sys
 
-from termcolor import cprint
-
 from aocd.exceptions import DeadTokenError
 from aocd.models import AOCD_CONFIG_DIR
 from aocd.utils import _ensure_intermediate_dirs
+from aocd.utils import colored
 from aocd.utils import get_owner
 
 
@@ -105,7 +104,7 @@ def scrape_session_tokens():
             try:
                 owner = get_owner(token)
             except DeadTokenError:
-                cprint(f"{token} ({name}) is dead", color="red")
+                print(colored(f"{token} ({name}) is dead", color="red"))
             else:
                 print(f"{token} ({name}) is alive")
                 if name != owner:

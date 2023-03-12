@@ -1,5 +1,6 @@
 import argparse
 import bs4
+import curses
 import errno
 import logging
 import os
@@ -8,16 +9,15 @@ import shutil
 import sys
 import tempfile
 import time
-import tzlocal
 from datetime import datetime
 from itertools import cycle
-from dateutil.tz import gettz
+from zoneinfo import ZoneInfo
 
 from .exceptions import DeadTokenError
 
 
 log = logging.getLogger(__name__)
-AOC_TZ = gettz("America/New_York")
+AOC_TZ = ZoneInfo("America/New_York")
 
 
 def _ensure_intermediate_dirs(fname):
@@ -57,7 +57,7 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
         # it should already be unlocked - nothing to do
         return
     spinner = cycle(r"\|/-")
-    localzone = tzlocal.get_localzone()
+    localzone = datetime.now().astimezone().tzinfo
     local_unlock = unlock.astimezone(tz=localzone)
     if datefmt is None:
         # %-I does not work on Windows, strip leading zeros manually
@@ -136,3 +136,11 @@ def _cli_guess(choice, choices):
         raise argparse.ArgumentTypeError(f"invalid choice {choice!r} (choose from {', '.join(choices)})")
     [result] = candidates
     return result
+
+
+def colored(txt, color):
+    if color is None:
+        return txt
+    code = 30 + getattr(curses, f"COLOR_{color.upper()}")
+    reset = "\x1b[0m"
+    return f"\x1b[{code}m{txt}{reset}"

@@ -15,8 +15,6 @@ from textwrap import dedent
 
 import bs4
 import requests
-from termcolor import colored
-from termcolor import cprint
 
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
@@ -26,6 +24,7 @@ from .exceptions import PuzzleLockedError
 from .utils import AOC_TZ
 from .utils import _ensure_intermediate_dirs
 from .utils import atomic_write_file
+from .utils import colored
 from .utils import get_owner
 
 
@@ -158,7 +157,7 @@ def default_user():
         See https://github.com/wimglenn/advent-of-code-wim/issues/1 for more info.
         """
     )
-    cprint(msg, color="red", file=sys.stderr)
+    print(colored(msg, color="red"), file=sys.stderr)
     raise AocdError("Missing session ID")
 
 
@@ -335,7 +334,7 @@ class Puzzle:
         if value in bad_guesses:
             if not quiet:
                 print(f"aocd will not submit that answer again. You've previously guessed {value} and the server responded:")
-                cprint(bad_guesses[value], "red")
+                print(colored(bad_guesses[value], "red"))
             return
         if part == "b" and value == getattr(self, "answer_a", None):
             raise AocdError(f"cowardly refusing to re-submit answer_a ({value}) for part b")
@@ -406,7 +405,7 @@ class Puzzle:
                 time.sleep(wait_time)
                 return self._submit(value=value, part=part, reopen=reopen, quiet=quiet)
         if not quiet:
-            cprint(message, color=color)
+            print(colored(message, color=color))
         return response
 
     def _check_guess_against_existing(self, guess, part):
