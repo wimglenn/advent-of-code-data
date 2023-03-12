@@ -1,10 +1,8 @@
 import argparse
-import bs4
 import curses
 import errno
 import logging
 import os
-import requests
 import shutil
 import sys
 import tempfile
@@ -12,6 +10,9 @@ import time
 from datetime import datetime
 from itertools import cycle
 from zoneinfo import ZoneInfo
+
+import bs4
+import requests
 
 from .exceptions import DeadTokenError
 

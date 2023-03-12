@@ -4,6 +4,7 @@ import re
 import traceback
 from logging import getLogger
 
+from ._ipykernel import get_ipynb_path
 from .exceptions import AocdError
 from .exceptions import PuzzleLockedError
 from .models import default_user
@@ -11,7 +12,6 @@ from .models import Puzzle
 from .models import User
 from .utils import AOC_TZ
 from .utils import blocker
-from ._ipykernel import get_ipynb_path
 
 
 log = getLogger(__name__)

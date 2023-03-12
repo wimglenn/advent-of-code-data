@@ -6,8 +6,8 @@ from requests.exceptions import HTTPError
 
 from aocd.exceptions import AocdError
 from aocd.exceptions import DeadTokenError
-from aocd.exceptions import UnknownUserError
 from aocd.exceptions import PuzzleUnsolvedError
+from aocd.exceptions import UnknownUserError
 from aocd.models import Puzzle
 from aocd.models import User
 

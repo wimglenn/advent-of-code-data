@@ -1,7 +1,8 @@
 import functools
 
-import aocd
 import pytest
+
+import aocd
 
 
 def test_aocd_data_with_attribute_access(mocker):

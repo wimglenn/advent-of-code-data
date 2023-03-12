@@ -1,6 +1,7 @@
 import sys
 from functools import partial
 
+from . import _ipykernel
 from . import cli
 from . import cookies
 from . import exceptions
@@ -9,7 +10,6 @@ from . import models
 from . import post
 from . import runner
 from . import utils
-from . import _ipykernel
 from .exceptions import AocdError
 from .get import get_data
 from .get import get_day_and_year
