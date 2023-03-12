@@ -6,6 +6,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime
+from importlib.metadata import entry_points
 from itertools import cycle
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -135,3 +136,12 @@ def colored(txt, color):
     code = 30 + getattr(curses, f"COLOR_{color.upper()}")
     reset = "\x1b[0m"
     return f"\x1b[{code}m{txt}{reset}"
+
+
+def get_plugins(group="adventofcode.user"):
+    try:
+        # Python 3.10+
+        return entry_points(group=group)
+    except TypeError:
+        # Python 3.9
+        return entry_points().get(group, [])

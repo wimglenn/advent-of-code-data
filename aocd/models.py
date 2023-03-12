@@ -7,7 +7,6 @@ import time
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
-from importlib.metadata import entry_points
 from importlib.metadata import version
 from pathlib import Path
 from textwrap import dedent
@@ -25,6 +24,7 @@ from .utils import AOC_TZ
 from .utils import atomic_write_file
 from .utils import colored
 from .utils import get_owner
+from .utils import get_plugins
 
 
 log = logging.getLogger(__name__)
@@ -483,14 +483,14 @@ class Puzzle:
 
     def solve(self):
         try:
-            [ep] = entry_points(group="adventofcode.user")
+            [ep] = get_plugins()
         except ValueError:
             raise AocdError("Puzzle.solve is only available with unique entry point")
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
     def solve_for(self, plugin):
-        for ep in entry_points(group="adventofcode.user"):
+        for ep in get_plugins():
             if ep.name == plugin:
                 break
         else:

@@ -8,7 +8,7 @@ from aocd.utils import colored
 
 
 def test_no_plugins_avail(capsys, mocker):
-    mock = mocker.patch("aocd.runner.entry_points", return_value=[])
+    mock = mocker.patch("aocd.runner.get_plugins", return_value=[])
     mocker.patch("sys.argv", ["aoc"])
     msg = (
         "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
@@ -18,7 +18,7 @@ def test_no_plugins_avail(capsys, mocker):
         main()
     out, err = capsys.readouterr()
     assert msg in err
-    mock.assert_called_once_with(group="adventofcode.user")
+    mock.assert_called_once_with()
 
 
 def test_no_datasets_avail(capsys, mocker, aocd_config_dir):
@@ -41,7 +41,7 @@ def test_main(capsys, mocker, aocd_config_dir):
     ep1.name = "user1"
     ep2 = mocker.Mock()
     ep2.name = "user2"
-    mocker.patch("aocd.runner.entry_points", return_value=[ep1, ep2])
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep1, ep2])
     tokens_file = aocd_config_dir / "tokens.json"
     tokens_file.write_text('{"data1": "token1", "data2": "token2"}')
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
@@ -81,7 +81,7 @@ def test_results(mocker, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
-    mocker.patch("aocd.runner.entry_points", return_value=[ep])
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     fake_puzzle = mocker.MagicMock()
     fake_puzzle.year = 2015
     fake_puzzle.day = 1
@@ -109,7 +109,7 @@ def test_results_xmas(mocker, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = xmas_entry_point
-    mocker.patch("aocd.runner.entry_points", return_value=[ep])
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     fake_puzzle = mocker.MagicMock(
         year=2015,
         day=25,
@@ -156,7 +156,7 @@ def test_day_out_of_range(mocker, capsys, freezer):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
-    mocker.patch("aocd.runner.entry_points", return_value=[ep])
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
         plugins=["testuser"],
         years=[2018],
@@ -179,7 +179,7 @@ def test_run_error(aocd_data_dir, mocker, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = bugged_entry_point
-    mocker.patch("aocd.runner.entry_points", return_value=[ep])
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
         plugins=["testuser"],
         years=[2018],
@@ -210,7 +210,7 @@ def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, requests_mock):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
-    mocker.patch("aocd.runner.entry_points", return_value=[ep])
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
         plugins=["testuser"],
         years=[2015],
@@ -235,7 +235,7 @@ def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, requests_mock):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
-    mocker.patch("aocd.runner.entry_points", return_value=[ep])
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
         plugins=["testuser"],
         years=[2015],

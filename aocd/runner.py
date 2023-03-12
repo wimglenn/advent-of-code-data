@@ -7,7 +7,6 @@ import time
 from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
-from importlib.metadata import entry_points
 from pathlib import Path
 
 import pebble.concurrent
@@ -19,6 +18,7 @@ from .models import Puzzle
 from .utils import _cli_guess
 from .utils import AOC_TZ
 from .utils import colored
+from .utils import get_plugins
 
 
 # from https://adventofcode.com/about
@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 
 
 def main():
-    eps = entry_points(group="adventofcode.user")
+    eps = get_plugins()
     plugins = {ep.name: ep for ep in eps}
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
@@ -173,8 +173,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
     if timeout == 0:
         timeout = float("inf")
     aoc_now = datetime.now(tz=AOC_TZ)
-    all_entry_points = entry_points(group="adventofcode.user")
-    eps = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
+    eps = {ep.name: ep for ep in get_plugins() if ep.name in plugins}
     it = itertools.product(years, days, plugins, datasets)
     n_incorrect = 0
     # padding values for alignment
