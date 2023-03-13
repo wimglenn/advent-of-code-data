@@ -1,5 +1,6 @@
 import pytest
 
+from aocd.runner import _process_wrapper
 from aocd.runner import format_time
 from aocd.runner import main
 from aocd.runner import run_for
@@ -274,3 +275,13 @@ def test_scratch_cleanup_failure(mocker):
     ep.load.return_value = file_entry_point
     mocker.patch("os.rmdir", side_effect=OSError)
     run_one(2015, 1, "abcxyz", ep)
+
+
+def test_process_wrapper(capsys):
+    _process_wrapper(lambda: print("1"))
+    out, err = capsys.readouterr()
+    assert err == ""
+    assert out.strip() == "1"
+    _process_wrapper(lambda: print("2"), capture=True)
+    out, err = capsys.readouterr()
+    assert not err and not out
