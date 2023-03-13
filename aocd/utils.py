@@ -1,36 +1,29 @@
 import argparse
-import bs4
-import errno
 import logging
 import os
-import requests
+import platform
 import shutil
 import sys
 import tempfile
 import time
-import tzlocal
 from datetime import datetime
+from importlib.metadata import entry_points
 from itertools import cycle
-from dateutil.tz import gettz
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+import bs4
+import requests
 
 from .exceptions import DeadTokenError
 
 
 log = logging.getLogger(__name__)
-AOC_TZ = gettz("America/New_York")
+AOC_TZ = ZoneInfo("America/New_York")
 
 
 def _ensure_intermediate_dirs(fname):
-    parent = os.path.dirname(os.path.expanduser(fname))
-    try:
-        os.makedirs(parent, exist_ok=True)
-    except TypeError:
-        # exist_ok not avail on Python 2
-        try:
-            os.makedirs(parent)
-        except (IOError, OSError) as err:
-            if err.errno != errno.EEXIST:
-                raise
+    Path(fname).expanduser().parent.mkdir(parents=True, exist_ok=True)
 
 
 def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
@@ -57,7 +50,7 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
         # it should already be unlocked - nothing to do
         return
     spinner = cycle(r"\|/-")
-    localzone = tzlocal.get_localzone()
+    localzone = datetime.now().astimezone().tzinfo
     local_unlock = unlock.astimezone(tz=localzone)
     if datefmt is None:
         # %-I does not work on Windows, strip leading zeros manually
@@ -88,7 +81,7 @@ def get_owner(token):
     if response.status_code != 200:
         # bad tokens will 302 redirect to main page
         log.info("session %s is dead - status_code=%s", token, response.status_code)
-        raise DeadTokenError("the auth token ...{} is expired or not functioning".format(token[-4:]))
+        raise DeadTokenError(f"the auth token ...{token[-4:]} is expired or not functioning")
     soup = bs4.BeautifulSoup(response.text, "html.parser")
     auth_source = "unknown"
     username = "unknown"
@@ -119,7 +112,7 @@ def atomic_write_file(fname, contents_str):
     renaming it to the final destination name. This solves a race condition where existence
     of a file doesn't necessarily mean the contents are all correct yet."""
     _ensure_intermediate_dirs(fname)
-    with tempfile.NamedTemporaryFile(mode="w", dir=os.path.dirname(fname), delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", dir=fname.parent, delete=False) as f:
         log.debug("writing to tempfile @ %s", f.name)
         f.write(contents_str)
     log.debug("moving %s -> %s", f.name, fname)
@@ -131,8 +124,30 @@ def _cli_guess(choice, choices):
         return choice
     candidates = [c for c in choices if choice in c]
     if len(candidates) > 1:
-        raise argparse.ArgumentTypeError("{} ambiguous (could be {})".format(choice, ", ".join(candidates)))
+        raise argparse.ArgumentTypeError(f"{choice} ambiguous (could be {', '.join(candidates)})")
     elif not candidates:
-        raise argparse.ArgumentTypeError("invalid choice {!r} (choose from {})".format(choice, ", ".join(choices)))
+        raise argparse.ArgumentTypeError(f"invalid choice {choice!r} (choose from {', '.join(choices)})")
     [result] = candidates
     return result
+
+
+_ansi_colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+if platform.system() == "Windows":
+    os.system("color")  # makes ANSI colors work in the windows cmd window
+
+
+def colored(txt, color):
+    if color is None:
+        return txt
+    code = _ansi_colors.index(color.casefold())
+    reset = "\x1b[0m"
+    return f"\x1b[{code + 30}m{txt}{reset}"
+
+
+def get_plugins(group="adventofcode.user"):
+    try:
+        # Python 3.10+
+        return entry_points(group=group)
+    except TypeError:
+        # Python 3.9
+        return entry_points().get(group, [])

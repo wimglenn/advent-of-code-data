@@ -1,11 +1,3 @@
-# coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
-import errno
-import io
 import json
 import logging
 import os
@@ -15,35 +7,36 @@ import time
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
+from importlib.metadata import version
+from pathlib import Path
 from textwrap import dedent
 
 import bs4
-import pkg_resources
 import requests
-from termcolor import colored
-from termcolor import cprint
 
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
-from .exceptions import UnknownUserError
-from .exceptions import PuzzleUnsolvedError
 from .exceptions import PuzzleLockedError
-from .utils import AOC_TZ
+from .exceptions import PuzzleUnsolvedError
+from .exceptions import UnknownUserError
 from .utils import _ensure_intermediate_dirs
+from .utils import AOC_TZ
 from .utils import atomic_write_file
+from .utils import colored
 from .utils import get_owner
-from .version import __version__
+from .utils import get_plugins
 
 
 log = logging.getLogger(__name__)
 
-AOCD_DATA_DIR = os.path.expanduser(os.environ.get("AOCD_DIR", os.path.join("~", ".config", "aocd")))
-AOCD_CONFIG_DIR = os.path.expanduser(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR))
+_v = version("advent-of-code-data")
+AOCD_DATA_DIR = Path(os.environ.get("AOCD_DIR", Path("~", ".config", "aocd"))).expanduser()
+AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
-USER_AGENT = {"User-Agent": "github.com/wimglenn/advent-of-code-data v{} by hey@wimglenn.com".format(__version__)}
+USER_AGENT = {"User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"}
 
 
-class User(object):
+class User:
 
     _token2id = None
 
@@ -55,7 +48,7 @@ class User(object):
     def from_id(cls, id):
         users = _load_users()
         if id not in users:
-            raise UnknownUserError("User with id '{}' is not known".format(id))
+            raise UnknownUserError(f"User with id '{id}' is not known")
         user = cls(users[id])
         user._owner = id
         return user
@@ -66,15 +59,12 @@ class User(object):
 
     @property
     def id(self):
-        fname = os.path.join(AOCD_CONFIG_DIR, "token2id.json")
+        fname = AOCD_CONFIG_DIR / "token2id.json"
         if User._token2id is None:
             try:
-                with io.open(fname, encoding="utf-8") as f:
-                    log.debug("loading user id memo from %s", fname)
-                    User._token2id = json.load(f)
-            except (IOError, OSError) as err:
-                if err.errno != errno.ENOENT:
-                    raise
+                User._token2id = json.loads(fname.read_text())
+                log.debug("loaded user id memo from %s", fname)
+            except FileNotFoundError:
                 User._token2id = {}
         if self.token not in User._token2id:
             log.debug("token not found in memo, attempting to determine user id")
@@ -82,8 +72,7 @@ class User(object):
             log.debug("got owner=%s, adding to memo", owner)
             User._token2id[self.token] = owner
             _ensure_intermediate_dirs(fname)
-            with open(fname, "w") as f:
-                json.dump(User._token2id, f, sort_keys=True, indent=2)
+            fname.write_text(json.dumps(User._token2id, sort_keys=True, indent=2))
         else:
             owner = User._token2id[self.token]
         if self._owner == "unknown.unknown.0":
@@ -91,11 +80,11 @@ class User(object):
         return owner
 
     def __str__(self):
-        return "<{} {} (token=...{})>".format(type(self).__name__, self._owner, self.token[-4:])
+        return f"<{type(self).__name__} {self._owner} (token=...{self.token[-4:]})>"
 
     @property
     def memo_dir(self):
-        return os.path.join(AOCD_DATA_DIR, self.id)
+        return AOCD_DATA_DIR / self.id
 
     def get_stats(self, years=None):
         aoc_now = datetime.now(tz=AOC_TZ)
@@ -107,15 +96,15 @@ class User(object):
         days = {str(i) for i in range(1, 26)}
         results = {}
         for year in years:
-            url = "https://adventofcode.com/{}/leaderboard/self".format(year)
+            url = f"https://adventofcode.com/{year}/leaderboard/self"
             response = requests.get(url, cookies=self.auth, headers=USER_AGENT)
             response.raise_for_status()
             soup = bs4.BeautifulSoup(response.text, "html.parser")
             if soup.article is None and "You haven't collected any stars" in soup.main.text:
                 continue
             if soup.article.pre is None and "overall leaderboard" in soup.article.text:
-                msg = "the auth token ...{} is expired or not functioning"
-                raise DeadTokenError(msg.format(self.token[-4:]))
+                msg = f"the auth token ...{self.token[-4:]} is expired or not functioning"
+                raise DeadTokenError(msg)
             stats_txt = soup.article.pre.text
             lines = stats_txt.splitlines()
             lines = [x for x in lines if x.split()[0] in days]
@@ -145,29 +134,27 @@ def default_user():
 
     # or chuck it in a plaintext file at ~/.config/aocd/token
     try:
-        with io.open(os.path.join(AOCD_CONFIG_DIR, "token"), encoding="utf-8") as f:
-            cookie = f.read().split()[0]
-    except (IOError, OSError) as err:
-        if err.errno != errno.ENOENT:
-            raise
+        cookie = (AOCD_CONFIG_DIR / "token").read_text().split()[0]
+    except FileNotFoundError:
+        pass
     if cookie:
         return User(token=cookie)
 
     msg = dedent(
-        """\
+        f"""\
         ERROR: AoC session ID is needed to get your puzzle data!
         You can find it in your browser cookies after login.
-            1) Save the cookie into a text file {}, or
+            1) Save the cookie into a text file {AOCD_CONFIG_DIR / "token"}, or
             2) Export the cookie in environment variable AOC_SESSION
 
         See https://github.com/wimglenn/advent-of-code-wim/issues/1 for more info.
         """
     )
-    cprint(msg.format(os.path.join(AOCD_CONFIG_DIR, "token")), color="red", file=sys.stderr)
+    print(colored(msg, color="red"), file=sys.stderr)
     raise AocdError("Missing session ID")
 
 
-class Puzzle(object):
+class Puzzle:
     def __init__(self, year, day, user=None):
         self.year = year
         self.day = day
@@ -176,19 +163,15 @@ class Puzzle(object):
         self._user = user
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
-        fname = "{}_{:02d}".format(self.year, self.day)
-        prefix = os.path.join(self.user.memo_dir, fname)
-        self.input_data_fname = prefix + "_input.txt"
-        self.example_input_data_fname = prefix + "_example_input.txt"
-        self.answer_a_fname = prefix + "a_answer.txt"
-        self.answer_b_fname = prefix + "b_answer.txt"
-        self.incorrect_answers_a_fname = prefix + "a_bad_answers.txt"
-        self.incorrect_answers_b_fname = prefix + "b_bad_answers.txt"
-        self.title_fname = os.path.join(
-            AOCD_DATA_DIR,
-            "titles",
-            "{}_{:02d}.txt".format(self.year, self.day)
-        )
+        fname = f"{self.year}_{self.day:02d}"
+        prefix = self.user.memo_dir / fname
+        self.input_data_fname = prefix.with_name(prefix.name + "_input.txt")
+        self.example_input_data_fname = prefix.with_name(prefix.name + "_example_input.txt")
+        self.answer_a_fname = prefix.with_name(prefix.name + "a_answer.txt")
+        self.answer_b_fname = prefix.with_name(prefix.name + "b_answer.txt")
+        self.incorrect_answers_a_fname = prefix.with_name(prefix.name + "a_bad_answers.txt")
+        self.incorrect_answers_b_fname = prefix.with_name(prefix.name + "b_bad_answers.txt")
+        self.title_fname = AOCD_DATA_DIR / "titles" / f"{self.year}_{self.day:02d}.txt"
         self._title = ""
 
     @property
@@ -199,11 +182,9 @@ class Puzzle(object):
     def input_data(self):
         try:
             # use previously received data, if any existing
-            with io.open(self.input_data_fname, encoding="utf-8") as f:
-                data = f.read()
-        except (IOError, OSError) as err:
-            if err.errno != errno.ENOENT:
-                raise
+            data = self.input_data_fname.read_text()
+        except FileNotFoundError:
+            pass
         else:
             log.debug("reusing existing data %s", self.input_data_fname)
             return data.rstrip("\r\n")
@@ -214,7 +195,7 @@ class Puzzle(object):
         )
         if not response.ok:
             if response.status_code == 404:
-                raise PuzzleLockedError("{}/{:02d} not available yet".format(self.year, self.day))
+                raise PuzzleLockedError(f"{self.year}/{self.day:02d} not available yet")
             log.error("got %s status code token=%s", response.status_code, sanitized)
             log.error(response.text)
             raise AocdError("Unexpected response")
@@ -226,11 +207,9 @@ class Puzzle(object):
     @property
     def example_data(self):
         try:
-            with io.open(self.example_input_data_fname, encoding="utf-8") as f:
-                data = f.read()
-        except (IOError, OSError) as err:
-            if err.errno != errno.ENOENT:
-                raise
+            data = self.example_input_data_fname.read_text()
+        except FileNotFoundError:
+            pass
         else:
             log.debug("reusing existing example data %s", self.example_input_data_fname)
             return data.rstrip("\r\n")
@@ -246,9 +225,8 @@ class Puzzle(object):
 
     @property
     def title(self):
-        if os.path.isfile(self.title_fname):
-            with io.open(self.title_fname, encoding="utf-8") as f:
-                self._title = f.read().strip()
+        if self.title_fname.is_file():
+            self._title = self.title_fname.read_text().strip()
         else:
             self._save_title()
         return self._title
@@ -258,8 +236,8 @@ class Puzzle(object):
         if cycle:
             p.text(repr(self))
         else:
-            template = "<{0}({1.year}, {1.day}) at {2} - {1.title}>"
-            p.text(template.format(type(self).__name__, self, hex(id(self))))
+            txt = f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
+            p.text(txt)
 
     def _coerce_val(self, val):
         if isinstance(val, float) and val.is_integer():
@@ -329,8 +307,8 @@ class Puzzle(object):
         return self._get_bad_guesses(part="b")
 
     def _submit(self, value, part, reopen=True, quiet=False):
-        if value in {u"", b"", None, b"None", u"None"}:
-            raise AocdError("cowardly refusing to submit non-answer: {!r}".format(value))
+        if value in {"", b"", None, b"None", "None"}:
+            raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
             value = self._coerce_val(value)
         part = str(part).replace("1", "a").replace("2", "b").lower()
@@ -339,12 +317,11 @@ class Puzzle(object):
         bad_guesses = getattr(self, "incorrect_answers_" + part)
         if value in bad_guesses:
             if not quiet:
-                msg = "aocd will not submit that answer again. You've previously guessed {} and the server responded:"
-                print(msg.format(value))
-                cprint(bad_guesses[value], "red")
+                print(f"aocd will not submit that answer again. You've previously guessed {value} and the server responded:")
+                print(colored(bad_guesses[value], "red"))
             return
         if part == "b" and value == getattr(self, "answer_a", None):
-            raise AocdError("cowardly refusing to re-submit answer_a ({}) for part b".format(value))
+            raise AocdError(f"cowardly refusing to re-submit answer_a ({value}) for part b")
         url = self.submit_url
         check_guess = self._check_guess_against_existing(value, part)
         if check_guess is not None:
@@ -365,7 +342,7 @@ class Puzzle(object):
         if not response.ok:
             log.error("got %s status code", response.status_code)
             log.error(response.text)
-            raise AocdError("Non-200 response for POST: {}".format(response))
+            raise AocdError(f"Non-200 response for POST: {response}")
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         message = soup.article.text
         color = None
@@ -412,7 +389,7 @@ class Puzzle(object):
                 time.sleep(wait_time)
                 return self._submit(value=value, part=part, reopen=reopen, quiet=quiet)
         if not quiet:
-            cprint(message, color=color)
+            print(colored(message, color=color))
         return response
 
     def _check_guess_against_existing(self, guess, part):
@@ -422,22 +399,18 @@ class Puzzle(object):
                 return None
         except PuzzleUnsolvedError:
             return None
-
         if answer == guess:
-            template = "Part {part} already solved with same answer: {answer}"
+            return f"Part {part} already solved with same answer: {answer}"
         else:
-            template = colored("Part {part} already solved with different answer: {answer}", "red")
-
-        return template.format(part=part, answer=answer)
+            return colored(f"Part {part} already solved with different answer: {answer}", "red")
 
     def _save_correct_answer(self, value, part):
-        fname = getattr(self, "answer_{}_fname".format(part))
+        fname = getattr(self, f"answer_{part}_fname")
         _ensure_intermediate_dirs(fname)
         txt = value.strip()
         msg = "saving"
-        if os.path.isfile(fname):
-            with open(fname) as f:
-                prev = f.read()
+        if fname.is_file():
+            prev = fname.read_text()
             if txt == prev:
                 msg = "the correct answer for %d/%02d part %s was already saved"
                 log.debug(msg, self.year, self.day, part)
@@ -445,16 +418,14 @@ class Puzzle(object):
             msg = "overwriting"
         msg += " the correct answer for %d/%02d part %s: %s"
         log.info(msg, self.year, self.day, part, txt)
-        with open(fname, "w") as f:
-            f.write(txt)
+        fname.write_text(txt)
 
     def _save_incorrect_answer(self, value, part, extra=""):
-        fname = getattr(self, "incorrect_answers_{}_fname".format(part))
+        fname = getattr(self, f"incorrect_answers_{part}_fname")
         _ensure_intermediate_dirs(fname)
         msg = "appending an incorrect answer for %d/%02d part %s"
         log.info(msg, self.year, self.day, part)
-        with open(fname, "a") as f:
-            f.write(value.strip() + " " + extra.replace("\n", " ") + "\n")
+        fname.write_text(value.strip() + " " + extra.replace("\n", " ") + "\n")
 
     def _save_title(self, soup=None):
         if soup is None:
@@ -463,13 +434,13 @@ class Puzzle(object):
             log.warning("heading not found")
             return
         txt = soup.h2.text.strip("- ")
-        prefix = "Day {}: ".format(self.day)
+        prefix = f"Day {self.day}: "
         if not txt.startswith(prefix):
             log.error("weird heading, wtf? %s", txt)
             return
         txt = self._title = txt[len(prefix) :]
         _ensure_intermediate_dirs(self.title_fname)
-        with io.open(self.title_fname, "w", encoding="utf-8") as f:
+        with self.title_fname.open("w") as f:
             print(txt, file=f)
 
     def _get_answer(self, part):
@@ -479,10 +450,9 @@ class Puzzle(object):
         """
         if part == "b" and self.day == 25:
             return ""
-        answer_fname = getattr(self, "answer_{}_fname".format(part))
-        if os.path.isfile(answer_fname):
-            with open(answer_fname) as f:
-                return f.read().strip()
+        answer_fname = getattr(self, f"answer_{part}_fname")
+        if answer_fname.is_file():
+            return answer_fname.read_text().strip()
         # scrape puzzle page for any previously solved answers
         soup = self._soup()
         if not self._title:
@@ -497,36 +467,34 @@ class Puzzle(object):
                 _p1, p2 = paras
                 partb_correct_answer = p2.code.text
                 self._save_correct_answer(value=partb_correct_answer, part="b")
-        if os.path.isfile(answer_fname):
-            with open(answer_fname) as f:
-                return f.read().strip()
-        msg = "Answer {}-{}{} is not available".format(self.year, self.day, part)
+        if answer_fname.is_file():
+            return answer_fname.read_text().strip()
+        msg = f"Answer {self.year}-{self.day}{part} is not available"
         raise PuzzleUnsolvedError(msg)
 
     def _get_bad_guesses(self, part):
-        fname = getattr(self, "incorrect_answers_{}_fname".format(part))
+        fname = getattr(self, f"incorrect_answers_{part}_fname")
         result = {}
-        if os.path.isfile(fname):
-            with open(fname) as f:
-                for line in f:
-                    answer, _sep, extra = line.strip().partition(" ")
-                    result[answer] = extra
+        if fname.is_file():
+            for line in fname.read_text().splitlines():
+                answer, _sep, extra = line.strip().partition(" ")
+                result[answer] = extra
         return result
 
     def solve(self):
         try:
-            [ep] = pkg_resources.iter_entry_points(group="adventofcode.user")
+            [ep] = get_plugins()
         except ValueError:
             raise AocdError("Puzzle.solve is only available with unique entry point")
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
     def solve_for(self, plugin):
-        for ep in pkg_resources.iter_entry_points(group="adventofcode.user"):
+        for ep in get_plugins():
             if ep.name == plugin:
                 break
         else:
-            raise AocdError("No entry point found for '{}'".format(plugin))
+            raise AocdError(f"No entry point found for {plugin!r}")
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
@@ -568,10 +536,9 @@ def _parse_duration(s):
 
 
 def _load_users():
-    path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
+    path = AOCD_CONFIG_DIR / "tokens.json"
     try:
-        with open(path) as f:
-            users = json.load(f)
-    except IOError:
+        users = json.loads(path.read_text())
+    except FileNotFoundError:
         users = {"default": default_user().token}
     return users

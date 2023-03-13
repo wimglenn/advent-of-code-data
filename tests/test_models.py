@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import logging
 from datetime import timedelta
 
@@ -8,8 +6,8 @@ from requests.exceptions import HTTPError
 
 from aocd.exceptions import AocdError
 from aocd.exceptions import DeadTokenError
-from aocd.exceptions import UnknownUserError
 from aocd.exceptions import PuzzleUnsolvedError
+from aocd.exceptions import UnknownUserError
 from aocd.models import Puzzle
 from aocd.models import User
 
@@ -102,12 +100,12 @@ def test_setattr_doesnt_submit_both_if_done(mocker, aocd_data_dir):
 
 
 def test_solve_no_plugs(mocker):
-    mock = mocker.patch("pkg_resources.iter_entry_points", return_value=iter([]))
+    mock = mocker.patch("aocd.models.get_plugins", return_value=[])
     puzzle = Puzzle(year=2018, day=1)
     expected = AocdError("Puzzle.solve is only available with unique entry point")
     with pytest.raises(expected):
         puzzle.solve()
-    mock.assert_called_once_with(group="adventofcode.user")
+    mock.assert_called_once_with()
 
 
 def test_solve_one_plug(aocd_data_dir, mocker):
@@ -115,7 +113,7 @@ def test_solve_one_plug(aocd_data_dir, mocker):
     input_path.write_text("someinput")
     ep = mocker.Mock()
     ep.name = "myplugin"
-    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([ep]))
+    mocker.patch("aocd.models.get_plugins", return_value=[ep])
     puzzle = Puzzle(year=2018, day=1)
     puzzle.solve()
     ep.load.return_value.assert_called_once_with(year=2018, day=1, data="someinput")
@@ -128,7 +126,7 @@ def test_solve_for(aocd_data_dir, mocker):
     plug1.name = "myplugin"
     plug2 = mocker.Mock()
     plug2.name = "otherplugin"
-    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([plug2, plug1]))
+    mocker.patch("aocd.models.get_plugins", return_value=[plug2, plug1])
     puzzle = Puzzle(year=2018, day=1)
     puzzle.solve_for("myplugin")
     plug1.load.assert_called_once_with()
@@ -142,7 +140,7 @@ def test_solve_for_unfound_user(aocd_data_dir, mocker):
     input_path.write_text("someinput")
     other_plug = mocker.Mock()
     other_plug.name = "otherplugin"
-    mocker.patch("pkg_resources.iter_entry_points", return_value=iter([other_plug]))
+    mocker.patch("aocd.models.get_plugins", return_value=[other_plug])
     puzzle = Puzzle(year=2018, day=1)
     with pytest.raises(AocdError("No entry point found for 'myplugin'")):
         puzzle.solve_for("myplugin")

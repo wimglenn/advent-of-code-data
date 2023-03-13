@@ -1,9 +1,3 @@
-# coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import itertools
 import logging
 import os
@@ -11,20 +5,20 @@ import sys
 import tempfile
 import time
 from argparse import ArgumentParser
-from collections import OrderedDict
 from datetime import datetime
+from functools import partial
+from pathlib import Path
 
 import pebble.concurrent
-import pkg_resources
-from functools import partial
-from termcolor import colored
 
 from .exceptions import AocdError
-from .models import AOCD_CONFIG_DIR
 from .models import _load_users
+from .models import AOCD_CONFIG_DIR
 from .models import Puzzle
-from .utils import AOC_TZ
 from .utils import _cli_guess
+from .utils import AOC_TZ
+from .utils import colored
+from .utils import get_plugins
 
 
 # from https://adventofcode.com/about
@@ -36,8 +30,8 @@ log = logging.getLogger(__name__)
 
 
 def main():
-    entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
-    plugins = OrderedDict([(ep.name, ep) for ep in entry_points])
+    eps = get_plugins()
+    plugins = {ep.name: ep for ep in eps}
     aoc_now = datetime.now(tz=AOC_TZ)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
@@ -56,11 +50,11 @@ def main():
     args = parser.parse_args()
 
     if not users:
-        path = os.path.join(AOCD_CONFIG_DIR, "tokens.json")
+        path = AOCD_CONFIG_DIR / "tokens.json"
         print(
             "There are no datasets available to use.\n"
             "Either export your AOC_SESSION or put some auth "
-            "tokens into {}".format(path),
+            f"tokens into {path}",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -144,18 +138,18 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
         color = "yellow"
     else:
         color = "red"
-    runtime = colored("{: 7.2f}s".format(t), color)
+    runtime = colored(f"{t: 7.2f}s", color)
     return runtime
 
 
 def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False):
     prev = os.getcwd()
-    scratch = tempfile.mkdtemp(prefix="{}-{:02d}-".format(year, day))
+    scratch = tempfile.mkdtemp(prefix=f"{year}-{day:02d}-")
     os.chdir(scratch)
-    assert not os.path.exists("input.txt")
+    input_path = Path("input.txt")
+    assert not input_path.exists()
     try:
-        with open("input.txt", "w") as f:
-            f.write(input_data)
+        input_path.write_text(input_data)
         a, b, walltime, error = run_with_timeout(
             entry_point=entry_point,
             timeout=timeout,
@@ -166,7 +160,7 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
             capture=capture,
         )
     finally:
-        os.unlink("input.txt")
+        input_path.unlink(missing_ok=True)
         os.chdir(prev)
         try:
             os.rmdir(scratch)
@@ -176,28 +170,24 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
 
 
 def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True, reopen=False, capture=False):
+    if timeout == 0:
+        timeout = float("inf")
     aoc_now = datetime.now(tz=AOC_TZ)
-    all_entry_points = pkg_resources.iter_entry_points(group="adventofcode.user")
-    entry_points = {ep.name: ep for ep in all_entry_points if ep.name in plugins}
+    eps = {ep.name: ep for ep in get_plugins() if ep.name in plugins}
     it = itertools.product(years, days, plugins, datasets)
-    userpad = 3
-    datasetpad = 8
     n_incorrect = 0
-    if entry_points:
-        userpad = len(max(entry_points, key=len))
-    if datasets:
-        datasetpad = len(max(datasets, key=len))
+    # padding values for alignment
+    wp = len(max(eps, key=len)) if eps else 3
+    wd = len(max(datasets, key=len)) if datasets else 8
     for year, day, plugin, dataset in it:
         if year == aoc_now.year and day > aoc_now.day:
             continue
         token = datasets[dataset]
-        entry_point = entry_points[plugin]
+        entry_point = eps[plugin]
         os.environ["AOC_SESSION"] = token
         puzzle = Puzzle(year=year, day=day)
         title = puzzle.title
-        progress = "{}/{:<2d} - {:<40}   {:>%d}/{:<%d}"
-        progress %= (userpad, datasetpad)
-        progress = progress.format(year, day, title, plugin, dataset)
+        progress = f"{year}/{day:<2d} - {title:<40}   {plugin:>{wp}}/{dataset:<{wd}}"
         a, b, walltime, error = run_one(
             year=year,
             day=day,
@@ -213,9 +203,8 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
             assert a == b == ""
             icon = colored("✖", "red")
             n_incorrect += 1
-            line += "   {icon} {error}".format(icon=icon, error=error)
+            line += f"   {icon} {error}"
         else:
-            result_template = "   {icon} part {part}: {answer}"
             for answer, part in zip((a, b), "ab"):
                 if day == 25 and part == "b":
                     # there's no part b on christmas day, skip
@@ -243,10 +232,10 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
                         icon = colored("?", "magenta")
                         correction = "(correct answer unknown)"
                     else:
-                        correction = "(expected: {})".format(expected)
-                answer = "{} {}".format(answer, correction)
+                        correction = f"(expected: {expected})"
+                answer = f"{answer} {correction}"
                 if part == "a":
                     answer = answer.ljust(30)
-                line += result_template.format(icon=icon, part=part, answer=answer)
+                line += f"   {icon} part {part}: {answer}"
         print(line)
     return n_incorrect

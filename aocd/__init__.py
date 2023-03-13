@@ -1,12 +1,7 @@
-# coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import sys
 from functools import partial
 
+from . import _ipykernel
 from . import cli
 from . import cookies
 from . import exceptions
@@ -14,74 +9,28 @@ from . import get
 from . import models
 from . import post
 from . import runner
-from . import transforms
 from . import utils
-from . import version
-from . import _ipykernel
 from .exceptions import AocdError
-from .exceptions import PuzzleUnsolvedError
 from .get import get_data
 from .get import get_day_and_year
-from .post import submit
-from .utils import AOC_TZ
-from .version import __version__
+from .post import submit as _impartial_submit
 
 
-__all__ = [
-    "cli",
-    "cookies",
-    "exceptions",
-    "get",
-    "models",
-    "post",
-    "runner",
-    "utils",
-    "version",
-    "data",
-    "get_data",
-    "submit",
-    "transforms",
-    "__version__",
-    "AocdError",
-    "PuzzleUnsolvedError",
-    "AOC_TZ",
-    "_ipykernel",
-]
-__all__ += transforms.__all__
-
-# Add declaration for magic attribute `data` to make it discoverable by static analysis tools.
-data = ""
-
-
-class Aocd(object):
-    _module = sys.modules[__name__]
-
-    def __dir__(self):
-        return __all__
-
-    def __getattr__(self, name):
-        if name == "data":
+def __getattr__(name):
+    if name == "data":
+        day, year = get_day_and_year()
+        return get_data(day=day, year=year)
+    if name == "submit":
+        try:
             day, year = get_day_and_year()
-            return get_data(day=day, year=year)
-        if name == "submit":
-            try:
-                day, year = get_day_and_year()
-            except AocdError:
-                return submit
-            else:
-                return partial(submit, day=day, year=year)
-        if name in transforms.__all__:
-            transform = getattr(transforms, name)
-            return transform(self.data)
-        if name in dir(self):
-            return globals()[name]
-        raise AttributeError(name)
+        except AocdError:
+            return _impartial_submit
+        else:
+            return partial(_impartial_submit, day=day, year=year)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
-sys.modules[__name__] = Aocd()
-
-
-if sys.platform == "win32":
-    import colorama
-
-    colorama.init(autoreset=True)
+# pretend we're not a package, now that relative imports have been resolved.
+# hackish - this prevents the import statement `from aocd import data` from going into
+# importlib._bootstrap._handle_fromlist, which can cause __getattr__ to be called twice
+del sys.modules[__name__].__path__

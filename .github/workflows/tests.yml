@@ -19,9 +19,8 @@ jobs:
         - macos-latest
         - windows-latest
         python-version:
-        - "2.7"
+        - "3.9"
         - "3.11"
-        - "pypy-2.7"
         - "pypy-3.9"
 
     steps:
@@ -33,15 +32,12 @@ jobs:
           architecture: x64
 
       - name: "Install"
-        run: |
-          python -VV
-          python -m pip install -q -r tests/requirements.txt
-          python -m pip freeze --all
+        run: python -m pip install -q -r tests/requirements.txt
 
       - name: "Run tests for ${{ matrix.python-version }} on ${{ matrix.os }}"
         run: python -m pytest --durations=10
 
       - name: Upload coverage to Codecov
-        uses: "codecov/codecov-action@v3"
+        uses: "codecov/codecov-action@main"
         with:
           fail_ci_if_error: true

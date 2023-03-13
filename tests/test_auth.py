@@ -20,7 +20,7 @@ def test_get_session_id_from_env(monkeypatch):
 
 
 def test_get_session_id_from_file(test_token):
-    test_token.write_text(u"tokenfromfile")
+    test_token.write_text("tokenfromfile")
     user = default_user()
     assert user.token == "tokenfromfile"
 
@@ -34,5 +34,5 @@ def test_env_takes_priority_over_file(monkeypatch, test_token):
 def test_problem_loading_session_id_is_left_unhandled(test_token):
     test_token.unlink()
     test_token.mkdir()
-    with pytest.raises(IOError):
+    with pytest.raises(OSError):
         default_user()

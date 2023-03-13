@@ -1,19 +1,13 @@
-# coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import argparse
 import datetime
 from functools import partial
+from importlib.metadata import version
 
 from .get import get_data
 from .get import most_recent_year
 from .models import _load_users
-from .utils import AOC_TZ
 from .utils import _cli_guess
-from .version import __version__
+from .utils import AOC_TZ
 
 
 def main():
@@ -22,8 +16,8 @@ def main():
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     users = _load_users()
     parser = argparse.ArgumentParser(
-        description="Advent of Code Data v{}".format(__version__),
-        usage="aocd [day 1-25] [year 2015-{}]".format(years[-1]),
+        description=f"Advent of Code Data v{version('advent-of-code-data')}",
+        usage=f"aocd [day 1-25] [year 2015-{years[-1]}]",
     )
     parser.add_argument(
         "day",
@@ -37,12 +31,12 @@ def main():
         nargs="?",
         type=int,
         default=most_recent_year(),
-        help="2015-{} (default: %(default)s)".format(years[-1]),
+        help=f"2015-{years[-1]} (default: %(default)s)",
     )
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s v{}".format(__version__),
+        version=f"%(prog)s v{version('advent-of-code-data')}",
     )
     if len(users) > 1:
         parser.add_argument("-u", "--user", choices=users, type=partial(_cli_guess, choices=users))

@@ -1,12 +1,10 @@
-import errno
 import logging
 
 import pytest
-from termcolor import colored
 
 from aocd.exceptions import AocdError
 from aocd.post import submit
-from aocd.utils import _ensure_intermediate_dirs
+from aocd.utils import colored
 
 
 def test_submit_correct_answer(requests_mock, capsys):
@@ -220,19 +218,6 @@ def test_submit_puts_level1_by_default(freezer, requests_mock, aocd_data_dir):
     assert query == ["answer=1234", "level=1"]
     assert parta_answer.exists()
     assert parta_answer.read_text() == "1234"
-
-
-def test_failure_to_create_dirs_unhandled(mocker):
-    mocker.patch("os.makedirs", side_effect=TypeError)
-    with pytest.raises(TypeError):
-        _ensure_intermediate_dirs("/")
-    mocker.patch("os.makedirs", side_effect=[TypeError, OSError])
-    with pytest.raises(OSError):
-        _ensure_intermediate_dirs("/")
-    err = OSError()
-    err.errno = errno.EEXIST
-    mocker.patch("os.makedirs", side_effect=[TypeError, err])
-    _ensure_intermediate_dirs("/")
 
 
 def test_cannot_submit_same_bad_answer_twice(requests_mock, capsys):

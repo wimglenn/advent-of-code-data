@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "advent-of-code-data"
+version = "2.0.0"
+description = "Get your puzzle data with a single import"
+requires-python = ">=3.9"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Games/Entertainment :: Puzzle Games",
+]
+dependencies = [
+    "beautifulsoup4",
+    "pebble",
+    "requests",
+    'tzdata ; platform_system == "Windows"',
+]
+
+[[project.authors]]
+name = "Wim Glenn"
+email = "hey@wimglenn.com"
+
+[project.license]
+text = "MIT"
+
+[project.readme]
+file = "README.rst"
+content-type = "text/x-rst"
+
+[project.urls]
+Homepage = "https://github.com/wimglenn/advent-of-code-data"
+
+[project.optional-dependencies]
+nb = ["IPython", "jupyter-server"]
+
+[project.scripts]
+aocd = "aocd.cli:main"
+aoc = "aocd.runner:main"
+aocd-token = "aocd.cookies:scrape_session_tokens"
+
+[tool.setuptools]
+packages = ["aocd"]
+
+[project.entry-points."adventofcode.user"]
+
+[project.entry-points."adventofcode.transforms"]

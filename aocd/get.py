@@ -1,15 +1,10 @@
-# coding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import datetime
 import os
 import re
 import traceback
 from logging import getLogger
 
+from ._ipykernel import get_ipynb_path
 from .exceptions import AocdError
 from .exceptions import PuzzleLockedError
 from .models import default_user
@@ -17,7 +12,6 @@ from .models import Puzzle
 from .models import User
 from .utils import AOC_TZ
 from .utils import blocker
-from ._ipykernel import get_ipynb_path
 
 
 log = getLogger(__name__)
