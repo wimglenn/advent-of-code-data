@@ -240,11 +240,25 @@ class Puzzle:
             p.text(txt)
 
     def _coerce_val(self, val):
-        if isinstance(val, float) and val.is_integer():
-            log.warning("coerced value %r for %d/%02d", val, self.year, self.day)
-            val = int(val)
+        orig_val = val
+        orig_type = type(val)
+        coerced = False
+        if isinstance(val, (float, complex)) and val.imag == 0. and val.real.is_integer():
+            coerced = True
+            val = int(val.real)
+        elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
+            # deal with numpy scalars
+            if orig_type.__name__.startswith(("int", "uint", "long", "ulong")):
+                coerced = True
+                val = int(orig_val)
+            elif orig_type.__name__.startswith(("float", "complex")):
+                if val.imag == 0. and float(val.real).is_integer():
+                    coerced = True
+                    val = int(val.real)
         if isinstance(val, int):
             val = str(val)
+        if coerced:
+            log.warning("coerced %s value %r for %d/%02d", orig_type.__name__, orig_val, self.year, self.day)
         return val
 
     @property

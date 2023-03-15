@@ -1,4 +1,5 @@
 --editable .
+numpy
 pytest
 pytest-cov
 pytest-mock

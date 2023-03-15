@@ -252,5 +252,5 @@ def test_submit_float_warns(requests_mock, capsys, caplog):
     )
     submit(1234.0, part="a", day=8, year=2022, session="whatever", reopen=False)
     assert post.call_count == 1
-    log_record = ("aocd.models", logging.WARNING, "coerced value 1234.0 for 2022/08")
+    log_record = ("aocd.models", logging.WARNING, "coerced float value 1234.0 for 2022/08")
     assert log_record in caplog.record_tuples
