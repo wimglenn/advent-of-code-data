@@ -1,6 +1,7 @@
 import logging
 from datetime import timedelta
 
+import numpy as np
 import pytest
 from requests.exceptions import HTTPError
 
@@ -375,3 +376,24 @@ def test_example_data_cache(aocd_data_dir, requests_mock):
     requests_mock.reset()
     assert puzzle.example_data == "1\n2\n3"
     assert not mock.called
+
+
+@pytest.mark.parametrize("v_raw,v_expected,len_logs", [
+    ("123", "123", 0),
+    (123, "123", 0),
+    ("xxx", "xxx", 0),
+    (123.5, 123.5, 0),
+    (123. + 123.j, 123. + 123.j, 0),
+    (123.0, "123", 1),
+    (123. + 0.j, "123", 1),
+    (np.int32(123), "123", 1),
+    (np.uint32(123), "123", 1),
+    (np.double(123.), "123", 1),
+    (np.complex64(123. + 0.j), "123", 1),
+    (np.complex64(123. + .5j), np.complex64(123. + .5j), 0),
+])
+def test_type_coercions(v_raw, v_expected, len_logs, caplog):
+    p = Puzzle(2022, 1)
+    v_actual = p._coerce_val(v_raw)
+    assert v_actual == v_expected, f"{type(v_raw)} {v_raw})"
+    assert len(caplog.records) == len_logs

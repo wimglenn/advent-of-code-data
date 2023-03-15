@@ -21,7 +21,9 @@ jobs:
         python-version:
         - "3.9"
         - "3.11"
-        - "pypy-3.9"
+        include:
+          - python-version: "pypy-3.9"
+            os: ubuntu-latest
 
     steps:
       - uses: "actions/checkout@v3"
