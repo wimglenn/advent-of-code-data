@@ -7,12 +7,10 @@ import time
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
-from importlib.metadata import version
 from pathlib import Path
 from textwrap import dedent
 
 import bs4
-import requests
 
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
@@ -25,15 +23,15 @@ from .utils import atomic_write_file
 from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
+from .utils import http
 
 
 log = logging.getLogger(__name__)
 
-_v = version("advent-of-code-data")
+
 AOCD_DATA_DIR = Path(os.environ.get("AOCD_DIR", Path("~", ".config", "aocd"))).expanduser()
 AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
-USER_AGENT = {"User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"}
 
 
 class User:
@@ -55,7 +53,7 @@ class User:
 
     @property
     def auth(self):
-        return {"session": self.token}
+        return {"Cookie": f"session={self.token}"}
 
     @property
     def id(self):
@@ -97,9 +95,10 @@ class User:
         results = {}
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
-            response = requests.get(url, cookies=self.auth, headers=USER_AGENT)
-            response.raise_for_status()
-            soup = bs4.BeautifulSoup(response.text, "html.parser")
+            response = http.request("GET", url, headers=http.headers | self.auth)
+            if response.status >= 400:
+                raise AocdError(f"HTTP {response.status} at {url}")
+            soup = bs4.BeautifulSoup(response.data, "html.parser")
             if soup.article is None and "You haven't collected any stars" in soup.main.text:
                 continue
             if soup.article.pre is None and "overall leaderboard" in soup.article.text:
@@ -190,16 +189,14 @@ class Puzzle:
             return data.rstrip("\r\n")
         sanitized = "..." + self.user.token[-4:]
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
-        response = requests.get(
-            url=self.input_data_url, cookies=self.user.auth, headers=USER_AGENT
-        )
-        if not response.ok:
-            if response.status_code == 404:
+        response = http.request("GET", url=self.input_data_url, headers=http.headers | self.user.auth)
+        if response.status >= 400:
+            if response.status == 404:
                 raise PuzzleLockedError(f"{self.year}/{self.day:02d} not available yet")
-            log.error("got %s status code token=%s", response.status_code, sanitized)
-            log.error(response.text)
-            raise AocdError("Unexpected response")
-        data = response.text
+            log.error("got %s status code token=%s", response.status, sanitized)
+            log.error(response.data.decode(errors="replace"))
+            raise AocdError(f"HTTP {response.status} at {self.input_data_url}")
+        data = response.data.decode()
         log.info("saving the puzzle input token=%s", sanitized)
         atomic_write_file(self.input_data_fname, data)
         return data.rstrip("\r\n")
@@ -347,17 +344,18 @@ class Puzzle:
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": 1, "b": 2}[part]
-        response = requests.post(
+        response = http.request_encode_body(
+            "POST",
             url=url,
-            cookies=self.user.auth,
-            headers=USER_AGENT,
-            data={"level": level, "answer": value},
+            headers=http.headers | self.user.auth,
+            fields={"level": level, "answer": value},
+            encode_multipart=False,
         )
-        if not response.ok:
-            log.error("got %s status code", response.status_code)
-            log.error(response.text)
-            raise AocdError(f"Non-200 response for POST: {response}")
-        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        if response.status != 200:
+            log.error("got %s status code", response.status)
+            log.error(response.data.decode(errors="replace"))
+            raise AocdError(f"HTTP {response.status} at {url}")
+        soup = bs4.BeautifulSoup(response.data, "html.parser")
         message = soup.article.text
         color = None
         if "That's the right answer" in message:
@@ -528,9 +526,11 @@ class Puzzle:
         return result
 
     def _soup(self):
-        response = requests.get(self.url, cookies=self.user.auth, headers=USER_AGENT)
-        response.raise_for_status()
-        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        response = http.request("GET", self.url, headers=http.headers | self.user.auth)
+        if response.status >= 400:
+            raise AocdError(f"HTTP {response.status} at {self.url}")
+        self._last_resp = response
+        soup = bs4.BeautifulSoup(response.data, "html.parser")
         return soup
 
     @property

@@ -194,7 +194,7 @@ def test_run_error(aocd_data_dir, mocker, capsys):
     assert "part b" not in out  # because it's 25 dec, no part b puzzle
 
 
-def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, requests_mock):
+def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, pook):
     title_path = aocd_data_dir / "titles"
     title_path.mkdir()
     title_file = title_path / "2015_01.txt"
@@ -203,10 +203,10 @@ def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, requests_mock):
     input_path.write_text("testinput")
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2015_01a_answer.txt"
     answer_path.write_text("answer1")
-    requests_mock.get(url="https://adventofcode.com/2015/day/1")
-    requests_mock.post(
+    pook.get(url="https://adventofcode.com/2015/day/1", times=2)
+    pook.post(
         url="https://adventofcode.com/2015/day/1/answer",
-        text="<article>That's not the right answer</article>",
+        response_body="<article>That's not the right answer</article>",
     )
     ep = mocker.Mock()
     ep.name = "testuser"
@@ -223,7 +223,7 @@ def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, requests_mock):
     assert "part b: wrong (correct answer unknown)" in out
 
 
-def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, requests_mock):
+def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, pook):
     title_path = aocd_data_dir / "titles"
     title_path.mkdir()
     title_file = title_path / "2015_01.txt"
@@ -232,7 +232,7 @@ def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, requests_mock):
     input_path.write_text("testinput")
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2015_01a_answer.txt"
     answer_path.write_text("answer1")
-    requests_mock.get(url="https://adventofcode.com/2015/day/1")
+    pook.get(url="https://adventofcode.com/2015/day/1")
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point

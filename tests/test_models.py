@@ -3,7 +3,6 @@ from datetime import timedelta
 
 import numpy as np
 import pytest
-from requests.exceptions import HTTPError
 
 from aocd.exceptions import AocdError
 from aocd.exceptions import DeadTokenError
@@ -20,8 +19,8 @@ def test_get_answer(aocd_data_dir):
     assert puzzle.answer_b == "the answer"
 
 
-def test_get_answer_not_existing(aocd_data_dir, requests_mock):
-    requests_mock.get("https://adventofcode.com/2017/day/13")
+def test_get_answer_not_existing(aocd_data_dir, pook):
+    pook.get("https://adventofcode.com/2017/day/13")
     puzzle = Puzzle(day=13, year=2017)
     with pytest.raises(AttributeError("answer_b")):
         puzzle.answer_b
@@ -62,8 +61,8 @@ def test_answered(aocd_data_dir):
     assert puzzle.answered("b") is True
 
 
-def test_setattr_submits(mocker, requests_mock):
-    requests_mock.get("https://adventofcode.com/2017/day/7")
+def test_setattr_submits(mocker, pook):
+    pook.get("https://adventofcode.com/2017/day/7")
     puzzle = Puzzle(year=2017, day=7)
     mock = mocker.patch("aocd.models.Puzzle._submit")
     puzzle.answer_a = 4321
@@ -79,8 +78,8 @@ def test_setattr_doesnt_submit_if_already_done(mocker, aocd_data_dir):
     mock.assert_not_called()
 
 
-def test_setattr_submit_both(aocd_data_dir, mocker, requests_mock):
-    requests_mock.get("https://adventofcode.com/2017/day/7")
+def test_setattr_submit_both(aocd_data_dir, mocker, pook):
+    pook.get("https://adventofcode.com/2017/day/7")
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("4321")
     puzzle = Puzzle(year=2017, day=7)
@@ -149,11 +148,11 @@ def test_solve_for_unfound_user(aocd_data_dir, mocker):
     other_plug.load.return_value.assert_not_called()
 
 
-def test_get_title_failure(freezer, requests_mock, caplog):
+def test_get_title_failure(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
-    requests_mock.get(
+    pook.get(
         url="https://adventofcode.com/2018/day/1",
-        text="<h2>Day 11: This SHOULD be day 1</h2>",
+        response_body="<h2>Day 11: This SHOULD be day 1</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert not puzzle.title
@@ -162,11 +161,11 @@ def test_get_title_failure(freezer, requests_mock, caplog):
     assert log_event in caplog.record_tuples
 
 
-def test_pprint(freezer, requests_mock, mocker):
+def test_pprint(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
-    requests_mock.get(
+    pook.get(
         url="https://adventofcode.com/2018/day/1",
-        text="<h2>Day 1: The Puzzle Title</h2>",
+        response_body="<h2>Day 1: The Puzzle Title</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -178,11 +177,11 @@ def test_pprint(freezer, requests_mock, mocker):
     assert pretty.endswith(" - The Puzzle Title>")
 
 
-def test_pprint_cycle(freezer, requests_mock, mocker):
+def test_pprint_cycle(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
-    requests_mock.get(
+    pook.get(
         url="https://adventofcode.com/2018/day/1",
-        text="<h2>Day 1: The Puzzle Title</h2>",
+        response_body="<h2>Day 1: The Puzzle Title</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -210,10 +209,11 @@ Day   <span class="leaderboard-daydesc-first">    Time  Rank  Score</span>
 """
 
 
-def test_get_stats(requests_mock):
+def test_get_stats(pook):
     puzzle = Puzzle(year=2019, day=4)
-    requests_mock.get(
-        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    pook.get(
+        url="https://adventofcode.com/2019/leaderboard/self",
+        response_body=fake_stats_response,
     )
     stats = puzzle.my_stats
     assert stats == {
@@ -222,31 +222,32 @@ def test_get_stats(requests_mock):
     }
 
 
-def test_get_stats_when_token_expired(requests_mock):
+def test_get_stats_when_token_expired(pook):
     # sadly, it just returns the global leaderboard, rather than a http 4xx
     user = User("token12345678")
-    requests_mock.get(
+    pook.get(
         url="https://adventofcode.com/2019/leaderboard/self",
-        text="<article><p>Below is the <em>Advent of Code 2019</em> overall leaderboard</p></article>"
+        response_body="<article><p>Below is the <em>Advent of Code 2019</em> overall leaderboard</p></article>"
     )
     expected_msg = "the auth token ...5678 is expired or not functioning"
     with pytest.raises(DeadTokenError(expected_msg)):
         user.get_stats(years=[2019])
 
 
-def test_get_stats_when_no_stars_yet(requests_mock):
+def test_get_stats_when_no_stars_yet(pook):
     user = User("token12345678")
-    requests_mock.get(
+    pook.get(
         url="https://adventofcode.com/2019/leaderboard/self",
-        text="<main>You haven't collected any stars... yet.</main>"
+        response_body="<main>You haven't collected any stars... yet.</main>"
     )
     assert user.get_stats(years=[2019]) == {}
 
 
-def test_get_stats_slow_user(requests_mock):
+def test_get_stats_slow_user(pook):
     puzzle = Puzzle(year=2019, day=25)
-    requests_mock.get(
-        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    pook.get(
+        url="https://adventofcode.com/2019/leaderboard/self",
+        response_body=fake_stats_response,
     )
     stats = puzzle.my_stats
     assert stats == {
@@ -255,19 +256,21 @@ def test_get_stats_slow_user(requests_mock):
     }
 
 
-def test_get_stats_fail(requests_mock):
+def test_get_stats_fail(pook):
     puzzle = Puzzle(year=2019, day=13)
-    requests_mock.get(
-        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    pook.get(
+        url="https://adventofcode.com/2019/leaderboard/self",
+        response_body=fake_stats_response,
     )
     with pytest.raises(PuzzleUnsolvedError):
         puzzle.my_stats
 
 
-def test_get_stats_partially_complete(requests_mock):
+def test_get_stats_partially_complete(pook):
     puzzle = Puzzle(year=2019, day=24)
-    requests_mock.get(
-        url="https://adventofcode.com/2019/leaderboard/self", text=fake_stats_response,
+    pook.get(
+        url="https://adventofcode.com/2019/leaderboard/self",
+        response_body=fake_stats_response,
     )
     stats = puzzle.my_stats
     assert stats == {
@@ -282,10 +285,10 @@ def test_puzzle_view(mocker):
     browser_open.assert_called_once_with("https://adventofcode.com/2019/day/4")
 
 
-def test_easter_eggs(requests_mock):
-    requests_mock.get(
+def test_easter_eggs(pook):
+    pook.get(
         url="https://adventofcode.com/2017/day/5",
-        text=(
+        response_body=(
             '<article class="day-desc">'
             "<h2>--- Day 5: A Maze of Twisty Trampolines, All Alike ---</h2>"
             '<p>An urgent <span title="Later, on its turn, it sends you a '
@@ -298,12 +301,11 @@ def test_easter_eggs(requests_mock):
     assert egg.attrs["title"] == "Later, on its turn, it sends you a sorcery."
 
 
-def test_get_stats_400(requests_mock):
-    requests_mock.get(
-        url="https://adventofcode.com/2015/leaderboard/self", status_code=400,
-    )
+def test_get_stats_400(pook):
+    url = "https://adventofcode.com/2015/leaderboard/self"
+    pook.get(url, reply=400)
     user = User("testtoken")
-    with pytest.raises(HTTPError):
+    with pytest.raises(AocdError(f"HTTP 400 at {url}")):
         user.get_stats()
 
 
@@ -362,20 +364,20 @@ def test_user_from_unknown_id(aocd_config_dir):
         User.from_id("blah")
 
 
-def test_example_data_cache(aocd_data_dir, requests_mock):
-    mock = requests_mock.get(
+def test_example_data_cache(aocd_data_dir, pook):
+    mock = pook.get(
         url="https://adventofcode.com/2018/day/1",
-        text="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
+        response_body="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
+        times=1,
     )
     cached = aocd_data_dir / "testauth.testuser.000/2018_01_example_input.txt"
     assert not cached.exists()
     puzzle = Puzzle(day=1, year=2018)
     assert puzzle.example_data == "1\n2\n3"
-    assert mock.called
+    assert mock.calls == 1
     assert cached.read_text() == "1\n2\n3\n"
-    requests_mock.reset()
     assert puzzle.example_data == "1\n2\n3"
-    assert not mock.called
+    assert mock.calls == 1
 
 
 @pytest.mark.parametrize("v_raw,v_expected,len_logs", [
