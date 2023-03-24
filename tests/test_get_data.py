@@ -21,6 +21,13 @@ def test_get_from_server(pook):
     assert mock.calls == 1
 
 
+def test_get_from_server_has_error(pook):
+    url = "https://adventofcode.com/2018/day/1/input"
+    pook.get(url, reply=418)
+    with pytest.raises(AocdError(f"HTTP 418 at {url}")):
+        aocd.get_data(year=2018, day=1, session="bogus")
+
+
 def test_get_data_uses_current_date_if_unspecified(pook, freezer):
     mock = pook.get(
         url="https://adventofcode.com/2017/day/17/input",

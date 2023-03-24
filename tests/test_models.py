@@ -380,6 +380,14 @@ def test_example_data_cache(aocd_data_dir, pook):
     assert mock.calls == 1
 
 
+def test_example_data_fail(pook):
+    url = "https://adventofcode.com/2018/day/1"
+    pook.get(url, reply=418, response_body="I'm a teapot")
+    puzzle = Puzzle(day=1, year=2018)
+    with pytest.raises(AocdError(f"HTTP 418 at {url}")):
+        puzzle.example_data
+
+
 @pytest.mark.parametrize("v_raw,v_expected,len_logs", [
     ("123", "123", 0),
     (123, "123", 0),
