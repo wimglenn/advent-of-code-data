@@ -28,34 +28,38 @@ def test_blocker_quiet(capsys):
     assert not out
 
 
-def test_get_owner_not_logged_in(requests_mock):
-    requests_mock.get("https://adventofcode.com/settings", status_code=302)
+def test_get_owner_not_logged_in(pook):
+    pook.reset()
+    pook.get("https://adventofcode.com/settings", reply=302)
     with pytest.raises(DeadTokenError):
         get_owner("not_logged_in")
 
 
-def test_get_owner_user_id(requests_mock):
-    requests_mock.get(
+def test_get_owner_user_id(pook):
+    pook.reset()
+    pook.get(
         "https://adventofcode.com/settings",
-        text="<span>Link to wtf</span><code>ownerproof-123-456-9c3a0172</code>",
+        response_body="<span>Link to wtf</span><code>ownerproof-123-456-9c3a0172</code>",
     )
     owner = get_owner("...")
     assert owner == "unknown.unknown.123"
 
 
-def test_get_owner_and_username(requests_mock):
-    requests_mock.get(
+def test_get_owner_and_username(pook):
+    pook.reset()
+    pook.get(
         "https://adventofcode.com/settings",
-        text="<span>Link to https://www.reddit.com/u/wim</span><code>ownerproof-123-456-9c3a0172</code>",
+        response_body="<span>Link to https://www.reddit.com/u/wim</span><code>ownerproof-123-456-9c3a0172</code>",
     )
     owner = get_owner("...")
     assert owner == "reddit.wim.123"
 
 
-def test_get_owner_google(requests_mock):
-    requests_mock.get(
+def test_get_owner_google(pook):
+    pook.reset()
+    pook.get(
         "https://adventofcode.com/settings",
-        text='<span><img src="https://lh3.googleusercontent.com/...">wim</span><code>ownerproof-1-2</code>',
+        response_body='<span><img src="https://lh3.googleusercontent.com/...">wim</span><code>ownerproof-1-2</code>',
     )
     owner = get_owner("...")
     assert owner == "google.wim.1"

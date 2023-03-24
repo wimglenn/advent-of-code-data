@@ -8,18 +8,22 @@ import tempfile
 import time
 from datetime import datetime
 from importlib.metadata import entry_points
+from importlib.metadata import version
 from itertools import cycle
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import bs4
-import requests
+import urllib3
 
 from .exceptions import DeadTokenError
 
 
+_v = version("advent-of-code-data")
 log = logging.getLogger(__name__)
 AOC_TZ = ZoneInfo("America/New_York")
+USER_AGENT = {"User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"}
+http = urllib3.PoolManager(headers=USER_AGENT)
 
 
 def _ensure_intermediate_dirs(fname):
@@ -77,12 +81,12 @@ def get_owner(token):
     """parse owner of the token. raises DeadTokenError if the token is expired/invalid.
     returns a string like authtype.username.userid"""
     url = "https://adventofcode.com/settings"
-    response = requests.get(url, cookies={"session": token}, allow_redirects=False)
-    if response.status_code != 200:
+    response = http.request("GET", url, headers=http.headers | {"Cookie": f"session={token}"}, redirect=False)
+    if response.status != 200:
         # bad tokens will 302 redirect to main page
-        log.info("session %s is dead - status_code=%s", token, response.status_code)
+        log.info("session %s is dead - status_code=%s", token, response.status)
         raise DeadTokenError(f"the auth token ...{token[-4:]} is expired or not functioning")
-    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    soup = bs4.BeautifulSoup(response.data, "html.parser")
     auth_source = "unknown"
     username = "unknown"
     userid = soup.code.text.split("-")[1]

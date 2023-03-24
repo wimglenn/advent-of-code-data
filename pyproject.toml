@@ -17,7 +17,7 @@ classifiers = [
 dependencies = [
     "beautifulsoup4",
     "pebble",
-    "requests",
+    "urllib3",
     'tzdata ; platform_system == "Windows"',
 ]
 

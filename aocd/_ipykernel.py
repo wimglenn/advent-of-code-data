@@ -1,7 +1,7 @@
 import os
 import re
 
-import requests
+import urllib3
 
 
 def get_ipynb_path():
@@ -11,9 +11,10 @@ def get_ipynb_path():
     from jupyter_server.utils import url_path_join
     app = IPython.get_ipython().config["IPKernelApp"]
     kernel_id = re.search(r"(?<=kernel-)[\w\-]+(?=\.json)", app["connection_file"])[0]
+    http = urllib3.PoolManager()
     for serv in serverapp.list_running_servers():
         url = url_path_join(serv["url"], "api/sessions")
-        resp = requests.get(url, params={"token": serv["token"]})
+        resp = http.request("GET", url, fields={"token": serv["token"]})
         resp.raise_for_status()
         for sess in resp.json():
             if kernel_id == sess["kernel"]["id"]:

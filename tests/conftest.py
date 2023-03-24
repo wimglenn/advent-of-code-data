@@ -1,3 +1,4 @@
+import pook as pook_mod
 import pytest
 
 from aocd.models import User
@@ -55,11 +56,18 @@ def answer_not_cached(request, mocker):
         mocker.patch("aocd.models.Puzzle._check_guess_against_existing", return_value=rv)
 
 
+@pytest.fixture
+def pook():
+    pook_mod.on()
+    yield pook_mod
+    pook_mod.off()
+
+
 @pytest.fixture(autouse=True)
-def detect_user_id(requests_mock):
-    requests_mock.get(
+def detect_user_id(pook):
+    pook.get(
         "https://adventofcode.com/settings",
-        text="<span>Link to testauth/testuser</span><code>ownerproof-000</code>",
+        response_body="<span>Link to testauth/testuser</span><code>ownerproof-000</code>",
     )
     yield
     if getattr(User, "_token2id", None) is not None:
