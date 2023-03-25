@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 from functools import partial
 from importlib.metadata import version
 
@@ -18,6 +19,7 @@ def main():
     parser = argparse.ArgumentParser(
         description=f"Advent of Code Data v{version('advent-of-code-data')}",
         usage=f"aocd [day 1-25] [year 2015-{years[-1]}]",
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
         "day",
@@ -34,13 +36,34 @@ def main():
         help=f"2015-{years[-1]} (default: %(default)s)",
     )
     parser.add_argument(
+        "-v",
         "--version",
         action="version",
         version=f"%(prog)s v{version('advent-of-code-data')}",
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="enable debug logging",
+    )
     if len(users) > 1:
-        parser.add_argument("-u", "--user", choices=users, type=partial(_cli_guess, choices=users))
+        parser.add_argument(
+            "-u",
+            "--user",
+            help=(
+                "gets the data for a particular user.\n"
+                "the known users are:\n"
+                + "\n".join(" - " + u for u in users)
+                + "\nuid may be specified by substring"
+            ),
+            metavar="<id>",
+            choices=users,
+            type=partial(_cli_guess, choices=users),
+        )
     args = parser.parse_args()
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
     if args.day in years and args.year in days:
         # be forgiving
         args.day, args.year = args.year, args.day

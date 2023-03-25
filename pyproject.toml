@@ -47,5 +47,3 @@ aocd-token = "aocd.cookies:scrape_session_tokens"
 packages = ["aocd"]
 
 [project.entry-points."adventofcode.user"]
-
-[project.entry-points."adventofcode.transforms"]
