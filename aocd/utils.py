@@ -19,13 +19,11 @@ import urllib3
 from .exceptions import DeadTokenError
 
 
-_v = version("advent-of-code-data")
 log = logging.getLogger(__name__)
 AOC_TZ = ZoneInfo("America/New_York")
-USER_AGENT = {
-    "User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"
-}
-http = urllib3.PoolManager(headers=USER_AGENT)
+_v = version("advent-of-code-data")
+USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"
+http = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
 
 
 def _ensure_intermediate_dirs(fname):
