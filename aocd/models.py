@@ -95,15 +95,16 @@ class User:
         results = {}
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
-            response = http.request("GET", url, headers=http.headers | self.auth)
+            response = http.request("GET", url, headers=http.headers | self.auth, redirect=False)
+            if 300 <= response.status < 400:
+                # expired tokens 302 redirect to the overall leaderboard
+                msg = f"the auth token ...{self.token[-4:]} is expired or not functioning"
+                raise DeadTokenError(msg)
             if response.status >= 400:
                 raise AocdError(f"HTTP {response.status} at {url}")
             soup = bs4.BeautifulSoup(response.data, "html.parser")
             if soup.article is None and "You haven't collected any stars" in soup.main.text:
                 continue
-            if soup.article.pre is None and "overall leaderboard" in soup.article.text:
-                msg = f"the auth token ...{self.token[-4:]} is expired or not functioning"
-                raise DeadTokenError(msg)
             stats_txt = soup.article.pre.text
             lines = stats_txt.splitlines()
             lines = [x for x in lines if x.split()[0] in days]
