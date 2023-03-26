@@ -9,6 +9,7 @@ def get_ipynb_path():
     import IPython
     from jupyter_server import serverapp
     from jupyter_server.utils import url_path_join
+
     app = IPython.get_ipython().config["IPKernelApp"]
     kernel_id = re.search(r"(?<=kernel-)[\w\-]+(?=\.json)", app["connection_file"])[0]
     http = urllib3.PoolManager()

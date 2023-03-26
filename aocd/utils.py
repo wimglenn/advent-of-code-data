@@ -22,7 +22,9 @@ from .exceptions import DeadTokenError
 _v = version("advent-of-code-data")
 log = logging.getLogger(__name__)
 AOC_TZ = ZoneInfo("America/New_York")
-USER_AGENT = {"User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"}
+USER_AGENT = {
+    "User-Agent": f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"
+}
 http = urllib3.PoolManager(headers=USER_AGENT)
 
 
@@ -81,11 +83,12 @@ def get_owner(token):
     """parse owner of the token. raises DeadTokenError if the token is expired/invalid.
     returns a string like authtype.username.userid"""
     url = "https://adventofcode.com/settings"
-    response = http.request("GET", url, headers=http.headers | {"Cookie": f"session={token}"}, redirect=False)
+    headers = http.headers | {"Cookie": f"session={token}"}
+    response = http.request("GET", url, headers=headers, redirect=False)
     if response.status != 200:
         # bad tokens will 302 redirect to main page
         log.info("session %s is dead - status_code=%s", token, response.status)
-        raise DeadTokenError(f"the auth token ...{token[-4:]} is expired or not functioning")
+        raise DeadTokenError(f"the auth token ...{token[-4:]} is dead")
     soup = bs4.BeautifulSoup(response.data, "html.parser")
     auth_source = "unknown"
     username = "unknown"
@@ -128,9 +131,11 @@ def _cli_guess(choice, choices):
         return choice
     candidates = [c for c in choices if choice in c]
     if len(candidates) > 1:
-        raise argparse.ArgumentTypeError(f"{choice} ambiguous (could be {', '.join(candidates)})")
+        msg = f"{choice} ambiguous (could be {', '.join(candidates)})"
+        raise argparse.ArgumentTypeError(msg)
     elif not candidates:
-        raise argparse.ArgumentTypeError(f"invalid choice {choice!r} (choose from {', '.join(choices)})")
+        msg = f"invalid choice {choice!r} (choose from {', '.join(choices)})"
+        raise argparse.ArgumentTypeError(msg)
     [result] = candidates
     return result
 

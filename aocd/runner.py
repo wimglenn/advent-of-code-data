@@ -36,17 +36,19 @@ def main():
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
     users = _load_users()
+    utype = partial(_cli_guess, choices=users)
     log_levels = "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     parser = ArgumentParser(description="AoC runner")
+    st = "store_true"
     parser.add_argument("-p", "--plugins", nargs="+", choices=plugins)
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
-    parser.add_argument("-u", "--users", nargs="+", choices=users, type=partial(_cli_guess, choices=users))
+    parser.add_argument("-u", "--users", nargs="+", choices=users, type=utype)
     parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
-    parser.add_argument("-s", "--no-submit", action="store_true", help="disable autosubmit")
-    parser.add_argument("-r", "--reopen", action="store_true", help="open browser on NEW solves")
-    parser.add_argument("-q", "--quiet", action="store_true", help="capture output from runner")
-    parser.add_argument("--log-level", default="WARNING", choices=log_levels)
+    parser.add_argument("-s", "--no-submit", action=st, help="disable autosubmit")
+    parser.add_argument("-r", "--reopen", action=st, help="open browser on NEW solves")
+    parser.add_argument("-q", "--quiet", action=st, help="capture output from runner")
+    parser.add_argument("-l", "--log-level", default="WARNING", choices=log_levels)
     args = parser.parse_args()
 
     if not users:
@@ -60,14 +62,16 @@ def main():
         sys.exit(1)
     if not plugins:
         print(
-            "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
-            "See https://github.com/wimglenn/advent-of-code-sample for an example plugin package structure.",
+            "There are no plugins available. Install some package(s) "
+            "with a registered 'adventofcode.user' entry-point.\n"
+            "See https://github.com/wimglenn/advent-of-code-sample "
+            "for an example plugin package structure.",
             file=sys.stderr,
         )
         sys.exit(1)
     logging.basicConfig(level=getattr(logging, args.log_level))
     rc = run_for(
-        plugins=args.plugins or list(plugins),
+        plugs=args.plugins or list(plugins),
         years=args.years or years,
         days=args.days or days,
         datasets={k: users[k] for k in (args.users or users)},
@@ -142,20 +146,22 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
     return runtime
 
 
-def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False):
+def run_one(
+    year, day, data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False
+):
     prev = os.getcwd()
     scratch = tempfile.mkdtemp(prefix=f"{year}-{day:02d}-")
     os.chdir(scratch)
     input_path = Path("input.txt")
     assert not input_path.exists()
     try:
-        input_path.write_text(input_data)
+        input_path.write_text(data)
         a, b, walltime, error = run_with_timeout(
             entry_point=entry_point,
             timeout=timeout,
             year=year,
             day=day,
-            data=input_data,
+            data=data,
             progress=progress,
             capture=capture,
         )
@@ -169,12 +175,21 @@ def run_one(year, day, input_data, entry_point, timeout=DEFAULT_TIMEOUT, progres
     return a, b, walltime, error
 
 
-def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=True, reopen=False, capture=False):
+def run_for(
+    plugs,
+    years,
+    days,
+    datasets,
+    timeout=DEFAULT_TIMEOUT,
+    autosubmit=True,
+    reopen=False,
+    capture=False,
+):
     if timeout == 0:
         timeout = float("inf")
     aoc_now = datetime.now(tz=AOC_TZ)
-    eps = {ep.name: ep for ep in get_plugins() if ep.name in plugins}
-    it = itertools.product(years, days, plugins, datasets)
+    eps = {ep.name: ep for ep in get_plugins() if ep.name in plugs}
+    it = itertools.product(years, days, plugs, datasets)
     n_incorrect = 0
     # padding values for alignment
     wp = len(max(eps, key=len)) if eps else 3
@@ -191,7 +206,7 @@ def run_for(plugins, years, days, datasets, timeout=DEFAULT_TIMEOUT, autosubmit=
         a, b, walltime, error = run_one(
             year=year,
             day=day,
-            input_data=puzzle.input_data,
+            data=puzzle.input_data,
             entry_point=entry_point,
             timeout=timeout,
             progress=progress,

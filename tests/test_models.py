@@ -226,8 +226,7 @@ def test_get_stats_when_token_expired(pook):
     # sadly, it just returns the global leaderboard, rather than a http 4xx
     user = User("token12345678")
     pook.get("https://adventofcode.com/2019/leaderboard/self", reply=302)
-    expected_msg = "the auth token ...5678 is expired or not functioning"
-    with pytest.raises(DeadTokenError(expected_msg)):
+    with pytest.raises(DeadTokenError("the auth token ...5678 is dead")):
         user.get_stats(years=[2019])
 
 
@@ -235,7 +234,7 @@ def test_get_stats_when_no_stars_yet(pook):
     user = User("token12345678")
     pook.get(
         url="https://adventofcode.com/2019/leaderboard/self",
-        response_body="<main>You haven't collected any stars... yet.</main>"
+        response_body="<main>You haven't collected any stars... yet.</main>",
     )
     assert user.get_stats(years=[2019]) == {}
 
@@ -310,7 +309,7 @@ def test_get_stats_400(pook):
 def test_check_guess_against_unsolved(mocker):
     mocker.patch("aocd.models.Puzzle._get_answer", side_effect=PuzzleUnsolvedError)
     puzzle = Puzzle(year=2019, day=4)
-    rv = puzzle._check_guess_against_existing("one", "a")
+    rv = puzzle._check_already_solved("one", "a")
     assert rv is None
 
 
@@ -318,7 +317,7 @@ def test_check_guess_against_unsolved(mocker):
 def test_check_guess_against_empty(mocker):
     mocker.patch("aocd.models.Puzzle._get_answer", return_value="")
     puzzle = Puzzle(year=2019, day=4)
-    rv = puzzle._check_guess_against_existing("one", "a")
+    rv = puzzle._check_already_solved("one", "a")
     assert rv is None
 
 
@@ -326,7 +325,7 @@ def test_check_guess_against_empty(mocker):
 def test_check_guess_against_saved_correct(mocker):
     mocker.patch("aocd.models.Puzzle._get_answer", return_value="one")
     puzzle = Puzzle(year=2019, day=4)
-    rv = puzzle._check_guess_against_existing("one", "a")
+    rv = puzzle._check_already_solved("one", "a")
     assert rv == "Part a already solved with same answer: one"
 
 
@@ -334,7 +333,7 @@ def test_check_guess_against_saved_correct(mocker):
 def test_check_guess_against_saved_incorrect(mocker):
     mocker.patch("aocd.models.Puzzle._get_answer", return_value="two")
     puzzle = Puzzle(year=2019, day=4)
-    rv = puzzle._check_guess_against_existing("one", "a")
+    rv = puzzle._check_already_solved("one", "a")
     assert "Part a already solved with different answer: two" in rv
 
 
@@ -385,20 +384,23 @@ def test_example_data_fail(pook):
         puzzle.example_data
 
 
-@pytest.mark.parametrize("v_raw,v_expected,len_logs", [
-    ("123", "123", 0),
-    (123, "123", 0),
-    ("xxx", "xxx", 0),
-    (123.5, 123.5, 0),
-    (123. + 123.j, 123. + 123.j, 0),
-    (123.0, "123", 1),
-    (123. + 0.j, "123", 1),
-    (np.int32(123), "123", 1),
-    (np.uint32(123), "123", 1),
-    (np.double(123.), "123", 1),
-    (np.complex64(123. + 0.j), "123", 1),
-    (np.complex64(123. + .5j), np.complex64(123. + .5j), 0),
-])
+@pytest.mark.parametrize(
+    "v_raw,v_expected,len_logs",
+    [
+        ("123", "123", 0),
+        (123, "123", 0),
+        ("xxx", "xxx", 0),
+        (123.5, 123.5, 0),
+        (123.0 + 123.0j, 123.0 + 123.0j, 0),
+        (123.0, "123", 1),
+        (123.0 + 0.0j, "123", 1),
+        (np.int32(123), "123", 1),
+        (np.uint32(123), "123", 1),
+        (np.double(123.0), "123", 1),
+        (np.complex64(123.0 + 0.0j), "123", 1),
+        (np.complex64(123.0 + 0.5j), np.complex64(123.0 + 0.5j), 0),
+    ],
+)
 def test_type_coercions(v_raw, v_expected, len_logs, caplog):
     p = Puzzle(2022, 1)
     v_actual = p._coerce_val(v_raw)

@@ -126,7 +126,8 @@ def test_submit_correct_part_a_answer_for_part_b_blocked(pook):
         url="https://adventofcode.com/2018/day/1/answer",
         response_body="<article>That's the right answer</article>",
     )
-    with pytest.raises(AocdError("cowardly refusing to re-submit answer_a (1234) for part b")):
+    expected_msg = "cowardly refusing to submit 1234 for part b, because that was the answer for part a"
+    with pytest.raises(AocdError(expected_msg)):
         submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
 
 
@@ -181,7 +182,7 @@ def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir):
     post = pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
         body="level=2&answer=answerB",
-        response_body="<article></article>"
+        response_body="<article></article>",
     )
     parta_answer = aocd_data_dir / "testauth.testuser.000/2018_01a_answer.txt"
     partb_answer = aocd_data_dir / "testauth.testuser.000/2018_01b_answer.txt"
@@ -245,5 +246,5 @@ def test_submit_float_warns(pook, capsys, caplog):
     )
     submit(1234.0, part="a", day=8, year=2022, session="whatever", reopen=False)
     assert post.calls == 1
-    log_record = ("aocd.models", logging.WARNING, "coerced float value 1234.0 for 2022/08")
-    assert log_record in caplog.record_tuples
+    record = ("aocd.models", logging.WARNING, "coerced float value 1234.0 for 2022/08")
+    assert record in caplog.record_tuples

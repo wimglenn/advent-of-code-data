@@ -137,10 +137,12 @@ def test_race_on_download_data(mocker, aocd_data_dir, pook):
 
     real_os_open = os.open
     fds = {}
+
     def logging_os_open(path, *args, **kwargs):
         ret = real_os_open(path, *args, **kwargs)
         fds[ret] = path
         return ret
+
     mocker.patch("os.open", side_effect=logging_os_open)
 
     # This doesn't use unittest.mock_open because we actually do want the faked object to be functional.
@@ -154,12 +156,16 @@ def test_race_on_download_data(mocker, aocd_data_dir, pook):
                 return res
             open_evt.set()
             real_write = res.write
+
             def write(*args, **kwargs):
                 write_evt.wait()
                 real_write(*args, **kwargs)
+
             res.write = write
             return res
+
         return open_impl
+
     mocker.patch("io.open", side_effect=generate_open(io.open))
 
     t = threading.Thread(target=aocd.get_data, kwargs={"year": 2018, "day": 1})
