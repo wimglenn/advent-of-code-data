@@ -22,13 +22,14 @@ def get_working_tokens():
     except ImportError:
         sys.exit("To use this feature you must pip install browser-cookie3")
 
-    log.info("checking browser cookies storage for auth tokens, this might pop up an auth dialog!")
+    log.info("checking browser storage for tokens, this might pop up an auth dialog!")
     log.info("checking chrome cookie jar...")
-    cookie_files = glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies")) + [None]
+    cookie_files = glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies"))
+    cookie_files.append(None)
     chrome_cookies = []
-    for cookie_file in cookie_files:
+    for cf in cookie_files:
         try:
-            chrome = bc3.chrome(cookie_file=cookie_file, domain_name=".adventofcode.com")
+            chrome = bc3.chrome(cookie_file=cf, domain_name=".adventofcode.com")
         except Exception as err:
             log.debug("Couldn't scrape chrome - %s: %s", type(err), err)
         else:
@@ -50,7 +51,7 @@ def get_working_tokens():
     tokens = list({}.fromkeys([c.value for c in chrome + firefox]))
     removed = len(chrome + firefox) - len(tokens)
     if removed:
-        log.info("Removed %d duplicate%s", removed, "s"[:removed-1])
+        log.info("Removed %d duplicate%s", removed, "s"[: removed - 1])
 
     result = {}  # map of {token: auth source}
     for token in tokens:
@@ -65,12 +66,24 @@ def get_working_tokens():
 
 
 def scrape_session_tokens():
+    """Scrapes AoC session tokens from your browser's cookie storage"""
     aocd_token_path = AOCD_CONFIG_DIR / "token"
     aocd_tokens_path = AOCD_CONFIG_DIR / "tokens.json"
 
-    parser = argparse.ArgumentParser(description="Scrapes AoC session tokens from your browser's cookie storage")
-    parser.add_argument("-v", "--verbose", action="count", help="increased logging (may be specified multiple)")
-    parser.add_argument("-c", "--check", nargs="?", help="check existing token(s) and exit", const=True)
+    parser = argparse.ArgumentParser(description=scrape_session_tokens.__doc__)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        help="increased logging (may be specified multiple)",
+    )
+    parser.add_argument(
+        "-c",
+        "--check",
+        nargs="?",
+        help="check existing token(s) and exit",
+        const=True,
+    )
     args = parser.parse_args()
 
     if args.verbose is None:

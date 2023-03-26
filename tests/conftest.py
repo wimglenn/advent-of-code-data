@@ -53,7 +53,7 @@ def answer_not_cached(request, mocker):
         rv = mark.kwargs.get("rv", None)
 
     if install:
-        mocker.patch("aocd.models.Puzzle._check_guess_against_existing", return_value=rv)
+        mocker.patch("aocd.models.Puzzle._check_already_solved", return_value=rv)
 
 
 @pytest.fixture

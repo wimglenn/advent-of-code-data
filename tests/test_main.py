@@ -70,12 +70,12 @@ def test_main_user_exact(mocker, capsys):
 
 def test_main_user_wat(mocker, capsys):
     fake_users = {
-        "bill": "b",
-        "teddy": "t",
+        "bo": "b",
+        "ted": "t",
     }
     mocker.patch("aocd.cli._load_users", return_value=fake_users)
     mocker.patch("sys.argv", ["aocd", "2015", "8", "-u", "z"])
     with pytest.raises(SystemExit(2)):
         main()
     out, err = capsys.readouterr()
-    assert "aocd: error: argument -u/--user: invalid choice 'z' (choose from bill, teddy)" in err
+    assert "error: argument -u/--user: invalid choice 'z' (choose from bo, ted)" in err

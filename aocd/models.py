@@ -29,13 +29,13 @@ from .utils import http
 log = logging.getLogger(__name__)
 
 
-AOCD_DATA_DIR = Path(os.environ.get("AOCD_DIR", Path("~", ".config", "aocd"))).expanduser()
+AOCD_DATA_DIR = Path(os.environ.get("AOCD_DIR", Path("~", ".config", "aocd")))
+AOCD_DATA_DIR = AOCD_DATA_DIR.expanduser()
 AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
 
 
 class User:
-
     _token2id = None
 
     def __init__(self, token):
@@ -93,17 +93,19 @@ class User:
             years = all_years
         days = {str(i) for i in range(1, 26)}
         results = {}
+        headers = http.headers | self.auth
+        ur_broke = "You haven't collected any stars"
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
-            response = http.request("GET", url, headers=http.headers | self.auth, redirect=False)
+            response = http.request("GET", url, headers=headers, redirect=False)
             if 300 <= response.status < 400:
                 # expired tokens 302 redirect to the overall leaderboard
-                msg = f"the auth token ...{self.token[-4:]} is expired or not functioning"
+                msg = f"the auth token ...{self.token[-4:]} is dead"
                 raise DeadTokenError(msg)
             if response.status >= 400:
                 raise AocdError(f"HTTP {response.status} at {url}")
             soup = bs4.BeautifulSoup(response.data, "html.parser")
-            if soup.article is None and "You haven't collected any stars" in soup.main.text:
+            if soup.article is None and ur_broke in soup.main.text:
                 continue
             stats_txt = soup.article.pre.text
             lines = stats_txt.splitlines()
@@ -164,13 +166,13 @@ class Puzzle:
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
         fname = f"{self.year}_{self.day:02d}"
-        prefix = self.user.memo_dir / fname
-        self.input_data_fname = prefix.with_name(prefix.name + "_input.txt")
-        self.example_input_data_fname = prefix.with_name(prefix.name + "_example_input.txt")
-        self.answer_a_fname = prefix.with_name(prefix.name + "a_answer.txt")
-        self.answer_b_fname = prefix.with_name(prefix.name + "b_answer.txt")
-        self.incorrect_answers_a_fname = prefix.with_name(prefix.name + "a_bad_answers.txt")
-        self.incorrect_answers_b_fname = prefix.with_name(prefix.name + "b_bad_answers.txt")
+        pre = self.user.memo_dir / fname
+        self.input_data_fname = pre.with_name(pre.name + "_input.txt")
+        self.example_input_data_fname = pre.with_name(pre.name + "_example_input.txt")
+        self.answer_a_fname = pre.with_name(pre.name + "a_answer.txt")
+        self.answer_b_fname = pre.with_name(pre.name + "b_answer.txt")
+        self.incorrect_answers_a_fname = pre.with_name(pre.name + "a_bad_answers.txt")
+        self.incorrect_answers_b_fname = pre.with_name(pre.name + "b_bad_answers.txt")
         self.title_fname = AOCD_DATA_DIR / "titles" / f"{self.year}_{self.day:02d}.txt"
         self._title = ""
 
@@ -190,7 +192,8 @@ class Puzzle:
             return data.rstrip("\r\n")
         sanitized = "..." + self.user.token[-4:]
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
-        response = http.request("GET", url=self.input_data_url, headers=http.headers | self.user.auth)
+        headers = http.headers | self.user.auth
+        response = http.request("GET", url=self.input_data_url, headers=headers)
         if response.status >= 400:
             if response.status == 404:
                 raise PuzzleLockedError(f"{self.year}/{self.day:02d} not available yet")
@@ -241,7 +244,8 @@ class Puzzle:
         orig_val = val
         orig_type = type(val)
         coerced = False
-        if isinstance(val, (float, complex)) and val.imag == 0. and val.real.is_integer():
+        floatish = isinstance(val, (float, complex))
+        if floatish and val.imag == 0.0 and val.real.is_integer():
             coerced = True
             val = int(val.real)
         elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
@@ -250,13 +254,19 @@ class Puzzle:
                 coerced = True
                 val = int(orig_val)
             elif orig_type.__name__.startswith(("float", "complex")):
-                if val.imag == 0. and float(val.real).is_integer():
+                if val.imag == 0.0 and float(val.real).is_integer():
                     coerced = True
                     val = int(val.real)
         if isinstance(val, int):
             val = str(val)
         if coerced:
-            log.warning("coerced %s value %r for %d/%02d", orig_type.__name__, orig_val, self.year, self.day)
+            log.warning(
+                "coerced %s value %r for %d/%02d",
+                orig_type.__name__,
+                orig_val,
+                self.year,
+                self.day,
+            )
         return val
 
     @property
@@ -329,13 +339,19 @@ class Puzzle:
         bad_guesses = getattr(self, "incorrect_answers_" + part)
         if value in bad_guesses:
             if not quiet:
-                print(f"aocd will not submit that answer again. You've previously guessed {value} and the server responded:")
+                print(
+                    "aocd will not submit that answer again. "
+                    f"You've previously guessed {value} and the server responded:"
+                )
                 print(colored(bad_guesses[value], "red"))
             return
         if part == "b" and value == getattr(self, "answer_a", None):
-            raise AocdError(f"cowardly refusing to re-submit answer_a ({value}) for part b")
+            raise AocdError(
+                f"cowardly refusing to submit {value} for part b, "
+                "because that was the answer for part a"
+            )
         url = self.submit_url
-        check_guess = self._check_guess_against_existing(value, part)
+        check_guess = self._check_already_solved(value, part)
         if check_guess is not None:
             if quiet:
                 log.info(check_guess)
@@ -376,7 +392,8 @@ class Puzzle:
                     log.info("Got 49 stars already, getting 50th...")
                     self._submit(value="done", part="b", reopen=reopen, quiet=quiet)
                 else:
-                    log.info("Got %d stars, need %d more for part b", n_stars, 49 - n_stars)
+                    rem = 49 - n_stars
+                    log.info("Got %d stars, need %d more for part b", n_stars, rem)
         elif "Did you already complete it" in message:
             color = "yellow"
         elif "That's not the right answer" in message:
@@ -405,17 +422,20 @@ class Puzzle:
             print(colored(message, color=color))
         return response
 
-    def _check_guess_against_existing(self, guess, part):
+    def _check_already_solved(self, guess, part):
         try:
             answer = self._get_answer(part=part)
             if answer == "":
                 return None
         except PuzzleUnsolvedError:
             return None
+        msg = f"Part {part} already solved"
         if answer == guess:
-            return f"Part {part} already solved with same answer: {answer}"
+            msg += f" with same answer: {answer}"
         else:
-            return colored(f"Part {part} already solved with different answer: {answer}", "red")
+            msg += f" with different answer: {answer}"
+            msg = colored(msg, "red")
+        return msg
 
     def _save_correct_answer(self, value, part):
         fname = getattr(self, f"answer_{part}_fname")

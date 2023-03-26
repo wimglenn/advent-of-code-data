@@ -49,7 +49,7 @@ def test_main(capsys, mocker, aocd_config_dir):
     with pytest.raises(SystemExit(0)):
         main()
     mock.assert_called_once_with(
-        plugins=["user1", "user2"],
+        plugs=["user1", "user2"],
         years=[2015],
         days=[3, 7],
         datasets={"data1": "token1", "data2": "token2"},
@@ -92,7 +92,7 @@ def test_results(mocker, capsys):
     fake_puzzle.title = "The Puzzle Title"
     mocker.patch("aocd.runner.Puzzle", return_value=fake_puzzle)
     run_for(
-        plugins=["testuser"],
+        plugs=["testuser"],
         years=[2015],
         days=[1],
         datasets={"testdataset": "testtoken"},
@@ -121,7 +121,7 @@ def test_results_xmas(mocker, capsys):
     )
     mocker.patch("aocd.runner.Puzzle", return_value=fake_puzzle)
     run_for(
-        plugins=["testuser"],
+        plugs=["testuser"],
         years=[2015],
         days=[25],
         datasets={"testdataset": "testtoken"},
@@ -149,7 +149,7 @@ def test_format_time(t, timeout, expected, color):
 
 
 def test_nothing_to_do():
-    run_for(plugins=[], years=[], days=[], datasets=[])
+    run_for(plugs=[], years=[], days=[], datasets=[])
 
 
 def test_day_out_of_range(mocker, capsys, freezer):
@@ -159,7 +159,7 @@ def test_day_out_of_range(mocker, capsys, freezer):
     ep.load.return_value = fake_entry_point
     mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
-        plugins=["testuser"],
+        plugs=["testuser"],
         years=[2018],
         days=[27],
         datasets={"default": "thetesttoken"},
@@ -182,7 +182,7 @@ def test_run_error(aocd_data_dir, mocker, capsys):
     ep.load.return_value = bugged_entry_point
     mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
-        plugins=["testuser"],
+        plugs=["testuser"],
         years=[2018],
         days=[25],
         datasets={"default": "thetesttoken"},
@@ -213,7 +213,7 @@ def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, pook):
     ep.load.return_value = fake_entry_point
     mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
-        plugins=["testuser"],
+        plugs=["testuser"],
         years=[2015],
         days=[1],
         datasets={"default": "thetesttoken"},
@@ -238,7 +238,7 @@ def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, pook):
     ep.load.return_value = fake_entry_point
     mocker.patch("aocd.runner.get_plugins", return_value=[ep])
     run_for(
-        plugins=["testuser"],
+        plugs=["testuser"],
         years=[2015],
         days=[1],
         datasets={"default": "thetesttoken"},

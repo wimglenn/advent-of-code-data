@@ -19,24 +19,25 @@ def test_aocd_data_with_from_import(mocker):
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mock = mocker.patch("aocd.get_data", return_value="test data 2017/23")
     from aocd import data
+
     mock.assert_called_once_with(day=23, year=2017)
     assert data == "test data 2017/23"
 
 
-def test_import_submit_binds_day_and_year(mocker):
+def test_submit_autobinds_day_and_year(mocker):
     fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    from aocd import submit
+    submit = aocd.submit
     assert isinstance(submit, functools.partial)
-    assert submit.func is aocd.post.submit  # partially applied with day=23 and year=2017
-    submit.keywords == {"day": 23, "year": 2017}
+    assert submit.func is aocd.post.submit
+    # partially applied with day=23 and year=2017
+    assert submit.keywords == {"day": 23, "year": 2017}
 
 
-def test_import_submit_doesnt_bind_day_and_year_when_introspection_failed(mocker):
+def test_submit_doesnt_bind_day_and_year_when_introspection_failed(mocker):
     fake_stack = []
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    from aocd import submit
-    assert not isinstance(submit, functools.partial)
+    assert not isinstance(aocd.submit, functools.partial)
 
 
 def test_data_in_interactive_mode(monkeypatch, mocker, freezer):
