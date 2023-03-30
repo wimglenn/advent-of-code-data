@@ -110,7 +110,7 @@ def test_correct_submit_records_good_answer(pook, aocd_data_dir):
         url="https://adventofcode.com/2018/day/1/answer",
         response_body="<article>That's the right answer</article>",
     )
-    answer_fname = aocd_data_dir / "testauth.testuser.000/2018_01b_answer.txt"
+    answer_fname = aocd_data_dir / "testauth.testuser.000" / "2018_01b_answer.txt"
     assert not answer_fname.exists()
     submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
     assert answer_fname.exists()
@@ -142,7 +142,7 @@ def test_submits_for_partb_when_already_submitted_parta(freezer, pook, aocd_data
         body="level=2&answer=1234",
         response_body="<article>That's the right answer</article>",
     )
-    parta_answer = aocd_data_dir / "testauth.testuser.000/2018_01a_answer.txt"
+    parta_answer = aocd_data_dir / "testauth.testuser.000" / "2018_01a_answer.txt"
     parta_answer.touch()
     submit(1234, reopen=False)
     assert post.calls == 1
@@ -194,8 +194,8 @@ def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir):
         body="level=2&answer=answerB",
         response_body="<article></article>",
     )
-    parta_answer = aocd_data_dir / "testauth.testuser.000/2018_01a_answer.txt"
-    partb_answer = aocd_data_dir / "testauth.testuser.000/2018_01b_answer.txt"
+    parta_answer = aocd_data_dir / "testauth.testuser.000" / "2018_01a_answer.txt"
+    partb_answer = aocd_data_dir / "testauth.testuser.000" / "2018_01b_answer.txt"
     assert not parta_answer.exists()
     assert not partb_answer.exists()
     submit("answerB", reopen=False)
@@ -215,7 +215,7 @@ def test_submit_puts_level1_by_default(freezer, pook, aocd_data_dir):
         body="level=1&answer=1234",
         response_body="<article>That's the right answer</article>",
     )
-    parta_answer = aocd_data_dir / "testauth.testuser.000/2018_01a_answer.txt"
+    parta_answer = aocd_data_dir / "testauth.testuser.000" / "2018_01a_answer.txt"
     assert not parta_answer.exists()
     submit(1234, reopen=False)
     assert get.calls == 1
@@ -224,17 +224,27 @@ def test_submit_puts_level1_by_default(freezer, pook, aocd_data_dir):
     assert parta_answer.read_text() == "1234"
 
 
-def test_cannot_submit_same_bad_answer_twice(pook, capsys):
-    mock = pook.post(
+def test_cannot_submit_same_bad_answer_twice(aocd_data_dir, pook, capsys):
+    mock1 = pook.post(
         url="https://adventofcode.com/2015/day/1/answer",
         response_body="<article><p>That's not the right answer. (You guessed <span>69.)</span></a></p></article>",
     )
-    submit(year=2015, day=1, part="a", answer=69)
-    submit(year=2015, day=1, part="a", answer=69)
+    mock2 = pook.post(
+        url="https://adventofcode.com/2015/day/1/answer",
+        response_body="<article><p>That's not the right answer idiot. (You guessed <span>70.)</span></a></p></article>",
+    )
     submit(year=2015, day=1, part="a", answer=69, quiet=True)
-    assert mock.calls == 1
+    submit(year=2015, day=1, part="a", answer=70, quiet=True)
+    submit(year=2015, day=1, part="a", answer=69)
+    assert mock1.calls == 1
+    assert mock2.calls == 1
     out, err = capsys.readouterr()
+    cached = aocd_data_dir / "testauth.testuser.000" / "2015_01a_bad_answers.txt"
     assert "aocd will not submit that answer again" in out
+    assert cached.read_text() == (
+        "69 That's not the right answer. (You guessed 69.)\n"
+        "70 That's not the right answer idiot. (You guessed 70.)\n"
+    )
 
 
 def test_will_not_submit_null():

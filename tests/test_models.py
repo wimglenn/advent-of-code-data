@@ -148,6 +148,17 @@ def test_solve_for_unfound_user(aocd_data_dir, mocker):
     other_plug.load.return_value.assert_not_called()
 
 
+def test_get_title_failure_no_heading(freezer, pook, caplog):
+    freezer.move_to("2018-12-01 12:00:00Z")
+    pook.get(
+        url="https://adventofcode.com/2018/day/1",
+        response_body="--- Day 1: hello ---",
+    )
+    puzzle = Puzzle(year=2018, day=1)
+    with pytest.raises(AocdError("heading not found")):
+        puzzle.title
+
+
 def test_get_title_failure(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
