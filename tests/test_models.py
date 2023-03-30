@@ -152,20 +152,19 @@ def test_get_title_failure(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 11: This SHOULD be day 1</h2>",
+        response_body="<h2>--- Day 11: This SHOULD be day 1 ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
-    assert not puzzle.title
-    msg = "weird heading, wtf? Day 11: This SHOULD be day 1"
-    log_event = ("aocd.models", logging.ERROR, msg)
-    assert log_event in caplog.record_tuples
+    msg = "unexpected h2 text: --- Day 11: This SHOULD be day 1 ---"
+    with pytest.raises(AocdError(msg)):
+        puzzle.title
 
 
 def test_pprint(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 1: The Puzzle Title</h2>",
+        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -181,7 +180,7 @@ def test_pprint_cycle(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 1: The Puzzle Title</h2>",
+        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -366,12 +365,10 @@ def test_example_data_cache(aocd_data_dir, pook):
         response_body="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
         times=1,
     )
-    cached = aocd_data_dir / "testauth.testuser.000/2018_01_example_input.txt"
-    assert not cached.exists()
     puzzle = Puzzle(day=1, year=2018)
+    assert mock.calls == 0
     assert puzzle.example_data == "1\n2\n3"
     assert mock.calls == 1
-    assert cached.read_text() == "1\n2\n3\n"
     assert puzzle.example_data == "1\n2\n3"
     assert mock.calls == 1
 

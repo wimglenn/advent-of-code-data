@@ -169,10 +169,10 @@ def test_day_out_of_range(mocker, capsys, freezer):
 
 
 def test_run_error(aocd_data_dir, mocker, capsys):
-    title_path = aocd_data_dir / "titles"
-    title_path.mkdir()
-    title_file = title_path / "2018_25.txt"
-    title_file.write_text("The Puzzle Title")
+    prose_dir = aocd_data_dir / "prose"
+    prose_dir.mkdir()
+    puzzle_file = prose_dir / "2018_25_prose.0.html"
+    puzzle_file.write_text("<h2>--- Day 25: The Puzzle Title ---</h2>")
     input_path = aocd_data_dir / "testauth.testuser.000" / "2018_25_input.txt"
     input_path.write_text("someinput")
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2018_25a_answer.txt"
@@ -195,10 +195,10 @@ def test_run_error(aocd_data_dir, mocker, capsys):
 
 
 def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, pook):
-    title_path = aocd_data_dir / "titles"
-    title_path.mkdir()
-    title_file = title_path / "2015_01.txt"
-    title_file.write_text("The Puzzle Title")
+    prose_dir = aocd_data_dir / "prose"
+    prose_dir.mkdir()
+    puzzle_file = prose_dir / "2015_01_prose.0.html"
+    puzzle_file.write_text("<h2>--- Day 1: The Puzzle Title ---</h2>")
     input_path = aocd_data_dir / "testauth.testuser.000" / "2015_01_input.txt"
     input_path.write_text("testinput")
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2015_01a_answer.txt"
@@ -224,10 +224,10 @@ def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, pook):
 
 
 def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, pook):
-    title_path = aocd_data_dir / "titles"
-    title_path.mkdir()
-    title_file = title_path / "2015_01.txt"
-    title_file.write_text("The Puzzle Title")
+    prose_dir = aocd_data_dir / "prose"
+    prose_dir.mkdir()
+    puzzle_file = prose_dir / "2015_01_prose.0.html"
+    puzzle_file.write_text("<h2>--- Day 1: The Puzzle Title ---</h2>")
     input_path = aocd_data_dir / "testauth.testuser.000" / "2015_01_input.txt"
     input_path.write_text("testinput")
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2015_01a_answer.txt"

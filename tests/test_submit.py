@@ -120,7 +120,11 @@ def test_correct_submit_records_good_answer(pook, aocd_data_dir):
 def test_submit_correct_part_a_answer_for_part_b_blocked(pook):
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 1: Yo Dawg</h2> <p>Your puzzle answer was <code>1234</code></p>",
+        response_body=(
+            "<h2>--- Day 1: Yo Dawg ---</h2>"
+            "The first half of this puzzle is complete!"
+            "<p>Your puzzle answer was <code>1234</code></p>"
+        ),
     )
     pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
@@ -148,7 +152,11 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_di
     freezer.move_to("2018-12-01 12:00:00Z")
     get = pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 1: Yo Dawg</h2> <p>Your puzzle answer was <code>666</code></p>",
+        response_body=(
+            "<h2>--- Day 1: Yo Dawg ---</h2>"
+            "The first half of this puzzle is complete!"
+            "<p>Your puzzle answer was <code>666</code></p>"
+        ),
     )
     post = pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
@@ -164,10 +172,11 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_di
     assert partb_answer.exists()
     assert parta_answer.read_text() == "666"
     assert partb_answer.read_text() == "1234"
-    title_path = aocd_data_dir / "titles" / "2018_01.txt"
-    assert title_path.read_text() == "Yo Dawg\n"
     assert get.calls == 1
     assert post.calls == 1
+    prose_fname = aocd_data_dir / "testauth.testuser.000" / "2018_01_prose.1.html"
+    assert prose_fname.is_file()
+    assert " Yo Dawg " in prose_fname.read_text()
 
 
 def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir):
@@ -175,6 +184,7 @@ def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir):
     get = pook.get(
         url="https://adventofcode.com/2018/day/1",
         response_body=(
+            "Both parts of this puzzle are complete!"
             "<p>Your puzzle answer was <code>answerA</code></p>"
             "<p>Your puzzle answer was <code>answerB</code></p>"
         ),

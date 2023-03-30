@@ -227,7 +227,7 @@ class Puzzle:
         prefix = f"--- Day {self.day}: "
         suffix = " ---"
         if not txt.startswith(prefix) or not txt.endswith(suffix):
-            raise AocdError("weird heading, wtf? %s", txt)
+            raise AocdError(f"unexpected h2 text: {txt}")
         return txt.removeprefix(prefix).removesuffix(suffix)
 
     def _repr_pretty_(self, p, cycle):
@@ -572,18 +572,22 @@ class Puzzle:
             if mode == "unlocked" and not require_solved:
                 return text
             raise PuzzleUnsolvedError
-        self._request_puzzle_page()
-        if require_solved:
-            fname = next(AOCD_DATA_DIR.glob("*/" + self.prose2_fname.name), None)
-            if fname is not None:
-                return fname.read_text()
-            raise PuzzleUnsolvedError
-        if require_b:
-            fname = next(AOCD_DATA_DIR.glob("*/" + self.prose1_fname.name), None)
-            if fname is not None:
-                return fname.read_text()
-            raise PuzzleUnsolvedError
-        return self.prose0_fname.read_text()
+        fname2 = next(AOCD_DATA_DIR.glob("*/" + self.prose2_fname.name), None)
+        if fname2 is not None:
+            return fname2.read_text()
+        fname1 = next(AOCD_DATA_DIR.glob("*/" + self.prose1_fname.name), None)
+        if not require_solved and fname1 is not None:
+            return fname1.read_text()
+        if not require_solved and not require_b and self.prose0_fname.is_file():
+            return self.prose0_fname.read_text()
+        text, soup, mode = self._request_puzzle_page()
+        if require_solved and mode == "solved":
+            return text
+        if not require_solved and require_b and mode in ("solved", "unlocked"):
+            return text
+        if not require_solved and not require_b:
+            return text
+        raise PuzzleUnsolvedError
 
     @property
     def easter_eggs(self):
