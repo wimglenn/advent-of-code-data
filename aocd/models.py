@@ -473,7 +473,9 @@ class Puzzle:
         answer_fname = getattr(self, f"answer_{part}_fname")
         if answer_fname.is_file():
             return answer_fname.read_text().strip()
-        # scrape puzzle page for any previously solved answers
+        # check puzzle page for any previously solved answers.
+        # if these were solved by typing into the website directly, rather than using
+        # aocd submit, then our caches might not know about the answers yet.
         self._request_puzzle_page()
         if answer_fname.is_file():
             return answer_fname.read_text().strip()
@@ -532,7 +534,7 @@ class Puzzle:
         text = response.data.decode()
         soup = bs4.BeautifulSoup(text, "html.parser")
         hit = "Your puzzle answer was"
-        if "Both parts of this puzzle are complete!" in text:
+        if "Both parts of this puzzle are complete!" in text:  # solved
             if not self.prose2_fname.is_file():
                 self.prose2_fname.write_text(text)
             hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
@@ -542,60 +544,37 @@ class Puzzle:
                 pa, pb = hits
                 self._save_correct_answer(pb.code.text, "b")
             self._save_correct_answer(pa.code.text, "a")
-            mode = "solved"
-        elif "The first half of this puzzle is complete!" in text:
+        elif "The first half of this puzzle is complete!" in text:  # part b unlocked
             if not self.prose1_fname.is_file():
                 self.prose1_fname.write_text(text)
             [pa] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             self._save_correct_answer(pa.code.text, "a")
-            mode = "unlocked"
-        else:
+        else:  # init, or dead token - doesn't really matter
             if not self.prose0_fname.is_file():
                 _ensure_intermediate_dirs(self.prose0_fname)
                 self.prose0_fname.write_text(text)
-            if "To play, please identify yourself via one of these services" in text:
-                mode = "anon"
-            else:
-                mode = "init"
-        return text, soup, mode
 
-    def _get_prose(self, require_b=False, require_solved=False, strict=False):
-        """
-        require_b:      second part must be unlocked (i.e. part a solved)
-        require_solved: both parts must be solved
-        strict:         answers in html must be from same user id as self.user.id
-        """
-        if self.prose2_fname.is_file():
-            return self.prose2_fname.read_text()
-        if strict and not require_solved and self.prose1_fname.is_file():
-            return self.prose1_fname.read_text()
-        if strict:
-            text, soup, mode = self._request_puzzle_page()
-            if mode == "solved":
-                return text
-            if mode == "unlocked" and not require_solved:
-                return text
-            raise PuzzleUnsolvedError
-        fname2 = next(AOCD_DATA_DIR.glob("*/" + self.prose2_fname.name), None)
-        if fname2 is not None:
-            return fname2.read_text()
-        fname1 = next(AOCD_DATA_DIR.glob("*/" + self.prose1_fname.name), None)
-        if not require_solved and fname1 is not None:
-            return fname1.read_text()
-        if not require_solved and not require_b and self.prose0_fname.is_file():
+    def _get_prose(self):
+        # prefer to return full prose (i.e. part b is solved or unlocked)
+        # prefer to return prose with answers from same the user id as self.user.id
+        for path in self.prose2_fname, self.prose1_fname:
+            if path.is_file():
+                return path.read_text()
+            # see if other user has cached it
+            other = next(AOCD_DATA_DIR.glob("*/" + path.name), None)
+            if other is not None:
+                return other.read_text()
+        if self.prose0_fname.is_file():
             return self.prose0_fname.read_text()
-        text, soup, mode = self._request_puzzle_page()
-        if require_solved and mode == "solved":
-            return text
-        if not require_solved and require_b and mode in ("solved", "unlocked"):
-            return text
-        if not require_solved and not require_b:
-            return text
-        raise PuzzleUnsolvedError
+        self._request_puzzle_page()
+        for path in self.prose2_fname, self.prose1_fname, self.prose0_fname:
+            if path.is_file():
+                return path.read_text()
 
     @property
     def easter_eggs(self):
-        soup = bs4.BeautifulSoup(self._get_prose(), "html.parser")
+        txt = self._get_prose()
+        soup = bs4.BeautifulSoup(txt, "html.parser")
         # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
