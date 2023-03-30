@@ -535,9 +535,13 @@ class Puzzle:
         if "Both parts of this puzzle are complete!" in text:
             if not self.prose2_fname.is_file():
                 self.prose2_fname.write_text(text)
-            pa, pb = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            if self.day == 25:
+                [pa] = hits
+            else:
+                pa, pb = hits
+                self._save_correct_answer(pb.code.text, "b")
             self._save_correct_answer(pa.code.text, "a")
-            self._save_correct_answer(pb.code.text, "b")
             mode = "solved"
         elif "The first half of this puzzle is complete!" in text:
             if not self.prose1_fname.is_file():
