@@ -7,6 +7,7 @@ import time
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
+from functools import cache
 from pathlib import Path
 from textwrap import dedent
 
@@ -165,16 +166,15 @@ class Puzzle:
         self._user = user
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
-        fname = f"{self.year}_{self.day:02d}"
-        pre = self.user.memo_dir / fname
+        pre = self.user.memo_dir / f"{self.year}_{self.day:02d}"
         self.input_data_fname = pre.with_name(pre.name + "_input.txt")
-        self.example_input_data_fname = pre.with_name(pre.name + "_example_input.txt")
         self.answer_a_fname = pre.with_name(pre.name + "a_answer.txt")
         self.answer_b_fname = pre.with_name(pre.name + "b_answer.txt")
         self.incorrect_answers_a_fname = pre.with_name(pre.name + "a_bad_answers.txt")
         self.incorrect_answers_b_fname = pre.with_name(pre.name + "b_bad_answers.txt")
-        self.title_fname = AOCD_DATA_DIR / "titles" / f"{self.year}_{self.day:02d}.txt"
-        self._title = ""
+        self.prose0_fname = AOCD_DATA_DIR / "prose" / (pre.name + "_prose.0.html")
+        self.prose1_fname = pre.with_name(pre.name + "_prose.1.html")  # part a solved
+        self.prose2_fname = pre.with_name(pre.name + "_prose.2.html")  # part b solved
 
     @property
     def user(self):
@@ -207,30 +207,28 @@ class Puzzle:
 
     @property
     def example_data(self):
-        try:
-            data = self.example_input_data_fname.read_text()
-        except FileNotFoundError:
-            pass
-        else:
-            log.debug("reusing existing example data %s", self.example_input_data_fname)
-            return data.rstrip("\r\n")
-        soup = self._soup()
+        text = self._get_prose()
+        soup = bs4.BeautifulSoup(text, "html.parser")
         try:
             data = soup.pre.text
         except Exception:
-            log.info("unable to find example data year=%s day=%s", self.year, self.day)
+            log.warning("unable to find example data for %d/%02d", self.year, self.day)
             data = ""
-        log.info("saving the example data")
-        atomic_write_file(self.example_input_data_fname, data)
         return data.rstrip("\r\n")
 
     @property
+    @cache
     def title(self):
-        if self.title_fname.is_file():
-            self._title = self.title_fname.read_text().strip()
-        else:
-            self._save_title()
-        return self._title
+        prose = self._get_prose()
+        soup = bs4.BeautifulSoup(prose, "html.parser")
+        if soup.h2 is None:
+            raise AocdError("heading not found")
+        txt = soup.h2.text
+        prefix = f"--- Day {self.day}: "
+        suffix = " ---"
+        if not txt.startswith(prefix) or not txt.endswith(suffix):
+            raise AocdError(f"unexpected h2 text: {txt}")
+        return txt.removeprefix(prefix).removesuffix(suffix)
 
     def _repr_pretty_(self, p, cycle):
         # this is a hook for IPython's pretty-printer
@@ -439,7 +437,6 @@ class Puzzle:
 
     def _save_correct_answer(self, value, part):
         fname = getattr(self, f"answer_{part}_fname")
-        _ensure_intermediate_dirs(fname)
         txt = value.strip()
         msg = "saving"
         if fname.is_file():
@@ -451,30 +448,20 @@ class Puzzle:
             msg = "overwriting"
         msg += " the correct answer for %d/%02d part %s: %s"
         log.info(msg, self.year, self.day, part, txt)
+        _ensure_intermediate_dirs(fname)
         fname.write_text(txt)
 
     def _save_incorrect_answer(self, value, part, extra=""):
         fname = getattr(self, f"incorrect_answers_{part}_fname")
-        _ensure_intermediate_dirs(fname)
         msg = "appending an incorrect answer for %d/%02d part %s"
         log.info(msg, self.year, self.day, part)
-        fname.write_text(value.strip() + " " + extra.replace("\n", " ") + "\n")
-
-    def _save_title(self, soup=None):
-        if soup is None:
-            soup = self._soup()
-        if soup.h2 is None:
-            log.warning("heading not found")
-            return
-        txt = soup.h2.text.strip("- ")
-        prefix = f"Day {self.day}: "
-        if not txt.startswith(prefix):
-            log.error("weird heading, wtf? %s", txt)
-            return
-        txt = self._title = txt[len(prefix) :]
-        _ensure_intermediate_dirs(self.title_fname)
-        with self.title_fname.open("w") as f:
-            print(txt, file=f)
+        _ensure_intermediate_dirs(fname)
+        if fname.is_file():
+            txt = fname.read_text()
+        else:
+            txt = ""
+        txt += value.strip() + " " + extra.replace("\n", " ") + "\n"
+        fname.write_text(txt)
 
     def _get_answer(self, part):
         """
@@ -486,20 +473,10 @@ class Puzzle:
         answer_fname = getattr(self, f"answer_{part}_fname")
         if answer_fname.is_file():
             return answer_fname.read_text().strip()
-        # scrape puzzle page for any previously solved answers
-        soup = self._soup()
-        if not self._title:
-            # may as well save this while we're here
-            self._save_title(soup=soup)
-        hit = "Your puzzle answer was"
-        paras = [p for p in soup.find_all("p") if p.text.startswith(hit)]
-        if paras:
-            parta_correct_answer = paras[0].code.text
-            self._save_correct_answer(value=parta_correct_answer, part="a")
-            if len(paras) > 1:
-                _p1, p2 = paras
-                partb_correct_answer = p2.code.text
-                self._save_correct_answer(value=partb_correct_answer, part="b")
+        # check puzzle page for any previously solved answers.
+        # if these were solved by typing into the website directly, rather than using
+        # aocd submit, then our caches might not know about the answers yet.
+        self._request_puzzle_page()
         if answer_fname.is_file():
             return answer_fname.read_text().strip()
         msg = f"Answer {self.year}-{self.day}{part} is not available"
@@ -546,17 +523,58 @@ class Puzzle:
         result = stats[self.year, self.day]
         return result
 
-    def _soup(self):
-        response = http.request("GET", self.url, headers=http.headers | self.user.auth)
-        if response.status >= 400:
+    def _request_puzzle_page(self):
+        headers = http.headers | self.user.auth
+        response = http.request("GET", self.url, headers=headers)
+        if response.status != 200:
+            log.error("got %s status code", response.status)
+            log.error(response.data.decode(errors="replace"))
             raise AocdError(f"HTTP {response.status} at {self.url}")
         self._last_resp = response
-        soup = bs4.BeautifulSoup(response.data, "html.parser")
-        return soup
+        text = response.data.decode()
+        soup = bs4.BeautifulSoup(text, "html.parser")
+        hit = "Your puzzle answer was"
+        if "Both parts of this puzzle are complete!" in text:  # solved
+            if not self.prose2_fname.is_file():
+                self.prose2_fname.write_text(text)
+            hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            if self.day == 25:
+                [pa] = hits
+            else:
+                pa, pb = hits
+                self._save_correct_answer(pb.code.text, "b")
+            self._save_correct_answer(pa.code.text, "a")
+        elif "The first half of this puzzle is complete!" in text:  # part b unlocked
+            if not self.prose1_fname.is_file():
+                self.prose1_fname.write_text(text)
+            [pa] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            self._save_correct_answer(pa.code.text, "a")
+        else:  # init, or dead token - doesn't really matter
+            if not self.prose0_fname.is_file():
+                _ensure_intermediate_dirs(self.prose0_fname)
+                self.prose0_fname.write_text(text)
+
+    def _get_prose(self):
+        # prefer to return full prose (i.e. part b is solved or unlocked)
+        # prefer to return prose with answers from same the user id as self.user.id
+        for path in self.prose2_fname, self.prose1_fname:
+            if path.is_file():
+                return path.read_text()
+            # see if other user has cached it
+            other = next(AOCD_DATA_DIR.glob("*/" + path.name), None)
+            if other is not None:
+                return other.read_text()
+        if self.prose0_fname.is_file():
+            return self.prose0_fname.read_text()
+        self._request_puzzle_page()
+        for path in self.prose2_fname, self.prose1_fname, self.prose0_fname:
+            if path.is_file():
+                return path.read_text()
 
     @property
     def easter_eggs(self):
-        soup = self._soup()
+        txt = self._get_prose()
+        soup = bs4.BeautifulSoup(txt, "html.parser")
         # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs

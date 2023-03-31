@@ -23,7 +23,8 @@ def submit(
         year = most_recent_year()
     puzzle = Puzzle(year=year, day=day, user=user)
     if part is None:
-        # guess if user is submitting for part a or part b
+        # guess if user is submitting for part a or part b,
+        # based on whether part a is already solved or not
         answer_a = getattr(puzzle, "answer_a", None)
         log.warning("answer a: %s", answer_a)
         if answer_a is None:

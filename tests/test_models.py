@@ -59,6 +59,8 @@ def test_answered(aocd_data_dir):
     assert puzzle.answered("a") is False
     assert puzzle.answered_b is True
     assert puzzle.answered("b") is True
+    with pytest.raises(AocdError('part must be "a" or "b"')):
+        puzzle.answered(1)
 
 
 def test_setattr_submits(mocker, pook):
@@ -148,24 +150,34 @@ def test_solve_for_unfound_user(aocd_data_dir, mocker):
     other_plug.load.return_value.assert_not_called()
 
 
+def test_get_title_failure_no_heading(freezer, pook, caplog):
+    freezer.move_to("2018-12-01 12:00:00Z")
+    pook.get(
+        url="https://adventofcode.com/2018/day/1",
+        response_body="--- Day 1: hello ---",
+    )
+    puzzle = Puzzle(year=2018, day=1)
+    with pytest.raises(AocdError("heading not found")):
+        puzzle.title
+
+
 def test_get_title_failure(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 11: This SHOULD be day 1</h2>",
+        response_body="<h2>--- Day 11: This SHOULD be day 1 ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
-    assert not puzzle.title
-    msg = "weird heading, wtf? Day 11: This SHOULD be day 1"
-    log_event = ("aocd.models", logging.ERROR, msg)
-    assert log_event in caplog.record_tuples
+    msg = "unexpected h2 text: --- Day 11: This SHOULD be day 1 ---"
+    with pytest.raises(AocdError(msg)):
+        puzzle.title
 
 
 def test_pprint(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 1: The Puzzle Title</h2>",
+        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -181,7 +193,7 @@ def test_pprint_cycle(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>Day 1: The Puzzle Title</h2>",
+        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -366,12 +378,10 @@ def test_example_data_cache(aocd_data_dir, pook):
         response_body="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
         times=1,
     )
-    cached = aocd_data_dir / "testauth.testuser.000/2018_01_example_input.txt"
-    assert not cached.exists()
     puzzle = Puzzle(day=1, year=2018)
+    assert mock.calls == 0
     assert puzzle.example_data == "1\n2\n3"
     assert mock.calls == 1
-    assert cached.read_text() == "1\n2\n3\n"
     assert puzzle.example_data == "1\n2\n3"
     assert mock.calls == 1
 
@@ -382,6 +392,15 @@ def test_example_data_fail(pook):
     puzzle = Puzzle(day=1, year=2018)
     with pytest.raises(AocdError(f"HTTP 418 at {url}")):
         puzzle.example_data
+
+
+def test_example_data_missing(pook, caplog):
+    url = "https://adventofcode.com/2018/day/1"
+    pook.get(url, reply=200, response_body="wat")
+    puzzle = Puzzle(day=1, year=2018)
+    assert puzzle.example_data == ""
+    record = ("aocd.models", logging.WARNING, "unable to find example data for 2018/01")
+    assert record in caplog.record_tuples
 
 
 @pytest.mark.parametrize(
@@ -406,3 +425,14 @@ def test_type_coercions(v_raw, v_expected, len_logs, caplog):
     v_actual = p._coerce_val(v_raw)
     assert v_actual == v_expected, f"{type(v_raw)} {v_raw})"
     assert len(caplog.records) == len_logs
+
+
+def test_get_prose_cache(aocd_data_dir):
+    cached = aocd_data_dir / "other-user-id" / "2022_01_prose.2.html"
+    cached.parent.mkdir()
+    cached.write_text("foo")
+    puzzle = Puzzle(year=2022, day=1)
+    assert puzzle._get_prose() == "foo"
+    my_cached = aocd_data_dir / "testauth.testuser.000" / "2022_01_prose.2.html"
+    my_cached.write_text("bar")
+    assert puzzle._get_prose() == "bar"
