@@ -59,6 +59,8 @@ def test_answered(aocd_data_dir):
     assert puzzle.answered("a") is False
     assert puzzle.answered_b is True
     assert puzzle.answered("b") is True
+    with pytest.raises(AocdError('part must be "a" or "b"')):
+        puzzle.answered(1)
 
 
 def test_setattr_submits(mocker, pook):
@@ -392,6 +394,15 @@ def test_example_data_fail(pook):
         puzzle.example_data
 
 
+def test_example_data_missing(pook, caplog):
+    url = "https://adventofcode.com/2018/day/1"
+    pook.get(url, reply=200, response_body="wat")
+    puzzle = Puzzle(day=1, year=2018)
+    assert puzzle.example_data == ""
+    record = ("aocd.models", logging.WARNING, "unable to find example data for 2018/01")
+    assert record in caplog.record_tuples
+
+
 @pytest.mark.parametrize(
     "v_raw,v_expected,len_logs",
     [
@@ -414,3 +425,14 @@ def test_type_coercions(v_raw, v_expected, len_logs, caplog):
     v_actual = p._coerce_val(v_raw)
     assert v_actual == v_expected, f"{type(v_raw)} {v_raw})"
     assert len(caplog.records) == len_logs
+
+
+def test_get_prose_cache(aocd_data_dir):
+    cached = aocd_data_dir / "other-user-id" / "2022_01_prose.2.html"
+    cached.parent.mkdir()
+    cached.write_text("foo")
+    puzzle = Puzzle(year=2022, day=1)
+    assert puzzle._get_prose() == "foo"
+    my_cached = aocd_data_dir / "testauth.testuser.000" / "2022_01_prose.2.html"
+    my_cached.write_text("bar")
+    assert puzzle._get_prose() == "bar"

@@ -212,7 +212,7 @@ class Puzzle:
         try:
             data = soup.pre.text
         except Exception:
-            log.info("unable to find example data year=%s day=%s", self.year, self.day)
+            log.warning("unable to find example data for %d/%02d", self.year, self.day)
             data = ""
         return data.rstrip("\r\n")
 
