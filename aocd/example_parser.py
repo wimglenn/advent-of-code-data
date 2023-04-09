@@ -4,10 +4,14 @@ import bs4
 
 
 class Example(NamedTuple):
-    data: str
-    part_a_answer: str = None
-    part_b_answer: str = None
+    input_data: str
+    answer_a: str = None
+    answer_b: str = None
     extra: str = None
+
+    @property
+    def answers(self):
+        return self.answer_a, self.answer_b
 
 
 def extract_examples(html):
@@ -15,5 +19,3 @@ def extract_examples(html):
     data = soup.pre.text.rstrip("\r\n")
     example = Example(data)
     return [example]
-
-

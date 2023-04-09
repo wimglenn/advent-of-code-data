@@ -380,9 +380,9 @@ def test_examples_cache(aocd_data_dir, pook):
     )
     puzzle = Puzzle(day=1, year=2018)
     assert mock.calls == 0
-    assert puzzle.examples[0].data == "1\n2\n3"
+    assert puzzle.examples[0].input_data == "1\n2\n3"
     assert mock.calls == 1
-    assert puzzle.examples[0].data
+    assert puzzle.examples[0].input_data
     assert mock.calls == 1
 
 

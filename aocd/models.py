@@ -560,16 +560,20 @@ class Puzzle:
         # prefer to return prose with answers from same the user id as self.user.id
         for path in self.prose2_fname, self.prose1_fname:
             if path.is_file():
+                log.debug("_get_prose using cached %s", path)
                 return path.read_text()
             # see if other user has cached it
             other = next(AOCD_DATA_DIR.glob("*/" + path.name), None)
             if other is not None:
+                log.debug("_get_prose using cached %s", other)
                 return other.read_text()
         if self.prose0_fname.is_file():
+            log.debug("_get_prose using cached %s", self.prose0_fname)
             return self.prose0_fname.read_text()
         self._request_puzzle_page()
         for path in self.prose2_fname, self.prose1_fname, self.prose0_fname:
             if path.is_file():
+                log.debug("_get_prose using %s", path)
                 return path.read_text()
 
     @property
