@@ -207,7 +207,7 @@ class Puzzle:
         return data.rstrip("\r\n")
 
     @property
-    def example_data(self):
+    def examples(self):
         html = self._get_prose()
         try:
             examples = extract_examples(html)

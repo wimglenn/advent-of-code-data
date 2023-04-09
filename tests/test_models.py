@@ -372,7 +372,7 @@ def test_user_from_unknown_id(aocd_config_dir):
         User.from_id("blah")
 
 
-def test_example_data_cache(aocd_data_dir, pook):
+def test_examples_cache(aocd_data_dir, pook):
     mock = pook.get(
         url="https://adventofcode.com/2018/day/1",
         response_body="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
@@ -380,9 +380,9 @@ def test_example_data_cache(aocd_data_dir, pook):
     )
     puzzle = Puzzle(day=1, year=2018)
     assert mock.calls == 0
-    assert puzzle.example_data == "1\n2\n3"
+    assert puzzle.examples[0].data == "1\n2\n3"
     assert mock.calls == 1
-    assert puzzle.example_data == "1\n2\n3"
+    assert puzzle.examples[0].data
     assert mock.calls == 1
 
 
@@ -391,14 +391,14 @@ def test_example_data_fail(pook):
     pook.get(url, reply=418, response_body="I'm a teapot")
     puzzle = Puzzle(day=1, year=2018)
     with pytest.raises(AocdError(f"HTTP 418 at {url}")):
-        puzzle.example_data
+        puzzle.examples
 
 
 def test_example_data_missing(pook, caplog):
     url = "https://adventofcode.com/2018/day/1"
     pook.get(url, reply=200, response_body="wat")
     puzzle = Puzzle(day=1, year=2018)
-    assert not puzzle.example_data
+    assert not puzzle.examples
     msg = (
         "unable to find example data for 2018/01: "
         "'NoneType' object has no attribute 'text'"
