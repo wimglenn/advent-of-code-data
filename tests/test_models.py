@@ -398,9 +398,12 @@ def test_example_data_missing(pook, caplog):
     url = "https://adventofcode.com/2018/day/1"
     pook.get(url, reply=200, response_body="wat")
     puzzle = Puzzle(day=1, year=2018)
-    assert puzzle.example_data == ""
-    record = ("aocd.models", logging.WARNING, "unable to find example data for 2018/01")
-    assert record in caplog.record_tuples
+    assert not puzzle.example_data
+    msg = (
+        "unable to find example data for 2018/01: "
+        "'NoneType' object has no attribute 'text'"
+    )
+    assert ("aocd.models", logging.WARNING, msg) in caplog.record_tuples
 
 
 @pytest.mark.parametrize(

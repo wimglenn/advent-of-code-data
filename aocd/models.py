@@ -13,6 +13,7 @@ from textwrap import dedent
 
 import bs4
 
+from .example_parser import extract_examples
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import PuzzleLockedError
@@ -207,14 +208,14 @@ class Puzzle:
 
     @property
     def example_data(self):
-        text = self._get_prose()
-        soup = bs4.BeautifulSoup(text, "html.parser")
+        html = self._get_prose()
         try:
-            data = soup.pre.text
-        except Exception:
-            log.warning("unable to find example data for %d/%02d", self.year, self.day)
-            data = ""
-        return data.rstrip("\r\n")
+            examples = extract_examples(html)
+        except Exception as err:
+            msg = "unable to find example data for %d/%02d: %s"
+            log.warning(msg, self.year, self.day, err)
+            examples = []
+        return examples
 
     @property
     @cache
