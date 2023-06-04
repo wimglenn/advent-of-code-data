@@ -81,7 +81,9 @@ def _trunc(s, maxlen=50):
 
 
 def extract_examples(html, year, day):
-    scope = {"soup": _get_soup(html)}
+    soup = _get_soup(html)
+    scope = {"soup": soup}
+    part_b_locked = len(soup.find_all("article")) != 2
     result = []
     locators = _locators()
     key = f"{year}/{day:02d}"
@@ -92,7 +94,7 @@ def extract_examples(html, year, day):
             pos = loc.get(k, default[k])
             if k == "extra" and pos is None:
                 break
-            if day == 25 and k == "answer_b":
+            if k == "answer_b" and (part_b_locked or day == 25):
                 vals.append(None)
                 continue
             val = eval(pos, scope)
@@ -134,6 +136,7 @@ if __name__ == "__main__":
         missing = Example("")
         for day in range(1, 26):
             p = Puzzle(year, day)
+            part_b_locked = len(_get_soup(p._get_prose()).find_all("article")) != 2
             scrapeds = p.examples
             corrects = get_actual(year, day)
             for i, (scraped, correct) in enumerate(zip_longest(scrapeds, corrects, fillvalue=missing), start=1):
@@ -141,15 +144,20 @@ if __name__ == "__main__":
                 if i == 1:
                     row[0] = f"{year}/{day:02d}"
                 row[1] = str(i)
+                if part_b_locked:
+                    row[1] += "(a)"
 
                 i2 = scraped.input_data == correct.input_data
                 i3 = scraped.answer_a == correct.answer_a
-                i4 = scraped.answer_b == correct.answer_b
+                if part_b_locked:
+                    i4 = scraped.answer_b is None
+                else:
+                    i4 = scraped.answer_b == correct.answer_b
                 i5 = scraped.extra == correct.extra
 
-                row[2] = "❌✅"[i2] + f" ({len(scraped.input_data)} bytes)"
+                row[2] = "❌✅"[i2] + f" ({len(scraped.input_data or '')} bytes)"
                 if not i2:
-                    row[2] += f"\n(correct: {len(correct.input_data)} bytes)"
+                    row[2] += f"\n(correct: {len(correct.input_data or '')} bytes)"
 
                 row[3] = "❌✅"[i3] + f" {_trunc(scraped.answer_a)}"
                 if not i3:
@@ -159,6 +167,8 @@ if __name__ == "__main__":
                     row[4] = "❌✅"[i4] + f" {_trunc(scraped.answer_b)}"
                     if not i4:
                         row[4] += f"\n(correct: {correct.answer_b})"
+                if day < 25 and part_b_locked and i4:
+                    row[4] = "❓"
 
                 if scraped.extra or correct.extra:
                     row[5] = "❌✅"[i5] + f" {scraped.extra}"
