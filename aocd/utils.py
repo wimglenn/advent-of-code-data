@@ -7,6 +7,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime
+from functools import cache
 from importlib.metadata import entry_points
 from importlib.metadata import version
 from itertools import cycle
@@ -87,7 +88,7 @@ def get_owner(token):
         # bad tokens will 302 redirect to main page
         log.info("session %s is dead - status_code=%s", token, response.status)
         raise DeadTokenError(f"the auth token ...{token[-4:]} is dead")
-    soup = bs4.BeautifulSoup(response.data, "html.parser")
+    soup = _get_soup(response.data)
     auth_source = "unknown"
     username = "unknown"
     userid = soup.code.text.split("-")[1]
@@ -158,3 +159,8 @@ def get_plugins(group="adventofcode.user"):
     except TypeError:
         # Python 3.9
         return entry_points().get(group, [])
+
+
+@cache
+def _get_soup(html):
+    return bs4.BeautifulSoup(html, "html.parser")

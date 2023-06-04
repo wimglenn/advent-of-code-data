@@ -2,11 +2,12 @@ import argparse
 import importlib.resources
 import json
 import logging
+import sys
 from functools import cache
 from itertools import zip_longest
 from typing import NamedTuple
 
-import bs4
+from aocd.utils import _get_soup
 
 
 class Example(NamedTuple):
@@ -21,7 +22,7 @@ class Example(NamedTuple):
 
 
 def extract_examples(html, year=None, day=None):
-    soup = bs4.BeautifulSoup(html, "html.parser")
+    soup = _get_soup(html)
     if soup.pre is None:
         return []
     data = soup.pre.text.rstrip("\r\n")
@@ -80,7 +81,7 @@ def _trunc(s, maxlen=50):
 
 
 def extract_examples(html, year, day):
-    scope = {"soup": bs4.BeautifulSoup(html, "html.parser")}
+    scope = {"soup": _get_soup(html)}
     result = []
     locators = _locators()
     key = f"{year}/{day:02d}"
@@ -105,8 +106,14 @@ def extract_examples(html, year, day):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     from aocd.models import Puzzle
-    from rich.console import Console
-    from rich.table import Table
+    try:
+        from rich.console import Console
+        from rich.table import Table
+    except ImportError:
+        sys.exit(
+            f"To use example parser, please install rich:\n"
+            f"  {sys.executable} -m pip install rich"
+        )
     parser = argparse.ArgumentParser()
     parser.add_argument("-y", "--years", nargs="+", type=int, action="extend")
     args = parser.parse_args()

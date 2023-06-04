@@ -11,8 +11,6 @@ from functools import cache
 from pathlib import Path
 from textwrap import dedent
 
-import bs4
-
 from .example_parser import extract_examples
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
@@ -25,6 +23,7 @@ from .utils import atomic_write_file
 from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
+from .utils import _get_soup
 from .utils import http
 
 
@@ -106,7 +105,7 @@ class User:
                 raise DeadTokenError(msg)
             if response.status >= 400:
                 raise AocdError(f"HTTP {response.status} at {url}")
-            soup = bs4.BeautifulSoup(response.data, "html.parser")
+            soup = _get_soup(response.data)
             if soup.article is None and ur_broke in soup.main.text:
                 continue
             stats_txt = soup.article.pre.text
@@ -221,7 +220,7 @@ class Puzzle:
     @cache
     def title(self):
         prose = self._get_prose()
-        soup = bs4.BeautifulSoup(prose, "html.parser")
+        soup = _get_soup(prose)
         if soup.h2 is None:
             raise AocdError("heading not found")
         txt = soup.h2.text
@@ -371,7 +370,7 @@ class Puzzle:
             log.error("got %s status code", response.status)
             log.error(response.data.decode(errors="replace"))
             raise AocdError(f"HTTP {response.status} at {url}")
-        soup = bs4.BeautifulSoup(response.data, "html.parser")
+        soup = _get_soup(response.data)
         message = soup.article.text
         color = None
         if "That's the right answer" in message:
@@ -533,7 +532,7 @@ class Puzzle:
             raise AocdError(f"HTTP {response.status} at {self.url}")
         self._last_resp = response
         text = response.data.decode()
-        soup = bs4.BeautifulSoup(text, "html.parser")
+        soup = _get_soup(text)
         hit = "Your puzzle answer was"
         if "Both parts of this puzzle are complete!" in text:  # solved
             if not self.prose2_fname.is_file():
@@ -579,7 +578,7 @@ class Puzzle:
     @property
     def easter_eggs(self):
         txt = self._get_prose()
-        soup = bs4.BeautifulSoup(txt, "html.parser")
+        soup = _get_soup(txt)
         # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
