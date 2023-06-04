@@ -375,7 +375,10 @@ def test_user_from_unknown_id(aocd_config_dir):
 def test_examples_cache(aocd_data_dir, pook):
     mock = pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
+        response_body=(
+            "<article><pre><code>1\n2\n3\n</code></pre><code>abc</code></article>"
+            "<article><pre><code>1\n2\n3\n</code></pre><code>xyz</code></article>"
+        ),
         times=1,
     )
     puzzle = Puzzle(day=1, year=2018)
@@ -401,7 +404,7 @@ def test_example_data_missing(pook, caplog):
     assert not puzzle.examples
     msg = (
         "unable to find example data for 2018/01: "
-        "'NoneType' object has no attribute 'text'"
+        "'NoneType' object has no attribute 'code'"
     )
     assert ("aocd.models", logging.WARNING, msg) in caplog.record_tuples
 
