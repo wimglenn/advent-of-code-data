@@ -210,7 +210,7 @@ class Puzzle:
     def examples(self):
         html = self._get_prose()
         try:
-            examples = extract_examples(html)
+            examples = extract_examples(html, year=self.year, day=self.day)
         except Exception as err:
             msg = "unable to find example data for %d/%02d: %s"
             log.warning(msg, self.year, self.day, err)
