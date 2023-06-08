@@ -162,6 +162,87 @@
       "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
     }
   ],
-
+  "2021/16": [
+    {
+      "input_data": "soup.find_all('code')[7].text",
+      "answer_a": "soup.find_all('code')[11].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('code')[33].text",
+      "answer_a": "str(0b001 + 0b110 + 0b010)",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('code')[52].text",
+      "answer_a": "str(0b111 + 0b010 + 0b100 + 0b001)",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('code')[73].text",
+      "answer_a": "soup.find_all('code')[74].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('code')[75].text",
+      "answer_a": "soup.find_all('code')[76].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('code')[77].text",
+      "answer_a": "soup.find_all('code')[78].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('code')[79].text",
+      "answer_a": "soup.find_all('code')[80].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[8].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[11].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[12].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[15].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[16].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[20].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[21].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[25].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[26].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[27].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[30].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[31].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[34].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[35].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[38].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[39].text"
+    }
+  ],
+  "2021/14": [
+    {
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-1].text.split()[-1]"
+    }
+  ],
   "2021/13": []
 }

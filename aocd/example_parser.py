@@ -21,7 +21,7 @@ class Example(NamedTuple):
         return self.answer_a, self.answer_b
 
 
-def extract_examples(html, year=None, day=None):
+def extract_examples_old(html, year=None, day=None):
     soup = _get_soup(html)
     if soup.pre is None:
         return []
@@ -103,6 +103,29 @@ def extract_examples(html, year, day):
             vals.append(val)
         result.append(Example(*vals))
     return result
+
+
+# TODO: delete this helper
+def fc(s, val, a=None):
+    s_orig = s
+    if a is not None:
+        s = s.find_all('article')[a]
+    code_blocks = s.find_all('code')
+    n = len(code_blocks)
+    [i] = [i for i, c in enumerate(code_blocks) if c.text == str(val)]
+    i_ = i - n
+    if a is not None:
+        assert s_orig.find_all('article')[a].find_all('code')[i].text == str(val)
+        print(f"soup.find_all('article')[{a}].find_all('code')[{i}].text")
+        assert s_orig.find_all('article')[a].find_all('code')[i_].text == str(val)
+        print(f"soup.find_all('article')[{a}].find_all('code')[{i_}].text")
+    else:
+        assert s.find_all('code')[i].text == str(val)
+        assert s is s_orig
+        print(f"soup.find_all('code')[{i}].text")
+        if a == 0:
+            assert s_orig.find_all('article')[a].find_all('code')[i].text == str(val)
+            print(f"soup.find_all('article')[{a}].find_all('code')[{i}].text")
 
 
 if __name__ == "__main__":
