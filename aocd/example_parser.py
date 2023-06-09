@@ -97,7 +97,10 @@ def extract_examples(html, year, day):
             if k == "answer_b" and (part_b_locked or day == 25):
                 vals.append(None)
                 continue
-            val = eval(pos, scope)
+            try:
+                val = eval(pos, scope)
+            except Exception:
+                val = None
             if val is not None:
                 val = val.rstrip("\r\n")
             vals.append(val)

@@ -1,8 +1,8 @@
 {
   "default_locators": {
       "input_data": "soup.pre.code.text",
-      "answer_a": "soup.find_all('article')[0].find_all('code')[-1].text",
-      "answer_b": "soup.find_all('article')[1].find_all('code')[-1].text",
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-1].text.split()[-1]",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-1].text.split()[-1]",
       "extra": null
   },
   "2022/06": [
@@ -140,14 +140,12 @@
   ],
   "2021/21": [
     {
-      "answer_a": "soup.find_all('article')[0].find_all('code')[-1].text.split()[-1]",
       "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
     }
   ],
   "2021/19": [
     {
-      "input_data": "soup.find_all('code')[28].text",
-      "answer_b": "soup.find_all('article')[1].find_all('code')[-1].text.split()[-1]"
+      "input_data": "soup.find_all('code')[28].text"
     }
   ],
   "2021/18": [
@@ -239,10 +237,53 @@
       "answer_b": "soup.find_all('article')[1].find_all('code')[39].text"
     }
   ],
-  "2021/14": [
+  "2021/13": [
     {
-      "answer_a": "soup.find_all('article')[0].find_all('code')[-1].text.split()[-1]"
+      "input_data": "soup.find_all('code')[1].text",
+      "answer_b": "'□'"
     }
   ],
-  "2021/13": []
+  "2021/12": [
+    {
+      "answer_a": "soup.find_all('code')[11].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-4].text"
+    },
+    {
+      "input_data": "soup.find_all('code')[18].text",
+      "answer_a": "soup.find_all('code')[19].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
+    },
+    {
+      "input_data": "soup.find_all('code')[22].text",
+      "answer_a": "soup.find_all('code')[21].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-1].text"
+    }
+  ],
+  "2021/11": [
+    {
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
+    }
+  ],
+  "2021/10": [
+    {
+      "input_data": "soup.find_all('code')[20].text"
+    }
+  ],
+  "2021/08": [
+    {
+      "input_data": "soup.find_all('code')[23].text",
+      "answer_a": "'0'",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[30].text"
+    },
+    {
+      "input_data": "soup.find_all('code')[39].text",
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-5].text"
+    }
+  ],
+  "2021/07": [
+    {
+      "answer_a": "soup.find_all('code')[34].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-3].text"
+    }
+  ]
 }
