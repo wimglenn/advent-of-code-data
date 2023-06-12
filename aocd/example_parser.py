@@ -52,6 +52,10 @@ def get_actual(year, day):
     from pathlib import Path
     path = Path(f"~/git/advent-of-code-wim/tests/{year}/{day:02d}/").expanduser()
     for p in sorted(path.glob("*.txt")):
+        if "broken" in p.name:
+            continue
+        if "jwolf" in p.name:
+            continue
         with p.open() as f:
             lines = list(f)
         input_data = "".join(lines[:-2]).rstrip("\r\n")
