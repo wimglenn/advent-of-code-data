@@ -110,7 +110,8 @@ def extract_examples(html, year, day):
             if val is not None:
                 val = val.rstrip("\r\n")
             vals.append(val)
-        result.append(Example(*vals))
+        if vals[0] is not None:
+            result.append(Example(*vals))
     return result
 
 

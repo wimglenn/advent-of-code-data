@@ -397,7 +397,7 @@ def test_example_data_fail(pook):
         puzzle.examples
 
 
-def test_example_data_missing(pook, caplog, mocker):
+def test_example_data_crash(pook, caplog, mocker):
     mocker.patch("aocd.models.extract_examples", side_effect=Exception("boom"))
     url = "https://adventofcode.com/2018/day/1"
     pook.get(url, reply=200, response_body="wat")
@@ -405,6 +405,13 @@ def test_example_data_missing(pook, caplog, mocker):
     assert not puzzle.examples
     msg = "unable to find example data for 2018/01: boom"
     assert ("aocd.models", logging.WARNING, msg) in caplog.record_tuples
+
+
+def test_example_data_missing(pook, caplog):
+    url = "https://adventofcode.com/2018/day/1"
+    pook.get(url, reply=200, response_body="wat")
+    puzzle = Puzzle(day=1, year=2018)
+    assert not puzzle.examples
 
 
 @pytest.mark.parametrize(
