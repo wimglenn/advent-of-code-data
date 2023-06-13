@@ -56,6 +56,8 @@ def get_actual(year, day):
             continue
         if "jwolf" in p.name:
             continue
+        if "fizbin" in p.name:
+            continue
         with p.open() as f:
             lines = list(f)
         input_data = "".join(lines[:-2]).rstrip("\r\n")
@@ -123,16 +125,16 @@ def fc(s, val, a=None):
     i_ = i - n
     if a is not None:
         assert s_orig.find_all('article')[a].find_all('code')[i].text == str(val)
-        print(f"soup.find_all('article')[{a}].find_all('code')[{i}].text")
+        print(f"\"soup.find_all('article')[{a}].find_all('code')[{i}].text\"")
         assert s_orig.find_all('article')[a].find_all('code')[i_].text == str(val)
-        print(f"soup.find_all('article')[{a}].find_all('code')[{i_}].text")
+        print(f"\"soup.find_all('article')[{a}].find_all('code')[{i_}].text\"")
     else:
         assert s.find_all('code')[i].text == str(val)
         assert s is s_orig
-        print(f"soup.find_all('code')[{i}].text")
+        print(f"\"soup.find_all('code')[{i}].text\"")
         if a == 0:
             assert s_orig.find_all('article')[a].find_all('code')[i].text == str(val)
-            print(f"soup.find_all('article')[{a}].find_all('code')[{i}].text")
+            print(f"\"soup.find_all('article')[{a}].find_all('code')[{i}].text\"")
 
 
 if __name__ == "__main__":
@@ -203,7 +205,7 @@ if __name__ == "__main__":
                 if scraped.extra or correct.extra:
                     row[5] = "❌✅"[i5] + f" {scraped.extra}"
                     if not i5:
-                        row[5] = f"\n(correct: {correct.extra})"
+                        row[5] += f"\n(correct: {correct.extra})"
 
                 table.add_row(*row)
         console.print(table)
