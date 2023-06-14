@@ -597,5 +597,76 @@
       "answer_a": "None"
     }
   ],
-  "2019/17": []
+  "2019/17": [],
+  "2019/16": [
+    {
+      "input_data": "soup.find_all('article')[0].find_all('code')[-6].text",
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-5].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[0].find_all('code')[-4].text",
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-3].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[0].find_all('code')[-2].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[-6].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-5].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[-4].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-3].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('code')[-2].text",
+      "answer_a": "None"
+    }
+  ],
+  "2019/15": [],
+  "2019/14": [
+    {
+      "answer_a": "soup.find_all('em')[8].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('pre')[1].text",
+      "answer_a": "soup.find_all('em')[9].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('pre')[2].text",
+      "answer_a": "soup.find_all('em')[10].text",
+      "answer_b": "soup.find_all('article')[1].find_all('em')[-4].text"
+    },
+    {
+      "input_data": "soup.find_all('pre')[3].text",
+      "answer_a": "soup.find_all('em')[11].text",
+      "answer_b": "soup.find_all('article')[1].find_all('em')[-3].text"
+    },
+    {
+      "input_data": "soup.find_all('pre')[4].text",
+      "answer_a": "soup.find_all('em')[12].text",
+      "answer_b": "soup.find_all('article')[1].find_all('em')[-2].text"
+    }
+  ],
+  "2019/13": [],
+  "2019/12": [
+    {
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-4].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[0].text",
+      "extra": "'ta=10'"
+    },
+    {
+      "input_data": "soup.find_all('pre')[3].text",
+      "answer_a": "soup.find_all('pre')[4].text.split()[-1]",
+      "extra": "'ta=100'"
+    }
+  ],
+  "2019/11": []
 }
