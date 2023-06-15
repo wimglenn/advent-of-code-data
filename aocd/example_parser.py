@@ -125,6 +125,9 @@ def fc(s, val, a=None):
     [i] = [i for i, c in enumerate(code_blocks) if c.text == str(val)]
     i_ = i - n
     if a is not None:
+        if a == 0:
+            assert s_orig.find_all('code')[i].text == str(val)
+            print(f"\"soup.find_all('code')[{i}].text\"")
         assert s_orig.find_all('article')[a].find_all('code')[i].text == str(val)
         print(f"\"soup.find_all('article')[{a}].find_all('code')[{i}].text\"")
         assert s_orig.find_all('article')[a].find_all('code')[i_].text == str(val)
@@ -133,9 +136,6 @@ def fc(s, val, a=None):
         assert s.find_all('code')[i].text == str(val)
         assert s is s_orig
         print(f"\"soup.find_all('code')[{i}].text\"")
-        if a == 0:
-            assert s_orig.find_all('article')[a].find_all('code')[i].text == str(val)
-            print(f"\"soup.find_all('article')[{a}].find_all('code')[{i}].text\"")
 
 
 if __name__ == "__main__":
