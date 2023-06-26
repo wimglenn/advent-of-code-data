@@ -58,6 +58,8 @@ def get_actual(year, day):
             continue
         if "fizbin" in p.name:
             continue
+        if "_wim" in p.name:
+            continue
         with p.open() as f:
             lines = list(f)
         input_data = "".join(lines[:-2]).rstrip("\r\n")
