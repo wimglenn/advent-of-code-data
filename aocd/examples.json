@@ -1050,5 +1050,145 @@
       "answer_a": "soup.article.find_all('code')[-2].text",
       "answer_b": "None"
     }
+  ],
+  "2018/11": [
+    {
+      "input_data": "soup.find_all('code')[26].text",
+      "answer_a": "soup.find_all('code')[27].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-6].text"
+    },
+    {
+      "input_data": "soup.find_all('code')[30].text",
+      "answer_a": "soup.find_all('code')[31].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
+    }
+  ],
+  "2018/09": [
+    {
+      "input_data": "'9 players; last marble is worth 25 points'",
+      "answer_a": "soup.article.find_all('em')[-7].text"
+    },
+    {
+      "input_data": "soup.article.li.text.split(':')[0]",
+      "answer_a": "soup.article.li.text.split()[-1]"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[1].text.split(':')[0]",
+      "answer_a": "soup.article.find_all('li')[1].text.split()[-1]"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[2].text.split(':')[0]",
+      "answer_a": "soup.article.find_all('li')[2].text.split()[-1]"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[3].text.split(':')[0]",
+      "answer_a": "soup.article.find_all('li')[3].text.split()[-1]"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[4].text.split(':')[0]",
+      "answer_a": "soup.article.find_all('li')[4].text.split()[-1]"
+    }
+  ],
+  "2018/08": [
+    {
+      "input_data": "soup.pre.text.splitlines()[0]",
+      "answer_a": "soup.article.find_all('code')[-1].em.text"
+    }
+  ],
+  "2018/07": [
+    {
+      "answer_b": "soup.find_all('article')[1].em.text",
+      "extra": "'delay=0,n_workers=2'"
+    }
+  ],
+  "2018/06": [
+    {
+      "answer_a": "soup.article.find_all('em')[-2].text",
+      "answer_b": "soup.find_all('article')[1].find_all('em')[-3].text"
+    }
+  ],
+  "2018/05": [
+    {
+      "input_data": "soup.article.find_all('code')[4].text",
+      "answer_a": "'0'",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('code')[7].text",
+      "answer_a": "'0'",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('code')[10].text",
+      "answer_a": "str(len(soup.article.find_all('code')[10].text))",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('code')[11].text",
+      "answer_a": "str(len(soup.article.find_all('code')[11].text))",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('code')[14].text",
+      "answer_a": "soup.article.find_all('em')[-2].text.split()[0]",
+      "answer_b": "soup.find_all('article')[1].find_all('em')[-2].text"
+    }
+  ],
+  "2018/03": [
+    {
+      "input_data": "soup.article.find_all('pre')[1].text",
+      "answer_a": "str(soup.article.find_all('pre')[-1].text.count('X'))"
+    }
+  ],
+  "2018/02": [
+    {
+      "input_data": "'\\n'.join([li.code.text for li in soup.article.find_all('li')])",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text",
+      "answer_a": "None"
+    }
+  ],
+  "2018/01": [
+    {
+      "input_data": "soup.find_all('code')[4].text",
+      "answer_a": "soup.find_all('code')[17].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[18].text"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[-3].code.text",
+      "answer_a": "soup.article.find_all('li')[-3].text.split()[-1]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[-2].code.text",
+      "answer_a": "soup.article.find_all('li')[-2].text.split()[-1]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[-1].code.text",
+      "answer_a": "soup.article.find_all('li')[-1].text.split()[-1]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('li')[-4].code.text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('li')[-4].text.split()[-2]"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('li')[-3].code.text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('li')[-3].text.split()[-2]"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('li')[-2].code.text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('li')[-2].text.split()[-2]"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('li')[-1].code.text",
+      "answer_a": "None"
+    }
   ]
 }

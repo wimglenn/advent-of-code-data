@@ -124,7 +124,13 @@ def fc(s, val, a=None):
         s = s.find_all('article')[a]
     code_blocks = s.find_all('code')
     n = len(code_blocks)
-    [i] = [i for i, c in enumerate(code_blocks) if c.text == str(val)]
+    hits = [i for i, c in enumerate(code_blocks) if c.text == str(val)]
+    if len(hits) == 1:
+        [i] = hits
+    elif len(hits) < 1:
+        raise Exception(f"not found: {val}")
+    else:
+        raise Exception(f"multiple hits: {', '.join(map(str, hits))}")
     i_ = i - n
     if a is not None:
         if a == 0:
