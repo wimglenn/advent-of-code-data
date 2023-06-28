@@ -10,6 +10,9 @@ from typing import NamedTuple
 from aocd.utils import _get_soup
 
 
+log = logging.getLogger(__name__)
+
+
 class Example(NamedTuple):
     input_data: str
     answer_a: str = None
@@ -180,6 +183,8 @@ if __name__ == "__main__":
             part_b_locked = len(_get_soup(p._get_prose()).find_all("article")) != 2
             scrapeds = p.examples
             corrects = get_actual(year, day)
+            if len(scrapeds) > len(corrects):
+                log.warning(f"{year}/{day:02d} scraped {len(scrapeds)} but expected {len(corrects)}")
             for i, (scraped, correct) in enumerate(zip_longest(scrapeds, corrects, fillvalue=missing), start=1):
                 row = [""] * 6
                 if i == 1:

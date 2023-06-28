@@ -1190,5 +1190,50 @@
       "input_data": "soup.find_all('article')[1].find_all('li')[-1].code.text",
       "answer_a": "None"
     }
+  ],
+  "2017/23": [],
+  "2017/22": [
+    {
+      "answer_a": "soup.article.find_all('code')[-2].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
+    }
+  ],
+  "2017/21": [
+    {
+      "input_data": "soup.article.find_all('pre')[3].text",
+      "answer_a": "soup.article.find_all('code')[-2].text",
+      "answer_b": "None",
+      "extra": "'iterations=2'"
+    }
+  ],
+  "2017/20": [
+    {
+      "input_data": "'\\n'.join([line.split('   ')[0] for line in soup.pre.text.split('\\n\\n')[0].splitlines()])",
+      "answer_a": "soup.article.find_all('code')[-2].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'\\n'.join([line.split('   ')[0] for line in soup.find_all('article')[1].pre.text.split('\\n\\n')[0].splitlines()])",
+      "answer_a": "None",
+      "answer_b": "'1'"
+    }
+  ],
+  "2017/18": [
+    {
+      "answer_a": "soup.article.find_all('code')[-2].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text",
+      "answer_a": "None",
+      "answer_b": "'3'"
+    }
+  ],
+  "2017/17": [
+    {
+      "input_data": "soup.find_all('code')[7].text",
+      "answer_a": "soup.article.find_all('code')[-2].text",
+      "answer_b": "None"
+    }
   ]
 }
