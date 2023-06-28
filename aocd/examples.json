@@ -118,7 +118,7 @@
   "2021/24": [],
   "2021/23": [
     {
-      "answer_a": "soup.article.find_all('code')[18].text",
+      "answer_a": "soup.find_all('code')[18].text",
       "answer_b": "soup.find_all('article')[1].find_all('code')[3].text"
     }
   ],
@@ -727,17 +727,17 @@
   ],
   "2019/07": [
     {
-      "input_data": "soup.article.find_all('pre')[1].text",
+      "input_data": "soup.find_all('pre')[1].text",
       "answer_a": "soup.article.find_all('code')[-9].text",
       "answer_b": "None"
     },
     {
-      "input_data": "soup.article.find_all('pre')[2].text",
+      "input_data": "soup.find_all('pre')[2].text",
       "answer_a": "soup.article.find_all('code')[-6].text",
       "answer_b": "None"
     },
     {
-      "input_data": "soup.article.find_all('pre')[3].text",
+      "input_data": "soup.find_all('pre')[3].text",
       "answer_a": "soup.article.find_all('code')[-3].text",
       "answer_b": "None"
     },
@@ -1109,23 +1109,23 @@
   ],
   "2018/05": [
     {
-      "input_data": "soup.article.find_all('code')[4].text",
+      "input_data": "soup.find_all('code')[4].text",
       "answer_a": "'0'",
       "answer_b": "None"
     },
     {
-      "input_data": "soup.article.find_all('code')[7].text",
+      "input_data": "soup.find_all('code')[7].text",
       "answer_a": "'0'",
       "answer_b": "None"
     },
     {
-      "input_data": "soup.article.find_all('code')[10].text",
-      "answer_a": "str(len(soup.article.find_all('code')[10].text))",
+      "input_data": "soup.find_all('code')[10].text",
+      "answer_a": "str(len(soup.find_all('code')[10].text))",
       "answer_b": "None"
     },
     {
-      "input_data": "soup.article.find_all('code')[11].text",
-      "answer_a": "str(len(soup.article.find_all('code')[11].text))",
+      "input_data": "soup.find_all('code')[11].text",
+      "answer_a": "str(len(soup.find_all('code')[11].text))",
       "answer_b": "None"
     },
     {
@@ -1136,7 +1136,7 @@
   ],
   "2018/03": [
     {
-      "input_data": "soup.article.find_all('pre')[1].text",
+      "input_data": "soup.find_all('pre')[1].text",
       "answer_a": "str(soup.article.find_all('pre')[-1].text.count('X'))"
     }
   ],
@@ -1200,7 +1200,7 @@
   ],
   "2017/21": [
     {
-      "input_data": "soup.article.find_all('pre')[3].text",
+      "input_data": "soup.find_all('pre')[3].text",
       "answer_a": "soup.article.find_all('code')[-2].text",
       "answer_b": "None",
       "extra": "'iterations=2'"

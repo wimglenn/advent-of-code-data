@@ -217,9 +217,7 @@ if __name__ == "__main__":
                     row[4] = "❓"
 
                 if scraped.extra or correct.extra:
-                    row[5] = "❌✅"[i5] + f" {scraped.extra}"
-                    if not i5:
-                        row[5] += f"\n(correct: {correct.extra})"
+                    row[5] = f"{scraped.extra or correct.extra or ''}"
 
                 table.add_row(*row)
         console.print(table)
