@@ -1235,5 +1235,26 @@
       "answer_a": "soup.article.find_all('code')[-2].text",
       "answer_b": "None"
     }
+  ],
+  "2017/16": [
+    {
+      "input_data": "','.join([soup.find_all('code')[i].text for i in [20, 23, 25]])"
+    }
+  ],
+  "2017/15": [
+    {
+      "input_data": "'Generator A starts with {}\\nGenerator B starts with {}'.format(*[c.text for c in soup.find_all('code')[3:5]])"
+    }
+  ],
+  "2017/14": [
+    {
+      "input_data": "soup.find_all('code')[4].text"
+    }
+  ],
+  "2017/12": [
+    {
+      "answer_a": "soup.article.find_all('code')[-3].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-3].text"
+    }
   ]
 }
