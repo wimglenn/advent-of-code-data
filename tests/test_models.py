@@ -374,14 +374,14 @@ def test_user_from_unknown_id(aocd_config_dir):
 
 def test_examples_cache(aocd_data_dir, pook):
     mock = pook.get(
-        url="https://adventofcode.com/2018/day/1",
+        url="https://adventofcode.com/2014/day/1",
         response_body=(
             "<article><pre><code>1\n2\n3\n</code></pre><code>abc</code></article>"
             "<article><pre><code>1\n2\n3\n</code></pre><code>xyz</code></article>"
         ),
         times=1,
     )
-    puzzle = Puzzle(day=1, year=2018)
+    puzzle = Puzzle(day=1, year=2014)
     assert mock.calls == 0
     assert puzzle.examples[0].input_data == "1\n2\n3"
     assert mock.calls == 1
