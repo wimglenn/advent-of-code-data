@@ -529,7 +529,7 @@
   "2019/24": [
     {
       "input_data": "soup.pre.text[15:45]",
-      "extra": "'t=10'"
+      "extra": "'tb=10'"
     }
   ],
   "2019/23": [],
@@ -1598,6 +1598,12 @@
       "answer_a": "soup.find_all('code')[52].text",
       "answer_b": "None",
       "extra": "'disk_length=20'"
+    }
+  ],
+  "2016/15": [
+    {
+      "answer_a": "soup.find_all('code')[18].text.split('=')[-1]",
+      "answer_b": "None"
     }
   ]
 }
