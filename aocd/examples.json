@@ -1582,8 +1582,7 @@
       "answer_b": "soup.find_all('article')[1].find_all('code')[-3].text"
     },
     {
-      "input_data": "soup.article.find_all('code')[-2].text",
-      "answer_a": "soup.article.find_all('code')[-1].text"
+      "input_data": "soup.article.find_all('code')[-2].text"
     }
   ],
   "2016/16": [
@@ -1604,6 +1603,33 @@
     {
       "answer_a": "soup.find_all('code')[18].text.split('=')[-1]",
       "answer_b": "None"
+    }
+  ],
+  "2016/14": [
+    {
+      "input_data": "soup.find_all('code')[5].text",
+      "answer_a": "soup.article.find_all('code')[-3].text",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-7].text"
+    }
+  ],
+  "2016/13": [
+    {
+      "input_data": "soup.find_all('code')[10].text",
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-3].text",
+      "answer_b": "None"
+    }
+  ],
+  "2016/12": [
+    {
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-2].text",
+      "answer_b": "None"
+    }
+  ],
+  "2016/10": [
+    {
+      "answer_a": "soup.find_all('article')[0].find_all('code')[-5].text",
+      "answer_b": "None",
+      "extra": "'chips=value-5,value-2'"
     }
   ]
 }
