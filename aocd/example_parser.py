@@ -55,13 +55,8 @@ def get_actual(year, day):
     from pathlib import Path
     path = Path(f"~/git/advent-of-code-wim/tests/{year}/{day:02d}/").expanduser()
     for p in sorted(path.glob("*.txt")):
-        if "broken" in p.name:
-            continue
-        if "jwolf" in p.name:
-            continue
-        if "fizbin" in p.name:
-            continue
-        if "_wim" in p.name:
+        blacklist = "broken", "jwolf", "fizbin", "_wim", "_topaz", "_reddit", "_wim"
+        if any(s in p.name for s in blacklist):
             continue
         with p.open() as f:
             lines = list(f)
