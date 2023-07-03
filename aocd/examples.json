@@ -1767,5 +1767,193 @@
       "input_data": "soup.find_all('article')[1].code.text",
       "answer_a": "None"
     }
+  ],
+  "2015/25": [
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 1.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[10]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 2.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[11]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 3.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[12]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 4.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[13]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 5.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[14]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 6.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[15]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 1.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[18]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 2.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[19]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 3.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[20]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 4.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[21]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 5.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[22]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 6.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[23]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 1.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[26]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 2.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[27]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 3.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[28]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 4.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[29]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 5.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[30]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 6.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[31]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 1.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[34]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 2.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[35]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 3.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[36]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 4.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[37]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 5.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[38]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 6.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[39]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 1.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[42]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 2.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[43]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 3.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[44]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 4.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[45]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 5.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[46]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 6.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[47]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 1.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[50]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 2.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[51]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 3.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[52]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 4.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[53]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 5.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[54]",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 6.'",
+      "answer_a": "soup.find_all('pre')[1].text.split()[55]",
+      "answer_b": "None"
+    }
+  ],
+  "2015/24": [
+    {
+      "input_data": "'\\n'.join(sorted({n for n in soup.pre.text.split() if n.isdigit()}, key=int))",
+      "answer_b": "soup.find_all('article')[1].pre.text.split(')')[0].split('QE=')[1]"
+    }
   ]
 }
