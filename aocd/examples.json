@@ -1955,5 +1955,36 @@
       "input_data": "'\\n'.join(sorted({n for n in soup.pre.text.split() if n.isdigit()}, key=int))",
       "answer_b": "soup.find_all('article')[1].pre.text.split(')')[0].split('QE=')[1]"
     }
+  ],
+  "2015/23": [
+    {
+      "answer_a": "'0'",
+      "answer_b": "'0'"
+    }
+  ],
+  "2015/22": [],
+  "2015/21": [],
+  "2015/20": [],
+  "2015/19": [
+    {
+      "input_data": "soup.article.pre.text + '\\n' + soup.article.find_all('code')[1].text",
+      "answer_a": "soup.find_all('code')[16].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.pre.text + '\\n' + soup.article.find_all('code')[19].text",
+      "answer_a": "soup.find_all('article')[0].find_all('code')[20].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text + '\\n' + soup.find_all('article')[1].find_all('code')[2].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-4].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text + '\\n' + soup.find_all('article')[1].find_all('code')[-3].text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
+    }
   ]
 }
