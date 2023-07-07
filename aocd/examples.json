@@ -1986,5 +1986,68 @@
       "answer_a": "None",
       "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
     }
+  ],
+  "2015/18": [
+    {
+      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[0].split(':\\n')[1]",
+      "answer_a": "str(soup.find_all('pre')[1].text.split('\\n\\n')[1].count('#'))",
+      "answer_b": "None",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[1].split(':\\n')[1]",
+      "answer_a": "str(soup.find_all('pre')[1].text.split('\\n\\n')[2].count('#'))",
+      "answer_b": "None",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[2].split(':\\n')[1]",
+      "answer_a": "str(soup.find_all('pre')[1].text.split('\\n\\n')[3].count('#'))",
+      "answer_b": "None",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[3].split(':\\n')[1]",
+      "answer_a": "str(soup.find_all('pre')[1].text.split('\\n\\n')[4].count('#'))",
+      "answer_b": "None",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text.split('\\n\\n')[0].split(':\\n')[1]",
+      "answer_a": "None",
+      "answer_b": "str(soup.find_all('article')[1].pre.text.split('\\n\\n')[1].count('#'))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text.split('\\n\\n')[1].split(':\\n')[1]",
+      "answer_a": "None",
+      "answer_b": "str(soup.find_all('article')[1].pre.text.split('\\n\\n')[2].count('#'))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text.split('\\n\\n')[2].split(':\\n')[1]",
+      "answer_a": "None",
+      "answer_b": "str(soup.find_all('article')[1].pre.text.split('\\n\\n')[3].count('#'))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text.split('\\n\\n')[3].split(':\\n')[1]",
+      "answer_a": "None",
+      "answer_b": "str(soup.find_all('article')[1].pre.text.split('\\n\\n')[4].count('#'))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].pre.text.split('\\n\\n')[4].split(':\\n')[1]",
+      "answer_a": "None",
+      "answer_b": "str(soup.find_all('article')[1].pre.text.split('\\n\\n')[5].count('#'))",
+      "extra": "'iterations=1'"
+    }
+  ],
+  "2015/17": [
+    {
+      "input_data": "'\\n'.join([c.text for c in soup.find_all('code')[1:6]])",
+      "answer_a": "str(len(soup.article.find_all('li')))",
+      "extra": "'liters=25'"
+    }
   ]
 }
