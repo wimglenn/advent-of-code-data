@@ -1569,8 +1569,7 @@
     },
     {
       "input_data": "soup.find_all('code')[8].text",
-      "answer_a":   "soup.find_all('code')[9].text",
-      "answer_b":   "soup.find_all('article')[1].find_all('code')[-1].text.split()[-1]"
+      "answer_a":   "soup.find_all('code')[9].text"
     }
   ],
   "2019/02": [],
