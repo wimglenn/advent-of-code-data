@@ -2239,5 +2239,32 @@
       "answer_b": "None",
       "extra": "'wire=y'"
     }
+  ],
+  "2015/06": [
+    {
+      "input_data": "soup.article.li.code.text",
+      "answer_a": "'1000000'",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[1].code.text",
+      "answer_a": "'1000'",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[2].code.text",
+      "answer_a": "'0'",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].li.code.text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].li.find_all('code')[1].text"
+    },
+    {
+      "input_data": "soup.find_all('article')[1].find_all('li')[1].code.text",
+      "answer_a": "None",
+      "answer_b": "soup.find_all('article')[1].find_all('li')[1].find_all('code')[1].text"
+    }
   ]
 }
