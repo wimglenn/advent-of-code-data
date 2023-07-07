@@ -2049,5 +2049,24 @@
       "answer_a": "str(len(soup.article.find_all('li')))",
       "extra": "'liters=25'"
     }
+  ],
+  "2015/16": [],
+  "2015/15": [
+    {
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
+    }
+  ],
+  "2015/14": [
+    {
+      "input_data": "'\\n'.join([li.text for li in soup.article.find_all('li')])",
+      "answer_a": "soup.code.text",
+      "answer_b": "soup.find_all('article')[1].code.text",
+      "extra": "'t=1000'"
+    }
+  ],
+  "2015/13": [
+    {
+      "answer_b": "None"
+    }
   ]
 }
