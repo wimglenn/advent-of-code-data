@@ -115,35 +115,6 @@ def extract_examples(html, year, day):
     return result
 
 
-# TODO: delete this helper
-def fc(s, val, a=None):
-    s_orig = s
-    if a is not None:
-        s = s.find_all('article')[a]
-    code_blocks = s.find_all('code')
-    n = len(code_blocks)
-    hits = [i for i, c in enumerate(code_blocks) if c.text == str(val)]
-    if len(hits) == 1:
-        [i] = hits
-    elif len(hits) < 1:
-        raise Exception(f"not found: {val}")
-    else:
-        raise Exception(f"multiple hits: {', '.join(map(str, hits))}")
-    i_ = i - n
-    if a is not None:
-        if a == 0:
-            assert s_orig.find_all('code')[i].text == str(val)
-            print(f"\"soup.find_all('code')[{i}].text\"")
-        assert s_orig.find_all('article')[a].find_all('code')[i].text == str(val)
-        print(f"\"soup.find_all('article')[{a}].find_all('code')[{i}].text\"")
-        assert s_orig.find_all('article')[a].find_all('code')[i_].text == str(val)
-        print(f"\"soup.find_all('article')[{a}].find_all('code')[{i_}].text\"")
-    else:
-        assert s.find_all('code')[i].text == str(val)
-        assert s is s_orig
-        print(f"\"soup.find_all('code')[{i}].text\"")
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     from aocd.models import Puzzle
