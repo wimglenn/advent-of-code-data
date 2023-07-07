@@ -2184,5 +2184,60 @@
     {
       "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
     }
+  ],
+  "2015/08": [
+    {
+      "input_data": "'\\n'.join([li.code.text for li in soup.article.find_all('li')])"
+    }
+  ],
+  "2015/07": [
+    {
+      "input_data": "soup.pre.text.replace('d', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('d: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=d'"
+    },
+    {
+      "input_data": "soup.pre.text.replace('e', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('e: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=e'"
+    },
+    {
+      "input_data": "soup.pre.text.replace('f', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('f: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=f'"
+    },
+    {
+      "input_data": "soup.pre.text.replace('g', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('g: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=g'"
+    },
+    {
+      "input_data": "soup.pre.text.replace('h', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('h: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=h'"
+    },
+    {
+      "input_data": "soup.pre.text.replace('i', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('i: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=i'"
+    },
+    {
+      "input_data": "soup.pre.text.replace('x', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('x: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=x'"
+    },
+    {
+      "input_data": "soup.pre.text.replace('y', 'a')",
+      "answer_a": "soup.find_all('pre')[1].text.split('y: ')[1].split()[0]",
+      "answer_b": "None",
+      "extra": "'wire=y'"
+    }
   ]
 }
