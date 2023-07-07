@@ -2135,5 +2135,54 @@
       "answer_a": "None",
       "answer_b": "soup.find_all('article')[1].find_all('li')[3].find_all('code')[1].text"
     }
+  ],
+  "2015/11": [
+    {
+      "input_data": "soup.article.find_all('li')[-2].code.text",
+      "answer_a": "soup.article.find_all('li')[-2].find_all('code')[1].text",
+      "answer_b": "None"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[-1].code.text",
+      "answer_a": "soup.article.find_all('li')[-1].find_all('code')[1].text",
+      "answer_b": "None"
+    }
+  ],
+  "2015/10": [
+    {
+      "input_data": "soup.code.text",
+      "answer_a": "str(len(soup.find_all('code')[1].text))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.article.li.code.text",
+      "answer_a": "str(len(soup.article.li.find_all('code')[1].text))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[1].code.text",
+      "answer_a": "str(len(soup.article.find_all('li')[1].find_all('code')[1].text))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[2].code.text",
+      "answer_a": "str(len(soup.article.find_all('li')[2].find_all('code')[1].text))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[3].code.text",
+      "answer_a": "str(len(soup.article.find_all('li')[3].find_all('code')[1].text))",
+      "extra": "'iterations=1'"
+    },
+    {
+      "input_data": "soup.article.find_all('li')[4].code.text",
+      "answer_a": "str(len(soup.article.find_all('li')[4].find_all('code')[1].text))",
+      "extra": "'iterations=1'"
+    }
+  ],
+  "2015/09": [
+    {
+      "answer_b": "soup.find_all('article')[1].find_all('code')[-2].text"
+    }
   ]
 }
