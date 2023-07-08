@@ -200,6 +200,7 @@ def main():
         years = range(2015, 2023)
     console = Console()
 
+    wrong = 0
     for year in years:
         score = total = 0
         table = Table(title=f"Advent of Code examples for year {year}")
@@ -236,15 +237,18 @@ def main():
                 row[2] = "❌✅"[i2] + f" ({len(scraped.input_data or '')} bytes)"
                 if not i2:
                     row[2] += f"\n(correct: {len(correct.input_data or '')} bytes)"
+                    wrong += 1
 
                 row[3] = "❌✅"[i3] + f" {_trunc(scraped.answer_a)}"
                 if not i3:
                     row[3] += f"\n(correct: {correct.answer_a})"
+                    wrong += 1
 
                 if day < 25 or scraped.answer_b:
                     row[4] = "❌✅"[i4] + f" {_trunc(scraped.answer_b)}"
                     if not i4:
                         row[4] += f"\n(correct: {correct.answer_b})"
+                        wrong += 1
                 if day < 25 and part_b_locked and i4:
                     row[4] = "❓"
 
@@ -253,3 +257,4 @@ def main():
 
                 table.add_row(*row)
         console.print(table)
+    sys.exit(f"{wrong} scraped incorrect")
