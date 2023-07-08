@@ -16,3 +16,7 @@ class DeadTokenError(AocdError):
 
 class UnknownUserError(AocdError):
     """the token for this userid was not found in the cache"""
+
+
+class ExampleParserError(AocdError):
+    """for problems specific to the example extraction code"""

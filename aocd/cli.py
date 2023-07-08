@@ -12,6 +12,7 @@ from .utils import AOC_TZ
 
 
 def main():
+    """get your puzzle input data, caching it if necessary, and print it on stdout"""
     aoc_now = datetime.datetime.now(tz=AOC_TZ)
     days = range(1, 26)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))

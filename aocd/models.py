@@ -8,6 +8,7 @@ import webbrowser
 from datetime import datetime
 from datetime import timedelta
 from functools import cache
+from itertools import count
 from pathlib import Path
 from textwrap import dedent
 
@@ -209,7 +210,7 @@ class Puzzle:
     def examples(self):
         html = self._get_prose()
         try:
-            examples = extract_examples(html, year=self.year, day=self.day)
+            examples = extract_examples(html)
         except Exception as err:
             msg = "unable to find example data for %d/%02d: %s"
             log.warning(msg, self.year, self.day, err)
@@ -358,7 +359,7 @@ class Puzzle:
             return
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
-        level = {"a": 1, "b": 2}[part]
+        level = {"a": "1", "b": "2"}[part]
         response = http.request_encode_body(
             "POST",
             url=url,
@@ -582,6 +583,27 @@ class Puzzle:
         # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
+
+    def unlock_time(self, local=True):
+        """
+        The time this puzzle unlocked. Might be in the future.
+        If local is True (default), returns a datetime in your local zone.
+        If local is False, returns a datetime in AoC's timezone (i.e. America/New_York)
+        """
+        result = datetime(self.year, 12, self.day, tzinfo=AOC_TZ)
+        if local:
+            localzone = datetime.now().astimezone().tzinfo
+            result = result.astimezone(tz=localzone)
+        return result
+
+    @staticmethod
+    def all(user=None):
+        for year in count(2015):
+            for day in range(1, 26):
+                puzzle = Puzzle(year, day, user)
+                if datetime.now(tz=AOC_TZ) < puzzle.unlock_time(local=False):
+                    return
+                yield puzzle
 
 
 def _parse_duration(s):

@@ -2,15 +2,66 @@ import argparse
 import importlib.resources
 import json
 import logging
+import re
 import sys
 from functools import cache
 from itertools import zip_longest
 from typing import NamedTuple
 
+import bs4
+
+from aocd.exceptions import ExampleParserError
 from aocd.utils import _get_soup
 
 
 log = logging.getLogger(__name__)
+
+
+class Page(NamedTuple):
+    year: int
+    day: int
+    raw_html: str
+    soup: bs4.BeautifulSoup
+    a: bs4.element.Tag
+    a_raw: str
+    b: bs4.element.Tag
+    b_raw: str
+
+    def __repr__(self):
+        return f"<Page({self.year}, {self.day}) at {hex(id(self))}>"
+
+    @classmethod
+    def from_raw(cls, html):
+        soup = _get_soup(html)
+        title_pat = r"^Day (\d{1,2}) - Advent of Code (\d{4})$"
+        title_text = soup.title.text
+        if (match := re.match(title_pat, title_text)) is None:
+            raise ExampleParserError(f"failed to extract year/day from title {title_text!r}")
+        day, year = map(int, match.groups())
+        articles = soup.find_all('article')
+        if len(articles) == 0:
+            raise ExampleParserError(f"no <article> found in html")
+        elif len(articles) == 1:
+            [a] = articles
+            a_raw = str(a)
+            b = b_raw = None
+        elif len(articles) == 2:
+            a, b = articles
+            a_raw = str(a)
+            b_raw = str(b)
+        else:
+            raise ExampleParserError(f"too many <article> found in html")
+        return Page(year=year, day=day, raw_html=html, soup=soup, a=a, a_raw=a_raw, b=b, b_raw=b_raw)
+
+    @property
+    def ca(self):
+        return [code.text for code in self.a.find_all('code')]
+
+    @property
+    def cb(self):
+        if self.b is None:
+            raise AttributeError("cb")
+        return [code.text for code in self.b.find_all('code')]
 
 
 class Example(NamedTuple):
@@ -22,32 +73,6 @@ class Example(NamedTuple):
     @property
     def answers(self):
         return self.answer_a, self.answer_b
-
-
-def extract_examples_old(html, year=None, day=None):
-    soup = _get_soup(html)
-    if soup.pre is None:
-        return []
-    data = soup.pre.text.rstrip("\r\n")
-    articles = soup.find_all("article")
-    if len(articles) == 1:
-        [part_a_article] = articles
-        part_b_article = None
-    elif len(articles) == 2:
-        part_a_article, part_b_article = articles
-    else:
-        return [Example(data)]
-    answer_a = part_a_article.find_all("code")[-1].text
-    if part_b_article is not None:
-        answer_b = part_b_article.find_all("code")[-1].text
-    else:
-        answer_b = None
-    if "\n" in answer_a:
-        answer_a = None
-    if "\n" in answer_b:
-        answer_b = None
-    example = Example(data, answer_a=answer_a, answer_b=answer_b)
-    return [example]
 
 
 def get_actual(year, day):
@@ -86,13 +111,13 @@ def _trunc(s, maxlen=50):
     return s[:maxlen] + f" ... ({len(s)} bytes)"
 
 
-def extract_examples(html, year, day):
-    soup = _get_soup(html)
-    scope = {"soup": soup}
-    part_b_locked = len(soup.find_all("article")) != 2
+def extract_examples(html):
+    page = Page.from_raw(html)
+    scope = {"soup": page.soup}
+    part_b_locked = page.b is None
     result = []
     locators = _locators()
-    key = f"{year}/{day:02d}"
+    key = f"{page.year}/{page.day:02d}"
     default = locators["default_locators"]
     for loc in locators.get(key, [default]):
         vals = []
@@ -100,7 +125,7 @@ def extract_examples(html, year, day):
             pos = loc.get(k, default[k])
             if k == "extra" and pos is None:
                 break
-            if k == "answer_b" and (part_b_locked or day == 25):
+            if k == "answer_b" and (part_b_locked or page.day == 25):
                 vals.append(None)
                 continue
             try:

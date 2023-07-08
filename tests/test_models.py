@@ -376,6 +376,7 @@ def test_examples_cache(aocd_data_dir, pook):
     mock = pook.get(
         url="https://adventofcode.com/2014/day/1",
         response_body=(
+            "<title>Day 1 - Advent of Code 2014</title>"
             "<article><pre><code>1\n2\n3\n</code></pre><code>abc</code></article>"
             "<article><pre><code>1\n2\n3\n</code></pre><code>xyz</code></article>"
         ),
