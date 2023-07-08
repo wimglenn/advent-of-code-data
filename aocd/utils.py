@@ -79,8 +79,11 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
 
 
 def get_owner(token):
-    """parse owner of the token. raises DeadTokenError if the token is expired/invalid.
-    returns a string like authtype.username.userid"""
+    """
+    Find owner of the token.
+    Raises `DeadTokenError` if the token is expired/invalid.
+    Returns a string like "authtype.username.userid"
+    """
     url = "https://adventofcode.com/settings"
     headers = http.headers | {"Cookie": f"session={token}"}
     response = http.request("GET", url, headers=headers, redirect=False)
@@ -114,9 +117,11 @@ def get_owner(token):
 
 
 def atomic_write_file(fname, contents_str):
-    """Atomically write a string to a file by writing it to a temporary file, and then
+    """
+    Atomically write a string to a file by writing it to a temporary file, and then
     renaming it to the final destination name. This solves a race condition where existence
-    of a file doesn't necessarily mean the contents are all correct yet."""
+    of a file doesn't necessarily mean the content is valid yet.
+    """
     _ensure_intermediate_dirs(fname)
     with tempfile.NamedTemporaryFile(mode="w", dir=fname.parent, delete=False) as f:
         log.debug("writing to tempfile @ %s", f.name)
@@ -141,7 +146,7 @@ def _cli_guess(choice, choices):
 
 _ansi_colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
 if platform.system() == "Windows":
-    os.system("color")  # makes ANSI colors work in the windows cmd window
+    os.system("color")  # hack - makes ANSI colors work in the windows cmd window
 
 
 def colored(txt, color):
@@ -153,6 +158,9 @@ def colored(txt, color):
 
 
 def get_plugins(group="adventofcode.user"):
+    """
+    Installed plugins for user solves.
+    """
     try:
         # Python 3.10+
         return entry_points(group=group)

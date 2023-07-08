@@ -18,6 +18,26 @@ log = logging.getLogger(__name__)
 
 
 class Page(NamedTuple):
+    """
+    Container of pre-parsed html to be used by example data extraction functions.
+
+    Instances are expected to be initialised with the classmethod factory
+    `Page.from_raw(html)` rather than directly.
+
+    Attributes of interest:
+    - year: AoC puzzle year (2015+)
+    - day: AoC puzzle day (1-25)
+    - raw_html: String of the puzzle page html. May or may not have part b unlocked.
+    - soup: The raw_html string parsed into a bs4.BeautifulSoup instance
+    - a: The bs4 tag for the first <article> in the page, i.e. part a
+    - b: The bs4 tag for the second <article> in the page, i.e. part b. Will be `None` if part b locked.
+    - a_raw: The first <article> html as a string
+    - b_raw: The second <article> html as a string. Will be `None` if part b locked.
+
+    Most example data extraction functions should probably be mostly concerned with the
+    `a` and `b` attributes, along with the `ca` and `cb` properties for quick access to
+    codeblock contents.
+    """
     year: int
     day: int
     raw_html: str
@@ -55,16 +75,32 @@ class Page(NamedTuple):
 
     @property
     def ca(self):
+        """Code blocks from the first <article> i.e. part a."""
         return [code.text for code in self.a.find_all('code')]
 
     @property
     def cb(self):
+        """
+        Code blocks from the second <article> i.e. part b.
+        This attribute hides itself if part b isn't available.
+        """
         if self.b is None:
             raise AttributeError("cb")
         return [code.text for code in self.b.find_all('code')]
 
 
 class Example(NamedTuple):
+    """
+    Tuple of example data, answers, and any extra context needed for a solver.
+
+    A list of these examples is returned by the `Puzzle.examples` property.
+    User code should be able to run with the `example.input_data` and is expected
+    to produce `example.answer_a` and `example.answer_b`.
+
+    Sometimes examples in the prose need some extra context, such as a fewer
+    number of iterations to be used when working with the test data. This may
+    be returned as some human-readable string in `example.extra`
+    """
     input_data: str
     answer_a: str = None
     answer_b: str = None
@@ -99,6 +135,7 @@ def get_actual(year, day):
 
 @cache
 def _locators():
+    # predetermined locations of code-blocks etc for example data
     resource = importlib.resources.files("aocd") / "examples.json"
     txt = resource.read_text()
     data = json.loads(txt)
@@ -106,12 +143,16 @@ def _locators():
 
 
 def _trunc(s, maxlen=50):
+    # don't print massive strings and mess up the example_parser table rendering
     if s is None or len(s) <= maxlen:
         return s
     return s[:maxlen] + f" ... ({len(s)} bytes)"
 
 
 def extract_examples(html):
+    """
+    Takes the puzzle page's raw html (str) and returns a list of `Example` instances.
+    """
     page = Page.from_raw(html)
     scope = {"soup": page.soup}
     part_b_locked = page.b is None
@@ -140,7 +181,7 @@ def extract_examples(html):
     return result
 
 
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.INFO)
     from aocd.models import Puzzle
     try:
@@ -212,3 +253,7 @@ if __name__ == "__main__":
 
                 table.add_row(*row)
         console.print(table)
+
+
+if __name__ == "__main__":
+    main()

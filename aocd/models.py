@@ -55,10 +55,15 @@ class User:
 
     @property
     def auth(self):
+        """The header necessary to get user-specific puzzle input and prose"""
         return {"Cookie": f"session={self.token}"}
 
     @property
     def id(self):
+        """User's token might change (they expire eventually) but the id found on AoC's
+        settings page for a logged-in user is as close as we can get to a primary key.
+        This id is used to key the cache, so that your caches aren't unnecessarily
+        invalidated by being issued a new token"""
         fname = AOCD_CONFIG_DIR / "token2id.json"
         if User._token2id is None:
             try:
@@ -84,9 +89,16 @@ class User:
 
     @property
     def memo_dir(self):
+        """
+        Directory where this user's puzzle inputs, answers etc. are stored on filesystem.
+        """
         return AOCD_DATA_DIR / self.id
 
     def get_stats(self, years=None):
+        """
+        Parsed version of your personal stats (rank, solve time, score).
+        See https://adventofcode.com/<year>/leaderboard/self when logged in.
+        """
         aoc_now = datetime.now(tz=AOC_TZ)
         all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
         if isinstance(years, int) and years in all_years:
@@ -115,14 +127,15 @@ class User:
             for line in reversed(lines):
                 vals = line.split()
                 day = int(vals[0])
-                results[year, day] = {}
-                results[year, day]["a"] = {
+                k = f"{year}/{day:02d}"
+                results[k] = {}
+                results[k]["a"] = {
                     "time": _parse_duration(vals[1]),
                     "rank": int(vals[2]),
                     "score": int(vals[3]),
                 }
                 if vals[4] != "-":
-                    results[year, day]["b"] = {
+                    results[k]["b"] = {
                         "time": _parse_duration(vals[4]),
                         "rank": int(vals[5]),
                         "score": int(vals[6]),
@@ -518,10 +531,15 @@ class Puzzle:
 
     @property
     def my_stats(self):
+        """
+        Your personal stats (rank, solve time, score) for this particular puzzle.
+        Raises `PuzzleUnsolvedError` if you haven't actually solved it yet.
+        """
         stats = self.user.get_stats(years=[self.year])
-        if (self.year, self.day) not in stats:
+        key = f"{self.year}/{self.day:02d}"
+        if key not in stats:
             raise PuzzleUnsolvedError
-        result = stats[self.year, self.day]
+        result = stats[key]
         return result
 
     def _request_puzzle_page(self):

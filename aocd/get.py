@@ -19,8 +19,10 @@ log = getLogger(__name__)
 
 def get_data(session=None, day=None, year=None, block=False):
     """
-    Get data for day (1-25) and year (>= 2015)
-    User's session cookie is needed (puzzle inputs differ by user)
+    Get data for day (1-25) and year (2015+).
+    User's session cookie (str) is needed - puzzle inputs differ by user.
+    If `block` is True and the puzzle is still locked, will wait until unlock
+    before returning data.
     """
     if session is None:
         user = default_user()

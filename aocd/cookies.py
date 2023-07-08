@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def get_working_tokens():
-    """check browser cookie storage for session tokens from .adventofcode.com domain"""
+    """Check browser cookie storage for session tokens from .adventofcode.com domain."""
     log.debug("checking for installation of browser-cookie3 package")
     try:
         import browser_cookie3 as bc3  # soft dependency
@@ -67,7 +67,7 @@ def get_working_tokens():
 
 
 def scrape_session_tokens():
-    """Scrape AoC session tokens from your browser's cookie storage"""
+    """Scrape AoC session tokens from your browser's cookie storage."""
     aocd_token_path = AOCD_CONFIG_DIR / "token"
     aocd_tokens_path = AOCD_CONFIG_DIR / "tokens.json"
 
