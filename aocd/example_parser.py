@@ -154,7 +154,7 @@ def extract_examples(html):
     Takes the puzzle page's raw html (str) and returns a list of `Example` instances.
     """
     page = Page.from_raw(html)
-    scope = {"soup": page.soup}
+    scope = {"soup": page.soup, "p": page}
     part_b_locked = page.b is None
     result = []
     locators = _locators()
@@ -253,7 +253,3 @@ def main():
 
                 table.add_row(*row)
         console.print(table)
-
-
-if __name__ == "__main__":
-    main()

@@ -1,8 +1,8 @@
 {
   "default_locators": {
-    "input_data": "soup.pre.code.text",
-    "answer_a":   "soup.article.find_all('code')[-1].text.split()[-1]",
-    "answer_b":   "soup.find_all('article')[1].find_all('code')[-1].text.split()[-1]",
+    "input_data": "p.soup.pre.code.text",
+    "answer_a":   "p.ca[-1].split()[-1]",
+    "answer_b":   "p.cb[-1].split()[-1]",
     "extra":      null
   },
   "2015/01": [
