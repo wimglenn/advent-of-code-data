@@ -436,22 +436,22 @@
   ],
   "2015/19": [
     {
-      "input_data": "a_pre[0] + '\\n' + a_code[1]",
+      "input_data": "a_pre[0], a_code[1]",
       "answer_a":   "a_code[16]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_pre[0] + '\\n' + a_code[19]",
+      "input_data": "a_pre[0], a_code[19]",
       "answer_a":   "a_code[20]",
       "answer_b":   "None"
     },
     {
-      "input_data": "b_pre[0] + '\\n' + b_code[2]",
+      "input_data": "b_pre[0], b_code[2]",
       "answer_a":   "None",
       "answer_b":   "b_code[-4]"
     },
     {
-      "input_data": "b_pre[0] + '\\n' + b_code[-3]",
+      "input_data": "b_pre[0], b_code[-3]",
       "answer_a":   "None",
       "answer_b":   "b_code[-2]"
     }
@@ -1576,7 +1576,7 @@
   "2019/02": [],
   "2019/03": [
     {
-      "input_data": "a_code[0] + '\\n' + a_code[7]",
+      "input_data": "a_code[0], a_code[7]",
       "answer_a":   "a_code[14].split()[-1]",
       "answer_b":   "b_code[-5].split()[-1]"
     },
@@ -2098,7 +2098,7 @@
   ],
   "2020/19": [
     {
-      "input_data": "a_pre[0] + '\\n' + a_code[23] + '\\n' + a_code[24]",
+      "input_data": "a_pre[0], a_code[23], a_code[24]",
       "answer_a":   "'2'",
       "answer_b":   "None"
     },
@@ -2132,7 +2132,7 @@
   ],
   "2020/25": [
     {
-      "input_data": "a_code[5] + '\\n' + a_code[10]"
+      "input_data": "a_code[5], a_code[10]"
     }
   ],
   "2021/07": [
@@ -2383,7 +2383,7 @@
   ],
   "2022/18": [
     {
-      "input_data": "a_code[1] + '\\n' + a_code[2]",
+      "input_data": "a_code[1], a_code[2]",
       "answer_a":   "a_code[3]",
       "answer_b":   "a_code[3]"
     },

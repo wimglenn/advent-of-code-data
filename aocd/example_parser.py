@@ -188,7 +188,7 @@ def extract_examples(html):
                 val = eval(pos, scope)
             except Exception:
                 val = None
-            if isinstance(val, list):
+            if isinstance(val, (tuple, list)):
                 val = "\n".join(val)
             if val is not None:
                 val = val.rstrip("\r\n")
