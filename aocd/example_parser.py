@@ -38,7 +38,7 @@ class Page:
     b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
 
     def __repr__(self):
-        return f"<Page({self.year}, {self.day}) at {hex(id(self))}{'*' if self.article_b is None else ''}>"
+        return f"<Page({self.year}, {self.day}) at {hex(id(self))}{' *' if self.article_b is None else ''}>"
 
     @classmethod
     def from_raw(cls, html):
@@ -87,7 +87,11 @@ class Page:
             # actually used by an example parser
             raise AttributeError(name)
         article = self.article_a if part == "a" else self.article_b
-        result = [t.text for t in article.find_all(tag)]
+        if tag == "li":
+            # list items usually need further drill-down
+            result = article.find_all("li")
+        else:
+            result = [t.text for t in article.find_all(tag)]
         setattr(self, name, result)  # cache the result
         msg = "cached %s accessors for puzzle %d/%02d part %s page (%d hits)"
         log.debug(msg, tag, self.year, self.day, part, len(result))
@@ -165,9 +169,11 @@ def extract_examples(html):
         "b": page.article_b,
         "p": page,
         "a_code": page.a_code,
-        "b_code": page.b_code,
         "a_pre": page.a_pre,
+        "a_li": page.a_li,
+        "b_code": page.b_code,
         "b_pre": page.b_pre,
+        "b_li": page.b_li,
     }
     part_b_locked = page.article_b is None
     result = []
