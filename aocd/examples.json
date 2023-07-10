@@ -741,7 +741,7 @@
   ],
   "2016/08": [
     {
-      "input_data": "'\\n'.join([pre.previous.previous for pre in soup.find_all('pre')])",
+      "input_data": "'\\n'.join([li.code.text for li in a_li[3:]])",
       "answer_a":   "str(a_pre[-1].count('#'))",
       "answer_b":   "None",
       "extra":      "'im=7x3'"
