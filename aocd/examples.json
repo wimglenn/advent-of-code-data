@@ -233,7 +233,7 @@
   ],
   "2015/08": [
     {
-      "input_data": "'\\n'.join([li.code.text for li in a.find_all('li')])"
+      "input_data": "'\\n'.join([li.code.text for li in a_li])"
     }
   ],
   "2015/09": [
@@ -359,7 +359,7 @@
   ],
   "2015/14": [
     {
-      "input_data": "'\\n'.join([li.text for li in a.find_all('li')])",
+      "input_data": "'\\n'.join([li.text for li in a_li])",
       "answer_a":   "a_code[0]",
       "answer_b":   "b_code[0]",
       "extra":      "'t=1000'"
@@ -374,7 +374,7 @@
   "2015/17": [
     {
       "input_data": "'\\n'.join([c.text for c in soup.find_all('code')[1:6]])",
-      "answer_a":   "str(len(a.find_all('li')))",
+      "answer_a":   "str(len(a_li))",
       "extra":      "'liters=25'"
     }
   ],
@@ -688,7 +688,7 @@
   ],
   "2016/04": [
     {
-      "input_data": "'\\n'.join([li.code.text for li in a.find_all('li')])",
+      "input_data": "'\\n'.join([li.code.text for li in a_li])",
       "answer_b":   "None"
     }
   ],
@@ -879,7 +879,7 @@
   ],
   "2016/21": [
     {
-      "input_data": "'\\n'.join(c.code.text for c in a.find_all('li')[6:])",
+      "input_data": "'\\n'.join(c.code.text for c in a_li[6:])",
       "answer_a":   "a_code[-2]",
       "answer_b":   "None",
       "extra":      "'start=abcde'"
@@ -1274,7 +1274,7 @@
   ],
   "2018/02": [
     {
-      "input_data": "'\\n'.join([li.code.text for li in a.find_all('li')])",
+      "input_data": "'\\n'.join([li.code.text for li in a_li])",
       "answer_b":   "None"
     },
     {
