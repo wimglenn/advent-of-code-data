@@ -1323,14 +1323,14 @@
   ],
   "2018/07": [
     {
-      "answer_b":   "b.em.text",
+      "answer_b":   "b_em[0]",
       "extra":      "'delay=0,n_workers=2'"
     }
   ],
   "2018/08": [
     {
       "input_data": "a_pre[0].splitlines()[0]",
-      "answer_a":   "a.find_all('code')[-1].em.text"
+      "answer_a":   "a_code[-1].split('=')[1]"
     }
   ],
   "2018/09": [
@@ -1872,7 +1872,7 @@
   "2019/19": [],
   "2019/20": [
     {
-      "answer_a":   "soup.em.text",
+      "answer_a":   "a_em[0]",
       "answer_b":   "'26'"
     },
     {
