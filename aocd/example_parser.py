@@ -165,12 +165,7 @@ def extract_examples(html):
     Takes the puzzle page's raw html (str) and returns a list of `Example` instances.
     """
     page = Page.from_raw(html)
-    scope = {
-        "soup": page.soup,
-        "a": page.article_a,
-        "b": page.article_b,
-        "p": page,
-    }
+    scope = {"page": page}
     for part in "ab":
         for tag in "code", "pre", "em", "li":
             name = f"{part}_{tag}"

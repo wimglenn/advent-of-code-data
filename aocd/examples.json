@@ -700,7 +700,7 @@
   "2016/07": [
     {
       "input_data": "a_li[0].codes[0]",
-      "answer_a":   "str(int(a.li.em is None))",
+      "answer_a":   "str(int(a_li[0].em is None))",
       "answer_b":   "None"
     },
     {
@@ -1339,8 +1339,8 @@
       "answer_a":   "a_em[-7]"
     },
     {
-      "input_data": "a.li.text.split(':')[0]",
-      "answer_a":   "a.li.text.split()[-1]"
+      "input_data": "a_li[0].text.split(':')[0]",
+      "answer_a":   "a_li[0].text.split()[-1]"
     },
     {
       "input_data": "a_li[1].text.split(':')[0]",
@@ -1581,12 +1581,12 @@
       "answer_b":   "b_code[-5].split()[-1]"
     },
     {
-      "input_data": "'\\n'.join(list(soup.find_all('code')[15].children)[::2])",
+      "input_data": "list(page.soup.find_all('code')[15].children)[::2]",
       "answer_a":   "a_code[-3]",
       "answer_b":   "b_code[-3]"
     },
     {
-      "input_data": "'\\n'.join(list(soup.find_all('code')[17].children)[::2])"
+      "input_data": "list(page.soup.find_all('code')[17].children)[::2]"
     }
   ],
   "2019/04": [
