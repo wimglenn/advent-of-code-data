@@ -676,7 +676,7 @@
   ],
   "2016/02": [
     {
-      "input_data": "a.find_all('pre')[1].text"
+      "input_data": "a_pre[1]"
     }
   ],
   "2016/03": [
@@ -854,12 +854,12 @@
   "2016/18": [
     {
       "input_data": "a_code[10]",
-      "answer_a":   "str(a.find_all('pre')[1].text.count('.'))",
+      "answer_a":   "str(a_pre[1].count('.'))",
       "answer_b":   "None",
       "extra":      "'n_rows=3'"
     },
     {
-      "input_data": "a.find_all('pre')[2].text.splitlines()[0]",
+      "input_data": "a_pre[2].splitlines()[0]",
       "answer_a":   "a_code[-2]",
       "answer_b":   "None",
       "extra":      "'n_rows=10'"
@@ -1285,7 +1285,7 @@
   "2018/03": [
     {
       "input_data": "a_pre[1]",
-      "answer_a":   "str(a.find_all('pre')[-1].text.count('X'))"
+      "answer_a":   "str(a_pre[-1].count('X'))"
     }
   ],
   "2018/05": [
@@ -1446,17 +1446,17 @@
     {
       "input_data": "'\\n'.join(line.split()[0] for line in a_pre[7].split('\\n\\n')[0].splitlines())",
       "answer_a":   "a_pre[7].split()[-1]",
-      "answer_b":   "b.find_all('pre')[1].text.split()[-1]"
+      "answer_b":   "b_pre[1].split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in a_pre[8].split('\\n\\n')[0].splitlines())",
       "answer_a":   "a_pre[8].split()[-1]",
-      "answer_b":   "b.find_all('pre')[2].text.split()[-1]"
+      "answer_b":   "b_pre[2].split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in a_pre[9].split('\\n\\n')[0].splitlines())",
       "answer_a":   "a_pre[9].split()[-1]",
-      "answer_b":   "b.find_all('pre')[3].text.split()[-1]"
+      "answer_b":   "b_pre[3].split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in a_pre[10].split('\\n\\n')[0].splitlines())",
@@ -1686,12 +1686,12 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.find_all('pre')[1].text",
+      "input_data": "b_pre[1]",
       "answer_a":   "None",
       "answer_b":   "b_code[-6]"
     },
     {
-      "input_data": "b.find_all('pre')[2].text",
+      "input_data": "b_pre[2]",
       "answer_a":   "None",
       "answer_b":   "b_code[-3]"
     }
@@ -1850,22 +1850,22 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in b.find_all('pre')[2].text.splitlines())",
+      "input_data": "'\\n'.join(line.split()[0] for line in b_pre[2].splitlines())",
       "answer_a":   "None",
       "answer_b":   "b_code[14]"
     },
     {
-      "input_data": "b.find_all('pre')[7].text",
+      "input_data": "b_pre[7]",
       "answer_a":   "None",
       "answer_b":   "b_code[22]"
     },
     {
-      "input_data": "b.find_all('pre')[8].text",
+      "input_data": "b_pre[8]",
       "answer_a":   "None",
       "answer_b":   "b_code[36]"
     },
     {
-      "input_data": "b.find_all('pre')[9].text",
+      "input_data": "b_pre[9]",
       "answer_a":   "None"
     }
   ],

@@ -271,6 +271,7 @@ def main():
 
                 table.add_row(*row)
         console.print(table)
+    wrong = [*{}.fromkeys(wrong)]
     for y, d, i in wrong:
         print(y, d, i)
     sys.exit(f"{len(wrong)} scraped incorrect")
