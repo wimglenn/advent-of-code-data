@@ -80,7 +80,7 @@ class Page:
         if part == "b" and self.article_b is None:
             # hide part b accessors if part b is not unlocked yet
             raise AttributeError(name)
-        if tag not in {"code", "li", "pre"}:
+        if tag not in {"code", "li", "pre", "em"}:
             # only some soup attributes are whitelisted for access
             # these are computed dynamically and cached so that we
             # only pay the cost of parsing for them if/when they are
@@ -168,13 +168,11 @@ def extract_examples(html):
         "a": page.article_a,
         "b": page.article_b,
         "p": page,
-        "a_code": page.a_code,
-        "a_pre": page.a_pre,
-        "a_li": page.a_li,
-        "b_code": page.b_code,
-        "b_pre": page.b_pre,
-        "b_li": page.b_li,
     }
+    for part in "ab":
+        for tag in "code", "pre", "em", "li":
+            name = f"{part}_{tag}"
+            scope[name] = getattr(page, name)
     part_b_locked = page.article_b is None
     result = []
     locators = _locators()
@@ -279,5 +277,5 @@ def main():
         console.print(table)
     wrong = [*{}.fromkeys(wrong)]
     for y, d, i in wrong:
-        print(y, d, i)
+        print(f"{y}/{d:02d}", i)
     sys.exit(f"{len(wrong)} scraped incorrect")

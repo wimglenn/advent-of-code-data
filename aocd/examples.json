@@ -1311,14 +1311,14 @@
     },
     {
       "input_data": "a_code[14]",
-      "answer_a":   "a.find_all('em')[-2].text.split()[0]",
-      "answer_b":   "b.find_all('em')[-2].text"
+      "answer_a":   "a_em[-2].split()[0]",
+      "answer_b":   "b_em[-2]"
     }
   ],
   "2018/06": [
     {
-      "answer_a":   "a.find_all('em')[-2].text",
-      "answer_b":   "b.find_all('em')[-3].text"
+      "answer_a":   "a_em[-2]",
+      "answer_b":   "b_em[-3]"
     }
   ],
   "2018/07": [
@@ -1336,7 +1336,7 @@
   "2018/09": [
     {
       "input_data": "'9 players; last marble is worth 25 points'",
-      "answer_a":   "a.find_all('em')[-7].text"
+      "answer_a":   "a_em[-7]"
     },
     {
       "input_data": "a.li.text.split(':')[0]",
@@ -1768,28 +1768,28 @@
   "2019/13": [],
   "2019/14": [
     {
-      "answer_a":   "soup.find_all('em')[8].text",
+      "answer_a":   "a_em[8]",
       "answer_b":   "None"
     },
     {
       "input_data": "a_pre[1]",
-      "answer_a":   "soup.find_all('em')[9].text",
+      "answer_a":   "a_em[9]",
       "answer_b":   "None"
     },
     {
       "input_data": "a_pre[2]",
-      "answer_a":   "soup.find_all('em')[10].text",
-      "answer_b":   "b.find_all('em')[-4].text"
+      "answer_a":   "a_em[10]",
+      "answer_b":   "b_em[-4]"
     },
     {
       "input_data": "a_pre[3]",
-      "answer_a":   "soup.find_all('em')[11].text",
-      "answer_b":   "b.find_all('em')[-3].text"
+      "answer_a":   "a_em[11]",
+      "answer_b":   "b_em[-3]"
     },
     {
       "input_data": "a_pre[4]",
-      "answer_a":   "soup.find_all('em')[12].text",
-      "answer_b":   "b.find_all('em')[-2].text"
+      "answer_a":   "a_em[12]",
+      "answer_b":   "b_em[-2]"
     }
   ],
   "2019/15": [],
@@ -1877,13 +1877,13 @@
     },
     {
       "input_data": "a_pre[1]",
-      "answer_a":   "soup.find_all('em')[1].text",
+      "answer_a":   "a_em[1]",
       "answer_b":   "None"
     },
     {
       "input_data": "b_pre[0]",
       "answer_a":   "None",
-      "answer_b":   "b.find_all('em')[-2].text"
+      "answer_b":   "b_em[-2]"
     }
   ],
   "2019/21": [],
