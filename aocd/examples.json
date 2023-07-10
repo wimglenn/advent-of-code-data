@@ -17,7 +17,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "a_li[1].codes[-1]",
       "answer_b":   "None"
     },
@@ -27,12 +27,12 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "a_li[2].codes[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[3].code.text",
+      "input_data": "a_li[3].codes[0]",
       "answer_a":   "a_li[3].codes[-1]",
       "answer_b":   "None"
     },
@@ -42,7 +42,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[4].code.text",
+      "input_data": "a_li[4].codes[0]",
       "answer_a":   "a_li[4].codes[-1]",
       "answer_b":   "None"
     },
@@ -52,12 +52,12 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b_li[0].code.text",
+      "input_data": "b_li[0].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[0].codes[-1]"
     },
     {
-      "input_data": "b_li[1].code.text",
+      "input_data": "b_li[1].codes[0]",
       "answer_a":   "None"
     }
   ],
@@ -68,7 +68,7 @@
       "answer_b":   "b_li[0].codes[-1]"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "a_li[1].codes[-1]",
       "answer_b":   "b_li[1].codes[-1]"
     }
@@ -80,17 +80,17 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "a_li[1].codes[1]",
       "answer_b":   "b_li[1].codes[1]"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "a_li[2].codes[1]",
       "answer_b":   "b_li[2].codes[1]"
     },
     {
-      "input_data": "b_li[0].code.text",
+      "input_data": "b_li[0].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[0].codes[1]"
     }
@@ -102,54 +102,54 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "a_li[1].codes[1]",
       "answer_b":   "None"
     }
   ],
   "2015/05": [
     {
-      "input_data": "a_li[3].code.text",
+      "input_data": "a_li[3].codes[0]",
       "answer_a":   "str(a_li[3].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[4].code.text",
+      "input_data": "a_li[4].codes[0]",
       "answer_a":   "str(a_li[4].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[5].code.text",
+      "input_data": "a_li[5].codes[0]",
       "answer_a":   "str(a_li[5].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[6].code.text",
+      "input_data": "a_li[6].codes[0]",
       "answer_a":   "str(a_li[6].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[7].code.text",
+      "input_data": "a_li[7].codes[0]",
       "answer_a":   "str(a_li[7].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "b_li[2].code.text",
+      "input_data": "b_li[2].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(b_li[2].text.count('nice'))"
     },
     {
-      "input_data": "b_li[3].code.text",
+      "input_data": "b_li[3].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(b_li[3].text.count('nice'))"
     },
     {
-      "input_data": "b_li[4].code.text",
+      "input_data": "b_li[4].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(b_li[4].text.count('nice'))"
     },
     {
-      "input_data": "b_li[5].code.text",
+      "input_data": "b_li[5].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(b_li[5].text.count('nice'))"
     }
@@ -161,22 +161,22 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "'1000'",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "'0'",
       "answer_b":   "None"
     },
     {
-      "input_data": "b_li[0].code.text",
+      "input_data": "b_li[0].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[0].codes[1]"
     },
     {
-      "input_data": "b_li[1].code.text",
+      "input_data": "b_li[1].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[1].codes[1]"
     }
@@ -253,34 +253,34 @@
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "str(len(a_li[1].codes[1]))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "str(len(a_li[2].codes[1]))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "a_li[3].code.text",
+      "input_data": "a_li[3].codes[0]",
       "answer_a":   "str(len(a_li[3].codes[1]))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "a_li[4].code.text",
+      "input_data": "a_li[4].codes[0]",
       "answer_a":   "str(len(a_li[4].codes[1]))",
       "extra":      "'iterations=1'"
     }
   ],
   "2015/11": [
     {
-      "input_data": "a_li[-2].code.text",
+      "input_data": "a_li[-2].codes[0]",
       "answer_a":   "a_li[-2].codes[1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-1].code.text",
+      "input_data": "a_li[-1].codes[0]",
       "answer_a":   "a_li[-1].codes[1]",
       "answer_b":   "None"
     }
@@ -297,7 +297,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "a_li[1].codes[-1]",
       "answer_b":   "None"
     },
@@ -307,7 +307,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "a_li[2].codes[2]",
       "answer_b":   "None"
     },
@@ -317,7 +317,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[3].code.text",
+      "input_data": "a_li[3].codes[0]",
       "answer_a":   "a_li[3].codes[2]",
       "answer_b":   "None"
     },
@@ -327,7 +327,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[4].code.text",
+      "input_data": "a_li[4].codes[0]",
       "answer_a":   "a_li[4].codes[2]",
       "answer_b":   "None"
     },
@@ -337,17 +337,17 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b_li[1].code.text",
+      "input_data": "b_li[1].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[1].codes[1]"
     },
     {
-      "input_data": "b_li[2].code.text",
+      "input_data": "b_li[2].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[2].codes[1]"
     },
     {
-      "input_data": "b_li[3].code.text",
+      "input_data": "b_li[3].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[3].codes[1]"
     }
@@ -660,12 +660,12 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "a_li[1].codes[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "a_li[2].codes[-1]",
       "answer_b":   "None"
     },
@@ -704,37 +704,37 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "str(int(a_li[1].em is None))",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "str(int(a_li[2].em is None))",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[3].code.text",
+      "input_data": "a_li[3].codes[0]",
       "answer_a":   "str(int(a_li[3].em is None))",
       "answer_b":   "None"
     },
     {
-      "input_data": "b_li[0].code.text",
+      "input_data": "b_li[0].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(int(b_li[0].em is None))"
     },
     {
-      "input_data": "b_li[1].code.text",
+      "input_data": "b_li[1].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(int(b_li[1].em is None))"
     },
     {
-      "input_data": "b_li[2].code.text",
+      "input_data": "b_li[2].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(int(b_li[2].em is None))"
     },
     {
-      "input_data": "b_li[3].code.text",
+      "input_data": "b_li[3].codes[0]",
       "answer_a":   "None",
       "answer_b":   "str(int(b_li[3].em is None))"
     }
@@ -754,37 +754,37 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[1].code.text",
+      "input_data": "a_li[1].codes[0]",
       "answer_a":   "a_li[1].codes[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[2].code.text",
+      "input_data": "a_li[2].codes[0]",
       "answer_a":   "a_li[2].codes[-1]",
       "answer_b":   "str(len(b_li[0].codes[-1]))"
     },
     {
-      "input_data": "a_li[3].code.text",
+      "input_data": "a_li[3].codes[0]",
       "answer_a":   "a_li[3].codes[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[4].code.text",
+      "input_data": "a_li[4].codes[0]",
       "answer_a":   "a_li[4].codes[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[5].code.text",
+      "input_data": "a_li[5].codes[0]",
       "answer_a":   "a_li[5].codes[2]",
       "answer_b":   "str(len(b_li[1].codes[1]))"
     },
     {
-      "input_data": "b_li[2].code.text",
+      "input_data": "b_li[2].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[2].codes[-1]"
     },
     {
-      "input_data": "b_li[3].code.text",
+      "input_data": "b_li[3].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[3].codes[-1]"
     }
@@ -1045,42 +1045,42 @@
   ],
   "2017/09": [
     {
-      "input_data": "a_li[-8].code.text",
+      "input_data": "a_li[-8].codes[0]",
       "answer_a":   "a_li[-8].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-7].code.text",
+      "input_data": "a_li[-7].codes[0]",
       "answer_a":   "a_li[-7].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-6].code.text",
+      "input_data": "a_li[-6].codes[0]",
       "answer_a":   "a_li[-6].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-5].code.text",
+      "input_data": "a_li[-5].codes[0]",
       "answer_a":   "a_li[-5].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-4].code.text",
+      "input_data": "a_li[-4].codes[0]",
       "answer_a":   "a_li[-4].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-3].code.text",
+      "input_data": "a_li[-3].codes[0]",
       "answer_a":   "a_li[-3].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-2].code.text",
+      "input_data": "a_li[-2].codes[0]",
       "answer_a":   "a_li[-2].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-1].code.text",
+      "input_data": "a_li[-1].codes[0]",
       "answer_a":   "a_li[-1].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
@@ -1238,37 +1238,37 @@
       "answer_b":   "b_code[18]"
     },
     {
-      "input_data": "a_li[-3].code.text",
+      "input_data": "a_li[-3].codes[0]",
       "answer_a":   "a_li[-3].text.split()[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-2].code.text",
+      "input_data": "a_li[-2].codes[0]",
       "answer_a":   "a_li[-2].text.split()[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a_li[-1].code.text",
+      "input_data": "a_li[-1].codes[0]",
       "answer_a":   "a_li[-1].text.split()[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "b_li[-4].code.text",
+      "input_data": "b_li[-4].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[-4].text.split()[-2]"
     },
     {
-      "input_data": "b_li[-3].code.text",
+      "input_data": "b_li[-3].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[-3].text.split()[-2]"
     },
     {
-      "input_data": "b_li[-2].code.text",
+      "input_data": "b_li[-2].codes[0]",
       "answer_a":   "None",
       "answer_b":   "b_li[-2].text.split()[-2]"
     },
     {
-      "input_data": "b_li[-1].code.text",
+      "input_data": "b_li[-1].codes[0]",
       "answer_a":   "None"
     }
   ],
