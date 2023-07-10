@@ -184,49 +184,49 @@
   "2015/07": [
     {
       "input_data": "a_pre[0].replace('d', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('d: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('d: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=d'"
     },
     {
       "input_data": "a_pre[0].replace('e', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('e: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('e: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=e'"
     },
     {
       "input_data": "a_pre[0].replace('f', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('f: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('f: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=f'"
     },
     {
       "input_data": "a_pre[0].replace('g', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('g: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('g: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=g'"
     },
     {
       "input_data": "a_pre[0].replace('h', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('h: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('h: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=h'"
     },
     {
       "input_data": "a_pre[0].replace('i', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('i: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('i: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=i'"
     },
     {
       "input_data": "a_pre[0].replace('x', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('x: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('x: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=x'"
     },
     {
       "input_data": "a_pre[0].replace('y', 'a')",
-      "answer_a":   "soup.find_all('pre')[1].text.split('y: ')[1].split()[0]",
+      "answer_a":   "a_pre[1].split('y: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=y'"
     }
@@ -380,26 +380,26 @@
   ],
   "2015/18": [
     {
-      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[0].split(':\\n')[1]",
-      "answer_a":   "str(soup.find_all('pre')[1].text.split('\\n\\n')[1].count('#'))",
+      "input_data": "a_pre[1].split('\\n\\n')[0].split(':\\n')[1]",
+      "answer_a":   "str(a_pre[1].split('\\n\\n')[1].count('#'))",
       "answer_b":   "None",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[1].split(':\\n')[1]",
-      "answer_a":   "str(soup.find_all('pre')[1].text.split('\\n\\n')[2].count('#'))",
+      "input_data": "a_pre[1].split('\\n\\n')[1].split(':\\n')[1]",
+      "answer_a":   "str(a_pre[1].split('\\n\\n')[2].count('#'))",
       "answer_b":   "None",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[2].split(':\\n')[1]",
-      "answer_a":   "str(soup.find_all('pre')[1].text.split('\\n\\n')[3].count('#'))",
+      "input_data": "a_pre[1].split('\\n\\n')[2].split(':\\n')[1]",
+      "answer_a":   "str(a_pre[1].split('\\n\\n')[3].count('#'))",
       "answer_b":   "None",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "soup.find_all('pre')[1].text.split('\\n\\n')[3].split(':\\n')[1]",
-      "answer_a":   "str(soup.find_all('pre')[1].text.split('\\n\\n')[4].count('#'))",
+      "input_data": "a_pre[1].split('\\n\\n')[3].split(':\\n')[1]",
+      "answer_a":   "str(a_pre[1].split('\\n\\n')[4].count('#'))",
       "answer_b":   "None",
       "extra":      "'iterations=1'"
     },
@@ -474,182 +474,182 @@
   "2015/25": [
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 1.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[10]",
+      "answer_a":   "a_pre[1].split()[10]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 2.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[11]",
+      "answer_a":   "a_pre[1].split()[11]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 3.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[12]",
+      "answer_a":   "a_pre[1].split()[12]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 4.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[13]",
+      "answer_a":   "a_pre[1].split()[13]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 5.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[14]",
+      "answer_a":   "a_pre[1].split()[14]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 1, column 6.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[15]",
+      "answer_a":   "a_pre[1].split()[15]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 1.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[18]",
+      "answer_a":   "a_pre[1].split()[18]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 2.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[19]",
+      "answer_a":   "a_pre[1].split()[19]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 3.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[20]",
+      "answer_a":   "a_pre[1].split()[20]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 4.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[21]",
+      "answer_a":   "a_pre[1].split()[21]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 5.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[22]",
+      "answer_a":   "a_pre[1].split()[22]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 2, column 6.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[23]",
+      "answer_a":   "a_pre[1].split()[23]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 1.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[26]",
+      "answer_a":   "a_pre[1].split()[26]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 2.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[27]",
+      "answer_a":   "a_pre[1].split()[27]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 3.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[28]",
+      "answer_a":   "a_pre[1].split()[28]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 4.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[29]",
+      "answer_a":   "a_pre[1].split()[29]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 5.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[30]",
+      "answer_a":   "a_pre[1].split()[30]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 3, column 6.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[31]",
+      "answer_a":   "a_pre[1].split()[31]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 1.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[34]",
+      "answer_a":   "a_pre[1].split()[34]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 2.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[35]",
+      "answer_a":   "a_pre[1].split()[35]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 3.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[36]",
+      "answer_a":   "a_pre[1].split()[36]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 4.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[37]",
+      "answer_a":   "a_pre[1].split()[37]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 5.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[38]",
+      "answer_a":   "a_pre[1].split()[38]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 4, column 6.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[39]",
+      "answer_a":   "a_pre[1].split()[39]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 1.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[42]",
+      "answer_a":   "a_pre[1].split()[42]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 2.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[43]",
+      "answer_a":   "a_pre[1].split()[43]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 3.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[44]",
+      "answer_a":   "a_pre[1].split()[44]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 4.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[45]",
+      "answer_a":   "a_pre[1].split()[45]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 5.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[46]",
+      "answer_a":   "a_pre[1].split()[46]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 5, column 6.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[47]",
+      "answer_a":   "a_pre[1].split()[47]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 1.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[50]",
+      "answer_a":   "a_pre[1].split()[50]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 2.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[51]",
+      "answer_a":   "a_pre[1].split()[51]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 3.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[52]",
+      "answer_a":   "a_pre[1].split()[52]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 4.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[53]",
+      "answer_a":   "a_pre[1].split()[53]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 5.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[54]",
+      "answer_a":   "a_pre[1].split()[54]",
       "answer_b":   "None"
     },
     {
       "input_data": "'To continue, please consult the code grid in the manual.  Enter the code at row 6, column 6.'",
-      "answer_a":   "soup.find_all('pre')[1].text.split()[55]",
+      "answer_a":   "a_pre[1].split()[55]",
       "answer_b":   "None"
     }
   ],
@@ -742,7 +742,7 @@
   "2016/08": [
     {
       "input_data": "'\\n'.join([pre.previous.previous for pre in soup.find_all('pre')])",
-      "answer_a":   "str(soup.find_all('pre')[-1].text.count('#'))",
+      "answer_a":   "str(a_pre[-1].count('#'))",
       "answer_b":   "None",
       "extra":      "'im=7x3'"
     }
@@ -1218,7 +1218,7 @@
   ],
   "2017/21": [
     {
-      "input_data": "soup.find_all('pre')[3].text",
+      "input_data": "a_pre[3]",
       "answer_a":   "a_code[-2]",
       "answer_b":   "None",
       "extra":      "'iterations=2'"
@@ -1284,7 +1284,7 @@
   ],
   "2018/03": [
     {
-      "input_data": "soup.find_all('pre')[1].text",
+      "input_data": "a_pre[1]",
       "answer_a":   "str(a.find_all('pre')[-1].text.count('X'))"
     }
   ],
@@ -1379,12 +1379,12 @@
   ],
   "2018/13": [
     {
-      "input_data": "'\\n'.join(line[0] for line in soup.find_all('pre')[2].text.splitlines())",
+      "input_data": "'\\n'.join(line[0] for line in a_pre[2].splitlines())",
       "answer_a":   "'0,3'",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[3].text.split('\\n\\n')[0]",
+      "input_data": "a_pre[3].split('\\n\\n')[0]",
       "answer_b":   "None"
     },
     {
@@ -1434,33 +1434,33 @@
   ],
   "2018/15": [
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[5].text.split('\\n\\n')[0].splitlines()[1:])",
+      "input_data": "'\\n'.join(line.split()[0] for line in a_pre[5].split('\\n\\n')[0].splitlines()[1:])",
       "answer_a":   "a_code[34].split()[-1]",
       "answer_b":   "b_pre[0].split()[-1]"
     },
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[6].text.split('\\n\\n')[0].splitlines())",
-      "answer_a":   "soup.find_all('pre')[6].text.split()[-1]",
+      "input_data": "'\\n'.join(line.split()[0] for line in a_pre[6].split('\\n\\n')[0].splitlines())",
+      "answer_a":   "a_pre[6].split()[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[7].text.split('\\n\\n')[0].splitlines())",
-      "answer_a":   "soup.find_all('pre')[7].text.split()[-1]",
+      "input_data": "'\\n'.join(line.split()[0] for line in a_pre[7].split('\\n\\n')[0].splitlines())",
+      "answer_a":   "a_pre[7].split()[-1]",
       "answer_b":   "b.find_all('pre')[1].text.split()[-1]"
     },
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[8].text.split('\\n\\n')[0].splitlines())",
-      "answer_a":   "soup.find_all('pre')[8].text.split()[-1]",
+      "input_data": "'\\n'.join(line.split()[0] for line in a_pre[8].split('\\n\\n')[0].splitlines())",
+      "answer_a":   "a_pre[8].split()[-1]",
       "answer_b":   "b.find_all('pre')[2].text.split()[-1]"
     },
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[9].text.split('\\n\\n')[0].splitlines())",
-      "answer_a":   "soup.find_all('pre')[9].text.split()[-1]",
+      "input_data": "'\\n'.join(line.split()[0] for line in a_pre[9].split('\\n\\n')[0].splitlines())",
+      "answer_a":   "a_pre[9].split()[-1]",
       "answer_b":   "b.find_all('pre')[3].text.split()[-1]"
     },
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[10].text.split('\\n\\n')[0].splitlines())",
-      "answer_a":   "soup.find_all('pre')[10].text.split()[-1]"
+      "input_data": "'\\n'.join(line.split()[0] for line in a_pre[10].split('\\n\\n')[0].splitlines())",
+      "answer_a":   "a_pre[10].split()[-1]"
     }
   ],
   "2018/16": [
@@ -1532,7 +1532,7 @@
   ],
   "2018/24": [
     {
-      "input_data": "soup.find_all('pre')[1].text"
+      "input_data": "a_pre[1]"
     }
   ],
   "2018/25": [
@@ -1540,15 +1540,15 @@
       "answer_a":   "a_code[8]"
     },
     {
-      "input_data": "soup.find_all('pre')[1].text",
+      "input_data": "a_pre[1]",
       "answer_a":   "a_code[12]"
     },
     {
-      "input_data": "soup.find_all('pre')[2].text",
+      "input_data": "a_pre[2]",
       "answer_a":   "a_code[14]"
     },
     {
-      "input_data": "soup.find_all('pre')[3].text",
+      "input_data": "a_pre[3]",
       "answer_a":   "a_code[16]"
     }
   ],
@@ -1660,7 +1660,7 @@
   ],
   "2019/06": [
     {
-      "input_data": "soup.find_all('pre')[1].text",
+      "input_data": "a_pre[1]",
       "answer_b":   "None"
     },
     {
@@ -1671,17 +1671,17 @@
   ],
   "2019/07": [
     {
-      "input_data": "soup.find_all('pre')[1].text",
+      "input_data": "a_pre[1]",
       "answer_a":   "a_code[-9]",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[2].text",
+      "input_data": "a_pre[2]",
       "answer_a":   "a_code[-6]",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[3].text",
+      "input_data": "a_pre[3]",
       "answer_a":   "a_code[-3]",
       "answer_b":   "None"
     },
@@ -1733,22 +1733,22 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[3].text",
+      "input_data": "a_pre[3]",
       "answer_a":   "a_code[17]",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[4].text",
+      "input_data": "a_pre[4]",
       "answer_a":   "a_code[20]",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[5].text",
+      "input_data": "a_pre[5]",
       "answer_a":   "a_code[23]",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[6].text",
+      "input_data": "a_pre[6]",
       "answer_a":   "a_code[26]"
     }
   ],
@@ -1760,8 +1760,8 @@
       "extra":      "'ta=10'"
     },
     {
-      "input_data": "soup.find_all('pre')[3].text",
-      "answer_a":   "soup.find_all('pre')[4].text.split()[-1]",
+      "input_data": "a_pre[3]",
+      "answer_a":   "a_pre[4].split()[-1]",
       "extra":      "'ta=100'"
     }
   ],
@@ -1772,22 +1772,22 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[1].text",
+      "input_data": "a_pre[1]",
       "answer_a":   "soup.find_all('em')[9].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[2].text",
+      "input_data": "a_pre[2]",
       "answer_a":   "soup.find_all('em')[10].text",
       "answer_b":   "b.find_all('em')[-4].text"
     },
     {
-      "input_data": "soup.find_all('pre')[3].text",
+      "input_data": "a_pre[3]",
       "answer_a":   "soup.find_all('em')[11].text",
       "answer_b":   "b.find_all('em')[-3].text"
     },
     {
-      "input_data": "soup.find_all('pre')[4].text",
+      "input_data": "a_pre[4]",
       "answer_a":   "soup.find_all('em')[12].text",
       "answer_b":   "b.find_all('em')[-2].text"
     }
@@ -1876,12 +1876,12 @@
       "answer_b":   "'26'"
     },
     {
-      "input_data": "soup.find_all('pre')[1].text",
+      "input_data": "a_pre[1]",
       "answer_a":   "soup.find_all('em')[1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "soup.find_all('pre')[2].text",
+      "input_data": "b_pre[0]",
       "answer_a":   "None",
       "answer_b":   "b.find_all('em')[-2].text"
     }
