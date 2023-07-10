@@ -2174,8 +2174,7 @@
     },
     {
       "input_data": "a_code[22]",
-      "answer_a":   "a_code[21]",
-      "answer_b":   "b_code[-1]"
+      "answer_a":   "a_code[21]"
     }
   ],
   "2021/13": [
