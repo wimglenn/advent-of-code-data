@@ -1,6 +1,6 @@
 {
   "default_locators": {
-    "input_data": "p.soup.pre.code.text",
+    "input_data": "a_pre[0]",
     "answer_a":   "a_code[-1].split()[-1]",
     "answer_b":   "b_code[-1].split()[-1]",
     "extra":      null
@@ -183,49 +183,49 @@
   ],
   "2015/07": [
     {
-      "input_data": "soup.pre.text.replace('d', 'a')",
+      "input_data": "a_pre[0].replace('d', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('d: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=d'"
     },
     {
-      "input_data": "soup.pre.text.replace('e', 'a')",
+      "input_data": "a_pre[0].replace('e', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('e: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=e'"
     },
     {
-      "input_data": "soup.pre.text.replace('f', 'a')",
+      "input_data": "a_pre[0].replace('f', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('f: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=f'"
     },
     {
-      "input_data": "soup.pre.text.replace('g', 'a')",
+      "input_data": "a_pre[0].replace('g', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('g: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=g'"
     },
     {
-      "input_data": "soup.pre.text.replace('h', 'a')",
+      "input_data": "a_pre[0].replace('h', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('h: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=h'"
     },
     {
-      "input_data": "soup.pre.text.replace('i', 'a')",
+      "input_data": "a_pre[0].replace('i', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('i: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=i'"
     },
     {
-      "input_data": "soup.pre.text.replace('x', 'a')",
+      "input_data": "a_pre[0].replace('x', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('x: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=x'"
     },
     {
-      "input_data": "soup.pre.text.replace('y', 'a')",
+      "input_data": "a_pre[0].replace('y', 'a')",
       "answer_a":   "soup.find_all('pre')[1].text.split('y: ')[1].split()[0]",
       "answer_b":   "None",
       "extra":      "'wire=y'"
@@ -404,33 +404,33 @@
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "b.pre.text.split('\\n\\n')[0].split(':\\n')[1]",
+      "input_data": "b_pre[0].split('\\n\\n')[0].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(b.pre.text.split('\\n\\n')[1].count('#'))",
+      "answer_b":   "str(b_pre[0].split('\\n\\n')[1].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "b.pre.text.split('\\n\\n')[1].split(':\\n')[1]",
+      "input_data": "b_pre[0].split('\\n\\n')[1].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(b.pre.text.split('\\n\\n')[2].count('#'))",
+      "answer_b":   "str(b_pre[0].split('\\n\\n')[2].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "b.pre.text.split('\\n\\n')[2].split(':\\n')[1]",
+      "input_data": "b_pre[0].split('\\n\\n')[2].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(b.pre.text.split('\\n\\n')[3].count('#'))",
+      "answer_b":   "str(b_pre[0].split('\\n\\n')[3].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "b.pre.text.split('\\n\\n')[3].split(':\\n')[1]",
+      "input_data": "b_pre[0].split('\\n\\n')[3].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(b.pre.text.split('\\n\\n')[4].count('#'))",
+      "answer_b":   "str(b_pre[0].split('\\n\\n')[4].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "b.pre.text.split('\\n\\n')[4].split(':\\n')[1]",
+      "input_data": "b_pre[0].split('\\n\\n')[4].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(b.pre.text.split('\\n\\n')[5].count('#'))",
+      "answer_b":   "str(b_pre[0].split('\\n\\n')[5].count('#'))",
       "extra":      "'iterations=1'"
     }
   ],
@@ -446,12 +446,12 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.pre.text + '\\n' + b_code[2]",
+      "input_data": "b_pre[0] + '\\n' + b_code[2]",
       "answer_a":   "None",
       "answer_b":   "b_code[-4]"
     },
     {
-      "input_data": "b.pre.text + '\\n' + b_code[-3]",
+      "input_data": "b_pre[0] + '\\n' + b_code[-3]",
       "answer_a":   "None",
       "answer_b":   "b_code[-2]"
     }
@@ -467,8 +467,8 @@
   ],
   "2015/24": [
     {
-      "input_data": "'\\n'.join(sorted({n for n in soup.pre.text.split() if n.isdigit()}, key=int))",
-      "answer_b":   "b.pre.text.split(')')[0].split('QE=')[1]"
+      "input_data": "'\\n'.join(sorted({n for n in a_pre[0].split() if n.isdigit()}, key=int))",
+      "answer_b":   "b_pre[0].split(')')[0].split('QE=')[1]"
     }
   ],
   "2015/25": [
@@ -867,7 +867,7 @@
   ],
   "2016/19": [
     {
-      "input_data": "max(soup.pre.text)"
+      "input_data": "max(a_pre[0])"
     }
   ],
   "2016/20": [
@@ -887,6 +887,7 @@
   ],
   "2016/22": [
     {
+      "input_data": "b_pre[0]",
       "answer_a":   "None",
       "answer_b":   "b_code[-2]"
     }
@@ -954,7 +955,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.pre.text",
+      "input_data": "b_pre[0]",
       "answer_a":   "None"
     }
   ],
@@ -1198,19 +1199,19 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.pre.text",
+      "input_data": "b_pre[0]",
       "answer_a":   "None",
       "answer_b":   "'3'"
     }
   ],
   "2017/20": [
     {
-      "input_data": "'\\n'.join([line.split('   ')[0] for line in soup.pre.text.split('\\n\\n')[0].splitlines()])",
+      "input_data": "'\\n'.join([line.split('   ')[0] for line in a_pre[0].split('\\n\\n')[0].splitlines()])",
       "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "'\\n'.join([line.split('   ')[0] for line in b.pre.text.split('\\n\\n')[0].splitlines()])",
+      "input_data": "'\\n'.join([line.split('   ')[0] for line in b_pre[0].split('\\n\\n')[0].splitlines()])",
       "answer_a":   "None",
       "answer_b":   "'1'"
     }
@@ -1277,7 +1278,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.pre.text",
+      "input_data": "b_pre[0]",
       "answer_a":   "None"
     }
   ],
@@ -1328,7 +1329,7 @@
   ],
   "2018/08": [
     {
-      "input_data": "soup.pre.text.splitlines()[0]",
+      "input_data": "a_pre[0].splitlines()[0]",
       "answer_a":   "a.find_all('code')[-1].em.text"
     }
   ],
@@ -1387,7 +1388,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.pre.text.split('\\n\\n')[0]",
+      "input_data": "b_pre[0].split('\\n\\n')[0]",
       "answer_a":   "None"
     }
   ],
@@ -1435,7 +1436,7 @@
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[5].text.split('\\n\\n')[0].splitlines()[1:])",
       "answer_a":   "a_code[34].split()[-1]",
-      "answer_b":   "b.pre.text.split()[-1]"
+      "answer_b":   "b_pre[0].split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[6].text.split('\\n\\n')[0].splitlines())",
@@ -1475,7 +1476,7 @@
   ],
   "2018/18": [
     {
-      "input_data": "soup.pre.text.split('\\n\\n')[0].split(':\\n')[1]"
+      "input_data": "a_pre[0].split('\\n\\n')[0].split(':\\n')[1]"
     }
   ],
   "2018/19": [
@@ -1524,7 +1525,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.pre.text",
+      "input_data": "b_pre[0]",
       "answer_a":   "None",
       "answer_b":   "b_code[-2]"
     }
@@ -1652,7 +1653,7 @@
       "answer_b":   "b_code[26]"
     },
     {
-      "input_data": "b.pre.text",
+      "input_data": "b_pre[0]",
       "answer_a":   "None",
       "answer_b":   "b_code[30]"
     }
@@ -1663,7 +1664,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.pre.text",
+      "input_data": "b_pre[0]",
       "answer_a":   "None",
       "answer_b":   "b_code[12]"
     }
@@ -1890,7 +1891,7 @@
   "2019/23": [],
   "2019/24": [
     {
-      "input_data": "soup.pre.text[15:45]",
+      "input_data": "a_pre[0][15:45]",
       "extra":      "'tb=10'"
     }
   ],
