@@ -243,7 +243,7 @@
   ],
   "2015/10": [
     {
-      "input_data": "soup.code.text",
+      "input_data": "a_code[0]",
       "answer_a":   "str(len(a_code[1]))",
       "extra":      "'iterations=1'"
     },
@@ -360,8 +360,8 @@
   "2015/14": [
     {
       "input_data": "'\\n'.join([li.text for li in a.find_all('li')])",
-      "answer_a":   "soup.code.text",
-      "answer_b":   "b.code.text",
+      "answer_a":   "a_code[0]",
+      "answer_b":   "b_code[0]",
       "extra":      "'t=1000'"
     }
   ],
@@ -670,7 +670,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.code.text",
+      "input_data": "b_code[0]",
       "answer_a":   "None"
     }
   ],
@@ -681,7 +681,7 @@
   ],
   "2016/03": [
     {
-      "input_data": "soup.code.text",
+      "input_data": "a_code[0]",
       "answer_a":   "'0'",
       "answer_b":   "None"
     }
@@ -907,7 +907,7 @@
   "2016/25": [],
   "2017/01": [
     {
-      "input_data": "soup.code.text",
+      "input_data": "a_code[0]",
       "answer_a":   "a_code[1]",
       "answer_b":   "None"
     },
@@ -982,7 +982,7 @@
   ],
   "2017/04": [
     {
-      "input_data": "soup.code.text",
+      "input_data": "a_code[0]",
       "answer_a":   "'1'",
       "answer_b":   "None"
     },
@@ -997,7 +997,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.code.text",
+      "input_data": "b_code[0]",
       "answer_a":   "None",
       "answer_b":   "'1'"
     },
@@ -1554,7 +1554,7 @@
   ],
   "2019/01": [
     {
-      "input_data": "soup.code.text",
+      "input_data": "a_code[0]",
       "answer_a":   "a_code[2]",
       "answer_b":   "'2'"
     },
@@ -1576,7 +1576,7 @@
   "2019/02": [],
   "2019/03": [
     {
-      "input_data": "soup.code.text + '\\n' + a_code[7]",
+      "input_data": "a_code[0] + '\\n' + a_code[7]",
       "answer_a":   "a_code[14].split()[-1]",
       "answer_b":   "b_code[-5].split()[-1]"
     },
@@ -1606,7 +1606,7 @@
       "answer_b":   "'0'"
     },
     {
-      "input_data": "'-'.join([b.code.text]*2)",
+      "input_data": "'-'.join([b_code[0]]*2)",
       "answer_a":   "'1'",
       "answer_b":   "'1'"
     },
@@ -1756,7 +1756,7 @@
   "2019/12": [
     {
       "answer_a":   "a_code[-4]",
-      "answer_b":   "b.code.text",
+      "answer_b":   "b_code[0]",
       "extra":      "'ta=10'"
     },
     {
@@ -1926,7 +1926,7 @@
   ],
   "2020/05": [
     {
-      "input_data": "soup.code.text",
+      "input_data": "a_code[0]",
       "answer_a":   "a_code[-13].split()[-1]"
     },
     {
@@ -2294,7 +2294,7 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.code.text",
+      "input_data": "b_code[0]",
       "answer_a":   "b_code[2]",
       "answer_b":   "b_code[1]"
     }
