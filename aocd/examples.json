@@ -52,9 +52,9 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.li.code.text",
+      "input_data": "b_li[0].code.text",
       "answer_a":   "None",
-      "answer_b":   "b.li.find_all('code')[-1].text"
+      "answer_b":   "b_li[0].find_all('code')[-1].text"
     },
     {
       "input_data": "b_li[1].code.text",
@@ -65,7 +65,7 @@
     {
       "input_data": "a.li.code.text",
       "answer_a":   "a.li.find_all('code')[-1].text",
-      "answer_b":   "b.li.find_all('code')[-1].text"
+      "answer_b":   "b_li[0].find_all('code')[-1].text"
     },
     {
       "input_data": "a_li[1].code.text",
@@ -90,9 +90,9 @@
       "answer_b":   "b_li[2].find_all('code')[1].text"
     },
     {
-      "input_data": "b.li.code.text",
+      "input_data": "b_li[0].code.text",
       "answer_a":   "None",
-      "answer_b":   "b.li.find_all('code')[1].text"
+      "answer_b":   "b_li[0].find_all('code')[1].text"
     }
   ],
   "2015/04": [
@@ -171,9 +171,9 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.li.code.text",
+      "input_data": "b_li[0].code.text",
       "answer_a":   "None",
-      "answer_b":   "b.li.find_all('code')[1].text"
+      "answer_b":   "b_li[0].find_all('code')[1].text"
     },
     {
       "input_data": "b_li[1].code.text",
@@ -289,7 +289,7 @@
     {
       "input_data": "a.li.code.text",
       "answer_a":   "a.li.find_all('code')[-1].text",
-      "answer_b":   "b.li.find_all('code')[-1].text"
+      "answer_b":   "b_li[0].find_all('code')[-1].text"
     },
     {
       "input_data": "a.li.find_all('code')[1].text",
@@ -719,9 +719,9 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "b.li.code.text",
+      "input_data": "b_li[0].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(int(b.li.em is None))"
+      "answer_b":   "str(int(b_li[0].em is None))"
     },
     {
       "input_data": "b_li[1].code.text",
@@ -761,7 +761,7 @@
     {
       "input_data": "a_li[2].code.text",
       "answer_a":   "a_li[2].find_all('code')[-1].text",
-      "answer_b":   "str(len(b.li.find_all('code')[-1].text))"
+      "answer_b":   "str(len(b_li[0].find_all('code')[-1].text))"
     },
     {
       "input_data": "a_li[3].code.text",
