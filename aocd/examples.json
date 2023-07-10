@@ -293,7 +293,7 @@
     },
     {
       "input_data": "a_li[0].codes[1]",
-      "answer_a":   "a.li.find_all('code')[2].text",
+      "answer_a":   "a_li[0].codes[2]",
       "answer_b":   "None"
     },
     {
@@ -373,7 +373,7 @@
   "2015/16": [],
   "2015/17": [
     {
-      "input_data": "'\\n'.join([c.text for c in soup.find_all('code')[1:6]])",
+      "input_data": "'\\n'.join(a_code[1:6])",
       "answer_a":   "str(len(a_li))",
       "extra":      "'liters=25'"
     }
@@ -1029,7 +1029,7 @@
   ],
   "2017/06": [
     {
-      "input_data": "'\\t'.join(c.text for c in soup.find_all('code')[:4])"
+      "input_data": "'\\t'.join(a_code[:4])"
     }
   ],
   "2017/07": [
@@ -1178,12 +1178,12 @@
   ],
   "2017/15": [
     {
-      "input_data": "'Generator A starts with {}\\nGenerator B starts with {}'.format(*[c.text for c in soup.find_all('code')[3:5]])"
+      "input_data": "'Generator A starts with {}\\nGenerator B starts with {}'.format(a_code[3], a_code[4])"
     }
   ],
   "2017/16": [
     {
-      "input_data": "','.join([soup.find_all('code')[i].text for i in [20, 23, 25]])"
+      "input_data": "','.join([li.codes[0] for li in a_li[3:]])"
     }
   ],
   "2017/17": [
