@@ -2098,7 +2098,7 @@
   ],
   "2020/19": [
     {
-      "input_data": "soup.pre.code.text + '\\n' + a_code[23] + '\\n' + a_code[24]",
+      "input_data": "a_pre[0] + '\\n' + a_code[23] + '\\n' + a_code[24]",
       "answer_a":   "'2'",
       "answer_b":   "None"
     },
