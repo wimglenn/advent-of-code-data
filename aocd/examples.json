@@ -436,12 +436,12 @@
   ],
   "2015/19": [
     {
-      "input_data": "a.pre.text + '\\n' + a_code[1]",
+      "input_data": "a_pre[0] + '\\n' + a_code[1]",
       "answer_a":   "a_code[16]",
       "answer_b":   "None"
     },
     {
-      "input_data": "a.pre.text + '\\n' + a_code[19]",
+      "input_data": "a_pre[0] + '\\n' + a_code[19]",
       "answer_a":   "a_code[20]",
       "answer_b":   "None"
     },
