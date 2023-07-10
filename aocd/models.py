@@ -225,7 +225,7 @@ class Puzzle:
         try:
             examples = extract_examples(html)
         except Exception as err:
-            msg = "unable to find example data for %d/%02d: %s"
+            msg = "unable to find example data for %d/%02d (%r)"
             log.warning(msg, self.year, self.day, err)
             examples = []
         return examples

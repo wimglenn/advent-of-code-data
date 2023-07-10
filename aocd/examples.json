@@ -1,184 +1,184 @@
 {
   "default_locators": {
     "input_data": "p.soup.pre.code.text",
-    "answer_a":   "p.ca[-1].split()[-1]",
-    "answer_b":   "p.cb[-1].split()[-1]",
+    "answer_a":   "a_code[-1].split()[-1]",
+    "answer_b":   "b_code[-1].split()[-1]",
     "extra":      null
   },
   "2015/01": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "p.a.li.find_all('code')[-1].text",
+      "input_data": "a.li.code.text",
+      "answer_a":   "a.li.find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.li.find_all('code')[1].text",
-      "answer_a":   "p.a.li.find_all('code')[-1].text",
+      "input_data": "a.li.find_all('code')[1].text",
+      "answer_a":   "a.li.find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].find_all('code')[1].text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[1].find_all('code')[1].text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
-      "answer_a":   "p.a.find_all('li')[2].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[2].code.text",
+      "answer_a":   "a.find_all('li')[2].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[3].code.text",
-      "answer_a":   "p.a.find_all('li')[3].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[3].code.text",
+      "answer_a":   "a.find_all('li')[3].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[3].find_all('code')[1].text",
-      "answer_a":   "p.a.find_all('li')[3].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[3].find_all('code')[1].text",
+      "answer_a":   "a.find_all('li')[3].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[4].code.text",
-      "answer_a":   "p.a.find_all('li')[4].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[4].code.text",
+      "answer_a":   "a.find_all('li')[4].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[4].find_all('code')[1].text",
-      "answer_a":   "p.a.find_all('li')[4].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[4].find_all('code')[1].text",
+      "answer_a":   "a.find_all('li')[4].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.li.code.text",
+      "input_data": "b.li.code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.li.find_all('code')[-1].text"
+      "answer_b":   "b.li.find_all('code')[-1].text"
     },
     {
-      "input_data": "p.b.find_all('li')[1].code.text",
+      "input_data": "b.find_all('li')[1].code.text",
       "answer_a":   "None"
     }
   ],
   "2015/02": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "p.a.li.find_all('code')[-1].text",
-      "answer_b":   "p.b.li.find_all('code')[-1].text"
+      "input_data": "a.li.code.text",
+      "answer_a":   "a.li.find_all('code')[-1].text",
+      "answer_b":   "b.li.find_all('code')[-1].text"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[-1].text",
-      "answer_b":   "p.b.find_all('li')[1].find_all('code')[-1].text"
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[-1].text",
+      "answer_b":   "b.find_all('li')[1].find_all('code')[-1].text"
     }
   ],
   "2015/03": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "p.a.li.find_all('code')[1].text",
+      "input_data": "a.li.code.text",
+      "answer_a":   "a.li.find_all('code')[1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[1].text",
-      "answer_b":   "p.b.find_all('li')[1].find_all('code')[1].text"
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[1].text",
+      "answer_b":   "b.find_all('li')[1].find_all('code')[1].text"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
-      "answer_a":   "p.a.find_all('li')[2].find_all('code')[1].text",
-      "answer_b":   "p.b.find_all('li')[2].find_all('code')[1].text"
+      "input_data": "a.find_all('li')[2].code.text",
+      "answer_a":   "a.find_all('li')[2].find_all('code')[1].text",
+      "answer_b":   "b.find_all('li')[2].find_all('code')[1].text"
     },
     {
-      "input_data": "p.b.li.code.text",
+      "input_data": "b.li.code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.li.find_all('code')[1].text"
+      "answer_b":   "b.li.find_all('code')[1].text"
     }
   ],
   "2015/04": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "p.a.li.find_all('code')[1].text",
+      "input_data": "a.li.code.text",
+      "answer_a":   "a.li.find_all('code')[1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[1].text",
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[1].text",
       "answer_b":   "None"
     }
   ],
   "2015/05": [
     {
-      "input_data": "p.a.find_all('li')[3].code.text",
-      "answer_a":   "str(p.a.find_all('li')[3].text.count('nice'))",
+      "input_data": "a.find_all('li')[3].code.text",
+      "answer_a":   "str(a.find_all('li')[3].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[4].code.text",
-      "answer_a":   "str(p.a.find_all('li')[4].text.count('nice'))",
+      "input_data": "a.find_all('li')[4].code.text",
+      "answer_a":   "str(a.find_all('li')[4].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[5].code.text",
-      "answer_a":   "str(p.a.find_all('li')[5].text.count('nice'))",
+      "input_data": "a.find_all('li')[5].code.text",
+      "answer_a":   "str(a.find_all('li')[5].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[6].code.text",
-      "answer_a":   "str(p.a.find_all('li')[6].text.count('nice'))",
+      "input_data": "a.find_all('li')[6].code.text",
+      "answer_a":   "str(a.find_all('li')[6].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[7].code.text",
-      "answer_a":   "str(p.a.find_all('li')[7].text.count('nice'))",
+      "input_data": "a.find_all('li')[7].code.text",
+      "answer_a":   "str(a.find_all('li')[7].text.count('nice'))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.find_all('li')[2].code.text",
+      "input_data": "b.find_all('li')[2].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.find_all('li')[2].text.count('nice'))"
+      "answer_b":   "str(b.find_all('li')[2].text.count('nice'))"
     },
     {
-      "input_data": "p.b.find_all('li')[3].code.text",
+      "input_data": "b.find_all('li')[3].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.find_all('li')[3].text.count('nice'))"
+      "answer_b":   "str(b.find_all('li')[3].text.count('nice'))"
     },
     {
-      "input_data": "p.b.find_all('li')[4].code.text",
+      "input_data": "b.find_all('li')[4].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.find_all('li')[4].text.count('nice'))"
+      "answer_b":   "str(b.find_all('li')[4].text.count('nice'))"
     },
     {
-      "input_data": "p.b.find_all('li')[5].code.text",
+      "input_data": "b.find_all('li')[5].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.find_all('li')[5].text.count('nice'))"
+      "answer_b":   "str(b.find_all('li')[5].text.count('nice'))"
     }
   ],
   "2015/06": [
     {
-      "input_data": "p.a.li.code.text",
+      "input_data": "a.li.code.text",
       "answer_a":   "'1000000'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
+      "input_data": "a.find_all('li')[1].code.text",
       "answer_a":   "'1000'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
+      "input_data": "a.find_all('li')[2].code.text",
       "answer_a":   "'0'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.li.code.text",
+      "input_data": "b.li.code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.li.find_all('code')[1].text"
+      "answer_b":   "b.li.find_all('code')[1].text"
     },
     {
-      "input_data": "p.b.find_all('li')[1].code.text",
+      "input_data": "b.find_all('li')[1].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[1].find_all('code')[1].text"
+      "answer_b":   "b.find_all('li')[1].find_all('code')[1].text"
     }
   ],
   "2015/07": [
@@ -233,123 +233,123 @@
   ],
   "2015/08": [
     {
-      "input_data": "'\\n'.join([li.code.text for li in p.a.find_all('li')])"
+      "input_data": "'\\n'.join([li.code.text for li in a.find_all('li')])"
     }
   ],
   "2015/09": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2015/10": [
     {
       "input_data": "soup.code.text",
-      "answer_a":   "str(len(p.ca[1]))",
+      "answer_a":   "str(len(a_code[1]))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "str(len(p.a.li.find_all('code')[1].text))",
+      "input_data": "a.li.code.text",
+      "answer_a":   "str(len(a.li.find_all('code')[1].text))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "str(len(p.a.find_all('li')[1].find_all('code')[1].text))",
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "str(len(a.find_all('li')[1].find_all('code')[1].text))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
-      "answer_a":   "str(len(p.a.find_all('li')[2].find_all('code')[1].text))",
+      "input_data": "a.find_all('li')[2].code.text",
+      "answer_a":   "str(len(a.find_all('li')[2].find_all('code')[1].text))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.a.find_all('li')[3].code.text",
-      "answer_a":   "str(len(p.a.find_all('li')[3].find_all('code')[1].text))",
+      "input_data": "a.find_all('li')[3].code.text",
+      "answer_a":   "str(len(a.find_all('li')[3].find_all('code')[1].text))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.a.find_all('li')[4].code.text",
-      "answer_a":   "str(len(p.a.find_all('li')[4].find_all('code')[1].text))",
+      "input_data": "a.find_all('li')[4].code.text",
+      "answer_a":   "str(len(a.find_all('li')[4].find_all('code')[1].text))",
       "extra":      "'iterations=1'"
     }
   ],
   "2015/11": [
     {
-      "input_data": "p.a.find_all('li')[-2].code.text",
-      "answer_a":   "p.a.find_all('li')[-2].find_all('code')[1].text",
+      "input_data": "a.find_all('li')[-2].code.text",
+      "answer_a":   "a.find_all('li')[-2].find_all('code')[1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-1].code.text",
-      "answer_a":   "p.a.find_all('li')[-1].find_all('code')[1].text",
+      "input_data": "a.find_all('li')[-1].code.text",
+      "answer_a":   "a.find_all('li')[-1].find_all('code')[1].text",
       "answer_b":   "None"
     }
   ],
   "2015/12": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "p.a.li.find_all('code')[-1].text",
-      "answer_b":   "p.b.li.find_all('code')[-1].text"
+      "input_data": "a.li.code.text",
+      "answer_a":   "a.li.find_all('code')[-1].text",
+      "answer_b":   "b.li.find_all('code')[-1].text"
     },
     {
-      "input_data": "p.a.li.find_all('code')[1].text",
-      "answer_a":   "p.a.li.find_all('code')[2].text",
+      "input_data": "a.li.find_all('code')[1].text",
+      "answer_a":   "a.li.find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].find_all('code')[1].text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[2].text",
+      "input_data": "a.find_all('li')[1].find_all('code')[1].text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
-      "answer_a":   "p.a.find_all('li')[2].find_all('code')[2].text",
+      "input_data": "a.find_all('li')[2].code.text",
+      "answer_a":   "a.find_all('li')[2].find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[2].find_all('code')[1].text",
-      "answer_a":   "p.a.find_all('li')[2].find_all('code')[2].text",
+      "input_data": "a.find_all('li')[2].find_all('code')[1].text",
+      "answer_a":   "a.find_all('li')[2].find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[3].code.text",
-      "answer_a":   "p.a.find_all('li')[3].find_all('code')[2].text",
+      "input_data": "a.find_all('li')[3].code.text",
+      "answer_a":   "a.find_all('li')[3].find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[3].find_all('code')[1].text",
-      "answer_a":   "p.a.find_all('li')[3].find_all('code')[2].text",
+      "input_data": "a.find_all('li')[3].find_all('code')[1].text",
+      "answer_a":   "a.find_all('li')[3].find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[4].code.text",
-      "answer_a":   "p.a.find_all('li')[4].find_all('code')[2].text",
+      "input_data": "a.find_all('li')[4].code.text",
+      "answer_a":   "a.find_all('li')[4].find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[4].find_all('code')[1].text",
-      "answer_a":   "p.a.find_all('li')[4].find_all('code')[2].text",
+      "input_data": "a.find_all('li')[4].find_all('code')[1].text",
+      "answer_a":   "a.find_all('li')[4].find_all('code')[2].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.find_all('li')[1].code.text",
+      "input_data": "b.find_all('li')[1].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[1].find_all('code')[1].text"
+      "answer_b":   "b.find_all('li')[1].find_all('code')[1].text"
     },
     {
-      "input_data": "p.b.find_all('li')[2].code.text",
+      "input_data": "b.find_all('li')[2].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[2].find_all('code')[1].text"
+      "answer_b":   "b.find_all('li')[2].find_all('code')[1].text"
     },
     {
-      "input_data": "p.b.find_all('li')[3].code.text",
+      "input_data": "b.find_all('li')[3].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[3].find_all('code')[1].text"
+      "answer_b":   "b.find_all('li')[3].find_all('code')[1].text"
     }
   ],
   "2015/13": [
@@ -359,22 +359,22 @@
   ],
   "2015/14": [
     {
-      "input_data": "'\\n'.join([li.text for li in p.a.find_all('li')])",
+      "input_data": "'\\n'.join([li.text for li in a.find_all('li')])",
       "answer_a":   "soup.code.text",
-      "answer_b":   "p.b.code.text",
+      "answer_b":   "b.code.text",
       "extra":      "'t=1000'"
     }
   ],
   "2015/15": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2015/16": [],
   "2015/17": [
     {
       "input_data": "'\\n'.join([c.text for c in soup.find_all('code')[1:6]])",
-      "answer_a":   "str(len(p.a.find_all('li')))",
+      "answer_a":   "str(len(a.find_all('li')))",
       "extra":      "'liters=25'"
     }
   ],
@@ -404,56 +404,56 @@
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.b.pre.text.split('\\n\\n')[0].split(':\\n')[1]",
+      "input_data": "b.pre.text.split('\\n\\n')[0].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.pre.text.split('\\n\\n')[1].count('#'))",
+      "answer_b":   "str(b.pre.text.split('\\n\\n')[1].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.b.pre.text.split('\\n\\n')[1].split(':\\n')[1]",
+      "input_data": "b.pre.text.split('\\n\\n')[1].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.pre.text.split('\\n\\n')[2].count('#'))",
+      "answer_b":   "str(b.pre.text.split('\\n\\n')[2].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.b.pre.text.split('\\n\\n')[2].split(':\\n')[1]",
+      "input_data": "b.pre.text.split('\\n\\n')[2].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.pre.text.split('\\n\\n')[3].count('#'))",
+      "answer_b":   "str(b.pre.text.split('\\n\\n')[3].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.b.pre.text.split('\\n\\n')[3].split(':\\n')[1]",
+      "input_data": "b.pre.text.split('\\n\\n')[3].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.pre.text.split('\\n\\n')[4].count('#'))",
+      "answer_b":   "str(b.pre.text.split('\\n\\n')[4].count('#'))",
       "extra":      "'iterations=1'"
     },
     {
-      "input_data": "p.b.pre.text.split('\\n\\n')[4].split(':\\n')[1]",
+      "input_data": "b.pre.text.split('\\n\\n')[4].split(':\\n')[1]",
       "answer_a":   "None",
-      "answer_b":   "str(p.b.pre.text.split('\\n\\n')[5].count('#'))",
+      "answer_b":   "str(b.pre.text.split('\\n\\n')[5].count('#'))",
       "extra":      "'iterations=1'"
     }
   ],
   "2015/19": [
     {
-      "input_data": "p.a.pre.text + '\\n' + p.ca[1]",
-      "answer_a":   "p.ca[16]",
+      "input_data": "a.pre.text + '\\n' + a_code[1]",
+      "answer_a":   "a_code[16]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.pre.text + '\\n' + p.ca[19]",
-      "answer_a":   "p.ca[20]",
+      "input_data": "a.pre.text + '\\n' + a_code[19]",
+      "answer_a":   "a_code[20]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.pre.text + '\\n' + p.cb[2]",
+      "input_data": "b.pre.text + '\\n' + b_code[2]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-4]"
+      "answer_b":   "b_code[-4]"
     },
     {
-      "input_data": "p.b.pre.text + '\\n' + p.cb[-3]",
+      "input_data": "b.pre.text + '\\n' + b_code[-3]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2015/20": [],
@@ -468,7 +468,7 @@
   "2015/24": [
     {
       "input_data": "'\\n'.join(sorted({n for n in soup.pre.text.split() if n.isdigit()}, key=int))",
-      "answer_b":   "p.b.pre.text.split(')')[0].split('QE=')[1]"
+      "answer_b":   "b.pre.text.split(')')[0].split('QE=')[1]"
     }
   ],
   "2015/25": [
@@ -655,28 +655,28 @@
   ],
   "2016/01": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "p.a.li.find_all('code')[-1].text",
+      "input_data": "a.li.code.text",
+      "answer_a":   "a.li.find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
-      "answer_a":   "p.a.find_all('li')[2].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[2].code.text",
+      "answer_a":   "a.find_all('li')[2].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.code.text",
+      "input_data": "b.code.text",
       "answer_a":   "None"
     }
   ],
   "2016/02": [
     {
-      "input_data": "p.a.find_all('pre')[1].text"
+      "input_data": "a.find_all('pre')[1].text"
     }
   ],
   "2016/03": [
@@ -688,55 +688,55 @@
   ],
   "2016/04": [
     {
-      "input_data": "'\\n'.join([li.code.text for li in p.a.find_all('li')])",
+      "input_data": "'\\n'.join([li.code.text for li in a.find_all('li')])",
       "answer_b":   "None"
     }
   ],
   "2016/05": [
     {
-      "input_data": "p.ca[1]"
+      "input_data": "a_code[1]"
     }
   ],
   "2016/07": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "str(int(p.a.li.em is None))",
+      "input_data": "a.li.code.text",
+      "answer_a":   "str(int(a.li.em is None))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "str(int(p.a.find_all('li')[1].em is None))",
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "str(int(a.find_all('li')[1].em is None))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
-      "answer_a":   "str(int(p.a.find_all('li')[2].em is None))",
+      "input_data": "a.find_all('li')[2].code.text",
+      "answer_a":   "str(int(a.find_all('li')[2].em is None))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[3].code.text",
-      "answer_a":   "str(int(p.a.find_all('li')[3].em is None))",
+      "input_data": "a.find_all('li')[3].code.text",
+      "answer_a":   "str(int(a.find_all('li')[3].em is None))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.li.code.text",
+      "input_data": "b.li.code.text",
       "answer_a":   "None",
-      "answer_b":   "str(int(p.b.li.em is None))"
+      "answer_b":   "str(int(b.li.em is None))"
     },
     {
-      "input_data": "p.b.find_all('li')[1].code.text",
+      "input_data": "b.find_all('li')[1].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(int(p.b.find_all('li')[1].em is None))"
+      "answer_b":   "str(int(b.find_all('li')[1].em is None))"
     },
     {
-      "input_data": "p.b.find_all('li')[2].code.text",
+      "input_data": "b.find_all('li')[2].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(int(p.b.find_all('li')[2].em is None))"
+      "answer_b":   "str(int(b.find_all('li')[2].em is None))"
     },
     {
-      "input_data": "p.b.find_all('li')[3].code.text",
+      "input_data": "b.find_all('li')[3].code.text",
       "answer_a":   "None",
-      "answer_b":   "str(int(p.b.find_all('li')[3].em is None))"
+      "answer_b":   "str(int(b.find_all('li')[3].em is None))"
     }
   ],
   "2016/08": [
@@ -749,118 +749,118 @@
   ],
   "2016/09": [
     {
-      "input_data": "p.a.li.code.text",
-      "answer_a":   "p.a.li.find_all('code')[-1].text",
+      "input_data": "a.li.code.text",
+      "answer_a":   "a.li.find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[1].code.text",
-      "answer_a":   "p.a.find_all('li')[1].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[1].code.text",
+      "answer_a":   "a.find_all('li')[1].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[2].code.text",
-      "answer_a":   "p.a.find_all('li')[2].find_all('code')[-1].text",
-      "answer_b":   "str(len(p.b.li.find_all('code')[-1].text))"
+      "input_data": "a.find_all('li')[2].code.text",
+      "answer_a":   "a.find_all('li')[2].find_all('code')[-1].text",
+      "answer_b":   "str(len(b.li.find_all('code')[-1].text))"
     },
     {
-      "input_data": "p.a.find_all('li')[3].code.text",
-      "answer_a":   "p.a.find_all('li')[3].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[3].code.text",
+      "answer_a":   "a.find_all('li')[3].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[4].code.text",
-      "answer_a":   "p.a.find_all('li')[4].find_all('code')[-1].text",
+      "input_data": "a.find_all('li')[4].code.text",
+      "answer_a":   "a.find_all('li')[4].find_all('code')[-1].text",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[5].code.text",
-      "answer_a":   "p.a.find_all('li')[5].find_all('code')[2].text",
-      "answer_b":   "str(len(p.b.find_all('li')[1].find_all('code')[1].text))"
+      "input_data": "a.find_all('li')[5].code.text",
+      "answer_a":   "a.find_all('li')[5].find_all('code')[2].text",
+      "answer_b":   "str(len(b.find_all('li')[1].find_all('code')[1].text))"
     },
     {
-      "input_data": "p.b.find_all('li')[2].code.text",
+      "input_data": "b.find_all('li')[2].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[2].find_all('code')[-1].text"
+      "answer_b":   "b.find_all('li')[2].find_all('code')[-1].text"
     },
     {
-      "input_data": "p.b.find_all('li')[3].code.text",
+      "input_data": "b.find_all('li')[3].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[3].find_all('code')[-1].text"
+      "answer_b":   "b.find_all('li')[3].find_all('code')[-1].text"
     }
   ],
   "2016/10": [
     {
-      "answer_a":   "p.ca[-5]",
+      "answer_a":   "a_code[-5]",
       "answer_b":   "None",
       "extra":      "'chips=value-5,value-2'"
     }
   ],
   "2016/12": [
     {
-      "answer_a":   "p.ca[-2]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     }
   ],
   "2016/13": [
     {
-      "input_data": "p.ca[10]",
-      "answer_a":   "p.ca[-3]",
+      "input_data": "a_code[10]",
+      "answer_a":   "a_code[-3]",
       "answer_b":   "None"
     }
   ],
   "2016/14": [
     {
-      "input_data": "p.ca[5]",
-      "answer_a":   "p.ca[-3]",
-      "answer_b":   "p.cb[-7]"
+      "input_data": "a_code[5]",
+      "answer_a":   "a_code[-3]",
+      "answer_b":   "b_code[-7]"
     }
   ],
   "2016/15": [
     {
-      "answer_a":   "p.ca[18].split('=')[-1]",
+      "answer_a":   "a_code[18].split('=')[-1]",
       "answer_b":   "None"
     }
   ],
   "2016/16": [
     {
-      "input_data": "p.ca[22]",
-      "answer_a":   "p.ca[34]",
+      "input_data": "a_code[22]",
+      "answer_a":   "a_code[34]",
       "answer_b":   "None",
       "extra":      "'disk_length=12'"
     },
     {
-      "input_data": "p.ca[38]",
-      "answer_a":   "p.ca[52]",
+      "input_data": "a_code[38]",
+      "answer_a":   "a_code[52]",
       "answer_b":   "None",
       "extra":      "'disk_length=20'"
     }
   ],
   "2016/17": [
     {
-      "input_data": "p.ca[-6]",
-      "answer_a":   "p.ca[-5]",
-      "answer_b":   "p.cb[-5]"
+      "input_data": "a_code[-6]",
+      "answer_a":   "a_code[-5]",
+      "answer_b":   "b_code[-5]"
     },
     {
-      "input_data": "p.ca[-4]",
-      "answer_a":   "p.ca[-3]",
-      "answer_b":   "p.cb[-3]"
+      "input_data": "a_code[-4]",
+      "answer_a":   "a_code[-3]",
+      "answer_b":   "b_code[-3]"
     },
     {
-      "input_data": "p.ca[-2]"
+      "input_data": "a_code[-2]"
     }
   ],
   "2016/18": [
     {
-      "input_data": "p.ca[10]",
-      "answer_a":   "str(p.a.find_all('pre')[1].text.count('.'))",
+      "input_data": "a_code[10]",
+      "answer_a":   "str(a.find_all('pre')[1].text.count('.'))",
       "answer_b":   "None",
       "extra":      "'n_rows=3'"
     },
     {
-      "input_data": "p.a.find_all('pre')[2].text.splitlines()[0]",
-      "answer_a":   "p.ca[-2]",
+      "input_data": "a.find_all('pre')[2].text.splitlines()[0]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None",
       "extra":      "'n_rows=10'"
     }
@@ -872,15 +872,15 @@
   ],
   "2016/20": [
     {
-      "answer_a":   "p.ca[-2]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "'2'",
       "extra":      "'max=9'"
     }
   ],
   "2016/21": [
     {
-      "input_data": "'\\n'.join(c.code.text for c in p.a.find_all('li')[6:])",
-      "answer_a":   "p.ca[-2]",
+      "input_data": "'\\n'.join(c.code.text for c in a.find_all('li')[6:])",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None",
       "extra":      "'start=abcde'"
     }
@@ -888,18 +888,18 @@
   "2016/22": [
     {
       "answer_a":   "None",
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2016/23": [
     {
-      "answer_a":   "p.ca[-4]",
+      "answer_a":   "a_code[-4]",
       "answer_b":   "None"
     }
   ],
   "2016/24": [
     {
-      "answer_a":   "p.ca[-4]",
+      "answer_a":   "a_code[-4]",
       "answer_b":   "'20'"
     }
   ],
@@ -907,45 +907,45 @@
   "2017/01": [
     {
       "input_data": "soup.code.text",
-      "answer_a":   "p.ca[1]",
+      "answer_a":   "a_code[1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[6]",
-      "answer_a":   "p.ca[7]",
+      "input_data": "a_code[6]",
+      "answer_a":   "a_code[7]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[9]",
-      "answer_a":   "p.ca[10]",
+      "input_data": "a_code[9]",
+      "answer_a":   "a_code[10]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[11]",
+      "input_data": "a_code[11]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.cb[2]",
+      "input_data": "b_code[2]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[3]"
+      "answer_b":   "b_code[3]"
     },
     {
-      "input_data": "p.cb[6]",
+      "input_data": "b_code[6]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[7]"
+      "answer_b":   "b_code[7]"
     },
     {
-      "input_data": "p.cb[10]",
+      "input_data": "b_code[10]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[11]"
+      "answer_b":   "b_code[11]"
     },
     {
-      "input_data": "p.cb[13]",
+      "input_data": "b_code[13]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[14]"
+      "answer_b":   "b_code[14]"
     },
     {
-      "input_data": "p.cb[15]",
+      "input_data": "b_code[15]",
       "answer_a":   "None"
     }
   ],
@@ -954,28 +954,28 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.pre.text",
+      "input_data": "b.pre.text",
       "answer_a":   "None"
     }
   ],
   "2017/03": [
     {
-      "input_data": "p.ca[-8]",
-      "answer_a":   "p.ca[-7]",
+      "input_data": "a_code[-8]",
+      "answer_a":   "a_code[-7]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-6]",
-      "answer_a":   "p.ca[-5]",
+      "input_data": "a_code[-6]",
+      "answer_a":   "a_code[-5]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-4]",
-      "answer_a":   "p.ca[-3]",
+      "input_data": "a_code[-4]",
+      "answer_a":   "a_code[-3]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-2]",
+      "input_data": "a_code[-2]",
       "answer_b":   "None"
     }
   ],
@@ -986,44 +986,44 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[1]",
+      "input_data": "a_code[1]",
       "answer_a":   "'0'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[3]",
+      "input_data": "a_code[3]",
       "answer_a":   "'1'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.code.text",
+      "input_data": "b.code.text",
       "answer_a":   "None",
       "answer_b":   "'1'"
     },
     {
-      "input_data": "p.cb[1]",
+      "input_data": "b_code[1]",
       "answer_a":   "None",
       "answer_b":   "'0'"
     },
     {
-      "input_data": "p.cb[2]",
+      "input_data": "b_code[2]",
       "answer_a":   "None",
       "answer_b":   "'1'"
     },
     {
-      "input_data": "p.cb[3]",
+      "input_data": "b_code[3]",
       "answer_a":   "None",
       "answer_b":   "'1'"
     },
     {
-      "input_data": "p.cb[4]",
+      "input_data": "b_code[4]",
       "answer_a":   "None",
       "answer_b":   "'0'"
     }
   ],
   "2017/05": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2017/06": [
@@ -1033,146 +1033,146 @@
   ],
   "2017/07": [
     {
-      "answer_a":   "p.ca[2]"
+      "answer_a":   "a_code[2]"
     }
   ],
   "2017/08": [
     {
-      "answer_a":   "p.ca[-3]",
-      "answer_b":   "p.cb[-2]"
+      "answer_a":   "a_code[-3]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2017/09": [
     {
-      "input_data": "p.a.find_all('li')[-8].code.text",
-      "answer_a":   "p.a.find_all('li')[-8].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-8].code.text",
+      "answer_a":   "a.find_all('li')[-8].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-7].code.text",
-      "answer_a":   "p.a.find_all('li')[-7].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-7].code.text",
+      "answer_a":   "a.find_all('li')[-7].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-6].code.text",
-      "answer_a":   "p.a.find_all('li')[-6].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-6].code.text",
+      "answer_a":   "a.find_all('li')[-6].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-5].code.text",
-      "answer_a":   "p.a.find_all('li')[-5].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-5].code.text",
+      "answer_a":   "a.find_all('li')[-5].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-4].code.text",
-      "answer_a":   "p.a.find_all('li')[-4].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-4].code.text",
+      "answer_a":   "a.find_all('li')[-4].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-3].code.text",
-      "answer_a":   "p.a.find_all('li')[-3].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-3].code.text",
+      "answer_a":   "a.find_all('li')[-3].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-2].code.text",
-      "answer_a":   "p.a.find_all('li')[-2].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-2].code.text",
+      "answer_a":   "a.find_all('li')[-2].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-1].code.text",
-      "answer_a":   "p.a.find_all('li')[-1].text.split()[-1][:-1]",
+      "input_data": "a.find_all('li')[-1].code.text",
+      "answer_a":   "a.find_all('li')[-1].text.split()[-1][:-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.cb[3]",
+      "input_data": "b_code[3]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[4]"
+      "answer_b":   "b_code[4]"
     },
     {
-      "input_data": "p.cb[5]",
+      "input_data": "b_code[5]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[6]"
+      "answer_b":   "b_code[6]"
     },
     {
-      "input_data": "p.cb[7]",
+      "input_data": "b_code[7]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[8]"
+      "answer_b":   "b_code[8]"
     },
     {
-      "input_data": "p.cb[9]",
+      "input_data": "b_code[9]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[10]"
+      "answer_b":   "b_code[10]"
     },
     {
-      "input_data": "p.cb[11]",
+      "input_data": "b_code[11]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[12]"
+      "answer_b":   "b_code[12]"
     },
     {
-      "input_data": "p.cb[13]",
+      "input_data": "b_code[13]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[14]"
+      "answer_b":   "b_code[14]"
     },
     {
-      "input_data": "p.cb[15]",
+      "input_data": "b_code[15]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[16]"
+      "answer_b":   "b_code[16]"
     }
   ],
   "2017/10": [
     {
-      "input_data": "p.ca[6]",
-      "answer_a":   "p.ca[-4]",
+      "input_data": "a_code[6]",
+      "answer_a":   "a_code[-4]",
       "answer_b":   "None",
       "extra":      "'n=5'"
     },
     {
       "input_data": "''",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-7]"
+      "answer_b":   "b_code[-7]"
     },
     {
-      "input_data": "p.cb[-6]",
+      "input_data": "b_code[-6]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-5]"
+      "answer_b":   "b_code[-5]"
     },
     {
-      "input_data": "p.cb[-4]",
+      "input_data": "b_code[-4]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-3]"
+      "answer_b":   "b_code[-3]"
     },
     {
-      "input_data": "p.cb[-2]",
+      "input_data": "b_code[-2]",
       "answer_a":   "None"
     }
   ],
   "2017/11": [
     {
-      "input_data": "p.ca[1]",
-      "answer_a":   "p.ca[2]"
+      "input_data": "a_code[1]",
+      "answer_a":   "a_code[2]"
     },
     {
-      "input_data": "p.ca[3]",
-      "answer_a":   "p.ca[4]"
+      "input_data": "a_code[3]",
+      "answer_a":   "a_code[4]"
     },
     {
-      "input_data": "p.ca[5]",
-      "answer_a":   "p.ca[6]"
+      "input_data": "a_code[5]",
+      "answer_a":   "a_code[6]"
     },
     {
-      "input_data": "p.ca[8]",
-      "answer_a":   "p.ca[9]"
+      "input_data": "a_code[8]",
+      "answer_a":   "a_code[9]"
     }
   ],
   "2017/12": [
     {
-      "answer_a":   "p.ca[-3]",
-      "answer_b":   "p.cb[-3]"
+      "answer_a":   "a_code[-3]",
+      "answer_b":   "b_code[-3]"
     }
   ],
   "2017/14": [
     {
-      "input_data": "p.ca[4]"
+      "input_data": "a_code[4]"
     }
   ],
   "2017/15": [
@@ -1187,18 +1187,18 @@
   ],
   "2017/17": [
     {
-      "input_data": "p.ca[7]",
-      "answer_a":   "p.ca[-2]",
+      "input_data": "a_code[7]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     }
   ],
   "2017/18": [
     {
-      "answer_a":   "p.ca[-2]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.pre.text",
+      "input_data": "b.pre.text",
       "answer_a":   "None",
       "answer_b":   "'3'"
     }
@@ -1206,11 +1206,11 @@
   "2017/20": [
     {
       "input_data": "'\\n'.join([line.split('   ')[0] for line in soup.pre.text.split('\\n\\n')[0].splitlines()])",
-      "answer_a":   "p.ca[-2]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "'\\n'.join([line.split('   ')[0] for line in p.b.pre.text.split('\\n\\n')[0].splitlines()])",
+      "input_data": "'\\n'.join([line.split('   ')[0] for line in b.pre.text.split('\\n\\n')[0].splitlines()])",
       "answer_a":   "None",
       "answer_b":   "'1'"
     }
@@ -1218,161 +1218,161 @@
   "2017/21": [
     {
       "input_data": "soup.find_all('pre')[3].text",
-      "answer_a":   "p.ca[-2]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None",
       "extra":      "'iterations=2'"
     }
   ],
   "2017/22": [
     {
-      "answer_a":   "p.ca[-2]",
-      "answer_b":   "p.cb[-2]"
+      "answer_a":   "a_code[-2]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2017/23": [],
   "2018/01": [
     {
-      "input_data": "p.ca[4]",
-      "answer_a":   "p.ca[17]",
-      "answer_b":   "p.cb[18]"
+      "input_data": "a_code[4]",
+      "answer_a":   "a_code[17]",
+      "answer_b":   "b_code[18]"
     },
     {
-      "input_data": "p.a.find_all('li')[-3].code.text",
-      "answer_a":   "p.a.find_all('li')[-3].text.split()[-1]",
+      "input_data": "a.find_all('li')[-3].code.text",
+      "answer_a":   "a.find_all('li')[-3].text.split()[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-2].code.text",
-      "answer_a":   "p.a.find_all('li')[-2].text.split()[-1]",
+      "input_data": "a.find_all('li')[-2].code.text",
+      "answer_a":   "a.find_all('li')[-2].text.split()[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.a.find_all('li')[-1].code.text",
-      "answer_a":   "p.a.find_all('li')[-1].text.split()[-1]",
+      "input_data": "a.find_all('li')[-1].code.text",
+      "answer_a":   "a.find_all('li')[-1].text.split()[-1]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.find_all('li')[-4].code.text",
+      "input_data": "b.find_all('li')[-4].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[-4].text.split()[-2]"
+      "answer_b":   "b.find_all('li')[-4].text.split()[-2]"
     },
     {
-      "input_data": "p.b.find_all('li')[-3].code.text",
+      "input_data": "b.find_all('li')[-3].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[-3].text.split()[-2]"
+      "answer_b":   "b.find_all('li')[-3].text.split()[-2]"
     },
     {
-      "input_data": "p.b.find_all('li')[-2].code.text",
+      "input_data": "b.find_all('li')[-2].code.text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('li')[-2].text.split()[-2]"
+      "answer_b":   "b.find_all('li')[-2].text.split()[-2]"
     },
     {
-      "input_data": "p.b.find_all('li')[-1].code.text",
+      "input_data": "b.find_all('li')[-1].code.text",
       "answer_a":   "None"
     }
   ],
   "2018/02": [
     {
-      "input_data": "'\\n'.join([li.code.text for li in p.a.find_all('li')])",
+      "input_data": "'\\n'.join([li.code.text for li in a.find_all('li')])",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.pre.text",
+      "input_data": "b.pre.text",
       "answer_a":   "None"
     }
   ],
   "2018/03": [
     {
       "input_data": "soup.find_all('pre')[1].text",
-      "answer_a":   "str(p.a.find_all('pre')[-1].text.count('X'))"
+      "answer_a":   "str(a.find_all('pre')[-1].text.count('X'))"
     }
   ],
   "2018/05": [
     {
-      "input_data": "p.ca[4]",
+      "input_data": "a_code[4]",
       "answer_a":   "'0'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[7]",
+      "input_data": "a_code[7]",
       "answer_a":   "'0'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[10]",
-      "answer_a":   "str(len(p.ca[10]))",
+      "input_data": "a_code[10]",
+      "answer_a":   "str(len(a_code[10]))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[11]",
-      "answer_a":   "str(len(p.ca[11]))",
+      "input_data": "a_code[11]",
+      "answer_a":   "str(len(a_code[11]))",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[14]",
-      "answer_a":   "p.a.find_all('em')[-2].text.split()[0]",
-      "answer_b":   "p.b.find_all('em')[-2].text"
+      "input_data": "a_code[14]",
+      "answer_a":   "a.find_all('em')[-2].text.split()[0]",
+      "answer_b":   "b.find_all('em')[-2].text"
     }
   ],
   "2018/06": [
     {
-      "answer_a":   "p.a.find_all('em')[-2].text",
-      "answer_b":   "p.b.find_all('em')[-3].text"
+      "answer_a":   "a.find_all('em')[-2].text",
+      "answer_b":   "b.find_all('em')[-3].text"
     }
   ],
   "2018/07": [
     {
-      "answer_b":   "p.b.em.text",
+      "answer_b":   "b.em.text",
       "extra":      "'delay=0,n_workers=2'"
     }
   ],
   "2018/08": [
     {
       "input_data": "soup.pre.text.splitlines()[0]",
-      "answer_a":   "p.a.find_all('code')[-1].em.text"
+      "answer_a":   "a.find_all('code')[-1].em.text"
     }
   ],
   "2018/09": [
     {
       "input_data": "'9 players; last marble is worth 25 points'",
-      "answer_a":   "p.a.find_all('em')[-7].text"
+      "answer_a":   "a.find_all('em')[-7].text"
     },
     {
-      "input_data": "p.a.li.text.split(':')[0]",
-      "answer_a":   "p.a.li.text.split()[-1]"
+      "input_data": "a.li.text.split(':')[0]",
+      "answer_a":   "a.li.text.split()[-1]"
     },
     {
-      "input_data": "p.a.find_all('li')[1].text.split(':')[0]",
-      "answer_a":   "p.a.find_all('li')[1].text.split()[-1]"
+      "input_data": "a.find_all('li')[1].text.split(':')[0]",
+      "answer_a":   "a.find_all('li')[1].text.split()[-1]"
     },
     {
-      "input_data": "p.a.find_all('li')[2].text.split(':')[0]",
-      "answer_a":   "p.a.find_all('li')[2].text.split()[-1]"
+      "input_data": "a.find_all('li')[2].text.split(':')[0]",
+      "answer_a":   "a.find_all('li')[2].text.split()[-1]"
     },
     {
-      "input_data": "p.a.find_all('li')[3].text.split(':')[0]",
-      "answer_a":   "p.a.find_all('li')[3].text.split()[-1]"
+      "input_data": "a.find_all('li')[3].text.split(':')[0]",
+      "answer_a":   "a.find_all('li')[3].text.split()[-1]"
     },
     {
-      "input_data": "p.a.find_all('li')[4].text.split(':')[0]",
-      "answer_a":   "p.a.find_all('li')[4].text.split()[-1]"
+      "input_data": "a.find_all('li')[4].text.split(':')[0]",
+      "answer_a":   "a.find_all('li')[4].text.split()[-1]"
     }
   ],
   "2018/11": [
     {
-      "input_data": "p.ca[26]",
-      "answer_a":   "p.ca[27]",
-      "answer_b":   "p.cb[-6]"
+      "input_data": "a_code[26]",
+      "answer_a":   "a_code[27]",
+      "answer_b":   "b_code[-6]"
     },
     {
-      "input_data": "p.ca[30]",
-      "answer_a":   "p.ca[31]",
-      "answer_b":   "p.cb[-2]"
+      "input_data": "a_code[30]",
+      "answer_a":   "a_code[31]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2018/12": [
     {
-      "answer_a":   "p.ca[-2]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     }
   ],
@@ -1387,55 +1387,55 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.pre.text.split('\\n\\n')[0]",
+      "input_data": "b.pre.text.split('\\n\\n')[0]",
       "answer_a":   "None"
     }
   ],
   "2018/14": [
     {
-      "input_data": "p.ca[-8]",
-      "answer_a":   "p.ca[-7]",
+      "input_data": "a_code[-8]",
+      "answer_a":   "a_code[-7]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-6]",
-      "answer_a":   "p.ca[-5]",
+      "input_data": "a_code[-6]",
+      "answer_a":   "a_code[-5]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-4]",
-      "answer_a":   "p.ca[-3]",
+      "input_data": "a_code[-4]",
+      "answer_a":   "a_code[-3]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-2]",
+      "input_data": "a_code[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-7]",
+      "input_data": "a_code[-7]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-7]"
+      "answer_b":   "b_code[-7]"
     },
     {
-      "input_data": "p.ca[-5]",
+      "input_data": "a_code[-5]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-5]"
+      "answer_b":   "b_code[-5]"
     },
     {
-      "input_data": "p.ca[-3]",
+      "input_data": "a_code[-3]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-3]"
+      "answer_b":   "b_code[-3]"
     },
     {
-      "input_data": "p.ca[-1]",
+      "input_data": "a_code[-1]",
       "answer_a":   "None"
     }
   ],
   "2018/15": [
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[5].text.split('\\n\\n')[0].splitlines()[1:])",
-      "answer_a":   "p.ca[34].split()[-1]",
-      "answer_b":   "p.b.pre.text.split()[-1]"
+      "answer_a":   "a_code[34].split()[-1]",
+      "answer_b":   "b.pre.text.split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[6].text.split('\\n\\n')[0].splitlines())",
@@ -1445,17 +1445,17 @@
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[7].text.split('\\n\\n')[0].splitlines())",
       "answer_a":   "soup.find_all('pre')[7].text.split()[-1]",
-      "answer_b":   "p.b.find_all('pre')[1].text.split()[-1]"
+      "answer_b":   "b.find_all('pre')[1].text.split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[8].text.split('\\n\\n')[0].splitlines())",
       "answer_a":   "soup.find_all('pre')[8].text.split()[-1]",
-      "answer_b":   "p.b.find_all('pre')[2].text.split()[-1]"
+      "answer_b":   "b.find_all('pre')[2].text.split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[9].text.split('\\n\\n')[0].splitlines())",
       "answer_a":   "soup.find_all('pre')[9].text.split()[-1]",
-      "answer_b":   "p.b.find_all('pre')[3].text.split()[-1]"
+      "answer_b":   "b.find_all('pre')[3].text.split()[-1]"
     },
     {
       "input_data": "'\\n'.join(line.split()[0] for line in soup.find_all('pre')[10].text.split('\\n\\n')[0].splitlines())",
@@ -1470,7 +1470,7 @@
   ],
   "2018/17": [
     {
-      "answer_a":   "p.ca[-2]"
+      "answer_a":   "a_code[-2]"
     }
   ],
   "2018/18": [
@@ -1486,37 +1486,37 @@
   ],
   "2018/20": [
     {
-      "input_data": "p.ca[43]",
-      "answer_a":   "p.ca[44]",
+      "input_data": "a_code[43]",
+      "answer_a":   "a_code[44]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[45]",
-      "answer_a":   "p.ca[46]",
+      "input_data": "a_code[45]",
+      "answer_a":   "a_code[46]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[47]",
-      "answer_a":   "p.ca[48]",
+      "input_data": "a_code[47]",
+      "answer_a":   "a_code[48]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[49].split()[1]",
-      "answer_a":   "p.ca[49].split(' ')[-2]",
+      "input_data": "a_code[49].split()[1]",
+      "answer_a":   "a_code[49].split(' ')[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[50].split()[1]",
-      "answer_a":   "p.ca[50].split(' ')[-2]",
+      "input_data": "a_code[50].split()[1]",
+      "answer_a":   "a_code[50].split(' ')[-2]",
       "answer_b":   "None"
     }
   ],
   "2018/21": [],
   "2018/22": [
     {
-      "input_data": "'depth: ' + p.ca[24] + '\\ntarget: ' + p.ca[25]",
-      "answer_a":   "p.ca[-2]",
-      "answer_b":   "p.cb[-3]"
+      "input_data": "'depth: ' + a_code[24] + '\\ntarget: ' + a_code[25]",
+      "answer_a":   "a_code[-2]",
+      "answer_b":   "b_code[-3]"
     }
   ],
   "2018/23": [
@@ -1524,9 +1524,9 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.pre.text",
+      "input_data": "b.pre.text",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2018/24": [
@@ -1536,53 +1536,53 @@
   ],
   "2018/25": [
     {
-      "answer_a":   "p.ca[8]"
+      "answer_a":   "a_code[8]"
     },
     {
       "input_data": "soup.find_all('pre')[1].text",
-      "answer_a":   "p.ca[12]"
+      "answer_a":   "a_code[12]"
     },
     {
       "input_data": "soup.find_all('pre')[2].text",
-      "answer_a":   "p.ca[14]"
+      "answer_a":   "a_code[14]"
     },
     {
       "input_data": "soup.find_all('pre')[3].text",
-      "answer_a":   "p.ca[16]"
+      "answer_a":   "a_code[16]"
     }
   ],
   "2019/01": [
     {
       "input_data": "soup.code.text",
-      "answer_a":   "p.ca[2]",
+      "answer_a":   "a_code[2]",
       "answer_b":   "'2'"
     },
     {
-      "input_data": "p.ca[3]",
-      "answer_a":   "p.ca[5]",
-      "answer_b":   "p.cb[3]"
+      "input_data": "a_code[3]",
+      "answer_a":   "a_code[5]",
+      "answer_b":   "b_code[3]"
     },
     {
-      "input_data": "p.ca[6]",
-      "answer_a":   "p.ca[7]",
-      "answer_b":   "p.cb[-3].split()[-1]"
+      "input_data": "a_code[6]",
+      "answer_a":   "a_code[7]",
+      "answer_b":   "b_code[-3].split()[-1]"
     },
     {
-      "input_data": "p.ca[8]",
-      "answer_a":   "p.ca[9]"
+      "input_data": "a_code[8]",
+      "answer_a":   "a_code[9]"
     }
   ],
   "2019/02": [],
   "2019/03": [
     {
-      "input_data": "soup.code.text + '\\n' + p.ca[7]",
-      "answer_a":   "p.ca[14].split()[-1]",
-      "answer_b":   "p.cb[-5].split()[-1]"
+      "input_data": "soup.code.text + '\\n' + a_code[7]",
+      "answer_a":   "a_code[14].split()[-1]",
+      "answer_b":   "b_code[-5].split()[-1]"
     },
     {
       "input_data": "'\\n'.join(list(soup.find_all('code')[15].children)[::2])",
-      "answer_a":   "p.ca[-3]",
-      "answer_b":   "p.cb[-3]"
+      "answer_a":   "a_code[-3]",
+      "answer_b":   "b_code[-3]"
     },
     {
       "input_data": "'\\n'.join(list(soup.find_all('code')[17].children)[::2])"
@@ -1590,71 +1590,71 @@
   ],
   "2019/04": [
     {
-      "input_data": "'-'.join([p.ca[4]]*2)",
+      "input_data": "'-'.join([a_code[4]]*2)",
       "answer_a":   "'1'",
       "answer_b":   "'0'"
     },
     {
-      "input_data": "'-'.join([p.ca[6]]*2)",
+      "input_data": "'-'.join([a_code[6]]*2)",
       "answer_a":   "'0'",
       "answer_b":   "'0'"
     },
     {
-      "input_data": "'-'.join([p.ca[8]]*2)",
+      "input_data": "'-'.join([a_code[8]]*2)",
       "answer_a":   "'0'",
       "answer_b":   "'0'"
     },
     {
-      "input_data": "'-'.join([p.b.code.text]*2)",
+      "input_data": "'-'.join([b.code.text]*2)",
       "answer_a":   "'1'",
       "answer_b":   "'1'"
     },
     {
-      "input_data": "'-'.join([p.cb[1]]*2)",
+      "input_data": "'-'.join([b_code[1]]*2)",
       "answer_a":   "'1'",
       "answer_b":   "'0'"
     },
     {
-      "input_data": "'-'.join([p.cb[4]]*2)",
+      "input_data": "'-'.join([b_code[4]]*2)",
       "answer_a":   "'1'",
       "answer_b":   "'1'"
     }
   ],
   "2019/05": [
     {
-      "input_data": "p.cb[9]",
+      "input_data": "b_code[9]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[12]"
+      "answer_b":   "b_code[12]"
     },
     {
-      "input_data": "p.cb[13]",
+      "input_data": "b_code[13]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[15]"
+      "answer_b":   "b_code[15]"
     },
     {
-      "input_data": "p.cb[17]",
+      "input_data": "b_code[17]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[20]"
+      "answer_b":   "b_code[20]"
     },
     {
-      "input_data": "p.cb[21]",
+      "input_data": "b_code[21]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[23]"
+      "answer_b":   "b_code[23]"
     },
     {
-      "input_data": "p.cb[27]",
+      "input_data": "b_code[27]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[26]"
+      "answer_b":   "b_code[26]"
     },
     {
-      "input_data": "p.cb[28]",
+      "input_data": "b_code[28]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[26]"
+      "answer_b":   "b_code[26]"
     },
     {
-      "input_data": "p.b.pre.text",
+      "input_data": "b.pre.text",
       "answer_a":   "None",
-      "answer_b":   "p.cb[30]"
+      "answer_b":   "b_code[30]"
     }
   ],
   "2019/06": [
@@ -1663,47 +1663,47 @@
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.pre.text",
+      "input_data": "b.pre.text",
       "answer_a":   "None",
-      "answer_b":   "p.cb[12]"
+      "answer_b":   "b_code[12]"
     }
   ],
   "2019/07": [
     {
       "input_data": "soup.find_all('pre')[1].text",
-      "answer_a":   "p.ca[-9]",
+      "answer_a":   "a_code[-9]",
       "answer_b":   "None"
     },
     {
       "input_data": "soup.find_all('pre')[2].text",
-      "answer_a":   "p.ca[-6]",
+      "answer_a":   "a_code[-6]",
       "answer_b":   "None"
     },
     {
       "input_data": "soup.find_all('pre')[3].text",
-      "answer_a":   "p.ca[-3]",
+      "answer_a":   "a_code[-3]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.find_all('pre')[1].text",
+      "input_data": "b.find_all('pre')[1].text",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-6]"
+      "answer_b":   "b_code[-6]"
     },
     {
-      "input_data": "p.b.find_all('pre')[2].text",
+      "input_data": "b.find_all('pre')[2].text",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-3]"
+      "answer_b":   "b_code[-3]"
     }
   ],
   "2019/08": [
     {
-      "input_data": "p.ca[2]",
+      "input_data": "a_code[2]",
       "answer_a":   "'1'",
       "answer_b":   "None",
       "extra":      "'im=3x2'"
     },
     {
-      "input_data": "p.cb[5]",
+      "input_data": "b_code[5]",
       "answer_a":   "None",
       "answer_b":   "'\u27cb'",
       "extra":      "'im=2x2'"
@@ -1711,51 +1711,51 @@
   ],
   "2019/09": [
     {
-      "input_data": "p.ca[-4]",
-      "answer_a":   "p.ca[-4]",
+      "input_data": "a_code[-4]",
+      "answer_a":   "a_code[-4]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-3]",
+      "input_data": "a_code[-3]",
       "answer_a":   "'1219070632396864'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-2]",
-      "answer_a":   "p.ca[-2].split(',')[1]",
+      "input_data": "a_code[-2]",
+      "answer_a":   "a_code[-2].split(',')[1]",
       "answer_b":   "None"
     }
   ],
   "2019/10": [
     {
-      "answer_a":   "p.ca[9]",
+      "answer_a":   "a_code[9]",
       "answer_b":   "None"
     },
     {
       "input_data": "soup.find_all('pre')[3].text",
-      "answer_a":   "p.ca[17]",
+      "answer_a":   "a_code[17]",
       "answer_b":   "None"
     },
     {
       "input_data": "soup.find_all('pre')[4].text",
-      "answer_a":   "p.ca[20]",
+      "answer_a":   "a_code[20]",
       "answer_b":   "None"
     },
     {
       "input_data": "soup.find_all('pre')[5].text",
-      "answer_a":   "p.ca[23]",
+      "answer_a":   "a_code[23]",
       "answer_b":   "None"
     },
     {
       "input_data": "soup.find_all('pre')[6].text",
-      "answer_a":   "p.ca[26]"
+      "answer_a":   "a_code[26]"
     }
   ],
   "2019/11": [],
   "2019/12": [
     {
-      "answer_a":   "p.ca[-4]",
-      "answer_b":   "p.b.code.text",
+      "answer_a":   "a_code[-4]",
+      "answer_b":   "b.code.text",
       "extra":      "'ta=10'"
     },
     {
@@ -1778,93 +1778,93 @@
     {
       "input_data": "soup.find_all('pre')[2].text",
       "answer_a":   "soup.find_all('em')[10].text",
-      "answer_b":   "p.b.find_all('em')[-4].text"
+      "answer_b":   "b.find_all('em')[-4].text"
     },
     {
       "input_data": "soup.find_all('pre')[3].text",
       "answer_a":   "soup.find_all('em')[11].text",
-      "answer_b":   "p.b.find_all('em')[-3].text"
+      "answer_b":   "b.find_all('em')[-3].text"
     },
     {
       "input_data": "soup.find_all('pre')[4].text",
       "answer_a":   "soup.find_all('em')[12].text",
-      "answer_b":   "p.b.find_all('em')[-2].text"
+      "answer_b":   "b.find_all('em')[-2].text"
     }
   ],
   "2019/15": [],
   "2019/16": [
     {
-      "input_data": "p.ca[-6]",
-      "answer_a":   "p.ca[-5]",
+      "input_data": "a_code[-6]",
+      "answer_a":   "a_code[-5]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-4]",
-      "answer_a":   "p.ca[-3]",
+      "input_data": "a_code[-4]",
+      "answer_a":   "a_code[-3]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-2]",
+      "input_data": "a_code[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.cb[-6]",
+      "input_data": "b_code[-6]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-5]"
+      "answer_b":   "b_code[-5]"
     },
     {
-      "input_data": "p.cb[-4]",
+      "input_data": "b_code[-4]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-3]"
+      "answer_b":   "b_code[-3]"
     },
     {
-      "input_data": "p.cb[-2]",
+      "input_data": "b_code[-2]",
       "answer_a":   "None"
     }
   ],
   "2019/17": [],
   "2019/18": [
     {
-      "answer_a":   "p.ca[17]",
+      "answer_a":   "a_code[17]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[18]",
-      "answer_a":   "p.ca[34]",
+      "input_data": "a_code[18]",
+      "answer_a":   "a_code[34]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[35]",
-      "answer_a":   "p.ca[36]",
+      "input_data": "a_code[35]",
+      "answer_a":   "a_code[36]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[44]",
-      "answer_a":   "p.ca[45]",
+      "input_data": "a_code[44]",
+      "answer_a":   "a_code[45]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[62]",
-      "answer_a":   "p.ca[63]",
+      "input_data": "a_code[62]",
+      "answer_a":   "a_code[63]",
       "answer_b":   "None"
     },
     {
-      "input_data": "'\\n'.join(line.split()[0] for line in p.b.find_all('pre')[2].text.splitlines())",
+      "input_data": "'\\n'.join(line.split()[0] for line in b.find_all('pre')[2].text.splitlines())",
       "answer_a":   "None",
-      "answer_b":   "p.cb[14]"
+      "answer_b":   "b_code[14]"
     },
     {
-      "input_data": "p.b.find_all('pre')[7].text",
+      "input_data": "b.find_all('pre')[7].text",
       "answer_a":   "None",
-      "answer_b":   "p.cb[22]"
+      "answer_b":   "b_code[22]"
     },
     {
-      "input_data": "p.b.find_all('pre')[8].text",
+      "input_data": "b.find_all('pre')[8].text",
       "answer_a":   "None",
-      "answer_b":   "p.cb[36]"
+      "answer_b":   "b_code[36]"
     },
     {
-      "input_data": "p.b.find_all('pre')[9].text",
+      "input_data": "b.find_all('pre')[9].text",
       "answer_a":   "None"
     }
   ],
@@ -1882,7 +1882,7 @@
     {
       "input_data": "soup.find_all('pre')[2].text",
       "answer_a":   "None",
-      "answer_b":   "p.b.find_all('em')[-2].text"
+      "answer_b":   "b.find_all('em')[-2].text"
     }
   ],
   "2019/21": [],
@@ -1897,28 +1897,28 @@
   "2019/25": [],
   "2020/01": [
     {
-      "answer_a":   "p.ca[-2]",
-      "answer_b":   "p.cb[-2]"
+      "answer_a":   "a_code[-2]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2020/02": [
     {
-      "answer_a":   "p.ca[5]",
+      "answer_a":   "a_code[5]",
       "answer_b":   "'1'"
     }
   ],
   "2020/04": [
     {
-      "answer_a":   "p.ca[-2]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.cb[-3]",
+      "input_data": "b_code[-3]",
       "answer_a":   "None",
       "answer_b":   "'0'"
     },
     {
-      "input_data": "p.cb[-2]",
+      "input_data": "b_code[-2]",
       "answer_a":   "None",
       "answer_b":   "'4'"
     }
@@ -1926,84 +1926,84 @@
   "2020/05": [
     {
       "input_data": "soup.code.text",
-      "answer_a":   "p.ca[-13].split()[-1]"
+      "answer_a":   "a_code[-13].split()[-1]"
     },
     {
-      "input_data": "p.ca[-12]",
-      "answer_a":   "p.ca[-9]"
+      "input_data": "a_code[-12]",
+      "answer_a":   "a_code[-9]"
     },
     {
-      "input_data": "p.ca[-8]",
-      "answer_a":   "p.ca[-5]"
+      "input_data": "a_code[-8]",
+      "answer_a":   "a_code[-5]"
     },
     {
-      "input_data": "p.ca[-4]"
+      "input_data": "a_code[-4]"
     }
   ],
   "2020/06": [
     {
-      "input_data": "p.ca[2]",
-      "answer_a":   "p.ca[3]",
+      "input_data": "a_code[2]",
+      "answer_a":   "a_code[3]",
       "answer_b":   "'3'"
     },
     {
-      "input_data": "p.ca[10]"
+      "input_data": "a_code[10]"
     }
   ],
   "2020/07": [
     {
-      "answer_a":   "p.ca[-2]",
-      "answer_b":   "p.cb[-5]"
+      "answer_a":   "a_code[-2]",
+      "answer_b":   "b_code[-5]"
     },
     {
-      "input_data": "p.cb[-4]",
+      "input_data": "b_code[-4]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2020/08": [
     {
-      "answer_b":   "p.cb[-8]"
+      "answer_b":   "b_code[-8]"
     }
   ],
   "2020/10": [
     {
-      "answer_a":   "str(int(p.ca[-5]) * int(p.ca[-4]))",
-      "answer_b":   "p.cb[-6]"
+      "answer_a":   "str(int(a_code[-5]) * int(a_code[-4]))",
+      "answer_b":   "b_code[-6]"
     },
     {
-      "input_data": "p.ca[-3]",
-      "answer_a":   "str(int(p.ca[-2]) * int(p.ca[-1]))"
+      "input_data": "a_code[-3]",
+      "answer_a":   "str(int(a_code[-2]) * int(a_code[-1]))"
     }
   ],
   "2020/13": [
     {
-      "answer_b":   "p.cb[21]"
+      "answer_b":   "b_code[21]"
     },
     {
-      "input_data": "'0\\n' + p.cb[27]",
+      "input_data": "'0\\n' + b_code[27]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[28]"
+      "answer_b":   "b_code[28]"
     },
     {
-      "input_data": "'0\\n' + p.cb[29]",
+      "input_data": "'0\\n' + b_code[29]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[30]"
+      "answer_b":   "b_code[30]"
     },
     {
-      "input_data": "'0\\n' + p.cb[31]",
+      "input_data": "'0\\n' + b_code[31]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[32]"
+      "answer_b":   "b_code[32]"
     },
     {
-      "input_data": "'0\\n' + p.cb[33]",
+      "input_data": "'0\\n' + b_code[33]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[34]"
+      "answer_b":   "b_code[34]"
     },
     {
-      "input_data": "'0\\n' + p.cb[35]",
+      "input_data": "'0\\n' + b_code[35]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[36]"
+      "answer_b":   "b_code[36]"
     }
   ],
   "2020/14": [
@@ -2012,407 +2012,407 @@
     },
     {
       "answer_a":   "None",
-      "input_data": "p.cb[4]"
+      "input_data": "b_code[4]"
     }
   ],
   "2020/15": [
     {
-      "input_data": "p.ca[2]",
-      "answer_a":   "p.ca[41]",
-      "answer_b":   "p.cb[3]"
+      "input_data": "a_code[2]",
+      "answer_a":   "a_code[41]",
+      "answer_b":   "b_code[3]"
     },
     {
-      "input_data": "p.ca[42]",
-      "answer_a":   "p.ca[44]",
-      "answer_b":   "p.cb[6]"
+      "input_data": "a_code[42]",
+      "answer_a":   "a_code[44]",
+      "answer_b":   "b_code[6]"
     },
     {
-      "input_data": "p.ca[45]",
-      "answer_a":   "p.ca[47]",
-      "answer_b":   "p.cb[9]"
+      "input_data": "a_code[45]",
+      "answer_a":   "a_code[47]",
+      "answer_b":   "b_code[9]"
     },
     {
-      "input_data": "p.ca[48]",
-      "answer_a":   "p.ca[50]",
-      "answer_b":   "p.cb[12]"
+      "input_data": "a_code[48]",
+      "answer_a":   "a_code[50]",
+      "answer_b":   "b_code[12]"
     },
     {
-      "input_data": "p.ca[51]",
-      "answer_a":   "p.ca[53]",
-      "answer_b":   "p.cb[15]"
+      "input_data": "a_code[51]",
+      "answer_a":   "a_code[53]",
+      "answer_b":   "b_code[15]"
     },
     {
-      "input_data": "p.ca[54]",
-      "answer_a":   "p.ca[56]",
-      "answer_b":   "p.cb[18]"
+      "input_data": "a_code[54]",
+      "answer_a":   "a_code[56]",
+      "answer_b":   "b_code[18]"
     },
     {
-      "input_data": "p.ca[57]",
-      "answer_a":   "p.ca[59]",
-      "answer_b":   "p.cb[21]"
+      "input_data": "a_code[57]",
+      "answer_a":   "a_code[59]",
+      "answer_b":   "b_code[21]"
     }
   ],
   "2020/16": [
     {
-      "input_data": "p.ca[10]",
+      "input_data": "a_code[10]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.cb[1]",
+      "input_data": "b_code[1]",
       "answer_a":   "None",
       "answer_b":   "None"
     }
   ],
   "2020/18": [
     {
-      "input_data": "p.ca[3]",
-      "answer_a":   "p.ca[4].split()[-1]",
-      "answer_b":   "p.cb[1].split()[-1]"
+      "input_data": "a_code[3]",
+      "answer_a":   "a_code[4].split()[-1]",
+      "answer_b":   "b_code[1].split()[-1]"
     },
     {
-      "input_data": "p.ca[5]",
-      "answer_a":   "p.ca[6].split()[-1]",
-      "answer_b":   "p.cb[3]"
+      "input_data": "a_code[5]",
+      "answer_a":   "a_code[6].split()[-1]",
+      "answer_b":   "b_code[3]"
     },
     {
-      "input_data": "p.ca[7]",
-      "answer_a":   "p.ca[8]",
-      "answer_b":   "p.cb[5]"
+      "input_data": "a_code[7]",
+      "answer_a":   "a_code[8]",
+      "answer_b":   "b_code[5]"
     },
     {
-      "input_data": "p.ca[9]",
-      "answer_a":   "p.ca[10]",
-      "answer_b":   "p.cb[7]"
+      "input_data": "a_code[9]",
+      "answer_a":   "a_code[10]",
+      "answer_b":   "b_code[7]"
     },
     {
-      "input_data": "p.ca[11]",
-      "answer_a":   "p.ca[12]",
-      "answer_b":   "p.cb[9]"
+      "input_data": "a_code[11]",
+      "answer_a":   "a_code[12]",
+      "answer_b":   "b_code[9]"
     },
     {
-      "input_data": "p.ca[13]",
-      "answer_a":   "p.ca[14]",
-      "answer_b":   "p.cb[11]"
+      "input_data": "a_code[13]",
+      "answer_a":   "a_code[14]",
+      "answer_b":   "b_code[11]"
     }
   ],
   "2020/19": [
     {
-      "input_data": "soup.pre.code.text + '\\n' + p.ca[23] + '\\n' + p.ca[24]",
+      "input_data": "soup.pre.code.text + '\\n' + a_code[23] + '\\n' + a_code[24]",
       "answer_a":   "'2'",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[61]",
-      "answer_a":   "p.ca[-6]",
+      "input_data": "a_code[61]",
+      "answer_a":   "a_code[-6]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.cb[7]",
+      "input_data": "b_code[7]",
       "answer_a":   "'3'",
-      "answer_b":   "p.cb[15]"
+      "answer_b":   "b_code[15]"
     }
   ],
   "2020/20": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2020/21": [
     {
-      "answer_a":   "p.ca[-2]"
+      "answer_a":   "a_code[-2]"
     }
   ],
   "2020/23": [
     {
-      "input_data": "p.ca[7]",
-      "answer_a":   "p.ca[-2]",
-      "answer_b":   "p.cb[-2]"
+      "input_data": "a_code[7]",
+      "answer_a":   "a_code[-2]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2020/25": [
     {
-      "input_data": "p.ca[5] + '\\n' + p.ca[10]"
+      "input_data": "a_code[5] + '\\n' + a_code[10]"
     }
   ],
   "2021/07": [
     {
-      "answer_a":   "p.ca[34]",
-      "answer_b":   "p.cb[-3]"
+      "answer_a":   "a_code[34]",
+      "answer_b":   "b_code[-3]"
     }
   ],
   "2021/08": [
     {
-      "input_data": "p.ca[23]",
+      "input_data": "a_code[23]",
       "answer_a":   "'0'",
-      "answer_b":   "p.cb[30]"
+      "answer_b":   "b_code[30]"
     },
     {
-      "input_data": "p.ca[39]",
-      "answer_a":   "p.ca[-5]"
+      "input_data": "a_code[39]",
+      "answer_a":   "a_code[-5]"
     }
   ],
   "2021/10": [
     {
-      "input_data": "p.ca[20]"
+      "input_data": "a_code[20]"
     }
   ],
   "2021/11": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2021/12": [
     {
-      "answer_a":   "p.ca[11]",
-      "answer_b":   "p.cb[-4]"
+      "answer_a":   "a_code[11]",
+      "answer_b":   "b_code[-4]"
     },
     {
-      "input_data": "p.ca[18]",
-      "answer_a":   "p.ca[19]",
-      "answer_b":   "p.cb[-2]"
+      "input_data": "a_code[18]",
+      "answer_a":   "a_code[19]",
+      "answer_b":   "b_code[-2]"
     },
     {
-      "input_data": "p.ca[22]",
-      "answer_a":   "p.ca[21]",
-      "answer_b":   "p.cb[-1]"
+      "input_data": "a_code[22]",
+      "answer_a":   "a_code[21]",
+      "answer_b":   "b_code[-1]"
     }
   ],
   "2021/13": [
     {
-      "input_data": "p.ca[1]",
+      "input_data": "a_code[1]",
       "answer_b":   "'\u25a1'"
     }
   ],
   "2021/16": [
     {
-      "input_data": "p.ca[7]",
-      "answer_a":   "p.ca[11]",
+      "input_data": "a_code[7]",
+      "answer_a":   "a_code[11]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[33]",
+      "input_data": "a_code[33]",
       "answer_a":   "str(0b001 + 0b110 + 0b010)",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[52]",
+      "input_data": "a_code[52]",
       "answer_a":   "str(0b111 + 0b010 + 0b100 + 0b001)",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[73]",
-      "answer_a":   "p.ca[74]",
+      "input_data": "a_code[73]",
+      "answer_a":   "a_code[74]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[75]",
-      "answer_a":   "p.ca[76]",
+      "input_data": "a_code[75]",
+      "answer_a":   "a_code[76]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[77]",
-      "answer_a":   "p.ca[78]",
+      "input_data": "a_code[77]",
+      "answer_a":   "a_code[78]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[79]",
-      "answer_a":   "p.ca[80]",
+      "input_data": "a_code[79]",
+      "answer_a":   "a_code[80]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.cb[8]",
+      "input_data": "b_code[8]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[11]"
+      "answer_b":   "b_code[11]"
     },
     {
-      "input_data": "p.cb[12]",
+      "input_data": "b_code[12]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[15]"
+      "answer_b":   "b_code[15]"
     },
     {
-      "input_data": "p.cb[16]",
+      "input_data": "b_code[16]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[20]"
+      "answer_b":   "b_code[20]"
     },
     {
-      "input_data": "p.cb[21]",
+      "input_data": "b_code[21]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[25]"
+      "answer_b":   "b_code[25]"
     },
     {
-      "input_data": "p.cb[26]",
+      "input_data": "b_code[26]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[27]"
+      "answer_b":   "b_code[27]"
     },
     {
-      "input_data": "p.cb[30]",
+      "input_data": "b_code[30]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[31]"
+      "answer_b":   "b_code[31]"
     },
     {
-      "input_data": "p.cb[34]",
+      "input_data": "b_code[34]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[35]"
+      "answer_b":   "b_code[35]"
     },
     {
-      "input_data": "p.cb[38]",
+      "input_data": "b_code[38]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[39]"
+      "answer_b":   "b_code[39]"
     }
   ],
   "2021/17": [
     {
-      "answer_a":   "p.ca[-4]",
-      "answer_b":   "p.cb[-2]"
+      "answer_a":   "a_code[-4]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2021/18": [
     {
-      "input_data": "p.ca[-3]",
-      "answer_b":   "p.cb[3]"
+      "input_data": "a_code[-3]",
+      "answer_b":   "b_code[3]"
     }
   ],
   "2021/19": [
     {
-      "input_data": "p.ca[28]"
+      "input_data": "a_code[28]"
     }
   ],
   "2021/21": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2021/22": [
     {
-      "answer_a":   "p.ca[64]",
+      "answer_a":   "a_code[64]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.ca[-3]",
-      "answer_a":   "p.ca[-2]",
+      "input_data": "a_code[-3]",
+      "answer_a":   "a_code[-2]",
       "answer_b":   "None"
     },
     {
-      "input_data": "p.b.code.text",
-      "answer_a":   "p.cb[2]",
-      "answer_b":   "p.cb[1]"
+      "input_data": "b.code.text",
+      "answer_a":   "b_code[2]",
+      "answer_b":   "b_code[1]"
     }
   ],
   "2021/23": [
     {
-      "answer_a":   "p.ca[18]",
-      "answer_b":   "p.cb[3]"
+      "answer_a":   "a_code[18]",
+      "answer_b":   "b_code[3]"
     }
   ],
   "2021/24": [],
   "2022/06": [
     {
-      "answer_a":   "p.ca[5]",
-      "answer_b":   "p.cb[1]"
+      "answer_a":   "a_code[5]",
+      "answer_b":   "b_code[1]"
     },
     {
-      "input_data": "p.ca[6]",
-      "answer_a":   "p.ca[7]",
-      "answer_b":   "p.cb[3]"
+      "input_data": "a_code[6]",
+      "answer_a":   "a_code[7]",
+      "answer_b":   "b_code[3]"
     },
     {
-      "input_data": "p.ca[8]",
-      "answer_a":   "p.ca[9]",
-      "answer_b":   "p.cb[5]"
+      "input_data": "a_code[8]",
+      "answer_a":   "a_code[9]",
+      "answer_b":   "b_code[5]"
     },
     {
-      "input_data": "p.ca[10]",
-      "answer_a":   "p.ca[11]",
-      "answer_b":   "p.cb[7]"
+      "input_data": "a_code[10]",
+      "answer_a":   "a_code[11]",
+      "answer_b":   "b_code[7]"
     },
     {
-      "input_data": "p.ca[12]",
-      "answer_a":   "p.ca[13]",
-      "answer_b":   "p.cb[9]"
+      "input_data": "a_code[12]",
+      "answer_a":   "a_code[13]",
+      "answer_b":   "b_code[9]"
     }
   ],
   "2022/07": [
     {
-      "input_data": "p.ca[1]"
+      "input_data": "a_code[1]"
     }
   ],
   "2022/08": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2022/09": [
     {
-      "input_data": "p.ca[5]",
-      "answer_b":   "p.cb[6]"
+      "input_data": "a_code[5]",
+      "answer_b":   "b_code[6]"
     },
     {
-      "input_data": "p.cb[7]",
+      "input_data": "b_code[7]",
       "answer_a":   "None",
-      "answer_b":   "p.cb[-3]"
+      "answer_b":   "b_code[-3]"
     }
   ],
   "2022/10": [
     {
-      "input_data": "p.ca[30]",
+      "input_data": "a_code[30]",
       "answer_b":   "'CRT'"
     }
   ],
   "2022/12": [
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2022/14": [
     {
-      "answer_a":   "p.ca[-3]",
-      "answer_b":   "p.cb[-2]"
+      "answer_a":   "a_code[-3]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2022/15": [
     {
-      "answer_a":   "p.ca[-2]"
+      "answer_a":   "a_code[-2]"
     }
   ],
   "2022/17": [
     {
-      "input_data": "p.ca[6]",
-      "answer_b":   "p.cb[-2]"
+      "input_data": "a_code[6]",
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2022/18": [
     {
-      "input_data": "p.ca[1] + '\\n' + p.ca[2]",
-      "answer_a":   "p.ca[3]",
-      "answer_b":   "p.ca[3]"
+      "input_data": "a_code[1] + '\\n' + a_code[2]",
+      "answer_a":   "a_code[3]",
+      "answer_b":   "a_code[3]"
     },
     {}
   ],
   "2022/19": [
     {
-      "answer_b":   "str(int(p.cb[-1]) * int(p.cb[-3]))"
+      "answer_b":   "str(int(b_code[-1]) * int(b_code[-3]))"
     }
   ],
   "2022/21": [
     {
-      "answer_a":   "p.ca[-2]",
-      "answer_b":   "p.cb[-4]"
+      "answer_a":   "a_code[-2]",
+      "answer_b":   "b_code[-4]"
     }
   ],
   "2022/23": [
     {
-      "input_data": "p.ca[3]",
-      "answer_a":   "str(p.ca[3].count('.'))",
+      "input_data": "a_code[3]",
+      "answer_a":   "str(a_code[3].count('.'))",
       "answer_b":   "'4'"
     },
     {
-      "answer_b":   "p.cb[-2]"
+      "answer_b":   "b_code[-2]"
     }
   ],
   "2022/24": [
     {
-      "input_data": "p.ca[15]",
-      "answer_a":   "p.ca[16]"
+      "input_data": "a_code[15]",
+      "answer_a":   "a_code[16]"
     }
   ]
 }

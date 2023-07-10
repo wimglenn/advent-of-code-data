@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import sys
+from dataclasses import dataclass
 from functools import cache
 from itertools import zip_longest
 from typing import NamedTuple
@@ -17,38 +18,27 @@ from aocd.utils import _get_soup
 log = logging.getLogger(__name__)
 
 
-class Page(NamedTuple):
+@dataclass
+class Page:
     """
     Container of pre-parsed html to be used by example data extraction functions.
 
     Instances are expected to be initialised with the classmethod factory
-    `Page.from_raw(html)` rather than directly.
+    `Page.from_raw(html)` rather than created directly with Page(...).
 
-    Attributes of interest:
-    - year: AoC puzzle year (2015+)
-    - day: AoC puzzle day (1-25)
-    - raw_html: String of the puzzle page html. May or may not have part b unlocked.
-    - soup: The raw_html string parsed into a bs4.BeautifulSoup instance
-    - a: The bs4 tag for the first <article> in the page, i.e. part a
-    - b: The bs4 tag for the second <article> in the page, i.e. part b. Will be `None` if part b locked.
-    - a_raw: The first <article> html as a string
-    - b_raw: The second <article> html as a string. Will be `None` if part b locked.
-
-    Most example data extraction functions should probably be mostly concerned with the
-    `a` and `b` attributes, along with the `ca` and `cb` properties for quick access to
-    codeblock contents.
+    Every other attribute of the page is derived from the raw html.
     """
-    year: int
-    day: int
-    raw_html: str
-    soup: bs4.BeautifulSoup
-    a: bs4.element.Tag
-    a_raw: str
-    b: bs4.element.Tag
-    b_raw: str
+    raw_html: str  # String of the puzzle page html. May or may not have part b unlocked
+    soup: bs4.BeautifulSoup  # The raw_html string parsed into a bs4.BeautifulSoup instance
+    year: int  # AoC puzzle year (2015+) parsed from html title
+    day: int  # AoC puzzle day (1-25) parsed from html title
+    article_a: bs4.element.Tag  # The bs4 tag for the first <article> in the page, i.e. part a
+    article_b: bs4.element.Tag  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
+    a_raw: str  # The first <article> html as a string
+    b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
 
     def __repr__(self):
-        return f"<Page({self.year}, {self.day}) at {hex(id(self))}>"
+        return f"<Page({self.year}, {self.day}) at {hex(id(self))}{'*' if self.article_b is None else ''}>"
 
     @classmethod
     def from_raw(cls, html):
@@ -62,31 +52,46 @@ class Page(NamedTuple):
         if len(articles) == 0:
             raise ExampleParserError(f"no <article> found in html")
         elif len(articles) == 1:
-            [a] = articles
-            a_raw = str(a)
-            b = b_raw = None
+            [article_a] = articles
+            a_raw = str(article_a)
+            article_b = b_raw = None
         elif len(articles) == 2:
-            a, b = articles
-            a_raw = str(a)
-            b_raw = str(b)
+            article_a, article_b = articles
+            a_raw = str(article_a)
+            b_raw = str(article_b)
         else:
             raise ExampleParserError(f"too many <article> found in html")
-        return Page(year=year, day=day, raw_html=html, soup=soup, a=a, a_raw=a_raw, b=b, b_raw=b_raw)
+        page = Page(
+            raw_html=html,
+            soup=soup,
+            year=year,
+            day=day,
+            article_a=article_a,
+            article_b=article_b,
+            a_raw=a_raw,
+            b_raw=b_raw,
+        )
+        return page
 
-    @property
-    def ca(self):
-        """Code blocks from the first <article> i.e. part a."""
-        return [code.text for code in self.a.find_all('code')]
-
-    @property
-    def cb(self):
-        """
-        Code blocks from the second <article> i.e. part b.
-        This attribute hides itself if part b isn't available.
-        """
-        if self.b is None:
-            raise AttributeError("cb")
-        return [code.text for code in self.b.find_all('code')]
+    def __getattr__(self, name):
+        if not name.startswith(("a_", "b_")):
+            raise AttributeError(name)
+        part, sep, tag = name.partition("_")
+        if part == "b" and self.article_b is None:
+            # hide part b accessors if part b is not unlocked yet
+            raise AttributeError(name)
+        if tag not in {"code", "li", "pre"}:
+            # only some soup attributes are whitelisted for access
+            # these are computed dynamically and cached so that we
+            # only pay the cost of parsing for them if/when they are
+            # actually used by an example parser
+            raise AttributeError(name)
+        article = self.article_a if part == "a" else self.article_b
+        result = [t.text for t in article.find_all(tag)]
+        setattr(self, name, result)  # cache the result
+        msg = "cached %s accessors for puzzle %d/%02d part %s page (%d hits)"
+        log.debug(msg, tag, self.year, self.day, part, len(result))
+        return result
 
 
 class Example(NamedTuple):
@@ -154,8 +159,15 @@ def extract_examples(html):
     Takes the puzzle page's raw html (str) and returns a list of `Example` instances.
     """
     page = Page.from_raw(html)
-    scope = {"soup": page.soup, "p": page}
-    part_b_locked = page.b is None
+    scope = {
+        "soup": page.soup,
+        "a": page.article_a,
+        "b": page.article_b,
+        "p": page,
+        "a_code": page.a_code,
+        "b_code": page.b_code,
+    }
+    part_b_locked = page.article_b is None
     result = []
     locators = _locators()
     key = f"{page.year}/{page.day:02d}"
