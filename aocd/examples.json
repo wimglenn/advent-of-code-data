@@ -1982,27 +1982,27 @@
       "answer_b":   "b_code[21]"
     },
     {
-      "input_data": "'0\\n' + b_code[27]",
+      "input_data": "'0', b_code[27]",
       "answer_a":   "None",
       "answer_b":   "b_code[28]"
     },
     {
-      "input_data": "'0\\n' + b_code[29]",
+      "input_data": "'0', b_code[29]",
       "answer_a":   "None",
       "answer_b":   "b_code[30]"
     },
     {
-      "input_data": "'0\\n' + b_code[31]",
+      "input_data": "'0', b_code[31]",
       "answer_a":   "None",
       "answer_b":   "b_code[32]"
     },
     {
-      "input_data": "'0\\n' + b_code[33]",
+      "input_data": "'0', b_code[33]",
       "answer_a":   "None",
       "answer_b":   "b_code[34]"
     },
     {
-      "input_data": "'0\\n' + b_code[35]",
+      "input_data": "'0', b_code[35]",
       "answer_a":   "None",
       "answer_b":   "b_code[36]"
     }
