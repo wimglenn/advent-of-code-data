@@ -404,7 +404,7 @@ def test_example_data_crash(pook, caplog, mocker):
     pook.get(url, reply=200, response_body="wat")
     puzzle = Puzzle(day=1, year=2018)
     assert not puzzle.examples
-    msg = "unable to find example data for 2018/01: boom"
+    msg = "unable to find example data for 2018/01 (Exception('boom'))"
     assert ("aocd.models", logging.WARNING, msg) in caplog.record_tuples
 
 
