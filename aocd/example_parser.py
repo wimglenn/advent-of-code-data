@@ -90,6 +90,8 @@ class Page:
         if tag == "li":
             # list items usually need further drill-down
             result = article.find_all("li")
+            for li in result:
+                li.codes = [code.text for code in li.find_all('code')]
         else:
             result = [t.text for t in article.find_all(tag)]
         setattr(self, name, result)  # cache the result
