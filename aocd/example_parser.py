@@ -123,28 +123,6 @@ class Example(NamedTuple):
         return self.answer_a, self.answer_b
 
 
-def get_actual(year, day):
-    examples = []
-    from pathlib import Path
-    path = Path(f"~/git/advent-of-code-wim/tests/{year}/{day:02d}/").expanduser()
-    for p in sorted(path.glob("*.txt")):
-        blacklist = "broken", "jwolf", "fizbin", "_wim", "_topaz", "_reddit", "_wim"
-        if any(s in p.name for s in blacklist):
-            continue
-        with p.open() as f:
-            lines = list(f)
-        input_data = "".join(lines[:-2]).rstrip("\r\n")
-        answer_a = lines[-2].split("#")[0].strip()
-        answer_b = lines[-1].split("#")[0].strip()
-        if answer_a == "-":
-            answer_a = None
-        if answer_b == "-":
-            answer_b = None
-        example = Example(input_data, answer_a, answer_b)
-        examples.append(example)
-    return examples
-
-
 @cache
 def _locators():
     # predetermined locations of code-blocks etc for example data
@@ -161,7 +139,7 @@ def _trunc(s, maxlen=50):
     return s[:maxlen] + f" ... ({len(s)} bytes)"
 
 
-def extract_examples(html):
+def extract_examples(html, use_default_locators=False):
     """
     Takes the puzzle page's raw html (str) and returns a list of `Example` instances.
     """
@@ -177,7 +155,11 @@ def extract_examples(html):
     locators = _locators()
     key = f"{page.year}/{page.day:02d}"
     default = locators["default_locators"]
-    for loc in locators.get(key, [default]):
+    if use_default_locators:
+        locs = [default]
+    else:
+        locs = locators.get(key, [default])
+    for loc in locs:
         vals = []
         for k in "input_data", "answer_a", "answer_b", "extra":
             pos = loc.get(k, default[k])
@@ -201,7 +183,6 @@ def extract_examples(html):
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
     from aocd.models import Puzzle
     try:
         from rich.console import Console
@@ -213,7 +194,15 @@ def main():
         )
     parser = argparse.ArgumentParser()
     parser.add_argument("-y", "--years", nargs="+", type=int, action="extend")
+    parser.add_argument("-v", "--verbose", action="count", help="increased logging (may be specified multiple)")
     args = parser.parse_args()
+    if args.verbose is None:
+        log_level = logging.WARNING
+    elif args.verbose == 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+    logging.basicConfig(level=log_level)
     years = args.years
     if not years:
         years = range(2015, 2023)
@@ -232,11 +221,12 @@ def main():
         missing = Example("")
         for day in range(1, 26):
             p = Puzzle(year, day)
-            part_b_locked = len(_get_soup(p._get_prose()).find_all("article")) != 2
-            scrapeds = p.examples
-            corrects = get_actual(year, day)
-            if len(scrapeds) > len(corrects):
-                log.warning(f"{year}/{day:02d} scraped {len(scrapeds)} but expected {len(corrects)}")
+            html = p._get_prose()
+            part_b_locked = len(_get_soup(html).find_all("article")) != 2
+            scrapeds = extract_examples(html, use_default_locators=True)
+            corrects = p.examples
+            if len(scrapeds) != len(corrects):
+                log.info(f"{year}/{day:02d} scraped {len(scrapeds)} but expected {len(corrects)}")
             for i, (scraped, correct) in enumerate(zip_longest(scrapeds, corrects, fillvalue=missing), start=1):
                 row = [""] * 6
                 if i == 1:
@@ -276,7 +266,3 @@ def main():
 
                 table.add_row(*row)
         console.print(table)
-    wrong = [*{}.fromkeys(wrong)]
-    for y, d, i in wrong:
-        print(f"{y}/{d:02d}", i)
-    sys.exit(f"{len(wrong)} scraped incorrect")
