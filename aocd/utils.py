@@ -27,8 +27,8 @@ USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com
 http = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
 
 
-def _ensure_intermediate_dirs(fname):
-    Path(fname).expanduser().parent.mkdir(parents=True, exist_ok=True)
+def _ensure_intermediate_dirs(path):
+    path.expanduser().parent.mkdir(parents=True, exist_ok=True)
 
 
 def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
@@ -116,18 +116,18 @@ def get_owner(token):
     return result
 
 
-def atomic_write_file(fname, contents_str):
+def atomic_write_file(path, contents_str):
     """
     Atomically write a string to a file by writing it to a temporary file, and then
     renaming it to the final destination name. This solves a race condition where existence
     of a file doesn't necessarily mean the content is valid yet.
     """
-    _ensure_intermediate_dirs(fname)
-    with tempfile.NamedTemporaryFile(mode="w", dir=fname.parent, delete=False) as f:
+    _ensure_intermediate_dirs(path)
+    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as f:
         log.debug("writing to tempfile @ %s", f.name)
         f.write(contents_str)
-    log.debug("moving %s -> %s", f.name, fname)
-    shutil.move(f.name, fname)
+    log.debug("moving %s -> %s", f.name, path)
+    shutil.move(f.name, path)
 
 
 def _cli_guess(choice, choices):

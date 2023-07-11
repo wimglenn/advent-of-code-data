@@ -242,7 +242,7 @@ def main():
                 if i == 1:
                     row[0] = f"{year}/{day:02d}"
                 row[1] = str(i)
-                if part_b_locked:
+                if part_b_locked and day != 25:
                     row[1] += "(a)"
 
                 i2 = scraped.input_data == correct.input_data

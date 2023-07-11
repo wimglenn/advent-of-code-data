@@ -64,11 +64,11 @@ class User:
         settings page for a logged-in user is as close as we can get to a primary key.
         This id is used to key the cache, so that your caches aren't unnecessarily
         invalidated by being issued a new token"""
-        fname = AOCD_CONFIG_DIR / "token2id.json"
+        path = AOCD_CONFIG_DIR / "token2id.json"
         if User._token2id is None:
             try:
-                User._token2id = json.loads(fname.read_text())
-                log.debug("loaded user id memo from %s", fname)
+                User._token2id = json.loads(path.read_text())
+                log.debug("loaded user id memo from %s", path)
             except FileNotFoundError:
                 User._token2id = {}
         if self.token not in User._token2id:
@@ -76,8 +76,8 @@ class User:
             owner = get_owner(self.token)
             log.debug("got owner=%s, adding to memo", owner)
             User._token2id[self.token] = owner
-            _ensure_intermediate_dirs(fname)
-            fname.write_text(json.dumps(User._token2id, sort_keys=True, indent=2))
+            _ensure_intermediate_dirs(path)
+            path.write_text(json.dumps(User._token2id, sort_keys=True, indent=2))
         else:
             owner = User._token2id[self.token]
         if self._owner == "unknown.unknown.0":
@@ -449,11 +449,11 @@ class Puzzle:
         return msg
 
     def _save_correct_answer(self, value, part):
-        fname = getattr(self, f"answer_{part}_fname")
+        path = getattr(self, f"answer_{part}_fname")
         txt = value.strip()
         msg = "saving"
-        if fname.is_file():
-            prev = fname.read_text()
+        if path.is_file():
+            prev = path.read_text()
             if txt == prev:
                 msg = "the correct answer for %d/%02d part %s was already saved"
                 log.debug(msg, self.year, self.day, part)
@@ -461,20 +461,20 @@ class Puzzle:
             msg = "overwriting"
         msg += " the correct answer for %d/%02d part %s: %s"
         log.info(msg, self.year, self.day, part, txt)
-        _ensure_intermediate_dirs(fname)
-        fname.write_text(txt)
+        _ensure_intermediate_dirs(path)
+        path.write_text(txt)
 
     def _save_incorrect_answer(self, value, part, extra=""):
-        fname = getattr(self, f"incorrect_answers_{part}_fname")
+        path = getattr(self, f"incorrect_answers_{part}_fname")
         msg = "appending an incorrect answer for %d/%02d part %s"
         log.info(msg, self.year, self.day, part)
-        _ensure_intermediate_dirs(fname)
-        if fname.is_file():
-            txt = fname.read_text()
+        _ensure_intermediate_dirs(path)
+        if path.is_file():
+            txt = path.read_text()
         else:
             txt = ""
         txt += value.strip() + " " + extra.replace("\n", " ") + "\n"
-        fname.write_text(txt)
+        path.write_text(txt)
 
     def _get_answer(self, part):
         """
@@ -554,6 +554,7 @@ class Puzzle:
         hit = "Your puzzle answer was"
         if "Both parts of this puzzle are complete!" in text:  # solved
             if not self.prose2_fname.is_file():
+                _ensure_intermediate_dirs(self.prose2_fname)
                 self.prose2_fname.write_text(text)
             hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             if self.day == 25:
@@ -564,6 +565,7 @@ class Puzzle:
             self._save_correct_answer(pa.code.text, "a")
         elif "The first half of this puzzle is complete!" in text:  # part b unlocked
             if not self.prose1_fname.is_file():
+                _ensure_intermediate_dirs(self.prose1_fname)
                 self.prose1_fname.write_text(text)
             [pa] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             self._save_correct_answer(pa.code.text, "a")
