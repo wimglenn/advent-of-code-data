@@ -7,7 +7,7 @@ import time
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
-from functools import cache
+from functools import cached_property
 from itertools import count
 from pathlib import Path
 from textwrap import dedent
@@ -230,8 +230,7 @@ class Puzzle:
             examples = []
         return examples
 
-    @property
-    @cache
+    @cached_property
     def title(self):
         prose = self._get_prose()
         soup = _get_soup(prose)

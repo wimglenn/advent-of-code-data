@@ -38,7 +38,8 @@ class Page:
     b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
 
     def __repr__(self):
-        return f"<Page({self.year}, {self.day}) at {hex(id(self))}{' *' if self.article_b is None else ''}>"
+        part_a_only = '*' if self.article_b is None else ''
+        return f"<Page({self.year}, {self.day}){part_a_only} at {hex(id(self))}>"
 
     @classmethod
     def from_raw(cls, html):
@@ -166,11 +167,12 @@ def extract_examples(html):
     """
     page = Page.from_raw(html)
     scope = {"page": page}
-    for part in "ab":
+    part_b_locked = page.article_b is None
+    parts = "a" if part_b_locked else "ab"
+    for part in parts:
         for tag in "code", "pre", "em", "li":
             name = f"{part}_{tag}"
             scope[name] = getattr(page, name)
-    part_b_locked = page.article_b is None
     result = []
     locators = _locators()
     key = f"{page.year}/{page.day:02d}"

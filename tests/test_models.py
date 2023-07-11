@@ -390,6 +390,22 @@ def test_examples_cache(aocd_data_dir, pook):
     assert mock.calls == 1
 
 
+def test_example_partial(aocd_data_dir, pook):
+    # only one article, for example when part B isn't unlocked yet
+    pook.get(
+        url="https://adventofcode.com/2014/day/1",
+        response_body=(
+            "<title>Day 1 - Advent of Code 2014</title>"
+            "<article><pre><code>1\n2\n3\n</code></pre><code>abc</code></article>"
+        ),
+    )
+    puzzle = Puzzle(day=1, year=2014)
+    [example] = puzzle.examples
+    assert example.input_data == "1\n2\n3"
+    assert example.answer_a == "abc"
+    assert example.answer_b is None
+
+
 def test_example_data_fail(pook):
     url = "https://adventofcode.com/2018/day/1"
     pook.get(url, reply=418, response_body="I'm a teapot")
