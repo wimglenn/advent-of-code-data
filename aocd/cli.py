@@ -6,6 +6,7 @@ from importlib.metadata import version
 
 from .get import get_data
 from .get import most_recent_year
+from .models import Puzzle
 from .models import _load_users
 from .utils import _cli_guess
 from .utils import AOC_TZ
@@ -48,6 +49,12 @@ def main():
         action="store_true",
         help="enable debug logging",
     )
+    parser.add_argument(
+        "-e",
+        "--example",
+        action="store_true",
+        help="get the example(s) data, if any"
+    )
     if len(users) > 1:
         parser.add_argument(
             "-u",
@@ -75,5 +82,27 @@ def main():
         session = users[args.user]
     except (KeyError, AttributeError):
         session = None
-    data = get_data(session=session, day=args.day, year=args.year)
-    print(data)
+    if args.example:
+        puzzle = Puzzle(year=args.year, day=args.day)
+        examples = puzzle.examples
+        if not examples:
+            print(f"no examples available for {args.year}/{args.day:02d}")
+            return
+        w = 80
+        head = f"--- Day {puzzle.day}: {puzzle.title} ---"
+        print(head.center(w, " "))
+        print(puzzle.url.center(w, " "))
+        for i, example in enumerate(examples, start=1):
+            print(f" Example data {i}/{len(examples)} ".center(w, "-"))
+            print(example.input_data)
+            print("-" * w)
+            print("answer_a:", example.answer_a or "-")
+            print("answer_b:", example.answer_b or "-")
+            if example.extra:
+                print("extra:", example.extra)
+            print("-" * w)
+            print()
+            print()
+    else:
+        data = get_data(session=session, day=args.day, year=args.year)
+        print(data)
