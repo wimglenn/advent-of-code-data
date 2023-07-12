@@ -11,7 +11,6 @@ from functools import cache
 from importlib.metadata import entry_points
 from importlib.metadata import version
 from itertools import cycle
-from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import bs4

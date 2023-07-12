@@ -7,14 +7,17 @@ import time
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
+from functools import cache
 from functools import cached_property
+from importlib.metadata import entry_points
 from itertools import count
 from pathlib import Path
 from textwrap import dedent
 
-from .examples import extract_examples
+from . import examples
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
+from .exceptions import ExampleParserError
 from .exceptions import PuzzleLockedError
 from .exceptions import PuzzleUnsolvedError
 from .exceptions import UnknownUserError
@@ -221,14 +224,19 @@ class Puzzle:
 
     @property
     def examples(self):
-        html = self._get_prose()
         try:
-            examples = extract_examples(html)
+            page = examples.Page.from_raw(html=self._get_prose())
+            parser = _load_example_parser()
+            if getattr(parser, "uses_real_datas", True):
+                datas = examples._get_unique_real_inputs(self.year, self.day)
+            else:
+                datas = []
+            result = parser(page, datas)
         except Exception as err:
             msg = "unable to find example data for %d/%02d (%r)"
             log.warning(msg, self.year, self.day, err)
-            examples = []
-        return examples
+            result = []
+        return result
 
     @cached_property
     def title(self):
@@ -640,3 +648,22 @@ def _load_users():
     except FileNotFoundError:
         users = {"default": default_user().token}
     return users
+
+
+@cache
+def _load_example_parser(group="adventofcode.examples", name="aocd_examples_canned"):
+    try:
+        # Python 3.10+ - group/name selectable entry points
+        eps = entry_points().select(group=group, name=name)
+    except AttributeError:
+        # Python 3.9 - dict interface
+        eps = [ep for ep in entry_points()[group] if ep.name == name]
+    if not eps:
+        msg = f"could not find the example parser plugin {group=}/{name=}"
+        raise ExampleParserError(msg)
+    if len(eps) > 1:
+        log.warning("expected unique entrypoint but found %d entrypoints", len(eps))
+    ep = eps[0]
+    parser = ep.load()
+    log.debug("loaded example parser %r", parser)
+    return parser

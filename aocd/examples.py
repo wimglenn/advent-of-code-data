@@ -1,11 +1,8 @@
 import argparse
-import importlib.resources
-import json
 import logging
 import re
 import sys
 from dataclasses import dataclass
-from functools import cache
 from itertools import zip_longest
 from typing import NamedTuple
 
@@ -128,63 +125,11 @@ class Example(NamedTuple):
         return self.answer_a, self.answer_b
 
 
-@cache
-def _locators():
-    # predetermined locations of code-blocks etc for example data
-    resource = importlib.resources.files("aocd") / "examples.json"
-    txt = resource.read_text()
-    data = json.loads(txt)
-    return data
-
-
 def _trunc(s, maxlen=50):
     # don't print massive strings and mess up the table rendering
     if s is None or len(s) <= maxlen:
         return s
     return s[:maxlen] + f" ... ({len(s)} bytes)"
-
-
-def extract_examples(html, use_default_locators=False):
-    """
-    Takes the puzzle page's raw html (str) and returns a list of `Example` instances.
-    """
-    page = Page.from_raw(html)
-    scope = {"page": page}
-    part_b_locked = page.article_b is None
-    parts = "a" if part_b_locked else "ab"
-    for part in parts:
-        for tag in "code", "pre", "em", "li":
-            name = f"{part}_{tag}"
-            scope[name] = getattr(page, name)
-    result = []
-    locators = _locators()
-    key = f"{page.year}/{page.day:02d}"
-    default = locators["default_locators"]
-    if use_default_locators:
-        locs = [default]
-    else:
-        locs = locators.get(key, [default])
-    for loc in locs:
-        vals = []
-        for k in "input_data", "answer_a", "answer_b", "extra":
-            pos = loc.get(k, default[k])
-            if k == "extra" and pos is None:
-                break
-            if k == "answer_b" and (part_b_locked or page.day == 25):
-                vals.append(None)
-                continue
-            try:
-                val = eval(pos, scope)
-            except Exception:
-                val = None
-            if isinstance(val, (tuple, list)):
-                val = "\n".join(val)
-            if val is not None:
-                val = val.rstrip("\r\n")
-            vals.append(val)
-        if vals[0] is not None:
-            result.append(Example(*vals))
-    return result
 
 
 def _get_unique_real_inputs(year, day):
@@ -242,6 +187,7 @@ def main():
         sys.exit(1)
     plugin = plugins[args.plugin].load()
     console = Console()
+    parser_wants_real_datas = getattr(plugin, "uses_real_datas", True)
 
     wrong = count = 0
     for year in years:
@@ -259,7 +205,10 @@ def main():
             puzzle = models.Puzzle(year, day)
             page = Page.from_raw(html=puzzle._get_prose())
             part_b_locked = page.article_b is None
-            real_inputs = _get_unique_real_inputs(year, day)
+            if parser_wants_real_datas:
+                real_inputs = _get_unique_real_inputs(year, day)
+            else:
+                real_inputs = []
             scrapeds = plugin(page, real_inputs)
             corrects = puzzle.examples
 
@@ -282,7 +231,6 @@ def main():
                     if not i1:
                         row[1] += f"\n(correct: {count_correct})"
                         wrong += inc
-
 
                 row[2] = str(i)
                 if part_b_locked and day != 25:

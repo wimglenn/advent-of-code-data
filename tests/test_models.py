@@ -406,29 +406,15 @@ def test_example_partial(aocd_data_dir, pook):
     assert example.answer_b is None
 
 
-def test_example_data_fail(pook):
+def test_example_data_crash(pook, caplog):
     url = "https://adventofcode.com/2018/day/1"
-    pook.get(url, reply=418, response_body="I'm a teapot")
-    puzzle = Puzzle(day=1, year=2018)
-    with pytest.raises(AocdError(f"HTTP 418 at {url}")):
-        puzzle.examples
-
-
-def test_example_data_crash(pook, caplog, mocker):
-    mocker.patch("aocd.models.extract_examples", side_effect=Exception("boom"))
-    url = "https://adventofcode.com/2018/day/1"
-    pook.get(url, reply=200, response_body="wat")
+    title_only = "<title>Day 1 - Advent of Code 2014</title>"
+    pook.get(url, reply=200, response_body=title_only)
     puzzle = Puzzle(day=1, year=2018)
     assert not puzzle.examples
-    msg = "unable to find example data for 2018/01 (Exception('boom'))"
+    err_repr = "ExampleParserError('no <article> found in html')"
+    msg = f"unable to find example data for 2018/01 ({err_repr})"
     assert ("aocd.models", logging.WARNING, msg) in caplog.record_tuples
-
-
-def test_example_data_missing(pook, caplog):
-    url = "https://adventofcode.com/2018/day/1"
-    pook.get(url, reply=200, response_body="wat")
-    puzzle = Puzzle(day=1, year=2018)
-    assert not puzzle.examples
 
 
 @pytest.mark.parametrize(
