@@ -1,6 +1,6 @@
 --editable .
 numpy
-pook
+git+https://github.com/wimglenn/pook@urllib3
 pytest
 pytest-cov
 pytest-mock
