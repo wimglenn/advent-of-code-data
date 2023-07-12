@@ -11,6 +11,7 @@ from typing import NamedTuple
 
 import bs4
 
+from aocd import models
 from aocd.exceptions import ExampleParserError
 from aocd.utils import get_plugins
 from aocd.utils import _get_soup
@@ -186,9 +187,14 @@ def extract_examples(html, use_default_locators=False):
     return result
 
 
-def main():
-    from aocd.models import Puzzle
+def _get_unique_real_inputs(year, day):
+    path = models.AOCD_DATA_DIR
+    paths = path.glob(f"*/{year}_{day:02d}_input.txt")
+    strs = [p.read_text() for p in paths]
+    return list({}.fromkeys(strs))
 
+
+def main():
     try:
         from rich.console import Console
         from rich.table import Table
@@ -250,12 +256,12 @@ def main():
         table.add_column("Extra")
         missing = Example("")
         for day in range(1, 26):
-            p = Puzzle(year, day)
-            html = p._get_prose()
-            page = Page.from_raw(html)
+            puzzle = models.Puzzle(year, day)
+            page = Page.from_raw(html=puzzle._get_prose())
             part_b_locked = page.article_b is None
-            scrapeds = plugin(page, [])
-            corrects = p.examples
+            real_inputs = _get_unique_real_inputs(year, day)
+            scrapeds = plugin(page, real_inputs)
+            corrects = puzzle.examples
 
             count_scraped = len(scrapeds)
             count_correct = len(corrects)
@@ -267,14 +273,15 @@ def main():
 
             rows = enumerate(zip_longest(scrapeds, corrects, fillvalue=missing), 1)
             for i, (scraped, correct) in rows:
+                inc = correct != missing
                 row = [""] * 7
                 if i == 1:
                     row[0] = f"{year}/{day:02d}"
                     row[1] = "❌✅"[i1] + f" {count_scraped}"
-                    count += 1
+                    count += inc
                     if not i1:
                         row[1] += f"\n(correct: {count_correct})"
-                        wrong += 1
+                        wrong += inc
 
 
                 row[2] = str(i)
@@ -288,23 +295,23 @@ def main():
                     i5 = scraped.answer_b == correct.answer_b
 
                 row[3] = "❌✅"[i3] + f" ({len(scraped.input_data or '')} bytes)"
-                count += 1
+                count += inc
                 if not i3:
                     row[3] += f"\n(correct: {len(correct.input_data or '')} bytes)"
-                    wrong += 1
+                    wrong += inc
 
                 row[4] = "❌✅"[i4] + f" {_trunc(scraped.answer_a)}"
-                count += 1
+                count += inc
                 if not i4:
                     row[4] += f"\n(correct: {correct.answer_a})"
-                    wrong += 1
+                    wrong += inc
 
                 if day < 25 or scraped.answer_b:
                     row[5] = "❌✅"[i5] + f" {_trunc(scraped.answer_b)}"
-                    count += 1
+                    count += inc
                     if not i5:
                         row[5] += f"\n(correct: {correct.answer_b})"
-                        wrong += 1
+                        wrong += inc
                 if day < 25 and part_b_locked and i5:
                     row[5] = "❓"
 
@@ -314,4 +321,4 @@ def main():
                 table.add_row(*row)
         console.print(table)
     score = count - wrong
-    print(f"the plugin {args.plugin} scored {score}/{count} ({score/count:.1%})")
+    print(f"plugin {args.plugin!r} scored {score}/{count} ({score/count:.1%})")
