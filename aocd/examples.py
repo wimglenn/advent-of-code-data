@@ -29,6 +29,7 @@ class Page:
 
     Every other attribute of the page is derived from the raw html.
     """
+
     raw_html: str  # String of the puzzle page html. May or may not have part b unlocked
     soup: bs4.BeautifulSoup  # The raw_html string parsed into a bs4.BeautifulSoup instance
     year: int  # AoC puzzle year (2015+) parsed from html title
@@ -39,7 +40,7 @@ class Page:
     b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
 
     def __repr__(self):
-        part_a_only = '*' if self.article_b is None else ''
+        part_a_only = "*" if self.article_b is None else ""
         return f"<Page({self.year}, {self.day}){part_a_only} at {hex(id(self))}>"
 
     @classmethod
@@ -48,9 +49,10 @@ class Page:
         title_pat = r"^Day (\d{1,2}) - Advent of Code (\d{4})$"
         title_text = soup.title.text
         if (match := re.match(title_pat, title_text)) is None:
-            raise ExampleParserError(f"failed to extract year/day from title {title_text!r}")
+            msg = f"failed to extract year/day from title {title_text!r}"
+            raise ExampleParserError(msg)
         day, year = map(int, match.groups())
-        articles = soup.find_all('article')
+        articles = soup.find_all("article")
         if len(articles) == 0:
             raise ExampleParserError(f"no <article> found in html")
         elif len(articles) == 1:
@@ -93,7 +95,7 @@ class Page:
             # list items usually need further drill-down
             result = article.find_all("li")
             for li in result:
-                li.codes = [code.text for code in li.find_all('code')]
+                li.codes = [code.text for code in li.find_all("code")]
         else:
             result = [t.text for t in article.find_all(tag)]
         setattr(self, name, result)  # cache the result
@@ -114,6 +116,7 @@ class Example(NamedTuple):
     number of iterations to be used when working with the test data. This may
     be returned as some human-readable string in `example.extra`
     """
+
     input_data: str
     answer_a: str = None
     answer_b: str = None
@@ -185,6 +188,7 @@ def extract_examples(html, use_default_locators=False):
 
 def main():
     from aocd.models import Puzzle
+
     try:
         from rich.console import Console
         from rich.table import Table
@@ -196,9 +200,20 @@ def main():
     eps = get_plugins(group="adventofcode.examples")
     plugins = {ep.name: ep for ep in eps}
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--plugin", choices=list(plugins), default="aocd_examples_canned", help="plugin to use for example extraction testing (default: %(default)s)")
+    parser.add_argument(
+        "-p",
+        "--plugin",
+        choices=list(plugins),
+        default="aocd_examples_canned",
+        help="plugin to use for example extraction testing (default: %(default)s)",
+    )
     parser.add_argument("-y", "--years", nargs="+", type=int, action="extend")
-    parser.add_argument("-v", "--verbose", action="count", help="increased logging (may be specified multiple)")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        help="increased logging (may be specified multiple)",
+    )
     args = parser.parse_args()
     if args.verbose is None:
         log_level = logging.WARNING
@@ -241,8 +256,10 @@ def main():
             scrapeds = plugin(page, [])
             corrects = p.examples
             if len(scrapeds) != len(corrects):
-                log.info(f"{year}/{day:02d} scraped {len(scrapeds)} but expected {len(corrects)}")
-            for i, (scraped, correct) in enumerate(zip_longest(scrapeds, corrects, fillvalue=missing), start=1):
+                msg = f"{year}/{day:02d} scraped {len(scrapeds)} but expected {len(corrects)}"
+                log.info(msg)
+            rows = enumerate(zip_longest(scrapeds, corrects, fillvalue=missing), 1)
+            for i, (scraped, correct) in rows:
                 row = [""] * 6
                 if i == 1:
                     row[0] = f"{year}/{day:02d}"
@@ -281,3 +298,4 @@ def main():
 
                 table.add_row(*row)
         console.print(table)
+        print(f"the plugin {plugin} scored {score}/{total} ({score/total:.1%})")
