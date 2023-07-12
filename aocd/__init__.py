@@ -10,6 +10,7 @@ from . import models
 from . import post
 from . import runner
 from . import utils
+from . import examples
 from .exceptions import AocdError
 from .get import get_data
 from .get import get_day_and_year

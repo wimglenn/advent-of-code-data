@@ -12,6 +12,7 @@ from typing import NamedTuple
 import bs4
 
 from aocd.exceptions import ExampleParserError
+from aocd.utils import get_plugins
 from aocd.utils import _get_soup
 
 
@@ -192,7 +193,10 @@ def main():
             f"To use example parser, please install rich:\n"
             f"  {sys.executable} -m pip install rich"
         )
+    eps = get_plugins(group="adventofcode.examples")
+    plugins = {ep.name: ep for ep in eps}
     parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--plugin", choices=list(plugins), default="aocd_examples_canned", help="plugin to use for example extraction testing (default: %(default)s)")
     parser.add_argument("-y", "--years", nargs="+", type=int, action="extend")
     parser.add_argument("-v", "--verbose", action="count", help="increased logging (may be specified multiple)")
     args = parser.parse_args()
@@ -206,6 +210,16 @@ def main():
     years = args.years
     if not years:
         years = range(2015, 2023)
+    if not plugins:
+        print(
+            "There are no plugins available. Install some package(s) "
+            "with a registered 'adventofcode.examples' entry-point.\n"
+            "See https://github.com/wimglenn/aocd-example-parser "
+            "for a sample plugin package structure.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    plugin = plugins[args.plugin].load()
     console = Console()
 
     wrong = []
@@ -222,8 +236,9 @@ def main():
         for day in range(1, 26):
             p = Puzzle(year, day)
             html = p._get_prose()
-            part_b_locked = len(_get_soup(html).find_all("article")) != 2
-            scrapeds = extract_examples(html, use_default_locators=True)
+            page = Page.from_raw(html)
+            part_b_locked = page.article_b is None
+            scrapeds = plugin(page, [])
             corrects = p.examples
             if len(scrapeds) != len(corrects):
                 log.info(f"{year}/{day:02d} scraped {len(scrapeds)} but expected {len(corrects)}")
