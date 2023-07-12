@@ -237,11 +237,12 @@ def main():
     plugin = plugins[args.plugin].load()
     console = Console()
 
-    wrong = []
+    wrong = count = 0
     for year in years:
-        score = total = 0
+
         table = Table(title=f"Advent of Code examples for year {year}")
         table.add_column("YYYY/DD", style="cyan")
+        table.add_column("count")
         table.add_column("eg")
         table.add_column("Example data")
         table.add_column("Part A answer")
@@ -255,47 +256,62 @@ def main():
             part_b_locked = page.article_b is None
             scrapeds = plugin(page, [])
             corrects = p.examples
+
+            count_scraped = len(scrapeds)
+            count_correct = len(corrects)
+            i1 = count_scraped == count_correct
+
             if len(scrapeds) != len(corrects):
                 msg = f"{year}/{day:02d} scraped {len(scrapeds)} but expected {len(corrects)}"
                 log.info(msg)
+
             rows = enumerate(zip_longest(scrapeds, corrects, fillvalue=missing), 1)
             for i, (scraped, correct) in rows:
-                row = [""] * 6
+                row = [""] * 7
                 if i == 1:
                     row[0] = f"{year}/{day:02d}"
-                row[1] = str(i)
+                    row[1] = "❌✅"[i1] + f" {count_scraped}"
+                    count += 1
+                    if not i1:
+                        row[1] += f"\n(correct: {count_correct})"
+                        wrong += 1
+
+
+                row[2] = str(i)
                 if part_b_locked and day != 25:
-                    row[1] += "(a)"
-
-                i2 = scraped.input_data == correct.input_data
-                i3 = scraped.answer_a == correct.answer_a
+                    row[2] += "(a)"
+                i3 = scraped.input_data == correct.input_data
+                i4 = scraped.answer_a == correct.answer_a
                 if part_b_locked:
-                    i4 = scraped.answer_b is None
+                    i5 = scraped.answer_b is None
                 else:
-                    i4 = scraped.answer_b == correct.answer_b
-                i5 = scraped.extra == correct.extra
+                    i5 = scraped.answer_b == correct.answer_b
 
-                row[2] = "❌✅"[i2] + f" ({len(scraped.input_data or '')} bytes)"
-                if not i2:
-                    row[2] += f"\n(correct: {len(correct.input_data or '')} bytes)"
-                    wrong.append((year, day, i))
-
-                row[3] = "❌✅"[i3] + f" {_trunc(scraped.answer_a)}"
+                row[3] = "❌✅"[i3] + f" ({len(scraped.input_data or '')} bytes)"
+                count += 1
                 if not i3:
-                    row[3] += f"\n(correct: {correct.answer_a})"
-                    wrong.append((year, day, i))
+                    row[3] += f"\n(correct: {len(correct.input_data or '')} bytes)"
+                    wrong += 1
+
+                row[4] = "❌✅"[i4] + f" {_trunc(scraped.answer_a)}"
+                count += 1
+                if not i4:
+                    row[4] += f"\n(correct: {correct.answer_a})"
+                    wrong += 1
 
                 if day < 25 or scraped.answer_b:
-                    row[4] = "❌✅"[i4] + f" {_trunc(scraped.answer_b)}"
-                    if not i4:
-                        row[4] += f"\n(correct: {correct.answer_b})"
-                        wrong.append((year, day, i))
-                if day < 25 and part_b_locked and i4:
-                    row[4] = "❓"
+                    row[5] = "❌✅"[i5] + f" {_trunc(scraped.answer_b)}"
+                    count += 1
+                    if not i5:
+                        row[5] += f"\n(correct: {correct.answer_b})"
+                        wrong += 1
+                if day < 25 and part_b_locked and i5:
+                    row[5] = "❓"
 
                 if scraped.extra or correct.extra:
-                    row[5] = f"{scraped.extra or correct.extra or ''}"
+                    row[6] = f"{scraped.extra or correct.extra or ''}"
 
                 table.add_row(*row)
         console.print(table)
-        print(f"the plugin {plugin} scored {score}/{total} ({score/total:.1%})")
+    score = count - wrong
+    print(f"the plugin {args.plugin} scored {score}/{count} ({score/count:.1%})")
