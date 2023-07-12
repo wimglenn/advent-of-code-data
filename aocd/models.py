@@ -12,7 +12,7 @@ from itertools import count
 from pathlib import Path
 from textwrap import dedent
 
-from .example_parser import extract_examples
+from .examples import extract_examples
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import PuzzleLockedError

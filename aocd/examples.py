@@ -133,7 +133,7 @@ def _locators():
 
 
 def _trunc(s, maxlen=50):
-    # don't print massive strings and mess up the example_parser table rendering
+    # don't print massive strings and mess up the table rendering
     if s is None or len(s) <= maxlen:
         return s
     return s[:maxlen] + f" ... ({len(s)} bytes)"

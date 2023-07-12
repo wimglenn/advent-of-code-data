@@ -42,7 +42,7 @@ nb = ["IPython", "jupyter-server"]
 aocd = "aocd.cli:main"
 aoc = "aocd.runner:main"
 aocd-token = "aocd.cookies:scrape_session_tokens"
-aoc-eg = "aocd.example_parser:main"
+aoce = "aocd.examples:main"
 
 [tool.setuptools]
 packages = ["aocd"]
