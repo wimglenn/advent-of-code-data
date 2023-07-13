@@ -582,8 +582,9 @@ class Puzzle:
             self._save_correct_answer(pa.code.text, "a")
         else:  # init, or dead token - doesn't really matter
             if not self.prose0_fname.is_file():
-                _ensure_intermediate_dirs(self.prose0_fname)
-                self.prose0_fname.write_text(text)
+                if "Advent of Code" in text:
+                    _ensure_intermediate_dirs(self.prose0_fname)
+                    self.prose0_fname.write_text(text)
 
     def _get_prose(self):
         # prefer to return full prose (i.e. part b is solved or unlocked)
@@ -605,6 +606,7 @@ class Puzzle:
             if path.is_file():
                 log.debug("_get_prose using %s", path)
                 return path.read_text()
+        raise AocdError(f"Could not get prose for {self.year}/{self.day:02d}")
 
     @property
     def easter_eggs(self):

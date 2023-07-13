@@ -154,7 +154,7 @@ def test_get_title_failure_no_heading(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="--- Day 1: hello ---",
+        response_body="Advent of Code --- Day 1: hello ---",
     )
     puzzle = Puzzle(year=2018, day=1)
     with pytest.raises(AocdError("heading not found")):
@@ -165,7 +165,7 @@ def test_get_title_failure(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>--- Day 11: This SHOULD be day 1 ---</h2>",
+        response_body="Advent of Code <h2>--- Day 11: This SHOULD be day 1 ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     msg = "unexpected h2 text: --- Day 11: This SHOULD be day 1 ---"
@@ -177,7 +177,7 @@ def test_pprint(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
+        response_body="Advent of Code <h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -193,7 +193,7 @@ def test_pprint_cycle(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
+        response_body="Advent of Code <h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -297,6 +297,7 @@ def test_easter_eggs(pook):
     pook.get(
         url="https://adventofcode.com/2017/day/5",
         response_body=(
+            "Advent of Code"
             '<article class="day-desc">'
             "<h2>--- Day 5: A Maze of Twisty Trampolines, All Alike ---</h2>"
             '<p>An urgent <span title="Later, on its turn, it sends you a '
