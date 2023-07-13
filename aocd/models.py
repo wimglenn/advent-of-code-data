@@ -666,7 +666,7 @@ def _load_example_parser(group="adventofcode.examples", name="aocd_examples_cann
         raise ExampleParserError(msg)
     if len(eps) > 1:
         log.warning("expected unique entrypoint but found %d entrypoints", len(eps))
-    ep = eps[0]
+    ep = next(iter(eps))
     parser = ep.load()
     log.debug("loaded example parser %r", parser)
     return parser
