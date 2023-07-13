@@ -224,9 +224,12 @@ class Puzzle:
 
     @property
     def examples(self):
+        return self._get_examples()
+
+    def _get_examples(self, parser_name="aocd_examples_canned"):
         try:
             page = examples.Page.from_raw(html=self._get_prose())
-            parser = _load_example_parser()
+            parser = _load_example_parser(name=parser_name)
             if getattr(parser, "uses_real_datas", True):
                 datas = examples._get_unique_real_inputs(self.year, self.day)
             else:

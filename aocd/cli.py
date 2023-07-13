@@ -10,6 +10,7 @@ from .models import Puzzle
 from .models import _load_users
 from .utils import _cli_guess
 from .utils import AOC_TZ
+from .utils import get_plugins
 
 
 def main():
@@ -18,6 +19,8 @@ def main():
     days = range(1, 26)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     users = _load_users()
+    eps = get_plugins(group="adventofcode.examples")
+    plugins = {ep.name: ep for ep in eps}
     parser = argparse.ArgumentParser(
         description=f"Advent of Code Data v{version('advent-of-code-data')}",
         usage=f"aocd [day 1-25] [year 2015-{years[-1]}]",
@@ -51,9 +54,11 @@ def main():
     )
     parser.add_argument(
         "-e",
-        "--example",
-        action="store_true",
-        help="get the example(s) data, if any"
+        "--example-parser",
+        nargs="?",
+        choices=plugins,
+        const="aocd_examples_canned",
+        help="get the example(s) data, if any",
     )
     if len(users) > 1:
         parser.add_argument(
@@ -82,9 +87,9 @@ def main():
         session = users[args.user]
     except (KeyError, AttributeError):
         session = None
-    if args.example:
+    if args.example_parser:
         puzzle = Puzzle(year=args.year, day=args.day)
-        examples = puzzle.examples
+        examples = puzzle._get_examples(parser_name=args.example_parser)
         if not examples:
             print(f"no examples available for {args.year}/{args.day:02d}")
             return
