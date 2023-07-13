@@ -254,14 +254,14 @@ def main():
                     row[4] += f"\n(correct: {correct.answer_a})"
                     wrong += inc
 
-                if day < 25 or scraped.answer_b:
+                if day < 25 and part_b_locked and i5:
+                    row[5] = "❓"
+                elif day < 25 or scraped.answer_b:
                     row[5] = "❌✅"[i5] + f" {_trunc(scraped.answer_b)}"
                     count += inc
                     if not i5:
                         row[5] += f"\n(correct: {correct.answer_b})"
                         wrong += inc
-                if day < 25 and part_b_locked and i5:
-                    row[5] = "❓"
 
                 if scraped.extra or correct.extra:
                     row[6] = f"{scraped.extra or correct.extra or ''}"
