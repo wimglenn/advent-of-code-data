@@ -52,14 +52,15 @@ def main():
         action="store_true",
         help="enable debug logging",
     )
-    parser.add_argument(
-        "-e",
-        "--example-parser",
-        nargs="?",
-        choices=plugins,
-        const="aocd_examples_canned",
-        help="get the example(s) data, if any",
-    )
+    if plugins:
+        parser.add_argument(
+            "-e",
+            "--example-parser",
+            nargs="?",
+            choices=plugins,
+            const="aocd_examples_canned",
+            help="get the example(s) data, if any",
+        )
     if len(users) > 1:
         parser.add_argument(
             "-u",
@@ -87,9 +88,10 @@ def main():
         session = users[args.user]
     except (KeyError, AttributeError):
         session = None
-    if args.example_parser:
+    parser_name = getattr(args, "example_parser", None)
+    if parser_name:
         puzzle = Puzzle(year=args.year, day=args.day)
-        examples = puzzle._get_examples(parser_name=args.example_parser)
+        examples = puzzle._get_examples(parser_name)
         if not examples:
             print(f"no examples available for {args.year}/{args.day:02d}")
             return

@@ -152,8 +152,8 @@ def main():
     plugins = {ep.name: ep for ep in eps}
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-p",
-        "--plugin",
+        "-e",
+        "--example-parser",
         choices=list(plugins),
         default="aocd_examples_canned",
         help="plugin to use for example extraction testing (default: %(default)s)",
@@ -185,7 +185,7 @@ def main():
             file=sys.stderr,
         )
         sys.exit(1)
-    plugin = plugins[args.plugin].load()
+    plugin = plugins[args.example_parser].load()
     console = Console()
     parser_wants_real_datas = getattr(plugin, "uses_real_datas", True)
 
