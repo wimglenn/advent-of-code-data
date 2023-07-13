@@ -3,6 +3,7 @@ import logging
 import re
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from itertools import zip_longest
 from typing import NamedTuple
 
@@ -10,6 +11,7 @@ import bs4
 
 from aocd import models
 from aocd.exceptions import ExampleParserError
+from aocd.utils import AOC_TZ
 from aocd.utils import get_plugins
 from aocd.utils import _get_soup
 
@@ -158,7 +160,9 @@ def main():
         default="aocd_examples_canned",
         help="plugin to use for example extraction testing (default: %(default)s)",
     )
-    parser.add_argument("-y", "--years", nargs="+", type=int, action="extend")
+    aoc_now = datetime.now(tz=AOC_TZ)
+    all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
+    parser.add_argument("-y", "--years", nargs="+", choices=all_years, type=int, action="extend")
     parser.add_argument(
         "-v",
         "--verbose",
@@ -175,7 +179,7 @@ def main():
     logging.basicConfig(level=log_level)
     years = args.years
     if not years:
-        years = range(2015, 2023)
+        years = all_years
     if not plugins:
         print(
             "There are no plugins available. Install some package(s) "
@@ -191,7 +195,6 @@ def main():
 
     wrong = count = 0
     for year in years:
-
         table = Table(title=f"Advent of Code examples for year {year}")
         table.add_column("YYYY/DD", style="cyan")
         table.add_column("count")
@@ -203,6 +206,8 @@ def main():
         missing = Example("")
         for day in range(1, 26):
             puzzle = models.Puzzle(year, day)
+            if datetime.now(tz=AOC_TZ) < puzzle.unlock_time(local=False):
+                break
             page = Page.from_raw(html=puzzle._get_prose())
             part_b_locked = page.article_b is None
             if parser_wants_real_datas:
@@ -269,4 +274,4 @@ def main():
                 table.add_row(*row)
         console.print(table)
     score = count - wrong
-    print(f"plugin {args.plugin!r} scored {score}/{count} ({score/count:.1%})")
+    print(f"plugin {args.example_parser!r} scored {score}/{count} ({score/count:.1%})")
