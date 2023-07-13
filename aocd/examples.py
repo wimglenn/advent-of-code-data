@@ -52,7 +52,7 @@ class Page:
         day, year = map(int, match.groups())
         articles = soup.find_all("article")
         if len(articles) == 0:
-            raise ExampleParserError(f"no <article> found in html")
+            raise ExampleParserError("no <article> found in html")
         elif len(articles) == 1:
             [article_a] = articles
             a_raw = str(article_a)
@@ -62,7 +62,7 @@ class Page:
             a_raw = str(article_a)
             b_raw = str(article_b)
         else:
-            raise ExampleParserError(f"too many <article> found in html")
+            raise ExampleParserError("too many <article> found in html")
         page = Page(
             raw_html=html,
             soup=soup,
