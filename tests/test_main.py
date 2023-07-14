@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 import pytest
 
 from aocd.cli import main
@@ -79,3 +81,44 @@ def test_main_user_wat(mocker, capsys):
         main()
     out, err = capsys.readouterr()
     assert "error: argument -u/--user: invalid choice 'z' (choose from bo, ted)" in err
+
+
+def test_aocd_no_examples(mocker, pook, capsys):
+    mocker.patch("sys.argv", ["aocd", "-d", "2022", "1", "--example"])
+    pook.get("https://adventofcode.com/2022/day/1")
+    main()
+    out, err = capsys.readouterr()
+    assert not err
+    assert out.strip() == "no examples available for 2022/01"
+
+
+def test_aocd_examples(mocker, pook, capsys):
+    mocker.patch("sys.argv", ["aocd", "2022", "1", "--example"])
+    resp = """
+        <title>Day 1 - Advent of Code 2022</title>
+        <h2>--- Day 1: Test aocd examples ---</h2>
+        <article>
+        <pre><code>test input data</code></pre>
+        <code>test answer_a</code>
+        </article>
+        <article>
+        <code>test answer_b</code>
+        </article>
+    """
+    pook.get("https://adventofcode.com/2022/day/1", response_body=resp)
+    main()
+    out, err = capsys.readouterr()
+    assert not err
+    expected = dedent("""\
+                               --- Day 1: Test aocd examples ---                        
+                              https://adventofcode.com/2022/day/1                       
+        ------------------------------- Example data 1/1 -------------------------------
+        test input data
+        --------------------------------------------------------------------------------
+        answer_a: answer_a
+        answer_b: answer_b
+        --------------------------------------------------------------------------------
+
+
+    """)
+    assert out == expected
