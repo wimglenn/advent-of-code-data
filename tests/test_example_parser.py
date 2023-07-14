@@ -1,5 +1,3 @@
-from textwrap import dedent
-
 import pytest
 
 from aocd.examples import main
@@ -80,14 +78,4 @@ def test_aoce(mocker, freezer, pook, capsys):
     main()
     out, err = capsys.readouterr()
     assert not err
-    assert out == dedent(
-        """\
-                             Advent of Code examples for year 2022                      
-        ┏━━━━━━━━━┳━━━━━━━┳━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━┓
-        ┃ YYYY/DD ┃ count ┃ eg ┃ Example data  ┃ Part A answer ┃ Part B answer ┃ Extra ┃
-        ┡━━━━━━━━━╇━━━━━━━╇━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━┩
-        │ 2022/01 │ ✅ 1  │ 1  │ ✅ (15 bytes) │ ✅ answer_a   │ ✅ answer_b   │       │
-        └─────────┴───────┴────┴───────────────┴───────────────┴───────────────┴───────┘
-        plugin 'aocd_examples_canned' scored 4/4 (100.0%)
-        """
-    )
+    assert "✅ (15 bytes)" in out

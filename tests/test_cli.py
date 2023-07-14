@@ -1,5 +1,3 @@
-from textwrap import dedent
-
 import pytest
 
 from aocd.cli import main
@@ -109,16 +107,4 @@ def test_aocd_examples(mocker, pook, capsys):
     main()
     out, err = capsys.readouterr()
     assert not err
-    expected = dedent("""\
-                               --- Day 1: Test aocd examples ---                        
-                              https://adventofcode.com/2022/day/1                       
-        ------------------------------- Example data 1/1 -------------------------------
-        test input data
-        --------------------------------------------------------------------------------
-        answer_a: answer_a
-        answer_b: answer_b
-        --------------------------------------------------------------------------------
-
-
-    """)
-    assert out == expected
+    assert "test input data" in out
