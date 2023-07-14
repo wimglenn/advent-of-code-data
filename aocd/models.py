@@ -8,13 +8,16 @@ import webbrowser
 from datetime import datetime
 from datetime import timedelta
 from functools import cache
+from functools import cached_property
+from importlib.metadata import entry_points
+from itertools import count
 from pathlib import Path
 from textwrap import dedent
 
-import bs4
-
+from . import examples
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
+from .exceptions import ExampleParserError
 from .exceptions import PuzzleLockedError
 from .exceptions import PuzzleUnsolvedError
 from .exceptions import UnknownUserError
@@ -24,6 +27,7 @@ from .utils import atomic_write_file
 from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
+from .utils import _get_soup
 from .utils import http
 
 
@@ -54,15 +58,20 @@ class User:
 
     @property
     def auth(self):
+        """The header necessary to get user-specific puzzle input and prose"""
         return {"Cookie": f"session={self.token}"}
 
     @property
     def id(self):
-        fname = AOCD_CONFIG_DIR / "token2id.json"
+        """User's token might change (they expire eventually) but the id found on AoC's
+        settings page for a logged-in user is as close as we can get to a primary key.
+        This id is used to key the cache, so that your caches aren't unnecessarily
+        invalidated by being issued a new token"""
+        path = AOCD_CONFIG_DIR / "token2id.json"
         if User._token2id is None:
             try:
-                User._token2id = json.loads(fname.read_text())
-                log.debug("loaded user id memo from %s", fname)
+                User._token2id = json.loads(path.read_text())
+                log.debug("loaded user id memo from %s", path)
             except FileNotFoundError:
                 User._token2id = {}
         if self.token not in User._token2id:
@@ -70,8 +79,8 @@ class User:
             owner = get_owner(self.token)
             log.debug("got owner=%s, adding to memo", owner)
             User._token2id[self.token] = owner
-            _ensure_intermediate_dirs(fname)
-            fname.write_text(json.dumps(User._token2id, sort_keys=True, indent=2))
+            _ensure_intermediate_dirs(path)
+            path.write_text(json.dumps(User._token2id, sort_keys=True, indent=2))
         else:
             owner = User._token2id[self.token]
         if self._owner == "unknown.unknown.0":
@@ -83,9 +92,16 @@ class User:
 
     @property
     def memo_dir(self):
+        """
+        Directory where this user's puzzle inputs, answers etc. are stored on filesystem.
+        """
         return AOCD_DATA_DIR / self.id
 
     def get_stats(self, years=None):
+        """
+        Parsed version of your personal stats (rank, solve time, score).
+        See https://adventofcode.com/<year>/leaderboard/self when logged in.
+        """
         aoc_now = datetime.now(tz=AOC_TZ)
         all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
         if isinstance(years, int) and years in all_years:
@@ -105,7 +121,7 @@ class User:
                 raise DeadTokenError(msg)
             if response.status >= 400:
                 raise AocdError(f"HTTP {response.status} at {url}")
-            soup = bs4.BeautifulSoup(response.data, "html.parser")
+            soup = _get_soup(response.data)
             if soup.article is None and ur_broke in soup.main.text:
                 continue
             stats_txt = soup.article.pre.text
@@ -114,14 +130,15 @@ class User:
             for line in reversed(lines):
                 vals = line.split()
                 day = int(vals[0])
-                results[year, day] = {}
-                results[year, day]["a"] = {
+                k = f"{year}/{day:02d}"
+                results[k] = {}
+                results[k]["a"] = {
                     "time": _parse_duration(vals[1]),
                     "rank": int(vals[2]),
                     "score": int(vals[3]),
                 }
                 if vals[4] != "-":
-                    results[year, day]["b"] = {
+                    results[k]["b"] = {
                         "time": _parse_duration(vals[4]),
                         "rank": int(vals[5]),
                         "score": int(vals[6]),
@@ -206,21 +223,28 @@ class Puzzle:
         return data.rstrip("\r\n")
 
     @property
-    def example_data(self):
-        text = self._get_prose()
-        soup = bs4.BeautifulSoup(text, "html.parser")
-        try:
-            data = soup.pre.text
-        except Exception:
-            log.warning("unable to find example data for %d/%02d", self.year, self.day)
-            data = ""
-        return data.rstrip("\r\n")
+    def examples(self):
+        return self._get_examples()
 
-    @property
-    @cache
+    def _get_examples(self, parser_name="aocd_examples_canned"):
+        try:
+            page = examples.Page.from_raw(html=self._get_prose())
+            parser = _load_example_parser(name=parser_name)
+            if getattr(parser, "uses_real_datas", True):
+                datas = examples._get_unique_real_inputs(self.year, self.day)
+            else:
+                datas = []
+            result = parser(page, datas)
+        except Exception as err:
+            msg = "unable to find example data for %d/%02d (%r)"
+            log.warning(msg, self.year, self.day, err)
+            result = []
+        return result
+
+    @cached_property
     def title(self):
         prose = self._get_prose()
-        soup = bs4.BeautifulSoup(prose, "html.parser")
+        soup = _get_soup(prose)
         if soup.h2 is None:
             raise AocdError("heading not found")
         txt = soup.h2.text
@@ -358,7 +382,7 @@ class Puzzle:
             return
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
-        level = {"a": 1, "b": 2}[part]
+        level = {"a": "1", "b": "2"}[part]
         response = http.request_encode_body(
             "POST",
             url=url,
@@ -370,7 +394,7 @@ class Puzzle:
             log.error("got %s status code", response.status)
             log.error(response.data.decode(errors="replace"))
             raise AocdError(f"HTTP {response.status} at {url}")
-        soup = bs4.BeautifulSoup(response.data, "html.parser")
+        soup = _get_soup(response.data)
         message = soup.article.text
         color = None
         if "That's the right answer" in message:
@@ -436,11 +460,11 @@ class Puzzle:
         return msg
 
     def _save_correct_answer(self, value, part):
-        fname = getattr(self, f"answer_{part}_fname")
+        path = getattr(self, f"answer_{part}_fname")
         txt = value.strip()
         msg = "saving"
-        if fname.is_file():
-            prev = fname.read_text()
+        if path.is_file():
+            prev = path.read_text()
             if txt == prev:
                 msg = "the correct answer for %d/%02d part %s was already saved"
                 log.debug(msg, self.year, self.day, part)
@@ -448,20 +472,20 @@ class Puzzle:
             msg = "overwriting"
         msg += " the correct answer for %d/%02d part %s: %s"
         log.info(msg, self.year, self.day, part, txt)
-        _ensure_intermediate_dirs(fname)
-        fname.write_text(txt)
+        _ensure_intermediate_dirs(path)
+        path.write_text(txt)
 
     def _save_incorrect_answer(self, value, part, extra=""):
-        fname = getattr(self, f"incorrect_answers_{part}_fname")
+        path = getattr(self, f"incorrect_answers_{part}_fname")
         msg = "appending an incorrect answer for %d/%02d part %s"
         log.info(msg, self.year, self.day, part)
-        _ensure_intermediate_dirs(fname)
-        if fname.is_file():
-            txt = fname.read_text()
+        _ensure_intermediate_dirs(path)
+        if path.is_file():
+            txt = path.read_text()
         else:
             txt = ""
         txt += value.strip() + " " + extra.replace("\n", " ") + "\n"
-        fname.write_text(txt)
+        path.write_text(txt)
 
     def _get_answer(self, part):
         """
@@ -517,10 +541,15 @@ class Puzzle:
 
     @property
     def my_stats(self):
+        """
+        Your personal stats (rank, solve time, score) for this particular puzzle.
+        Raises `PuzzleUnsolvedError` if you haven't actually solved it yet.
+        """
         stats = self.user.get_stats(years=[self.year])
-        if (self.year, self.day) not in stats:
+        key = f"{self.year}/{self.day:02d}"
+        if key not in stats:
             raise PuzzleUnsolvedError
-        result = stats[self.year, self.day]
+        result = stats[key]
         return result
 
     def _request_puzzle_page(self):
@@ -532,10 +561,11 @@ class Puzzle:
             raise AocdError(f"HTTP {response.status} at {self.url}")
         self._last_resp = response
         text = response.data.decode()
-        soup = bs4.BeautifulSoup(text, "html.parser")
+        soup = _get_soup(text)
         hit = "Your puzzle answer was"
         if "Both parts of this puzzle are complete!" in text:  # solved
             if not self.prose2_fname.is_file():
+                _ensure_intermediate_dirs(self.prose2_fname)
                 self.prose2_fname.write_text(text)
             hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             if self.day == 25:
@@ -546,38 +576,66 @@ class Puzzle:
             self._save_correct_answer(pa.code.text, "a")
         elif "The first half of this puzzle is complete!" in text:  # part b unlocked
             if not self.prose1_fname.is_file():
+                _ensure_intermediate_dirs(self.prose1_fname)
                 self.prose1_fname.write_text(text)
             [pa] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             self._save_correct_answer(pa.code.text, "a")
         else:  # init, or dead token - doesn't really matter
             if not self.prose0_fname.is_file():
-                _ensure_intermediate_dirs(self.prose0_fname)
-                self.prose0_fname.write_text(text)
+                if "Advent of Code" in text:
+                    _ensure_intermediate_dirs(self.prose0_fname)
+                    self.prose0_fname.write_text(text)
 
     def _get_prose(self):
         # prefer to return full prose (i.e. part b is solved or unlocked)
         # prefer to return prose with answers from same the user id as self.user.id
         for path in self.prose2_fname, self.prose1_fname:
             if path.is_file():
+                log.debug("_get_prose using cached %s", path)
                 return path.read_text()
             # see if other user has cached it
             other = next(AOCD_DATA_DIR.glob("*/" + path.name), None)
             if other is not None:
+                log.debug("_get_prose using cached %s", other)
                 return other.read_text()
         if self.prose0_fname.is_file():
+            log.debug("_get_prose using cached %s", self.prose0_fname)
             return self.prose0_fname.read_text()
         self._request_puzzle_page()
         for path in self.prose2_fname, self.prose1_fname, self.prose0_fname:
             if path.is_file():
+                log.debug("_get_prose using %s", path)
                 return path.read_text()
+        raise AocdError(f"Could not get prose for {self.year}/{self.day:02d}")
 
     @property
     def easter_eggs(self):
         txt = self._get_prose()
-        soup = bs4.BeautifulSoup(txt, "html.parser")
+        soup = _get_soup(txt)
         # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
+
+    def unlock_time(self, local=True):
+        """
+        The time this puzzle unlocked. Might be in the future.
+        If local is True (default), returns a datetime in your local zone.
+        If local is False, returns a datetime in AoC's timezone (i.e. America/New_York)
+        """
+        result = datetime(self.year, 12, self.day, tzinfo=AOC_TZ)
+        if local:
+            localzone = datetime.now().astimezone().tzinfo
+            result = result.astimezone(tz=localzone)
+        return result
+
+    @staticmethod
+    def all(user=None):
+        for year in count(2015):
+            for day in range(1, 26):
+                puzzle = Puzzle(year, day, user)
+                if datetime.now(tz=AOC_TZ) < puzzle.unlock_time(local=False):
+                    return
+                yield puzzle
 
 
 def _parse_duration(s):
@@ -595,3 +653,22 @@ def _load_users():
     except FileNotFoundError:
         users = {"default": default_user().token}
     return users
+
+
+@cache
+def _load_example_parser(group="adventofcode.examples", name="aocd_examples_canned"):
+    try:
+        # Python 3.10+ - group/name selectable entry points
+        eps = entry_points().select(group=group, name=name)
+    except AttributeError:
+        # Python 3.9 - dict interface
+        eps = [ep for ep in entry_points()[group] if ep.name == name]
+    if not eps:
+        msg = f"could not find the example parser plugin {group=}/{name=}"
+        raise ExampleParserError(msg)
+    if len(eps) > 1:
+        log.warning("expected unique entrypoint but found %d entrypoints", len(eps))
+    ep = next(iter(eps))
+    parser = ep.load()
+    log.debug("loaded example parser %r", parser)
+    return parser

@@ -19,6 +19,7 @@ dependencies = [
     "pebble",
     "urllib3",
     'tzdata ; platform_system == "Windows"',
+    "aocd-example-parser >= 2023.1",
 ]
 
 [[project.authors]]
@@ -42,8 +43,11 @@ nb = ["IPython", "jupyter-server"]
 aocd = "aocd.cli:main"
 aoc = "aocd.runner:main"
 aocd-token = "aocd.cookies:scrape_session_tokens"
+aoce = "aocd.examples:main"
 
 [tool.setuptools]
 packages = ["aocd"]
 
-[project.entry-points."adventofcode.user"]
+[project.entry-points]
+"adventofcode.user" = {}  # for user solvers
+"adventofcode.examples" = {}  # for example-parser implementations

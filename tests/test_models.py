@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from datetime import timedelta
 
 import numpy as np
@@ -10,6 +11,7 @@ from aocd.exceptions import PuzzleUnsolvedError
 from aocd.exceptions import UnknownUserError
 from aocd.models import Puzzle
 from aocd.models import User
+from aocd.utils import AOC_TZ
 
 
 def test_get_answer(aocd_data_dir):
@@ -154,7 +156,7 @@ def test_get_title_failure_no_heading(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="--- Day 1: hello ---",
+        response_body="Advent of Code --- Day 1: hello ---",
     )
     puzzle = Puzzle(year=2018, day=1)
     with pytest.raises(AocdError("heading not found")):
@@ -165,7 +167,7 @@ def test_get_title_failure(freezer, pook, caplog):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>--- Day 11: This SHOULD be day 1 ---</h2>",
+        response_body="Advent of Code <h2>--- Day 11: This SHOULD be day 1 ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     msg = "unexpected h2 text: --- Day 11: This SHOULD be day 1 ---"
@@ -177,7 +179,7 @@ def test_pprint(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
+        response_body="Advent of Code <h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -193,7 +195,7 @@ def test_pprint_cycle(freezer, pook, mocker):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
-        response_body="<h2>--- Day 1: The Puzzle Title ---</h2>",
+        response_body="Advent of Code <h2>--- Day 1: The Puzzle Title ---</h2>",
     )
     puzzle = Puzzle(year=2018, day=1)
     assert puzzle.title == "The Puzzle Title"
@@ -297,6 +299,7 @@ def test_easter_eggs(pook):
     pook.get(
         url="https://adventofcode.com/2017/day/5",
         response_body=(
+            "Advent of Code"
             '<article class="day-desc">'
             "<h2>--- Day 5: A Maze of Twisty Trampolines, All Alike ---</h2>"
             '<p>An urgent <span title="Later, on its turn, it sends you a '
@@ -372,35 +375,49 @@ def test_user_from_unknown_id(aocd_config_dir):
         User.from_id("blah")
 
 
-def test_example_data_cache(aocd_data_dir, pook):
+def test_examples_cache(aocd_data_dir, pook):
     mock = pook.get(
-        url="https://adventofcode.com/2018/day/1",
-        response_body="<pre><code>1\n2\n3\n</code></pre><pre><code>annotated</code></pre>",
+        url="https://adventofcode.com/2014/day/1",
+        response_body=(
+            "<title>Day 1 - Advent of Code 2014</title>"
+            "<article><pre><code>1\n2\n3\n</code></pre><code>abc</code></article>"
+            "<article><pre><code>1\n2\n3\n</code></pre><code>xyz</code></article>"
+        ),
         times=1,
     )
-    puzzle = Puzzle(day=1, year=2018)
+    puzzle = Puzzle(day=1, year=2014)
     assert mock.calls == 0
-    assert puzzle.example_data == "1\n2\n3"
+    assert puzzle.examples[0].input_data == "1\n2\n3"
     assert mock.calls == 1
-    assert puzzle.example_data == "1\n2\n3"
+    assert puzzle.examples[0].input_data
     assert mock.calls == 1
 
 
-def test_example_data_fail(pook):
-    url = "https://adventofcode.com/2018/day/1"
-    pook.get(url, reply=418, response_body="I'm a teapot")
-    puzzle = Puzzle(day=1, year=2018)
-    with pytest.raises(AocdError(f"HTTP 418 at {url}")):
-        puzzle.example_data
+def test_example_partial(aocd_data_dir, pook):
+    # only one article, for example when part B isn't unlocked yet
+    pook.get(
+        url="https://adventofcode.com/2014/day/1",
+        response_body=(
+            "<title>Day 1 - Advent of Code 2014</title>"
+            "<article><pre><code>1\n2\n3\n</code></pre><code>abc</code></article>"
+        ),
+    )
+    puzzle = Puzzle(day=1, year=2014)
+    [example] = puzzle.examples
+    assert example.input_data == "1\n2\n3"
+    assert example.answer_a == "abc"
+    assert example.answer_b is None
 
 
-def test_example_data_missing(pook, caplog):
+def test_example_data_crash(pook, caplog):
     url = "https://adventofcode.com/2018/day/1"
-    pook.get(url, reply=200, response_body="wat")
+    title_only = "<title>Day 1 - Advent of Code 2014</title>"
+    pook.get(url, reply=200, response_body=title_only)
     puzzle = Puzzle(day=1, year=2018)
-    assert puzzle.example_data == ""
-    record = ("aocd.models", logging.WARNING, "unable to find example data for 2018/01")
-    assert record in caplog.record_tuples
+    assert not puzzle.examples
+    err_repr = "ExampleParserError('no <article> found in html')"
+    msg = f"unable to find example data for 2018/01 ({err_repr})"
+    assert ("aocd.models", logging.WARNING, msg) in caplog.record_tuples
 
 
 @pytest.mark.parametrize(
@@ -436,3 +453,51 @@ def test_get_prose_cache(aocd_data_dir):
     my_cached = aocd_data_dir / "testauth.testuser.000" / "2022_01_prose.2.html"
     my_cached.write_text("bar")
     assert puzzle._get_prose() == "bar"
+
+
+def test_get_prose_fail(pook):
+    url = "https://adventofcode.com/2018/day/1"
+    pook.get(url, reply=400)
+    puzzle = Puzzle(day=1, year=2018)
+    with pytest.raises(AocdError("HTTP 400 at https://adventofcode.com/2018/day/1")):
+        puzzle._get_prose()
+
+
+def test_both_complete_on_day_25(pook):
+    # we still parse the page even though both are complete but only one answer found
+    pook.get(
+        url="https://adventofcode.com/2018/day/25",
+        response_body=(
+            "Both parts of this puzzle are complete!"
+            "<p>Your puzzle answer was <code>answerA</code></p>"
+        ),
+    )
+    puzzle = Puzzle(day=25, year=2018)
+    puzzle._get_prose()
+
+
+def test_empty_response(pook):
+    pook.get(url="https://adventofcode.com/2018/day/25")
+    puzzle = Puzzle(day=25, year=2018)
+    with pytest.raises(AocdError("Could not get prose for 2018/25")):
+        puzzle._get_prose()
+
+
+def test_unlock_time(pook):
+    pook.get(url="https://adventofcode.com/2018/day/25")
+    puzzle = Puzzle(day=13, year=2024)
+    unlock_local = puzzle.unlock_time()
+    unlock_aoctz = puzzle.unlock_time(local=False)
+    expected = datetime(2024, 12, 13, 0, 0, 0, tzinfo=AOC_TZ)
+    assert unlock_aoctz == unlock_local == expected
+
+
+def test_all_puzzles(freezer):
+    freezer.move_to("2017-10-10")
+    all_puzzles = list(Puzzle.all())
+    assert len(all_puzzles) == 50
+    first, *rest, last = all_puzzles
+    assert first.year == 2015
+    assert first.day == 1
+    assert last.year == 2016
+    assert last.day == 25

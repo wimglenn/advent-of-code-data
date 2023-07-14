@@ -7,10 +7,10 @@ import sys
 import tempfile
 import time
 from datetime import datetime
+from functools import cache
 from importlib.metadata import entry_points
 from importlib.metadata import version
 from itertools import cycle
-from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import bs4
@@ -26,8 +26,8 @@ USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com
 http = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
 
 
-def _ensure_intermediate_dirs(fname):
-    Path(fname).expanduser().parent.mkdir(parents=True, exist_ok=True)
+def _ensure_intermediate_dirs(path):
+    path.expanduser().parent.mkdir(parents=True, exist_ok=True)
 
 
 def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
@@ -78,8 +78,11 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
 
 
 def get_owner(token):
-    """parse owner of the token. raises DeadTokenError if the token is expired/invalid.
-    returns a string like authtype.username.userid"""
+    """
+    Find owner of the token.
+    Raises `DeadTokenError` if the token is expired/invalid.
+    Returns a string like "authtype.username.userid"
+    """
     url = "https://adventofcode.com/settings"
     headers = http.headers | {"Cookie": f"session={token}"}
     response = http.request("GET", url, headers=headers, redirect=False)
@@ -87,7 +90,7 @@ def get_owner(token):
         # bad tokens will 302 redirect to main page
         log.info("session %s is dead - status_code=%s", token, response.status)
         raise DeadTokenError(f"the auth token ...{token[-4:]} is dead")
-    soup = bs4.BeautifulSoup(response.data, "html.parser")
+    soup = _get_soup(response.data)
     auth_source = "unknown"
     username = "unknown"
     userid = soup.code.text.split("-")[1]
@@ -112,16 +115,18 @@ def get_owner(token):
     return result
 
 
-def atomic_write_file(fname, contents_str):
-    """Atomically write a string to a file by writing it to a temporary file, and then
+def atomic_write_file(path, contents_str):
+    """
+    Atomically write a string to a file by writing it to a temporary file, and then
     renaming it to the final destination name. This solves a race condition where existence
-    of a file doesn't necessarily mean the contents are all correct yet."""
-    _ensure_intermediate_dirs(fname)
-    with tempfile.NamedTemporaryFile(mode="w", dir=fname.parent, delete=False) as f:
+    of a file doesn't necessarily mean the content is valid yet.
+    """
+    _ensure_intermediate_dirs(path)
+    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as f:
         log.debug("writing to tempfile @ %s", f.name)
         f.write(contents_str)
-    log.debug("moving %s -> %s", f.name, fname)
-    shutil.move(f.name, fname)
+    log.debug("moving %s -> %s", f.name, path)
+    shutil.move(f.name, path)
 
 
 def _cli_guess(choice, choices):
@@ -140,7 +145,7 @@ def _cli_guess(choice, choices):
 
 _ansi_colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
 if platform.system() == "Windows":
-    os.system("color")  # makes ANSI colors work in the windows cmd window
+    os.system("color")  # hack - makes ANSI colors work in the windows cmd window
 
 
 def colored(txt, color):
@@ -152,9 +157,17 @@ def colored(txt, color):
 
 
 def get_plugins(group="adventofcode.user"):
+    """
+    Installed plugins for user solves.
+    """
     try:
         # Python 3.10+
         return entry_points(group=group)
     except TypeError:
         # Python 3.9
         return entry_points().get(group, [])
+
+
+@cache
+def _get_soup(html):
+    return bs4.BeautifulSoup(html, "html.parser")

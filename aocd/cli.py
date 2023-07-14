@@ -6,16 +6,21 @@ from importlib.metadata import version
 
 from .get import get_data
 from .get import most_recent_year
+from .models import Puzzle
 from .models import _load_users
 from .utils import _cli_guess
 from .utils import AOC_TZ
+from .utils import get_plugins
 
 
 def main():
+    """Get your puzzle input data, caching it if necessary, and print it on stdout."""
     aoc_now = datetime.datetime.now(tz=AOC_TZ)
     days = range(1, 26)
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     users = _load_users()
+    eps = get_plugins(group="adventofcode.examples")
+    plugins = {ep.name: ep for ep in eps}
     parser = argparse.ArgumentParser(
         description=f"Advent of Code Data v{version('advent-of-code-data')}",
         usage=f"aocd [day 1-25] [year 2015-{years[-1]}]",
@@ -47,6 +52,15 @@ def main():
         action="store_true",
         help="enable debug logging",
     )
+    if plugins:
+        parser.add_argument(
+            "-e",
+            "--example-parser",
+            nargs="?",
+            choices=plugins,
+            const="aocd_examples_canned",
+            help="get the example(s) data, if any",
+        )
     if len(users) > 1:
         parser.add_argument(
             "-u",
@@ -74,5 +88,28 @@ def main():
         session = users[args.user]
     except (KeyError, AttributeError):
         session = None
-    data = get_data(session=session, day=args.day, year=args.year)
-    print(data)
+    parser_name = getattr(args, "example_parser", None)
+    if parser_name:
+        puzzle = Puzzle(year=args.year, day=args.day)
+        examples = puzzle._get_examples(parser_name)
+        if not examples:
+            print(f"no examples available for {args.year}/{args.day:02d}")
+            return
+        w = 80
+        head = f"--- Day {puzzle.day}: {puzzle.title} ---"
+        print(head.center(w, " "))
+        print(puzzle.url.center(w, " "))
+        for i, example in enumerate(examples, start=1):
+            print(f" Example data {i}/{len(examples)} ".center(w, "-"))
+            print(example.input_data)
+            print("-" * w)
+            print("answer_a:", example.answer_a or "-")
+            print("answer_b:", example.answer_b or "-")
+            if example.extra:
+                print("extra:", example.extra)
+            print("-" * w)
+            print()
+            print()
+    else:
+        data = get_data(session=session, day=args.day, year=args.year)
+        print(data)
