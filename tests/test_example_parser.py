@@ -1,5 +1,8 @@
+from textwrap import dedent
+
 import pytest
 
+from aocd.examples import main
 from aocd.examples import Page
 from aocd.exceptions import ExampleParserError
 
@@ -24,7 +27,7 @@ def test_page_repr(mocker):
 
 def test_page_a_only(mocker):
     mocker.patch("aocd.examples.hex", return_value="0xdeadbeef")
-    html_a_only = fake_prose[:fake_prose.rfind("<article>")]
+    html_a_only = fake_prose[: fake_prose.rfind("<article>")]
     page_a_only = Page.from_raw(html=html_a_only)
     # The * indicates part b was not unlocked yet
     assert repr(page_a_only) == f"<Page(1234, 1)* at 0xdeadbeef>"
@@ -62,9 +65,29 @@ def test_invalid_page_no_articles():
 
 def test_invalid_page_no_title():
     html = fake_prose.replace("Advent", "Advert")
-    err = ExampleParserError(
-        "failed to extract year/day from title "
-        "'Day 1 - Advert of Code 1234'"
-    )
-    with pytest.raises(err):
+    msg = "failed to extract year/day from title 'Day 1 - Advert of Code 1234'"
+    with pytest.raises(ExampleParserError(msg)):
         Page.from_raw(html=html)
+
+
+def test_aoce(mocker, freezer, pook, capsys):
+    pook.get(
+        url="https://adventofcode.com:443/2022/day/1",
+        response_body=fake_prose,
+    )
+    freezer.move_to("2022-12-01 12:00:00-0500")
+    mocker.patch("sys.argv", ["aoce", "-y", "2022"])
+    main()
+    out, err = capsys.readouterr()
+    assert not err
+    assert out == dedent(
+        """\
+                             Advent of Code examples for year 2022                      
+        ┏━━━━━━━━━┳━━━━━━━┳━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━┓
+        ┃ YYYY/DD ┃ count ┃ eg ┃ Example data  ┃ Part A answer ┃ Part B answer ┃ Extra ┃
+        ┡━━━━━━━━━╇━━━━━━━╇━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━┩
+        │ 2022/01 │ ✅ 1  │ 1  │ ✅ (15 bytes) │ ✅ answer_a   │ ✅ answer_b   │       │
+        └─────────┴───────┴────┴───────────────┴───────────────┴───────────────┴───────┘
+        plugin 'aocd_examples_canned' scored 4/4 (100.0%)
+        """
+    )

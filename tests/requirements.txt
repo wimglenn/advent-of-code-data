@@ -7,3 +7,4 @@ pytest-mock
 pytest-raisin
 pytest-freezer
 pytest-socket
+rich
