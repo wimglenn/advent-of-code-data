@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from datetime import timedelta
 
 import numpy as np
@@ -10,6 +11,7 @@ from aocd.exceptions import PuzzleUnsolvedError
 from aocd.exceptions import UnknownUserError
 from aocd.models import Puzzle
 from aocd.models import User
+from aocd.utils import AOC_TZ
 
 
 def test_get_answer(aocd_data_dir):
@@ -451,3 +453,51 @@ def test_get_prose_cache(aocd_data_dir):
     my_cached = aocd_data_dir / "testauth.testuser.000" / "2022_01_prose.2.html"
     my_cached.write_text("bar")
     assert puzzle._get_prose() == "bar"
+
+
+def test_get_prose_fail(pook):
+    url = "https://adventofcode.com/2018/day/1"
+    pook.get(url, reply=400)
+    puzzle = Puzzle(day=1, year=2018)
+    with pytest.raises(AocdError("HTTP 400 at https://adventofcode.com/2018/day/1")):
+        puzzle._get_prose()
+
+
+def test_both_complete_on_day_25(pook):
+    # we still parse the page even though both are complete but only one answer found
+    pook.get(
+        url="https://adventofcode.com/2018/day/25",
+        response_body=(
+            "Both parts of this puzzle are complete!"
+            "<p>Your puzzle answer was <code>answerA</code></p>"
+        ),
+    )
+    puzzle = Puzzle(day=25, year=2018)
+    puzzle._get_prose()
+
+
+def test_empty_response(pook):
+    pook.get(url="https://adventofcode.com/2018/day/25")
+    puzzle = Puzzle(day=25, year=2018)
+    with pytest.raises(AocdError("Could not get prose for 2018/25")):
+        puzzle._get_prose()
+
+
+def test_unlock_time(pook):
+    pook.get(url="https://adventofcode.com/2018/day/25")
+    puzzle = Puzzle(day=13, year=2024)
+    unlock_local = puzzle.unlock_time()
+    unlock_aoctz = puzzle.unlock_time(local=False)
+    expected = datetime(2024, 12, 13, 0, 0, 0, tzinfo=AOC_TZ)
+    assert unlock_aoctz == unlock_local == expected
+
+
+def test_all_puzzles(freezer):
+    freezer.move_to("2017-10-10")
+    all_puzzles = list(Puzzle.all())
+    assert len(all_puzzles) == 50
+    first, *rest, last = all_puzzles
+    assert first.year == 2015
+    assert first.day == 1
+    assert last.year == 2016
+    assert last.day == 25
