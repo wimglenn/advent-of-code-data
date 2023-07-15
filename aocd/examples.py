@@ -137,7 +137,7 @@ def _trunc(s, maxlen=50):
 def _get_unique_real_inputs(year, day):
     path = models.AOCD_DATA_DIR
     paths = path.glob(f"*/{year}_{day:02d}_input.txt")
-    strs = [p.read_text() for p in paths]
+    strs = [p.read_text(encoding="utf-8") for p in paths]
     return list({}.fromkeys(strs))
 
 
