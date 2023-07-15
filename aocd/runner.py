@@ -37,9 +37,9 @@ def main():
     days = range(1, 26)
     users = _load_users()
     utype = partial(_cli_guess, choices=users)
-    log_levels = "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     parser = ArgumentParser(description="AoC runner")
     st = "store_true"
+    v_help = "increased logging (-v INFO, -vv DEBUG)"
     parser.add_argument("-p", "--plugins", nargs="+", choices=plugins)
     parser.add_argument("-y", "--years", type=int, nargs="+", choices=years)
     parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
@@ -48,7 +48,7 @@ def main():
     parser.add_argument("-s", "--no-submit", action=st, help="disable autosubmit")
     parser.add_argument("-r", "--reopen", action=st, help="open browser on NEW solves")
     parser.add_argument("-q", "--quiet", action=st, help="capture output from runner")
-    parser.add_argument("-l", "--log-level", default="WARNING", choices=log_levels)
+    parser.add_argument("-v", "--verbose", action="count", help=v_help)
     args = parser.parse_args()
 
     if not users:
@@ -69,7 +69,13 @@ def main():
             file=sys.stderr,
         )
         sys.exit(1)
-    logging.basicConfig(level=getattr(logging, args.log_level))
+    if args.verbose is None:
+        log_level = logging.WARNING
+    elif args.verbose == 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.DEBUG
+    logging.basicConfig(level=log_level)
     rc = run_for(
         plugs=args.plugins or list(plugins),
         years=args.years or years,

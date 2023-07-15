@@ -80,7 +80,8 @@ class User:
             log.debug("got owner=%s, adding to memo", owner)
             User._token2id[self.token] = owner
             _ensure_intermediate_dirs(path)
-            path.write_text(json.dumps(User._token2id, sort_keys=True, indent=2), encoding="utf-8")
+            txt = json.dumps(User._token2id, sort_keys=True, indent=2)
+            path.write_text(txt, encoding="utf-8")
         else:
             owner = User._token2id[self.token]
         if self._owner == "unknown.unknown.0":
@@ -205,7 +206,7 @@ class Puzzle:
         except FileNotFoundError:
             pass
         else:
-            log.debug("reusing existing data %s", self.input_data_fname)
+            log.debug("input_data cache hit %s", self.input_data_fname)
             return data.rstrip("\r\n")
         sanitized = "..." + self.user.token[-4:]
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
@@ -591,15 +592,15 @@ class Puzzle:
         # prefer to return prose with answers from same the user id as self.user.id
         for path in self.prose2_fname, self.prose1_fname:
             if path.is_file():
-                log.debug("_get_prose using cached %s", path)
+                log.debug("_get_prose cache hit %s", path)
                 return path.read_text(encoding="utf-8")
             # see if other user has cached it
             other = next(AOCD_DATA_DIR.glob("*/" + path.name), None)
             if other is not None:
-                log.debug("_get_prose using cached %s", other)
+                log.debug("_get_prose cache hit %s", other)
                 return other.read_text(encoding="utf-8")
         if self.prose0_fname.is_file():
-            log.debug("_get_prose using cached %s", self.prose0_fname)
+            log.debug("_get_prose cache hit %s", self.prose0_fname)
             return self.prose0_fname.read_text(encoding="utf-8")
         self._request_puzzle_page()
         for path in self.prose2_fname, self.prose1_fname, self.prose0_fname:

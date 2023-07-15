@@ -4,13 +4,13 @@ import os
 import platform
 import shutil
 import sys
-import tempfile
 import time
 from datetime import datetime
 from functools import cache
 from importlib.metadata import entry_points
 from importlib.metadata import version
 from itertools import cycle
+from tempfile import NamedTemporaryFile
 from zoneinfo import ZoneInfo
 
 import bs4
@@ -122,7 +122,7 @@ def atomic_write_file(path, contents_str):
     of a file doesn't necessarily mean the content is valid yet.
     """
     _ensure_intermediate_dirs(path)
-    with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, encoding="utf-8", delete=False) as f:
+    with NamedTemporaryFile("w", dir=path.parent, encoding="utf-8", delete=False) as f:
         log.debug("writing to tempfile @ %s", f.name)
         f.write(contents_str)
     log.debug("moving %s -> %s", f.name, path)

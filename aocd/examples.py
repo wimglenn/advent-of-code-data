@@ -152,6 +152,8 @@ def main():
         )
     eps = get_plugins(group="adventofcode.examples")
     plugins = {ep.name: ep for ep in eps}
+    aoc_now = datetime.now(tz=AOC_TZ)
+    all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-e",
@@ -160,14 +162,20 @@ def main():
         default="aocd_examples_canned",
         help="plugin to use for example extraction testing (default: %(default)s)",
     )
-    aoc_now = datetime.now(tz=AOC_TZ)
-    all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
-    parser.add_argument("-y", "--years", nargs="+", choices=all_years, type=int, action="extend")
+    parser.add_argument(
+        "-y",
+        "--years",
+        nargs="+",
+        help="years to run the parser against (can specify multiple)",
+        choices=all_years,
+        type=int,
+        action="extend",
+    )
     parser.add_argument(
         "-v",
         "--verbose",
         action="count",
-        help="increased logging (may be specified multiple)",
+        help="increased logging (-v INFO, -vv DEBUG)",
     )
     args = parser.parse_args()
     if args.verbose is None:
