@@ -102,11 +102,11 @@ def scrape_session_tokens():
             if os.environ.get("AOC_SESSION"):
                 tokens["AOC_SESSION"] = os.environ["AOC_SESSION"]
             if aocd_token_path.is_file():
-                txt = aocd_token_path.read_text().strip()
+                txt = aocd_token_path.read_text(encoding="utf-8").strip()
                 if txt:
                     tokens[aocd_token_path] = txt.split()[0]
             if aocd_tokens_path.is_file():
-                tokens.update(json.loads(aocd_tokens_path.read_text()))
+                tokens.update(json.loads(aocd_tokens_path.read_text(encoding="utf-8")))
         else:
             tokens = {"CLI": args.check}
         if not tokens:
@@ -136,5 +136,5 @@ def scrape_session_tokens():
             if len(working) == 1:
                 [(token, auth_source)] = working.items()
                 _ensure_intermediate_dirs(aocd_token_path)
-                aocd_token_path.write_text(token)
+                aocd_token_path.write_text(token, encoding="utf-8")
                 log.info("wrote %s session to %s", auth_source, aocd_token_path)

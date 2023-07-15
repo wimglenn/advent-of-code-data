@@ -155,7 +155,7 @@ def run_one(
     input_path = Path("input.txt")
     assert not input_path.exists()
     try:
-        input_path.write_text(data)
+        input_path.write_text(data, encoding="utf-8")
         a, b, walltime, error = run_with_timeout(
             entry_point=entry_point,
             timeout=timeout,
