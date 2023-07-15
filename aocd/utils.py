@@ -5,6 +5,7 @@ import platform
 import shutil
 import sys
 import time
+from collections import deque
 from datetime import datetime
 from functools import cache
 from importlib.metadata import entry_points
@@ -23,7 +24,60 @@ log = logging.getLogger(__name__)
 AOC_TZ = ZoneInfo("America/New_York")
 _v = version("advent-of-code-data")
 USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"
-http = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
+
+
+class HttpClient:
+    # every request to adventofcode.com goes through this wrapper
+    # so that we can put in user agent header, rate-limit, etc
+
+    def __init__(self):
+        self.pool_manager = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
+        self.req_count = {"GET": 0, "POST": 0}
+        self._max_t = 3.0
+        self._cooloff = 0.16
+        self._history = deque([time.time() - self._max_t] * 4, maxlen=4)
+
+    def _limiter(self):
+        now = time.time()
+        t0 = self._history[0]
+        if now - t0 < self._max_t:
+            # made 4 requests within 3 seconds - you're past the speed limit
+            # of 1 req/second and will get a delay of 160ms initially, then
+            # increasing exponentially on subsequent occasions. implemented
+            # at the AoC author's request:
+            #   https://github.com/wimglenn/advent-of-code-data/issues/59
+            log.warning("you're being rate-limited - slow down! (delay=%.02fs)", self._cooloff)
+            time.sleep(self._cooloff)
+            self._cooloff *= 2  # double it for repeat offenders
+        self._history.append(now)
+
+    def get(self, url, token=None, redirect=True):
+        # getting user inputs, puzzle prose, etc
+        if token is None:
+            headers = self.pool_manager.headers
+        else:
+            headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
+        self._limiter()
+        resp = self.pool_manager.request("GET", url, headers=headers, redirect=redirect)
+        self.req_count["GET"] += 1
+        return resp
+
+    def post(self, url, token, fields):
+        # submitting answers
+        headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
+        self._limiter()
+        resp = self.pool_manager.request_encode_body(
+            method="POST",
+            url=url,
+            fields=fields,
+            headers=headers,
+            encode_multipart=False,
+        )
+        self.req_count["POST"] += 1
+        return resp
+
+
+http = HttpClient()
 
 
 def _ensure_intermediate_dirs(path):
@@ -84,8 +138,7 @@ def get_owner(token):
     Returns a string like "authtype.username.userid"
     """
     url = "https://adventofcode.com/settings"
-    headers = http.headers | {"Cookie": f"session={token}"}
-    response = http.request("GET", url, headers=headers, redirect=False)
+    response = http.get(url, token=token, redirect=False)
     if response.status != 200:
         # bad tokens will 302 redirect to main page
         log.info("session %s is dead - status_code=%s", token, response.status)

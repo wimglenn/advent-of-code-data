@@ -57,11 +57,6 @@ class User:
         return user
 
     @property
-    def auth(self):
-        """The header necessary to get user-specific puzzle input and prose"""
-        return {"Cookie": f"session={self.token}"}
-
-    @property
     def id(self):
         """User's token might change (they expire eventually) but the id found on AoC's
         settings page for a logged-in user is as close as we can get to a primary key.
@@ -111,11 +106,10 @@ class User:
             years = all_years
         days = {str(i) for i in range(1, 26)}
         results = {}
-        headers = http.headers | self.auth
         ur_broke = "You haven't collected any stars"
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
-            response = http.request("GET", url, headers=headers, redirect=False)
+            response = http.get(url, token=self.token, redirect=False)
             if 300 <= response.status < 400:
                 # expired tokens 302 redirect to the overall leaderboard
                 msg = f"the auth token ...{self.token[-4:]} is dead"
@@ -204,14 +198,13 @@ class Puzzle:
             # use previously received data, if any existing
             data = self.input_data_fname.read_text(encoding="utf-8")
         except FileNotFoundError:
-            pass
+            log.debug("input_data cache miss %s", self.input_data_fname)
         else:
             log.debug("input_data cache hit %s", self.input_data_fname)
             return data.rstrip("\r\n")
         sanitized = "..." + self.user.token[-4:]
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
-        headers = http.headers | self.user.auth
-        response = http.request("GET", url=self.input_data_url, headers=headers)
+        response = http.get(self.input_data_url, token=self.user.token)
         if response.status >= 400:
             if response.status == 404:
                 raise PuzzleLockedError(f"{self.year}/{self.day:02d} not available yet")
@@ -384,13 +377,8 @@ class Puzzle:
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": "1", "b": "2"}[part]
-        response = http.request_encode_body(
-            "POST",
-            url=url,
-            headers=http.headers | self.user.auth,
-            fields={"level": level, "answer": value},
-            encode_multipart=False,
-        )
+        fields = {"level": level, "answer": value}
+        response = http.post(url, token=self.user.token, fields=fields)
         if response.status != 200:
             log.error("got %s status code", response.status)
             log.error(response.data.decode(errors="replace"))
@@ -554,8 +542,7 @@ class Puzzle:
         return result
 
     def _request_puzzle_page(self):
-        headers = http.headers | self.user.auth
-        response = http.request("GET", self.url, headers=headers)
+        response = http.get(self.url, token=self.user.token)
         if response.status != 200:
             log.error("got %s status code", response.status)
             log.error(response.data.decode(errors="replace"))
@@ -602,6 +589,7 @@ class Puzzle:
         if self.prose0_fname.is_file():
             log.debug("_get_prose cache hit %s", self.prose0_fname)
             return self.prose0_fname.read_text(encoding="utf-8")
+        log.debug("_get_prose cache miss year=%d day=%d", self.year, self.day)
         self._request_puzzle_page()
         for path in self.prose2_fname, self.prose1_fname, self.prose0_fname:
             if path.is_file():
