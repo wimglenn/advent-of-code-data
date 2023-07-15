@@ -6,8 +6,8 @@ from importlib.metadata import version
 
 from .get import get_data
 from .get import most_recent_year
-from .models import Puzzle
 from .models import _load_users
+from .models import Puzzle
 from .utils import _cli_guess
 from .utils import AOC_TZ
 from .utils import get_plugins

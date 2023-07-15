@@ -11,9 +11,9 @@ import bs4
 
 from aocd import models
 from aocd.exceptions import ExampleParserError
+from aocd.utils import _get_soup
 from aocd.utils import AOC_TZ
 from aocd.utils import get_plugins
-from aocd.utils import _get_soup
 
 
 log = logging.getLogger(__name__)

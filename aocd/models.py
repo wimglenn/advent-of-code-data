@@ -22,12 +22,12 @@ from .exceptions import PuzzleLockedError
 from .exceptions import PuzzleUnsolvedError
 from .exceptions import UnknownUserError
 from .utils import _ensure_intermediate_dirs
+from .utils import _get_soup
 from .utils import AOC_TZ
 from .utils import atomic_write_file
 from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
-from .utils import _get_soup
 from .utils import http
 
 

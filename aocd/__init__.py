@@ -4,13 +4,13 @@ from functools import partial
 from . import _ipykernel
 from . import cli
 from . import cookies
+from . import examples
 from . import exceptions
 from . import get
 from . import models
 from . import post
 from . import runner
 from . import utils
-from . import examples
 from .exceptions import AocdError
 from .get import get_data
 from .get import get_day_and_year
