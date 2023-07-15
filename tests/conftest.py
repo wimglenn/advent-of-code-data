@@ -2,11 +2,15 @@ import pook as pook_mod
 import pytest
 
 from aocd.models import User
+from aocd.utils import http
 
 
 @pytest.fixture(autouse=True)
 def mocked_sleep(mocker):
     no_sleep_till_brooklyn = mocker.patch("time.sleep")
+    # nerf the rate-limiter - tests don't actually talk to AoC server at all
+    # (and they *can't*, because we disable socket during tests)
+    http._max_t = -1.0
     return no_sleep_till_brooklyn
 
 
