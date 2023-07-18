@@ -335,6 +335,12 @@ class Puzzle:
     def answers(self, val):
         self.answer_a, self.answer_b = val
 
+    @property
+    def submit_results(self):
+        if self.submit_results_path.is_file():
+            return json.loads(self.submit_results_path.read_text())
+        return []
+
     def _submit(self, value, part, reopen=True, quiet=False):
         if value in {"", b"", None, b"None", "None"}:
             raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
@@ -343,63 +349,62 @@ class Puzzle:
         part = str(part).replace("1", "a").replace("2", "b").lower()
         if part not in {"a", "b"}:
             raise AocdError('part must be "a" or "b"')
-        if self.submit_results_path.is_file():
-            previous_submits = json.loads(self.submit_results_path.read_text())
-            try:
-                value_as_int = int(value)
-            except ValueError:
-                value_as_int = None
-            for result in previous_submits:
-                if result["part"] != part:
-                    continue
-                if result["message"].startswith("You gave an answer too recently"):
-                    continue
-                if result["message"].startswith("You don't seem to be solving the right level"):
-                    continue
-                if result["message"].startswith("That's the right answer"):
-                    if value != result["value"]:
-                        if not quiet:
-                            print(
-                                "aocd will not submit that answer. "
-                                f"At {result['when']} you've previously submitted "
-                                f"{result['value']} and the server responded with:"
-                            )
-                            print(colored(result["message"], "green"))
-                            print(f"It is certain that {value!r} is incorrect, because {value!r} != {result['value']!r}.")
-                        return
-                if "your answer is too high" in result["message"]:
-                    if value_as_int is None or value_as_int > int(result["value"]):
-                        if not quiet:
-                            print(
-                                "aocd will not submit that answer. "
-                                f"At {result['when']} you've previously submitted "
-                                f"{result['value']} and the server responded with:"
-                            )
-                            print(colored(result["message"], "red"))
-                            print(f"It is certain that {value!r} is incorrect, because {result['value']!r} was too high.")
-                        return
-                if "your answer is too low" in result["message"]:
-                    if value_as_int is None or value_as_int < int(result["value"]):
-                        if not quiet:
-                            print(
-                                "aocd will not submit that answer. "
-                                f"At {result['when']} you've previously submitted "
-                                f"{result['value']} and the server responded with:"
-                            )
-                            print(colored(result["message"], "red"))
-                            print(f"It is certain that {value!r} is incorrect, because {result['value']!r} was too low.")
-                        return
-                if result["value"] != value:
-                    continue
-                if not quiet:
-                    print(
-                        "aocd will not submit that answer again. "
-                        f"At {result['when']} you've previously submitted "
-                        f"{value} and the server responded with:"
-                    )
-                    color = "green" if result["message"].startswith("That's the right answer") else "red"
-                    print(colored(result["message"], color))
-                return
+        previous_submits = self.submit_results
+        try:
+            value_as_int = int(value)
+        except ValueError:
+            value_as_int = None
+        for result in previous_submits:
+            if result["part"] != part:
+                continue
+            if result["message"].startswith("You gave an answer too recently"):
+                continue
+            if result["message"].startswith("You don't seem to be solving the right level"):
+                continue
+            if result["message"].startswith("That's the right answer"):
+                if value != result["value"]:
+                    if not quiet:
+                        print(
+                            "aocd will not submit that answer. "
+                            f"At {result['when']} you've previously submitted "
+                            f"{result['value']} and the server responded with:"
+                        )
+                        print(colored(result["message"], "green"))
+                        print(f"It is certain that {value!r} is incorrect, because {value!r} != {result['value']!r}.")
+                    return
+            if "your answer is too high" in result["message"]:
+                if value_as_int is None or value_as_int > int(result["value"]):
+                    if not quiet:
+                        print(
+                            "aocd will not submit that answer. "
+                            f"At {result['when']} you've previously submitted "
+                            f"{result['value']} and the server responded with:"
+                        )
+                        print(colored(result["message"], "red"))
+                        print(f"It is certain that {value!r} is incorrect, because {result['value']!r} was too high.")
+                    return
+            if "your answer is too low" in result["message"]:
+                if value_as_int is None or value_as_int < int(result["value"]):
+                    if not quiet:
+                        print(
+                            "aocd will not submit that answer. "
+                            f"At {result['when']} you've previously submitted "
+                            f"{result['value']} and the server responded with:"
+                        )
+                        print(colored(result["message"], "red"))
+                        print(f"It is certain that {value!r} is incorrect, because {result['value']!r} was too low.")
+                    return
+            if result["value"] != value:
+                continue
+            if not quiet:
+                print(
+                    "aocd will not submit that answer again. "
+                    f"At {result['when']} you've previously submitted "
+                    f"{value} and the server responded with:"
+                )
+                color = "green" if result["message"].startswith("That's the right answer") else "red"
+                print(colored(result["message"], color))
+            return
         if part == "b" and value == getattr(self, "answer_a", None):
             raise AocdError(
                 f"cowardly refusing to submit {value} for part b, "
