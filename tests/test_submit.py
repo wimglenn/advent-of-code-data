@@ -1,3 +1,4 @@
+import json
 import logging
 
 import pytest
@@ -110,11 +111,11 @@ def test_correct_submit_records_good_answer(pook, aocd_data_dir):
         url="https://adventofcode.com/2018/day/1/answer",
         response_body="<article>That's the right answer</article>",
     )
-    answer_fname = aocd_data_dir / "testauth.testuser.000" / "2018_01b_answer.txt"
-    assert not answer_fname.exists()
+    answer_path = aocd_data_dir / "testauth.testuser.000" / "2018_01b_answer.txt"
+    assert not answer_path.exists()
     submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
-    assert answer_fname.exists()
-    assert answer_fname.read_text() == "1234"
+    assert answer_path.exists()
+    assert answer_path.read_text() == "1234"
 
 
 def test_submit_correct_part_a_answer_for_part_b_blocked(pook):
@@ -174,9 +175,9 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_di
     assert partb_answer.read_text() == "1234"
     assert get.calls == 1
     assert post.calls == 1
-    prose_fname = aocd_data_dir / "testauth.testuser.000" / "2018_01_prose.1.html"
-    assert prose_fname.is_file()
-    assert " Yo Dawg " in prose_fname.read_text()
+    prose_path = aocd_data_dir / "testauth.testuser.000" / "2018_01_prose.1.html"
+    assert prose_path.is_file()
+    assert " Yo Dawg " in prose_path.read_text()
 
 
 def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir):
@@ -224,7 +225,7 @@ def test_submit_puts_level1_by_default(freezer, pook, aocd_data_dir):
     assert parta_answer.read_text() == "1234"
 
 
-def test_cannot_submit_same_bad_answer_twice(aocd_data_dir, pook, capsys):
+def test_cannot_submit_same_bad_answer_twice(aocd_data_dir, pook, capsys, freezer):
     mock1 = pook.post(
         url="https://adventofcode.com/2015/day/1/answer",
         response_body="<article><p>That's not the right answer. (You guessed <span>69.)</span></a></p></article>",
@@ -233,18 +234,31 @@ def test_cannot_submit_same_bad_answer_twice(aocd_data_dir, pook, capsys):
         url="https://adventofcode.com/2015/day/1/answer",
         response_body="<article><p>That's not the right answer idiot. (You guessed <span>70.)</span></a></p></article>",
     )
+    freezer.move_to("2015-12-01 00:00:01-05:00")
     submit(year=2015, day=1, part="a", answer=69, quiet=True)
+    freezer.move_to("2015-12-01 00:00:31-05:00")
     submit(year=2015, day=1, part="a", answer=70, quiet=True)
     submit(year=2015, day=1, part="a", answer=69)
     assert mock1.calls == 1
     assert mock2.calls == 1
     out, err = capsys.readouterr()
-    cached = aocd_data_dir / "testauth.testuser.000" / "2015_01a_bad_answers.txt"
+    cached = aocd_data_dir / "testauth.testuser.000" / "2015_01_post.json"
     assert "aocd will not submit that answer again" in out
-    assert cached.read_text() == (
-        "69 That's not the right answer. (You guessed 69.)\n"
-        "70 That's not the right answer idiot. (You guessed 70.)\n"
-    )
+    data = json.loads(cached.read_text())
+    assert data == [
+        {
+            "part": "a",
+            "value": "69",
+            "when": "2015-12-01 00:00:01-05:00",
+            "message": "That's not the right answer. (You guessed 69.)",
+        },
+        {
+            "part": "a",
+            "value": "70",
+            "when": "2015-12-01 00:00:31-05:00",
+            "message": "That's not the right answer idiot. (You guessed 70.)",
+        },
+    ]
 
 
 def test_will_not_submit_null():
