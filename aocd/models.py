@@ -354,6 +354,8 @@ class Puzzle:
                     continue
                 if result["message"].startswith("You gave an answer too recently"):
                     continue
+                if result["message"].startswith("You don't seem to be solving the right level"):
+                    continue
                 if result["message"].startswith("That's the right answer"):
                     if value != result["value"]:
                         if not quiet:
@@ -395,7 +397,8 @@ class Puzzle:
                         f"At {result['when']} you've previously submitted "
                         f"{value} and the server responded with:"
                     )
-                    print(colored(result["message"], "red"))
+                    color = "green" if result["message"].startswith("That's the right answer") else "red"
+                    print(colored(result["message"], color))
                 return
         if part == "b" and value == getattr(self, "answer_a", None):
             raise AocdError(
