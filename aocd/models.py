@@ -179,14 +179,13 @@ class Puzzle:
         self.input_data_url = self.url + "/input"
         self.submit_url = self.url + "/answer"
         pre = self.user.memo_dir / f"{self.year}_{self.day:02d}"
-        self.input_data_fname = pre.with_name(pre.name + "_input.txt")
-        self.answer_a_fname = pre.with_name(pre.name + "a_answer.txt")
-        self.answer_b_fname = pre.with_name(pre.name + "b_answer.txt")
-        self.incorrect_answers_a_fname = pre.with_name(pre.name + "a_bad_answers.txt")
-        self.incorrect_answers_b_fname = pre.with_name(pre.name + "b_bad_answers.txt")
-        self.prose0_fname = AOCD_DATA_DIR / "prose" / (pre.name + "_prose.0.html")
-        self.prose1_fname = pre.with_name(pre.name + "_prose.1.html")  # part a solved
-        self.prose2_fname = pre.with_name(pre.name + "_prose.2.html")  # part b solved
+        self.input_data_path = pre.with_name(pre.name + "_input.txt")
+        self.answer_a_path = pre.with_name(pre.name + "a_answer.txt")
+        self.answer_b_path = pre.with_name(pre.name + "b_answer.txt")
+        self.submit_results_path = pre.with_name(pre.name + "_post.json")
+        self.prose0_path = AOCD_DATA_DIR / "prose" / (pre.name + "_prose.0.html")
+        self.prose1_path = pre.with_name(pre.name + "_prose.1.html")  # part a solved
+        self.prose2_path = pre.with_name(pre.name + "_prose.2.html")  # part b solved
 
     @property
     def user(self):
@@ -196,11 +195,11 @@ class Puzzle:
     def input_data(self):
         try:
             # use previously received data, if any existing
-            data = self.input_data_fname.read_text(encoding="utf-8")
+            data = self.input_data_path.read_text(encoding="utf-8")
         except FileNotFoundError:
-            log.debug("input_data cache miss %s", self.input_data_fname)
+            log.debug("input_data cache miss %s", self.input_data_path)
         else:
-            log.debug("input_data cache hit %s", self.input_data_fname)
+            log.debug("input_data cache hit %s", self.input_data_path)
             return data.rstrip("\r\n")
         sanitized = "..." + self.user.token[-4:]
         log.info("getting data year=%s day=%s token=%s", self.year, self.day, sanitized)
@@ -213,7 +212,7 @@ class Puzzle:
             raise AocdError(f"HTTP {response.status} at {self.input_data_url}")
         data = response.data.decode()
         log.info("saving the puzzle input token=%s", sanitized)
-        atomic_write_file(self.input_data_fname, data)
+        atomic_write_file(self.input_data_path, data)
         return data.rstrip("\r\n")
 
     @property
@@ -337,12 +336,10 @@ class Puzzle:
         self.answer_a, self.answer_b = val
 
     @property
-    def incorrect_answers_a(self):
-        return self._get_bad_guesses(part="a")
-
-    @property
-    def incorrect_answers_b(self):
-        return self._get_bad_guesses(part="b")
+    def submit_results(self):
+        if self.submit_results_path.is_file():
+            return json.loads(self.submit_results_path.read_text())
+        return []
 
     def _submit(self, value, part, reopen=True, quiet=False):
         if value in {"", b"", None, b"None", "None"}:
@@ -352,14 +349,73 @@ class Puzzle:
         part = str(part).replace("1", "a").replace("2", "b").lower()
         if part not in {"a", "b"}:
             raise AocdError('part must be "a" or "b"')
-        bad_guesses = getattr(self, "incorrect_answers_" + part)
-        if value in bad_guesses:
+        previous_submits = self.submit_results
+        try:
+            value_as_int = int(value)
+        except ValueError:
+            value_as_int = None
+        skip_prefix = (
+            "You gave an answer too recently",
+            "You don't seem to be solving the right level",
+        )
+        for result in previous_submits:
+            if result["part"] != part or result["message"].startswith(skip_prefix):
+                continue
+            if result["message"].startswith("That's the right answer"):
+                if value != result["value"]:
+                    if not quiet:
+                        print(
+                            "aocd will not submit that answer. "
+                            f"At {result['when']} you've previously submitted "
+                            f"{result['value']} and the server responded with:"
+                        )
+                        print(colored(result["message"], "green"))
+                        print(
+                            f"It is certain that {value!r} is incorrect, "
+                            f"because {value!r} != {result['value']!r}."
+                        )
+                    return
+            elif "your answer is too high" in result["message"]:
+                if value_as_int is None or value_as_int > int(result["value"]):
+                    if not quiet:
+                        print(
+                            "aocd will not submit that answer. "
+                            f"At {result['when']} you've previously submitted "
+                            f"{result['value']} and the server responded with:"
+                        )
+                        print(colored(result["message"], "red"))
+                        print(
+                            f"It is certain that {value!r} is incorrect, "
+                            f"because {result['value']!r} was too high."
+                        )
+                    return
+            elif "your answer is too low" in result["message"]:
+                if value_as_int is None or value_as_int < int(result["value"]):
+                    if not quiet:
+                        print(
+                            "aocd will not submit that answer. "
+                            f"At {result['when']} you've previously submitted "
+                            f"{result['value']} and the server responded with:"
+                        )
+                        print(colored(result["message"], "red"))
+                        print(
+                            f"It is certain that {value!r} is incorrect, "
+                            f"because {result['value']!r} was too low."
+                        )
+                    return
+            if result["value"] != value:
+                continue
             if not quiet:
                 print(
                     "aocd will not submit that answer again. "
-                    f"You've previously guessed {value} and the server responded:"
+                    f"At {result['when']} you've previously submitted "
+                    f"{value} and the server responded with:"
                 )
-                print(colored(bad_guesses[value], "red"))
+                if result["message"].startswith("That's the right answer"):
+                    color = "green"
+                else:
+                    color = "red"
+                print(colored(result["message"], color))
             return
         if part == "b" and value == getattr(self, "answer_a", None):
             raise AocdError(
@@ -379,12 +435,14 @@ class Puzzle:
         level = {"a": "1", "b": "2"}[part]
         fields = {"level": level, "answer": value}
         response = http.post(url, token=self.user.token, fields=fields)
+        when = datetime.now(tz=AOC_TZ).isoformat(sep=" ")
         if response.status != 200:
             log.error("got %s status code", response.status)
             log.error(response.data.decode(errors="replace"))
             raise AocdError(f"HTTP {response.status} at {url}")
         soup = _get_soup(response.data)
         message = soup.article.text
+        self._save_submit_result(value=value, part=part, message=message, when=when)
         color = None
         if "That's the right answer" in message:
             color = "green"
@@ -414,7 +472,6 @@ class Puzzle:
             except AttributeError:
                 context = soup.article.text
             log.warning("wrong answer: %s", context)
-            self._save_incorrect_answer(value=value, part=part, extra=soup.article.text)
         elif "You gave an answer too recently" in message:
             wait_pattern = r"You have (?:(\d+)m )?(\d+)s left to wait"
             try:
@@ -429,6 +486,8 @@ class Puzzle:
                 log.info("Waiting %d seconds to autoretry", wait_time)
                 time.sleep(wait_time)
                 return self._submit(value=value, part=part, reopen=reopen, quiet=quiet)
+        else:
+            log.warning("Unrecognised submit message %r", message)
         if not quiet:
             print(colored(message, color=color))
         return response
@@ -449,7 +508,7 @@ class Puzzle:
         return msg
 
     def _save_correct_answer(self, value, part):
-        path = getattr(self, f"answer_{part}_fname")
+        path = getattr(self, f"answer_{part}_path")
         txt = value.strip()
         msg = "saving"
         if path.is_file():
@@ -464,17 +523,23 @@ class Puzzle:
         _ensure_intermediate_dirs(path)
         path.write_text(txt, encoding="utf-8")
 
-    def _save_incorrect_answer(self, value, part, extra=""):
-        path = getattr(self, f"incorrect_answers_{part}_fname")
-        msg = "appending an incorrect answer for %d/%02d part %s"
-        log.info(msg, self.year, self.day, part)
-        _ensure_intermediate_dirs(path)
+    def _save_submit_result(self, value, part, message, when):
+        path = self.submit_results_path
+        log.info("saving submit result for %d/%02d part %s", self.year, self.day, part)
         if path.is_file():
-            txt = path.read_text(encoding="utf-8")
+            data = json.loads(path.read_text(encoding="utf-8"))
         else:
-            txt = ""
-        txt += value.strip() + " " + extra.replace("\n", " ") + "\n"
-        path.write_text(txt, encoding="utf-8")
+            _ensure_intermediate_dirs(path)
+            data = []
+        data.append(
+            {
+                "part": part,
+                "value": value,
+                "when": when,
+                "message": message,
+            }
+        )
+        path.write_text(json.dumps(data, indent=2))
 
     def _get_answer(self, part):
         """
@@ -483,26 +548,17 @@ class Puzzle:
         """
         if part == "b" and self.day == 25:
             return ""
-        answer_fname = getattr(self, f"answer_{part}_fname")
-        if answer_fname.is_file():
-            return answer_fname.read_text(encoding="utf-8").strip()
+        answer_path = getattr(self, f"answer_{part}_path")
+        if answer_path.is_file():
+            return answer_path.read_text(encoding="utf-8").strip()
         # check puzzle page for any previously solved answers.
         # if these were solved by typing into the website directly, rather than using
         # aocd submit, then our caches might not know about the answers yet.
         self._request_puzzle_page()
-        if answer_fname.is_file():
-            return answer_fname.read_text(encoding="utf-8").strip()
+        if answer_path.is_file():
+            return answer_path.read_text(encoding="utf-8").strip()
         msg = f"Answer {self.year}-{self.day}{part} is not available"
         raise PuzzleUnsolvedError(msg)
-
-    def _get_bad_guesses(self, part):
-        fname = getattr(self, f"incorrect_answers_{part}_fname")
-        result = {}
-        if fname.is_file():
-            for line in fname.read_text(encoding="utf-8").splitlines():
-                answer, _sep, extra = line.strip().partition(" ")
-                result[answer] = extra
-        return result
 
     def solve(self):
         try:
@@ -552,32 +608,33 @@ class Puzzle:
         soup = _get_soup(text)
         hit = "Your puzzle answer was"
         if "Both parts of this puzzle are complete!" in text:  # solved
-            if not self.prose2_fname.is_file():
-                _ensure_intermediate_dirs(self.prose2_fname)
-                self.prose2_fname.write_text(text, encoding="utf-8")
+            if not self.prose2_path.is_file():
+                _ensure_intermediate_dirs(self.prose2_path)
+                self.prose2_path.write_text(text, encoding="utf-8")
             hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             if self.day == 25:
                 [pa] = hits
+                self._save_correct_answer(pa.code.text, "a")
             else:
                 pa, pb = hits
+                self._save_correct_answer(pa.code.text, "a")
                 self._save_correct_answer(pb.code.text, "b")
-            self._save_correct_answer(pa.code.text, "a")
         elif "The first half of this puzzle is complete!" in text:  # part b unlocked
-            if not self.prose1_fname.is_file():
-                _ensure_intermediate_dirs(self.prose1_fname)
-                self.prose1_fname.write_text(text, encoding="utf-8")
+            if not self.prose1_path.is_file():
+                _ensure_intermediate_dirs(self.prose1_path)
+                self.prose1_path.write_text(text, encoding="utf-8")
             [pa] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             self._save_correct_answer(pa.code.text, "a")
         else:  # init, or dead token - doesn't really matter
-            if not self.prose0_fname.is_file():
+            if not self.prose0_path.is_file():
                 if "Advent of Code" in text:
-                    _ensure_intermediate_dirs(self.prose0_fname)
-                    self.prose0_fname.write_text(text, encoding="utf-8")
+                    _ensure_intermediate_dirs(self.prose0_path)
+                    self.prose0_path.write_text(text, encoding="utf-8")
 
     def _get_prose(self):
         # prefer to return full prose (i.e. part b is solved or unlocked)
         # prefer to return prose with answers from same the user id as self.user.id
-        for path in self.prose2_fname, self.prose1_fname:
+        for path in self.prose2_path, self.prose1_path:
             if path.is_file():
                 log.debug("_get_prose cache hit %s", path)
                 return path.read_text(encoding="utf-8")
@@ -586,12 +643,12 @@ class Puzzle:
             if other is not None:
                 log.debug("_get_prose cache hit %s", other)
                 return other.read_text(encoding="utf-8")
-        if self.prose0_fname.is_file():
-            log.debug("_get_prose cache hit %s", self.prose0_fname)
-            return self.prose0_fname.read_text(encoding="utf-8")
+        if self.prose0_path.is_file():
+            log.debug("_get_prose cache hit %s", self.prose0_path)
+            return self.prose0_path.read_text(encoding="utf-8")
         log.debug("_get_prose cache miss year=%d day=%d", self.year, self.day)
         self._request_puzzle_page()
-        for path in self.prose2_fname, self.prose1_fname, self.prose0_fname:
+        for path in self.prose2_path, self.prose1_path, self.prose0_path:
             if path.is_file():
                 log.debug("_get_prose using %s", path)
                 return path.read_text(encoding="utf-8")

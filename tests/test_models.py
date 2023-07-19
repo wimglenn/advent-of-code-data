@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from datetime import timedelta
+from textwrap import dedent
 
 import numpy as np
 import pytest
@@ -501,3 +502,70 @@ def test_all_puzzles(freezer):
     assert first.day == 1
     assert last.year == 2016
     assert last.day == 25
+
+
+def test_submit_prevents_bad_guesses_too_high(freezer, capsys, pook):
+    freezer.move_to("2022-12-01 12:34:56-05:00")
+    pook.get("https://adventofcode.com/2022/day/1", times=2)
+    resp = "<article>That's not the right answer; your answer is too high</article>"
+    pook.post("https://adventofcode.com/2022/day/1/answer", response_body=resp)
+    puzzle = Puzzle(2022, 1)
+    puzzle.answer_a = "1234"
+    out, err = capsys.readouterr()
+    assert not err
+    assert "That's not the right answer; your answer is too high" in out
+    puzzle.answer_a = "1235"
+    out, err = capsys.readouterr()
+    assert not err
+    expected = """
+        aocd will not submit that answer. At 2022-12-01 12:34:56-05:00 you've previously submitted 1234 and the server responded with:
+        That's not the right answer; your answer is too high
+        It is certain that '1235' is incorrect, because '1234' was too high.
+    """
+    for line in expected.splitlines():
+        assert line.strip() in out
+
+
+def test_submit_prevents_bad_guesses_too_low(freezer, capsys, pook):
+    freezer.move_to("2022-12-01 12:34:56-05:00")
+    pook.get("https://adventofcode.com/2022/day/1", times=2)
+    resp = "<article>That's not the right answer; your answer is too low</article>"
+    pook.post("https://adventofcode.com/2022/day/1/answer", response_body=resp)
+    puzzle = Puzzle(2022, 1)
+    puzzle.answer_a = "1234"
+    out, err = capsys.readouterr()
+    assert not err
+    assert "That's not the right answer; your answer is too low" in out
+    puzzle.answer_a = "foobar"
+    out, err = capsys.readouterr()
+    assert not err
+    expected = """
+        aocd will not submit that answer. At 2022-12-01 12:34:56-05:00 you've previously submitted 1234 and the server responded with:
+        That's not the right answer; your answer is too low
+        It is certain that 'foobar' is incorrect, because '1234' was too low.
+    """
+    for line in expected.splitlines():
+        assert line.strip() in out
+
+
+def test_submit_prevents_bad_guesses_known_incorrect(freezer, capsys, pook, mocker):
+    mocker.patch("aocd.models.webbrowser.open")
+    freezer.move_to("2022-12-01 12:34:56-05:00")
+    pook.get("https://adventofcode.com/2022/day/1", times=2)
+    resp = "<article>That's the right answer</article>"
+    pook.post("https://adventofcode.com/2022/day/1/answer", response_body=resp)
+    puzzle = Puzzle(2022, 1)
+    puzzle.answer_a = "1234"
+    out, err = capsys.readouterr()
+    assert not err
+    assert "That's the right answer" in out
+    puzzle.answer_a = "4321"
+    out, err = capsys.readouterr()
+    assert not err
+    expected = """
+        aocd will not submit that answer. At 2022-12-01 12:34:56-05:00 you've previously submitted 1234 and the server responded with:
+        That's the right answer
+        It is certain that '4321' is incorrect, because '4321' != '1234'.
+    """
+    for line in expected.splitlines():
+        assert line.strip() in out
