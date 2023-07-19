@@ -1,3 +1,4 @@
+import contextlib
 import itertools
 import logging
 import os
@@ -30,6 +31,10 @@ log = logging.getLogger(__name__)
 
 
 def main():
+    """
+    Run user solver(s) against their inputs and render the results. Can use multiple
+    tokens to validate your code against multiple input datas.
+    """
     eps = get_plugins()
     plugins = {ep.name: ep for ep in eps}
     aoc_now = datetime.now(tz=AOC_TZ)
@@ -89,29 +94,28 @@ def main():
     sys.exit(rc)
 
 
-def _timeout_wrapper(f, capture=False, timeout=DEFAULT_TIMEOUT, *args, **kwargs):
+def _timeout_wrapper(f, capture=False, timeout=DEFAULT_TIMEOUT, **kwargs):
+    # aocd.runner executes the user's solve in a subprocess, so that it can be reliably
+    # killed if it exceeds a time limit. you can't do that with threads.
     func = pebble.concurrent.process(daemon=False, timeout=timeout)(_process_wrapper)
-    return func(f, capture, *args, **kwargs)
+    return func(f, capture, **kwargs)
 
 
-def _process_wrapper(f, capture=False, *args, **kwargs):
-    # allows to run f in a process which can be killed if it misbehaves
-    prev_stdout = sys.stdout
-    prev_stderr = sys.stderr
-    if capture:
-        hush = open(os.devnull, "w")
-        sys.stdout = sys.stderr = hush
-    try:
-        result = f(*args, **kwargs)
-    finally:
+def _process_wrapper(f, capture=False, **kwargs):
+    # used to suppress any output from the subprocess, if aoc was invoked with --quiet
+    with contextlib.ExitStack() as ctx:
         if capture:
-            sys.stdout = prev_stdout
-            sys.stderr = prev_stderr
-            hush.close()
-    return result
+            null = ctx.enter_context(open(os.devnull, "w"))
+            ctx.enter_context(contextlib.redirect_stderr(null))
+            ctx.enter_context(contextlib.redirect_stdout(null))
+        return f(**kwargs)
 
 
 def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kwargs):
+    """
+    Execute a user solve, and display a progress spinner as it's running. Kill it if
+    the runtime exceeds `timeout` seconds.
+    """
     spinner = itertools.cycle(r"\|/-")
     line = elapsed = format_time(0)
     t0 = time.time()
@@ -142,6 +146,12 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kw
 
 
 def format_time(t, timeout=DEFAULT_TIMEOUT):
+    """
+    Used for rendering the puzzle solve time in color:
+    - green, if you're under a quarter of the timeout (15s default)
+    - yellow, if you're over a quarter but under a half (30s by default)
+    - red, if you're really slow (>30s by default)
+    """
     if t < timeout / 4:
         color = "green"
     elif t < timeout / 2:
@@ -155,6 +165,18 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
 def run_one(
     year, day, data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False
 ):
+    """
+    Creates a temporary dir and change directory into it (restores cwd on exit).
+    Lays down puzzle input in a file called "input.txt" in this directory - user code
+    doesn't have to read this file if it doesn't want to, the puzzle input data will
+    also be passed to the entry_point directly as a string.
+    Execute user's puzzle solver (i.e. the `entry_point`) and capture the results.
+    Returns a 4-tuple of:
+        part a answer (computed by the user code)
+        part b answer (computed by the user code)
+        runtime of the solver (walltime)
+        any error message (str) if the user code raised exception, empty string otherwise
+    """
     prev = os.getcwd()
     scratch = tempfile.mkdtemp(prefix=f"{year}-{day:02d}-")
     os.chdir(scratch)
@@ -191,6 +213,9 @@ def run_for(
     reopen=False,
     capture=False,
 ):
+    """
+    Run with multiple users, multiple datasets, multiple years/days, and render the results.
+    """
     if timeout == 0:
         timeout = float("inf")
     aoc_now = datetime.now(tz=AOC_TZ)

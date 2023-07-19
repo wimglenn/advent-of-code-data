@@ -58,10 +58,13 @@ class User:
 
     @property
     def id(self):
-        """User's token might change (they expire eventually) but the id found on AoC's
+        """
+        User's token might change (they expire eventually) but the id found on AoC's
         settings page for a logged-in user is as close as we can get to a primary key.
         This id is used to key the cache, so that your caches aren't unnecessarily
-        invalidated by being issued a new token"""
+        invalidated when being issued a new token. That is, scraping a user id allows
+        for aocd's caches to persist beyond multiple logout/logins.
+        """
         path = AOCD_CONFIG_DIR / "token2id.json"
         if User._token2id is None:
             try:
@@ -142,6 +145,11 @@ class User:
 
 
 def default_user():
+    """
+    Discover user's token from the environment or file, and exit with a diagnostic
+    message if none can be found. This default user is used whenever a token or user id
+    was otherwise unspecified.
+    """
     # export your session id as AOC_SESSION env var
     cookie = os.getenv("AOC_SESSION")
     if cookie:
@@ -189,10 +197,17 @@ class Puzzle:
 
     @property
     def user(self):
+        # this is a property to make it clear that it's read-only
         return self._user
 
     @property
     def input_data(self):
+        """
+        This puzzle's input data, specific to puzzle.user. It will usually be retrieved
+        from caches, but if this is the first time it was accessed it will be requested
+        from the server and then cached. Note that your puzzle inputs are associated
+        with your user id, and will never change, they're safe to cache indefinitely.
+        """
         try:
             # use previously received data, if any existing
             data = self.input_data_path.read_text(encoding="utf-8")
@@ -217,9 +232,21 @@ class Puzzle:
 
     @property
     def examples(self):
+        """
+        Sample data and answers associated with this puzzle, as a list of
+        `aocd.examples.Example` instances. These are extracted from the puzzle prose
+        html, and they're the same for every user id. This list might be empty (not
+        every puzzle has usable examples), or it might have several examples, but it
+        will usually have one element. The list, and the examples themselves, may be
+        different depending on whether or not part b of the puzzle prose has been
+        unlocked (i.e. part a has already been solved correctly).
+        """
         return self._get_examples()
 
     def _get_examples(self, parser_name="aocd_examples_canned"):
+        # invoke a named example parser to extract examples from cached prose.
+        # logs warning and returns an empty list if the parser plugin raises an
+        # exception for any reason.
         try:
             page = examples.Page.from_raw(html=self._get_prose())
             parser = _load_example_parser(name=parser_name)
@@ -236,6 +263,10 @@ class Puzzle:
 
     @cached_property
     def title(self):
+        """
+        Title of the puzzle, used in the pretty repr (IPython etc) and also displayed
+        by aocd.runner.
+        """
         prose = self._get_prose()
         soup = _get_soup(prose)
         if soup.h2 is None:
@@ -248,7 +279,7 @@ class Puzzle:
         return txt.removeprefix(prefix).removesuffix(suffix)
 
     def _repr_pretty_(self, p, cycle):
-        # this is a hook for IPython's pretty-printer
+        """Hook for IPython's pretty-printer."""
         if cycle:
             p.text(repr(self))
         else:
@@ -256,6 +287,9 @@ class Puzzle:
             p.text(txt)
 
     def _coerce_val(self, val):
+        # technically adventofcode.com will only accept strings as answers.
+        # but it's convenient to be able to submit numbers, since many of the answers
+        # are numeric strings. coerce the values to string safely.
         orig_val = val
         orig_type = type(val)
         coerced = False
@@ -286,6 +320,10 @@ class Puzzle:
 
     @property
     def answer_a(self):
+        """
+        The correct answer for the first part of the puzzle. This attribute hides
+        itself if the first part has not yet been solved.
+        """
         try:
             return self._get_answer(part="a")
         except PuzzleUnsolvedError:
@@ -293,6 +331,15 @@ class Puzzle:
 
     @answer_a.setter
     def answer_a(self, val):
+        """
+        You can submit your answer to adventofcode.com by setting the answer attribute
+        on a puzzle instance, e.g.
+
+            puzzle.answer_a = "1234"
+
+        The result of the submission will be printed to the terminal. It will only POST
+        to the server if necessary.
+        """
         val = self._coerce_val(val)
         if getattr(self, "answer_a", None) == val:
             return
@@ -300,10 +347,15 @@ class Puzzle:
 
     @property
     def answered_a(self):
+        """Has the first part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_a", None))
 
     @property
     def answer_b(self):
+        """
+        The correct answer for the second part of the puzzle. This attribute hides
+        itself if the second part has not yet been solved.
+        """
         try:
             return self._get_answer(part="b")
         except PuzzleUnsolvedError:
@@ -311,6 +363,15 @@ class Puzzle:
 
     @answer_b.setter
     def answer_b(self, val):
+        """
+        You can submit your answer to adventofcode.com by setting the answer attribute
+        on a puzzle instance, e.g.
+
+            puzzle.answer_b = "4321"
+
+        The result of the submission will be printed to the terminal. It will only POST
+        to the server if necessary.
+        """
         val = self._coerce_val(val)
         if getattr(self, "answer_b", None) == val:
             return
@@ -318,9 +379,11 @@ class Puzzle:
 
     @property
     def answered_b(self):
+        """Has the second part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_b", None))
 
     def answered(self, part):
+        """Has the specified part of this puzzle been solved correctly yet?"""
         if part == "a":
             return bool(getattr(self, "answer_a", None))
         if part == "b":
@@ -329,19 +392,43 @@ class Puzzle:
 
     @property
     def answers(self):
+        """
+        Returns a tuple of the correct answers for this puzzle. Will raise an
+        AttributeError if either part is yet to be solved by the associated user.
+        """
         return self.answer_a, self.answer_b
 
     @answers.setter
     def answers(self, val):
+        """
+        Submit both answers at once. Pretty much impossible in practice, unless you've
+        seen the puzzle before.
+        """
         self.answer_a, self.answer_b = val
 
     @property
     def submit_results(self):
+        """
+        Record of all previous submissions to adventofcode.com for this user/puzzle.
+        Submissions made by typing answers directly into the website will not be
+        captured here, only submissions made by aocd itself are recorded.
+
+        These previous submissions are cached to prevent submitting answers which are
+        certain to be incorrect (for example, if the server told you that the answer
+        "1234" was too high, then aocd will block you from submitting any higher value
+        like "2468".
+
+        The result of a previous submission made using puzzle answer setters can be
+        seen with puzzle.submit_results[-1].
+        """
         if self.submit_results_path.is_file():
             return json.loads(self.submit_results_path.read_text())
         return []
 
     def _submit(self, value, part, reopen=True, quiet=False):
+        # actual submit logic. not meant to be invoked directly - users are expected
+        # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
+        # which autosubmits answers by default.
         if value in {"", b"", None, b"None", "None"}:
             raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
@@ -493,6 +580,9 @@ class Puzzle:
         return response
 
     def _check_already_solved(self, guess, part):
+        # if you submit an answer on a puzzle which you've already solved, even if your
+        # answer is correct, you get a sort of cryptic/confusing message back from the
+        # server. this helper method prevents getting that.
         try:
             answer = self._get_answer(part=part)
             if answer == "":
@@ -508,6 +598,7 @@ class Puzzle:
         return msg
 
     def _save_correct_answer(self, value, part):
+        # cache the correct answers so that we know not to submit again
         path = getattr(self, f"answer_{part}_path")
         txt = value.strip()
         msg = "saving"
@@ -524,6 +615,8 @@ class Puzzle:
         path.write_text(txt, encoding="utf-8")
 
     def _save_submit_result(self, value, part, message, when):
+        # cache all submission results made by aocd. see the docstring of the
+        # submit_results property for the reasons why.
         path = self.submit_results_path
         log.info("saving submit result for %d/%02d part %s", self.year, self.day, part)
         if path.is_file():
@@ -561,6 +654,13 @@ class Puzzle:
         raise PuzzleUnsolvedError(msg)
 
     def solve(self):
+        """
+        If there is a unique entry-point in the "adventofcode.user" group, load it and
+        invoke it using this puzzle's input data. It is expected to return a tuple of
+        answers for part a and part b, respectively.
+
+        Raise AocdError if there are no entry-points or multiple.
+        """
         try:
             [ep] = get_plugins()
         except ValueError:
@@ -569,6 +669,13 @@ class Puzzle:
         return f(year=self.year, day=self.day, data=self.input_data)
 
     def solve_for(self, plugin):
+        """
+        Load the entry-point from the "adventofcode.user" plugin group with the
+        specified name, and invoke it using this puzzle's input data. The entry-point
+        is expected to return a tuple of answers for part a and part b, respectively.
+
+        Raise AocdError if the named plugin could not be found.
+        """
         for ep in get_plugins():
             if ep.name == plugin:
                 break
@@ -579,9 +686,11 @@ class Puzzle:
 
     @property
     def url(self):
+        """A link to the puzzle's description page on adventofcode.com."""
         return URL.format(year=self.year, day=self.day)
 
     def view(self):
+        """Open this puzzle's description page in a new browser tab"""
         webbrowser.open(self.url)
 
     @property
@@ -598,6 +707,8 @@ class Puzzle:
         return result
 
     def _request_puzzle_page(self):
+        # hit the server to get the prose
+        # cache the results so we don't have to get them again
         response = http.get(self.url, token=self.user.token)
         if response.status != 200:
             log.error("got %s status code", response.status)
@@ -656,9 +767,15 @@ class Puzzle:
 
     @property
     def easter_eggs(self):
+        """
+        Return a list of Easter eggs in the puzzle's description page. When you've
+        completed all 25 days, adventofcode.com will reveal the Easter eggs directly in
+        the html, but this property works even if all days haven't been completed yet.
+        Most puzzles have exactly one Easter egg, but 2018-12-17 had two, so this
+        property always returns a list for consistency.
+        """
         txt = self._get_prose()
         soup = _get_soup(txt)
-        # Most puzzles have exactly one easter-egg, but 2018/12/17 had two..
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
 
@@ -676,6 +793,9 @@ class Puzzle:
 
     @staticmethod
     def all(user=None):
+        """
+        Return an iterator over all known puzzles that are currently playable.
+        """
         for year in count(2015):
             for day in range(1, 26):
                 puzzle = Puzzle(year, day, user)
@@ -693,6 +813,8 @@ def _parse_duration(s):
 
 
 def _load_users():
+    # loads the mapping between user ids and tokens. one user can have many tokens,
+    # so we can't key the caches off of the token itself.
     path = AOCD_CONFIG_DIR / "tokens.json"
     try:
         users = json.loads(path.read_text(encoding="utf-8"))
@@ -703,6 +825,7 @@ def _load_users():
 
 @cache
 def _load_example_parser(group="adventofcode.examples", name="aocd_examples_canned"):
+    # lazy-loads a plugin used to parse sample data, and cache it
     try:
         # Python 3.10+ - group/name selectable entry points
         eps = entry_points().select(group=group, name=name)
