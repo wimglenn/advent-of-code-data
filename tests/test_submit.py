@@ -27,7 +27,7 @@ def test_correct_submit_reopens_browser_on_answer_page(mocker, pook):
         url="https://adventofcode.com/2018/day/1/answer",
         response_body="<article>That's the right answer</article>",
     )
-    browser_open = mocker.patch("webbrowser.open")
+    browser_open = mocker.patch("aocd.models.webbrowser.open")
     submit(1234, part="a", day=1, year=2018, session="whatever", reopen=True)
     browser_open.assert_called_once_with("https://adventofcode.com/2018/day/1#part2")
 

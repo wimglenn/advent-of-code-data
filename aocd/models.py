@@ -354,12 +354,12 @@ class Puzzle:
             value_as_int = int(value)
         except ValueError:
             value_as_int = None
+        skip_prefix = (
+            "You gave an answer too recently",
+            "You don't seem to be solving the right level",
+        )
         for result in previous_submits:
-            if result["part"] != part:
-                continue
-            if result["message"].startswith("You gave an answer too recently"):
-                continue
-            if result["message"].startswith("You don't seem to be solving the right level"):
+            if result["part"] != part or result["message"].startswith(skip_prefix):
                 continue
             if result["message"].startswith("That's the right answer"):
                 if value != result["value"]:
@@ -370,9 +370,12 @@ class Puzzle:
                             f"{result['value']} and the server responded with:"
                         )
                         print(colored(result["message"], "green"))
-                        print(f"It is certain that {value!r} is incorrect, because {value!r} != {result['value']!r}.")
+                        print(
+                            f"It is certain that {value!r} is incorrect, "
+                            f"because {value!r} != {result['value']!r}."
+                        )
                     return
-            if "your answer is too high" in result["message"]:
+            elif "your answer is too high" in result["message"]:
                 if value_as_int is None or value_as_int > int(result["value"]):
                     if not quiet:
                         print(
@@ -381,9 +384,12 @@ class Puzzle:
                             f"{result['value']} and the server responded with:"
                         )
                         print(colored(result["message"], "red"))
-                        print(f"It is certain that {value!r} is incorrect, because {result['value']!r} was too high.")
+                        print(
+                            f"It is certain that {value!r} is incorrect, "
+                            f"because {result['value']!r} was too high."
+                        )
                     return
-            if "your answer is too low" in result["message"]:
+            elif "your answer is too low" in result["message"]:
                 if value_as_int is None or value_as_int < int(result["value"]):
                     if not quiet:
                         print(
@@ -392,7 +398,10 @@ class Puzzle:
                             f"{result['value']} and the server responded with:"
                         )
                         print(colored(result["message"], "red"))
-                        print(f"It is certain that {value!r} is incorrect, because {result['value']!r} was too low.")
+                        print(
+                            f"It is certain that {value!r} is incorrect, "
+                            f"because {result['value']!r} was too low."
+                        )
                     return
             if result["value"] != value:
                 continue
@@ -402,7 +411,10 @@ class Puzzle:
                     f"At {result['when']} you've previously submitted "
                     f"{value} and the server responded with:"
                 )
-                color = "green" if result["message"].startswith("That's the right answer") else "red"
+                if result["message"].startswith("That's the right answer"):
+                    color = "green"
+                else:
+                    color = "red"
                 print(colored(result["message"], color))
             return
         if part == "b" and value == getattr(self, "answer_a", None):
