@@ -44,6 +44,30 @@ If all that sounds too magical, there is a simple getter function to just return
 
 Note that ``aocd`` will cache puzzle inputs and answers (including incorrect guesses) clientside, to save unnecessary requests to the server.
 
+*New in version 2.0.0:* Get the sample data (and corresponding answers). For example, from `2022 day 5 <https://adventofcode.com/2022/day/5>`_ there was:
+
+.. code-block:: bash
+
+   $ aocd 2022 5 --example
+                             --- Day 5: Supply Stacks ---
+                         https://adventofcode.com/2022/day/5
+   ------------------------------- Example data 1/1 -------------------------------
+       [D]
+   [N] [C]
+   [Z] [M] [P]
+    1   2   3
+
+   move 1 from 2 to 1
+   move 3 from 1 to 3
+   move 2 from 2 to 1
+   move 1 from 1 to 2
+   --------------------------------------------------------------------------------
+   answer_a: CMZ
+   answer_b: MCD
+   --------------------------------------------------------------------------------
+
+How does it work? Check `aocd-example-parser <https://github.com/wimglenn/aocd-example-parser>`_ for the gory details.
+
 
 Quickstart
 ----------
@@ -115,6 +139,11 @@ the right answer, then the puzzle will be refreshed in your web browser
 **Proceed with caution!** If you submit wrong guesses, your user **WILL**
 get rate-limited by Eric, so don't call submit until you're fairly confident
 you have a correct answer!
+
+*New in version 2.0.0*: Prevents submission of answers when it is certain the value
+is incorrect. For example, if the server told you that your answer "1234" was too
+high, then aocd will remember this info and prevent you from subsequently submitting
+an even higher value such as "1300".
 
 
 OOP-style interfaces
