@@ -135,6 +135,9 @@ def _trunc(s, maxlen=50):
 
 
 def _get_unique_real_inputs(year, day):
+    # these are passed to example parsers, in case the shape/content of the real
+    # input(s) is in some way useful for extracting the example input(s). it is
+    # not currently used by the default example parser implementation.
     path = models.AOCD_DATA_DIR
     paths = path.glob(f"*/{year}_{day:02d}_input.txt")
     strs = [p.read_text(encoding="utf-8") for p in paths]
@@ -142,6 +145,10 @@ def _get_unique_real_inputs(year, day):
 
 
 def main():
+    """
+    Summarize an example parser's results with historical puzzles' prose, and
+    compare the performance against a reference implementation (aocd_examples_canned)
+    """
     try:
         from rich.console import Console
         from rich.table import Table

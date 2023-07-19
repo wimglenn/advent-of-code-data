@@ -28,7 +28,8 @@ USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com
 
 class HttpClient:
     # every request to adventofcode.com goes through this wrapper
-    # so that we can put in user agent header, rate-limit, etc
+    # so that we can put in user agent header, rate-limit, etc.
+    # aocd users should not need to use this class directly.
 
     def __init__(self):
         self.pool_manager = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
@@ -184,6 +185,8 @@ def atomic_write_file(path, contents_str):
 
 
 def _cli_guess(choice, choices):
+    # used by the argument parser so that you can specify user ids with a substring
+    # (for example just specifying `-u git` instead of `--users github.wimglenn.119932`
     if choice in choices:
         return choice
     candidates = [c for c in choices if choice in c]
@@ -212,7 +215,7 @@ def colored(txt, color):
 
 def get_plugins(group="adventofcode.user"):
     """
-    Installed plugins for user solves.
+    Currently installed plugins for user solves.
     """
     try:
         # Python 3.10+
