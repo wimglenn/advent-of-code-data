@@ -1,3 +1,4 @@
+import contextlib
 import itertools
 import logging
 import os
@@ -93,28 +94,21 @@ def main():
     sys.exit(rc)
 
 
-def _timeout_wrapper(f, capture=False, timeout=DEFAULT_TIMEOUT, *args, **kwargs):
+def _timeout_wrapper(f, capture=False, timeout=DEFAULT_TIMEOUT, **kwargs):
     # aocd.runner executes the user's solve in a subprocess, so that it can be reliably
     # killed if it exceeds a time limit. you can't do that with threads.
     func = pebble.concurrent.process(daemon=False, timeout=timeout)(_process_wrapper)
-    return func(f, capture, *args, **kwargs)
+    return func(f, capture, **kwargs)
 
 
-def _process_wrapper(f, capture=False, *args, **kwargs):
-    # used to suppress output from the subprocess
-    prev_stdout = sys.stdout
-    prev_stderr = sys.stderr
-    if capture:
-        hush = open(os.devnull, "w")
-        sys.stdout = sys.stderr = hush
-    try:
-        result = f(*args, **kwargs)
-    finally:
+def _process_wrapper(f, capture=False, **kwargs):
+    # used to suppress any output from the subprocess, if aoc was invoked with --quiet
+    with contextlib.ExitStack() as ctx:
         if capture:
-            sys.stdout = prev_stdout
-            sys.stderr = prev_stderr
-            hush.close()
-    return result
+            null = ctx.enter_context(open(os.devnull, "w"))
+            ctx.enter_context(contextlib.redirect_stderr(null))
+            ctx.enter_context(contextlib.redirect_stdout(null))
+        return f(**kwargs)
 
 
 def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kwargs):
