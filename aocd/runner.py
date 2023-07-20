@@ -296,6 +296,7 @@ def run_for(
         entry_point = eps[plugin]
         puzzle = Puzzle(year, day)
         if example:
+            autosubmit = False
             examples = Puzzle(year, day).examples
             datas = range(len(examples))
         else:
@@ -339,12 +340,8 @@ def run_for(
                         else:
                             expected = getattr(puzzle, "answer_" + part)
                     except AttributeError:
-                        if (
-                            not example
-                            and autosubmit
-                            and part == "a"
-                            or (part == "b" and puzzle.answered_a)
-                        ):
+                        post = part == "a" or (part == "b" and puzzle.answered_a)
+                        if autosubmit and post:
                             try:
                                 puzzle._submit(answer, part, reopen=reopen, quiet=True)
                             except AocdError as err:
