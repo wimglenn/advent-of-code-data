@@ -19,22 +19,13 @@ Advent of Code data
 .. _codecov: https://codecov.io/gh/wimglenn/advent-of-code-data
 
 
-Get your puzzle data with a single import statement:
+Speedhackers, get your puzzle data with a single import statement:
 
 .. code-block:: python
 
    from aocd import data
 
-Might be useful for lazy Pythonistas and speedhackers.
-
-If you'd just like to print or keep your own input files, there's a shell entry point for that:
-
-.. code-block:: bash
-
-   aocd > input.txt  # saves today's data
-   aocd 13 2018 > day13.txt  # save some other day's data
-
-If all that sounds too magical, there is a simple getter function to just return your raw data.
+If that sounds too magical, use a simple function call to return your data in a string:
 
 .. code-block:: python
 
@@ -42,9 +33,16 @@ If all that sounds too magical, there is a simple getter function to just return
    >>> get_data(day=24, year=2015)
    '1\n2\n3\n7\n11\n13\n17\n19\n23\n31...
 
+If you'd just like to print or keep your own raw input files, there's a script for that:
+
+.. code-block:: bash
+
+   aocd > input.txt  # saves today's data
+   aocd 13 2018 > day13.txt  # save some other day's data
+
 Note that ``aocd`` will cache puzzle inputs and answers (including incorrect guesses) clientside, to save unnecessary requests to the server.
 
-*New in version 2.0.0:* Get the sample data (and corresponding answers). For example, from `2022 day 5 <https://adventofcode.com/2022/day/5>`_ there was:
+*New in version 2.0.0:* Get the example data (and corresponding answers). From `2022 day 5 <https://adventofcode.com/2022/day/5>`_ there was:
 
 .. code-block:: bash
 
@@ -66,7 +64,7 @@ Note that ``aocd`` will cache puzzle inputs and answers (including incorrect gue
    answer_b: MCD
    --------------------------------------------------------------------------------
 
-How does it work? Check `aocd-example-parser <https://github.com/wimglenn/aocd-example-parser>`_ for the gory details.
+How does scraping the examples work? Check `aocd-example-parser <https://github.com/wimglenn/aocd-example-parser>`_ for the gory details.
 
 
 Quickstart
@@ -113,6 +111,7 @@ If this utility script was able to locate your token, you can save it to file wi
 
    $ aocd-token > ~/.config/aocd/token
 
+
 Automated submission
 --------------------
 
@@ -140,17 +139,18 @@ the right answer, then the puzzle will be refreshed in your web browser
 get rate-limited by Eric, so don't call submit until you're fairly confident
 you have a correct answer!
 
-*New in version 2.0.0*: Prevents submission of answers when it is certain the value
-is incorrect. For example, if the server told you that your answer "1234" was too
-high, then aocd will remember this info and prevent you from subsequently submitting
-an even higher value such as "1300".
+*New in version 2.0.0*: Prevent submission of an answer when it is certain the value
+is incorrect. For example, if the server previously told you that your answer "1234"
+was too high, then aocd will remember this info and prevent you from subsequently
+submitting an even higher value such as "1300".
 
 
-OOP-style interfaces
---------------------
+Models
+------
 
 *New in version 0.8.0.*
 
+There are classes ``User`` and ``Puzzle`` found in the submodule ``aocd.models``.
 Input data is via regular attribute access. Example usage:
 
 .. code-block:: python
@@ -179,7 +179,6 @@ Your own solutions can be executed by writing and using an `entry-point <https:/
     >>> puzzle = Puzzle(year=2018, day=10)
     >>> puzzle.solve_for("wim")
     ('XLZAKBGZ', '10656')
-
 
 If you've never written a plugin before, see https://entrypoints.readthedocs.io/ for more info about plugin systems based on Python entry-points.
 
@@ -231,7 +230,7 @@ instead and have a nice day!
 Cache invalidation?
 -------------------
 
-``aocd`` saves puzzle inputs, answers, names, and your bad guesses to avoid hitting
+``aocd`` saves puzzle inputs, answers, prose, and your bad guesses to avoid hitting
 the AoC servers any more often than strictly necessary (this also speeds things up).
 All data is persisted in plain text files under ``~/.config/aocd``. To remove any
 caches, you may simply delete whatever files you want under that directory tree.
