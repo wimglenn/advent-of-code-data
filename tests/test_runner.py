@@ -53,6 +53,7 @@ def test_main(capsys, mocker, aocd_config_dir):
         years=[2015],
         days=[3, 7],
         datasets={"data1": "token1", "data2": "token2"},
+        example=False,
         timeout=60,
         autosubmit=True,
         reopen=False,

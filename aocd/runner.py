@@ -41,19 +41,81 @@ def main():
     years = range(2015, aoc_now.year + int(aoc_now.month == 12))
     days = range(1, 26)
     users = _load_users()
-    utype = partial(_cli_guess, choices=users)
     parser = ArgumentParser(description="AoC runner")
-    st = "store_true"
-    v_help = "increased logging (-v INFO, -vv DEBUG)"
-    parser.add_argument("-p", "--plugins", nargs="+", choices=plugins)
-    parser.add_argument("-y", "--years", type=int, nargs="+", choices=years)
-    parser.add_argument("-d", "--days", type=int, nargs="+", choices=days)
-    parser.add_argument("-u", "--users", nargs="+", choices=users, type=utype)
-    parser.add_argument("-t", "--timeout", type=int, default=DEFAULT_TIMEOUT)
-    parser.add_argument("-s", "--no-submit", action=st, help="disable autosubmit")
-    parser.add_argument("-r", "--reopen", action=st, help="open browser on NEW solves")
-    parser.add_argument("-q", "--quiet", action=st, help="capture output from runner")
-    parser.add_argument("-v", "--verbose", action="count", help=v_help)
+    parser.add_argument(
+        "-p",
+        "--plugins",
+        nargs="+",
+        choices=plugins,
+        default=list(plugins),
+        help="List of plugins (solvers) to evaluate. Runs against all available plugins by default.",
+    )
+    parser.add_argument(
+        "-y",
+        "--years",
+        type=int,
+        nargs="+",
+        choices=years,
+        default=years,
+        help="AoC years to run. Runs all available by default.",
+    )
+    parser.add_argument(
+        "-d",
+        "--days",
+        type=int,
+        nargs="+",
+        choices=days,
+        default=days,
+        help="AoC days to run. Runs all 1-25 by default.",
+    )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-e",
+        "--example",
+        action="store_true",
+        help="Run against examples, instead of against real user data. This option is mutually exclusive with -u, because the sample data is the same for all users.",
+    )
+    group.add_argument(
+        "-u",
+        "--users",
+        nargs="+",
+        choices=users,
+        type=partial(_cli_guess, choices=users),
+        default=users,
+        help="Users to run each plugin with (e.g. your google token, your reddit token, your twitter token, your github token).",
+    )
+    parser.add_argument(
+        "-t",
+        "--timeout",
+        type=int,
+        default=DEFAULT_TIMEOUT,
+        help="Kill a solver if it exceeded this timeout, in seconds (default: %(default)s). Can use value '0' to disable timeout.",
+    )
+    parser.add_argument(
+        "-s",
+        "--no-submit",
+        action="store_false",
+        dest="autosubmit",
+        help="Disable autosubmit. By default the runner will submit answers if necessary.",
+    )
+    parser.add_argument(
+        "-r",
+        "--reopen",
+        action="store_true",
+        help="Open browser on NEW solves. Off by default.",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Capture output from runner. Can be used to suppress unwanted terminal output from a plugin.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        help="Increased logging (-v INFO, -vv DEBUG). Default level is logging.WARNING.",
+    )
     args = parser.parse_args()
 
     if not users:
@@ -82,12 +144,13 @@ def main():
         log_level = logging.DEBUG
     logging.basicConfig(level=log_level)
     rc = run_for(
-        plugs=args.plugins or list(plugins),
-        years=args.years or years,
-        days=args.days or days,
-        datasets={k: users[k] for k in (args.users or users)},
+        plugs=args.plugins,
+        years=args.years,
+        days=args.days,
+        datasets={k: users[k] for k in args.users},
+        example=args.example,
         timeout=args.timeout,
-        autosubmit=not args.no_submit,
+        autosubmit=args.autosubmit,
         reopen=args.reopen,
         capture=args.quiet,
     )
@@ -133,12 +196,13 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kw
         a, b = future.result()
     except Exception as err:
         a = b = ""
-        error = repr(err)[:50]
+        error = repr(err)[:100]
     else:
         error = ""
-        # longest correct answer seen so far has been 32 chars
-        a = str(a)[:50]
-        b = str(b)[:50]
+        # longest correct answer seen so far has been 57 chars
+        # that was the first example data from 2019/12/9 (i.e. the quine)
+        a = str(a)[:60]
+        b = str(b)[:60]
     if progress is not None:
         sys.stderr.write("\r" + " " * len(line) + "\r")
         sys.stderr.flush()
@@ -208,6 +272,7 @@ def run_for(
     years,
     days,
     datasets,
+    example=False,
     timeout=DEFAULT_TIMEOUT,
     autosubmit=True,
     reopen=False,
@@ -220,68 +285,91 @@ def run_for(
         timeout = float("inf")
     aoc_now = datetime.now(tz=AOC_TZ)
     eps = {ep.name: ep for ep in get_plugins() if ep.name in plugs}
-    it = itertools.product(years, days, plugs, datasets)
+    matrix = itertools.product(years, days, plugs)
     n_incorrect = 0
     # padding values for alignment
     wp = len(max(eps, key=len)) if eps else 3
     wd = len(max(datasets, key=len)) if datasets else 8
-    for year, day, plugin, dataset in it:
+    for year, day, plugin in matrix:
         if year == aoc_now.year and day > aoc_now.day:
             continue
-        token = datasets[dataset]
         entry_point = eps[plugin]
-        os.environ["AOC_SESSION"] = token
-        puzzle = Puzzle(year=year, day=day)
-        title = puzzle.title
-        progress = f"{year}/{day:<2d} - {title:<40}   {plugin:>{wp}}/{dataset:<{wd}}"
-        a, b, walltime, error = run_one(
-            year=year,
-            day=day,
-            data=puzzle.input_data,
-            entry_point=entry_point,
-            timeout=timeout,
-            progress=progress,
-            capture=capture,
-        )
-        runtime = format_time(walltime, timeout)
-        line = "   ".join([runtime, progress])
-        if error:
-            assert a == b == ""
-            icon = colored("✖", "red")
-            n_incorrect += 1
-            line += f"   {icon} {error}"
+        puzzle = Puzzle(year, day)
+        if example:
+            examples = Puzzle(year, day).examples
+            datas = range(len(examples))
         else:
-            for answer, part in zip((a, b), "ab"):
-                if day == 25 and part == "b":
-                    # there's no part b on christmas day, skip
-                    continue
-                expected = None
-                try:
-                    expected = getattr(puzzle, "answer_" + part)
-                except AttributeError:
-                    post = part == "a" or (part == "b" and puzzle.answered_a)
-                    if autosubmit and post:
-                        try:
-                            puzzle._submit(answer, part, reopen=reopen, quiet=True)
-                        except AocdError as err:
-                            log.warning("error submitting - %s", err)
-                        try:
+            datas = datasets
+        for dataset in datas:
+            if example:
+                data = examples[dataset].input_data
+            else:
+                token = datasets[dataset]
+                os.environ["AOC_SESSION"] = token
+                puzzle = Puzzle(year, day)
+                data = puzzle.input_data
+            title = puzzle.title
+            descr = f"example-{dataset + 1}" if example else dataset
+            progress = f"{year}/{day:<2d} - {title:<40}   {plugin:>{wp}}/{descr:<{wd}}"
+            a, b, walltime, error = run_one(
+                year=year,
+                day=day,
+                data=data,
+                entry_point=entry_point,
+                timeout=timeout,
+                progress=progress,
+                capture=capture,
+            )
+            runtime = format_time(walltime, timeout)
+            line = "   ".join([runtime, progress])
+            if error:
+                assert a == b == ""
+                icon = colored("✖", "red")
+                n_incorrect += 1
+                line += f"   {icon} {error}"
+            else:
+                for answer, part in zip((a, b), "ab"):
+                    if day == 25 and part == "b":
+                        # there's no part b on christmas day, skip
+                        continue
+                    expected = None
+                    try:
+                        if example:
+                            expected = getattr(examples[dataset], "answer_" + part)
+                        else:
                             expected = getattr(puzzle, "answer_" + part)
-                        except AttributeError:
-                            pass
-                correct = expected is not None and str(expected) == answer
-                icon = colored("✔", "green") if correct else colored("✖", "red")
-                correction = ""
-                if not correct:
-                    n_incorrect += 1
-                    if expected is None:
-                        icon = colored("?", "magenta")
-                        correction = "(correct answer unknown)"
+                    except AttributeError:
+                        if (
+                            not example
+                            and autosubmit
+                            and part == "a"
+                            or (part == "b" and puzzle.answered_a)
+                        ):
+                            try:
+                                puzzle._submit(answer, part, reopen=reopen, quiet=True)
+                            except AocdError as err:
+                                log.warning("error submitting - %s", err)
+                            try:
+                                expected = getattr(puzzle, "answer_" + part)
+                            except AttributeError:
+                                pass
+                    correct = expected is not None and str(expected) == answer
+                    icon = colored("✔", "green") if correct else colored("✖", "red")
+                    correction = ""
+                    if not correct:
+                        if expected is None:
+                            icon = colored("?", "magenta")
+                            correction = "(correct answer unknown)"
+                        else:
+                            correction = f"(expected: {expected})"
+                            n_incorrect += 1
+                    answer = f"{answer} {correction}"
+                    if part == "a":
+                        answer = answer.ljust(32)
+                    if expected is None and example:
+                        result = " " * 45
                     else:
-                        correction = f"(expected: {expected})"
-                answer = f"{answer} {correction}"
-                if part == "a":
-                    answer = answer.ljust(30)
-                line += f"   {icon} part {part}: {answer}"
-        print(line)
+                        result = f"   {icon} part {part}: {answer}"
+                    line += result
+            print(line)
     return n_incorrect
