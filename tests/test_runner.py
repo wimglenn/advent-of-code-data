@@ -68,6 +68,13 @@ def fake_entry_point(year, day, data):
     return "answer1", "wrong"
 
 
+def fake_entry_point_25(year, day, data):
+    assert year == 2022
+    assert day == 25
+    assert data == "test example data"
+    return "answer_a", ""
+
+
 def xmas_entry_point(year, day, data):
     assert year == 2015
     assert day == 25
@@ -248,6 +255,39 @@ def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, pook):
     out, err = capsys.readouterr()
     assert "part a: answer1 " in out
     assert "part b: wrong (correct answer unknown)" in out
+
+
+def test_run_against_examples(aocd_data_dir, mocker, capsys, pook):
+    prose_dir = aocd_data_dir / "prose"
+    prose_dir.mkdir()
+    puzzle_file = prose_dir / "2022_25_prose.0.html"
+    puzzle_file.write_text(
+        """
+        <title>Day 25 - Advent of Code 2022</title>
+        <h2>--- Day 25: The Puzzle Title ---</h2>
+        <article>
+        <pre>test example data</pre>
+        <code>test answer_a</code>
+        </article>
+        """
+    )
+    pook.get(url="https://adventofcode.com/2022/day/25")
+    ep = mocker.Mock()
+    ep.name = "testuser"
+    ep.load.return_value = fake_entry_point_25
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
+    run_for(
+        plugs=["testuser"],
+        years=[2022],
+        days=[25],
+        datasets={"default": "thetesttoken"},
+        example=True,
+    )
+    out, err = capsys.readouterr()
+    assert "2022/25 - The Puzzle Title" in out
+    assert " testuser/example-1 " in out
+    assert "part a: answer_a" in out
+    assert "part b:" not in out
 
 
 def file_entry_point(year, day, data):
