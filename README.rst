@@ -201,7 +201,9 @@ As you can see above, I actually had incorrect code for `2017 Day 20: Particle S
 
 By the way, the ``aoc`` runner will kill your code if it takes more than 60 seconds, you can increase/decrease this by passing a command-line option, e.g. ``--timeout=120``.
 
-*New in version 1.1.0:*  Added option ``--quiet`` to suppress any output from plugins so it doesn't mess up the ``aoc`` runner's display.
+*New in version 1.1.0:* Added option ``--quiet`` to suppress any output from plugins so it doesn't mess up the ``aoc`` runner's display.
+
+*New in version 2.0.0:* You can verify your code against the example input data and answers, scraped from puzzle pages where available, using ``aoc --example``. This will pass the sample input data into your solver instead of passing the full user input data.
 
 
 How does this library work?
