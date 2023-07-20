@@ -88,8 +88,10 @@ If you want to use this within a Jupyter notebook, there are some extra deps:
 
    export AOC_SESSION=cafef00db01dfaceba5eba11deadbeef
 
-This is a cookie which is set when you login to AoC.  You can find it with
-your browser inspector.  If you're hacking on AoC at all you probably already
+*Note:* Windows users should use ``set`` instead of ``export`` here.
+
+The session ID is a cookie which is set when you login to AoC.  You can find it
+with your browser inspector.  If you're hacking on AoC at all you probably already
 know these kind of tricks, but if you need help with that part then you can
 `look here <https://github.com/wimglenn/advent-of-code/issues/1>`_.
 
