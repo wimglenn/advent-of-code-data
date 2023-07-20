@@ -48,7 +48,10 @@ def main():
         nargs="+",
         choices=plugins,
         default=list(plugins),
-        help="List of plugins (solvers) to evaluate. Runs against all available plugins by default.",
+        help=(
+            "List of plugins (solvers) to evaluate. "
+            "Runs against all available plugins by default."
+        ),
     )
     parser.add_argument(
         "-y",
@@ -73,7 +76,11 @@ def main():
         "-e",
         "--example",
         action="store_true",
-        help="Run against examples, instead of against real user data. This option is mutually exclusive with -u, because the sample data is the same for all users.",
+        help=(
+            "Run against examples, instead of against real user data. "
+            "This option is mutually exclusive with -u, because the sample "
+            "data is the same for all users."
+        ),
     )
     group.add_argument(
         "-u",
@@ -82,21 +89,30 @@ def main():
         choices=users,
         type=partial(_cli_guess, choices=users),
         default=users,
-        help="Users to run each plugin with (e.g. your google token, your reddit token, your twitter token, your github token).",
+        help=(
+            "Users to run each plugin with (e.g. your google token, your reddit token, "
+            "your twitter token, your github token)."
+        ),
     )
     parser.add_argument(
         "-t",
         "--timeout",
         type=int,
         default=DEFAULT_TIMEOUT,
-        help="Kill a solver if it exceeded this timeout, in seconds (default: %(default)s). Can use value '0' to disable timeout.",
+        help=(
+            "Kill a solver if it exceeded this timeout, in seconds "
+            "(default: %(default)s). Can use value '0' to disable timeout."
+        ),
     )
     parser.add_argument(
         "-s",
         "--no-submit",
         action="store_false",
         dest="autosubmit",
-        help="Disable autosubmit. By default the runner will submit answers if necessary.",
+        help=(
+            "Disable autosubmit. "
+            "By default, the runner will submit answers if necessary."
+        ),
     )
     parser.add_argument(
         "-r",
@@ -108,13 +124,19 @@ def main():
         "-q",
         "--quiet",
         action="store_true",
-        help="Capture output from runner. Can be used to suppress unwanted terminal output from a plugin.",
+        help=(
+            "Capture output from runner. "
+            "Can be used to suppress unwanted terminal output from a plugin."
+        ),
     )
     parser.add_argument(
         "-v",
         "--verbose",
         action="count",
-        help="Increased logging (-v INFO, -vv DEBUG). Default level is logging.WARNING.",
+        help=(
+            "Increased logging (-v INFO, -vv DEBUG). "
+            "Default level is logging.WARNING."
+        ),
     )
     args = parser.parse_args()
 
