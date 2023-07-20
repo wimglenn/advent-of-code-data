@@ -56,6 +56,7 @@ def main():
     parser.add_argument(
         "-y",
         "--years",
+        metavar=f"({years[0]}-{years[-1]})",
         type=int,
         nargs="+",
         choices=years,
@@ -65,6 +66,7 @@ def main():
     parser.add_argument(
         "-d",
         "--days",
+        metavar=f"({days[0]}-{days[-1]})",
         type=int,
         nargs="+",
         choices=days,
@@ -97,6 +99,7 @@ def main():
     parser.add_argument(
         "-t",
         "--timeout",
+        metavar="T",
         type=int,
         default=DEFAULT_TIMEOUT,
         help=(
