@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "advent-of-code-data"
-version = "2.0.0"
+version = "2.0.1"
 description = "Get your puzzle data with a single import"
 requires-python = ">=3.9"
 classifiers = [
@@ -19,7 +19,7 @@ dependencies = [
     "pebble",
     "urllib3",
     'tzdata ; platform_system == "Windows"',
-    "aocd-example-parser >= 2023.1",
+    "aocd-example-parser >= 2023.2",
 ]
 
 [[project.authors]]

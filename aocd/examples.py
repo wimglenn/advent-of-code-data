@@ -147,7 +147,7 @@ def _get_unique_real_inputs(year, day):
 def main():
     """
     Summarize an example parser's results with historical puzzles' prose, and
-    compare the performance against a reference implementation (aocd_examples_canned)
+    compare the performance against a reference implementation
     """
     try:
         from rich.console import Console
@@ -166,12 +166,13 @@ def main():
         "-e",
         "--example-parser",
         choices=list(plugins),
-        default="aocd_examples_canned",
+        default="reference",
         help="plugin to use for example extraction testing (default: %(default)s)",
     )
     parser.add_argument(
         "-y",
         "--years",
+        metavar="2015+",
         nargs="+",
         help="years to run the parser against (can specify multiple)",
         choices=all_years,
