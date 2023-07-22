@@ -243,7 +243,7 @@ class Puzzle:
         """
         return self._get_examples()
 
-    def _get_examples(self, parser_name="aocd_examples_canned"):
+    def _get_examples(self, parser_name="reference"):
         # invoke a named example parser to extract examples from cached prose.
         # logs warning and returns an empty list if the parser plugin raises an
         # exception for any reason.
@@ -824,7 +824,7 @@ def _load_users():
 
 
 @cache
-def _load_example_parser(group="adventofcode.examples", name="aocd_examples_canned"):
+def _load_example_parser(group="adventofcode.examples", name="reference"):
     # lazy-loads a plugin used to parse sample data, and cache it
     try:
         # Python 3.10+ - group/name selectable entry points

@@ -58,7 +58,7 @@ def main():
             "--example-parser",
             nargs="?",
             choices=plugins,
-            const="aocd_examples_canned",
+            const="reference",
             help="get the example(s) data, if any",
         )
     if len(users) > 1:
