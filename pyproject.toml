@@ -92,3 +92,20 @@ exclude = [
 [[tool.mypy.overrides]]
 module = ["browser_cookie3"]
 ignore_missing_imports = true
+
+[tool.coverage.report]
+exclude_also = [
+    # type checking only code
+    'if t\.TYPE_CHECKING:',
+
+    # defensive assertion code
+    'raise AssertionError',
+    'raise NotImplementedError',
+    'assert False',
+
+    # abstract methods are not run
+    '@(abc\.)?abstractmethod',
+
+    # methods on protocol classes are not run
+    'class .*\((t\.|typing\.)?Protocol\):'
+]
