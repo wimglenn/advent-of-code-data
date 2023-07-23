@@ -75,3 +75,10 @@ exclude = [
     # TODO: type check tests
     'tests/.*\.py$',  # don't type check tests
 ]
+
+# ignore missing imports for libraries that do not have type hints available
+[[tool.mypy.overrides]]
+module = [
+    "browser_cookie3",
+]
+ignore_missing_imports = true
