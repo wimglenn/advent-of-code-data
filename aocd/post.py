@@ -1,17 +1,25 @@
 import logging
+import typing as t
 
 from .get import current_day
 from .get import most_recent_year
 from .models import default_user
 from .models import Puzzle
 from .models import User
+from ._types import _Part, _Answer
 
 
 log = logging.getLogger(__name__)
 
 
 def submit(
-    answer, part=None, day=None, year=None, session=None, reopen=True, quiet=False
+    answer: _Answer,
+    part: t.Optional[_Part]=None,
+    day:t.Optional[int]=None,
+    year:t.Optional[int]=None,
+    session:t.Optional[str]=None,
+    reopen: bool = True,
+    quiet: bool = False,
 ):
     """
     Submit your answer to adventofcode.com, and print the response to the terminal.

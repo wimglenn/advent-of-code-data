@@ -1,6 +1,5 @@
 import os
 import re
-import typing as t
 
 import urllib3
 

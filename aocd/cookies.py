@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import sys
+import typing as t
 
 from .exceptions import DeadTokenError
 from .models import AOCD_CONFIG_DIR
@@ -25,8 +26,7 @@ def get_working_tokens():
 
     log.info("checking browser storage for tokens, this might pop up an auth dialog!")
     log.info("checking chrome cookie jar...")
-    cookie_files = glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies"))
-    cookie_files.append(None)
+    cookie_files = (*glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies")), None)
     chrome_cookies = []
     for cf in cookie_files:
         try:

@@ -1,6 +1,5 @@
 import json
 import logging
-import numbers
 import os
 import re
 import sys
@@ -54,6 +53,7 @@ class _SolverCallable(t.Protocol):
     def __call__(self, year: int, day:int, data: str) -> _Answer:
         ...
 
+# TODO: what should the return type be?
 _ExampleParserCallable = t.Callable[[examples.Page, list[str]], None]
 
 class _Result(t.TypedDict):
@@ -309,7 +309,7 @@ class Puzzle:
     def _repr_pretty_(self, p: "IPython.lib.pretty.PrettyPrinter", cycle: bool) -> None:
         """Hook for IPython's pretty-printer."""
         txt = repr(self) if cycle else f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
-        p.text(txt) # type: ignore[no-untyped-call] # ipython doesn't have type hints
+        p.text(txt)
 
     # TODO: providing better type hints for this function will require more work
     # than I want to do right now LOL
@@ -458,7 +458,7 @@ class Puzzle:
         part: _Part,
         reopen: bool = True,
         quiet: bool = False
-    ):
+    ) -> str:
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -471,7 +471,7 @@ class Puzzle:
             raise AocdError('part must be "a" or "b"')
         previous_submits = self.submit_results
         try:
-            value_as_int = int(value)
+            value_as_int = int(value) # type: ignore[arg-type]
         except ValueError:
             value_as_int = None
         skip_prefix = (

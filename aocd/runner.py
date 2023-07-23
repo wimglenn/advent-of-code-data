@@ -21,6 +21,7 @@ from .utils import _cli_guess
 from .utils import AOC_TZ
 from .utils import colored
 from .utils import get_plugins
+from ._types import _Part
 
 
 # from https://adventofcode.com/about
@@ -29,7 +30,6 @@ from .utils import get_plugins
 
 DEFAULT_TIMEOUT = 60
 log = logging.getLogger(__name__)
-
 
 def main() -> t.NoReturn:
     """
@@ -355,7 +355,7 @@ def run_for(
                 n_incorrect += 1
                 line += f"   {icon} {error}"
             else:
-                for answer, part in zip((a, b), "ab"):
+                for answer, part in zip((a, b), t.cast(t.Iterable[_Part], "ab")):
                     if day == 25 and part == "b":
                         # there's no part b on christmas day, skip
                         continue

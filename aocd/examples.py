@@ -1,5 +1,4 @@
 import argparse
-import inspect
 import logging
 import re
 import sys
@@ -35,9 +34,9 @@ class Page:
     year: int  # AoC puzzle year (2015+) parsed from html title
     day: int  # AoC puzzle day (1-25) parsed from html title
     article_a: bs4.element.Tag  # The bs4 tag for the first <article> in the page, i.e. part a
-    article_b: bs4.element.Tag  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
+    article_b: t.Optional[bs4.element.Tag]  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
     a_raw: str  # The first <article> html as a string
-    b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
+    b_raw: t.Optional[str]  # The second <article> html as a string. Will be `None` if part b locked
 
     def __repr__(self) -> str:
         part_a_only = "*" if self.article_b is None else ""
@@ -56,16 +55,19 @@ class Page:
         articles = soup.find_all("article")
         if len(articles) == 0:
             raise ExampleParserError("no <article> found in html")
-        elif len(articles) == 1:
-            [article_a] = articles
-            a_raw = str(article_a)
-            article_b = b_raw = None
-        elif len(articles) == 2:
-            article_a, article_b = articles
-            a_raw = str(article_a)
-            b_raw = str(article_b)
-        else:
+        if len(articles) > 2:
             raise ExampleParserError("too many <article> found in html")
+
+        article_a = articles.pop(0)
+        assert isinstance(article_a, bs4.Tag)
+        a_raw = str(article_a)
+
+        article_b = b_raw = None
+        if articles:
+            article_b = articles.pop(0)
+            assert isinstance(article_b, bs4.Tag)
+            b_raw = str(article_b)
+
         page = Page(
             raw_html=html,
             soup=soup,
@@ -92,6 +94,7 @@ class Page:
             # actually used by an example parser
             raise AttributeError(name)
         article = self.article_a if part == "a" else self.article_b
+        assert article is not None
         if tag == "li":
             # list items usually need further drill-down
             result = article.find_all("li")
@@ -128,7 +131,7 @@ class Example(t.NamedTuple):
         return self.answer_a, self.answer_b
 
 
-def _trunc(s: t.Optional[str], maxlen: int = 50) -> str:
+def _trunc(s: t.Optional[str], maxlen: int = 50) -> t.Optional[str]:
     # don't print massive strings and mess up the table rendering
     if s is None or len(s) <= maxlen:
         return s

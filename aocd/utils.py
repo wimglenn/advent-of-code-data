@@ -226,15 +226,15 @@ def colored(txt: str, color: t.Optional[str]) -> str:
 if sys.version_info >= (3, 10):
     from importlib.metadata import EntryPoints
 
-    def get_plugins(group: str ="adventofcode.user") -> EntryPoints:
+    def get_plugins(group: str = "adventofcode.user") -> EntryPoints:
         """
         Currently installed plugins for user solves.
         """
-        return entry_points(group=group) # type: ignore[call-arg, return-value] # group argument does not exist for Python < 3.10
+        return entry_points(group=group)
 else:
     from importlib.metadata import EntryPoint
 
-    def get_plugins(group: str ="adventofcode.user") -> list[EntryPoint]:
+    def get_plugins(group: str = "adventofcode.user") -> list[EntryPoint]:
         """
         Currently installed plugins for user solves.
         """

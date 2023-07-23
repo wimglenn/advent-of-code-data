@@ -79,7 +79,7 @@ def current_day() -> int:
     return day
 
 
-def get_day_and_year():
+def get_day_and_year() -> tuple[int, t.Optional[int]]:
     """
     Returns tuple (day, year).
 
@@ -101,7 +101,7 @@ def get_day_and_year():
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     sep = re.escape(os.sep)
     pattern_path = sep + sep.join([r"20\d\d", r"[0-2]?\d", r".*\.py$"])
-    visited = []
+    visited: list[str] = []
 
     def giveup(msg: str) -> AocdError:
         log.info("introspection failure")
@@ -168,12 +168,12 @@ def get_day_and_year():
     year = years.pop() if years else None
     basename_no_years = re.sub(pattern_year, "", basename)
     try:
-        [day] = set(re.findall(pattern_day, basename_no_years))
+        [day_str] = set(re.findall(pattern_day, basename_no_years))
     except ValueError:
         pass
     else:
-        assert not day.startswith("0"), "regex pattern_day must prevent any leading 0"
-        day = int(day)
+        assert not day_str.startswith("0"), "regex pattern_day must prevent any leading 0"
+        day = int(day_str)
         assert 1 <= day <= 25, "regex pattern_day must only match numbers in range 1-25"
         log.debug("year=%s day=%s", year or "?", day)
         return day, year
