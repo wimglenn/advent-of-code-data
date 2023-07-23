@@ -38,6 +38,17 @@ Homepage = "https://github.com/wimglenn/advent-of-code-data"
 
 [project.optional-dependencies]
 nb = ["IPython", "jupyter-server"]
+test = [
+    "numpy",
+    "pook @ git+https://github.com/wimglenn/pook@urllib3",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-raisin",
+    "pytest-freezer",
+    "pytest-socket",
+    "rich",
+]
 
 [project.scripts]
 aocd = "aocd.cli:main"
