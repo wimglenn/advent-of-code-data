@@ -28,13 +28,6 @@ AOC_TZ = ZoneInfo("America/New_York")
 _v = version("advent-of-code-data")
 USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"
 
-if sys.version_info >= (3, 10):
-    from importlib.metadata import EntryPoints # type: ignore[attr-defined] # EntryPoints does not exist for Python < 3.10
-    _Plugins = EntryPoints
-else:
-    from importlib.metadata import EntryPoint
-    _Plugins = list[EntryPoint]
-
 class HttpClient:
     # every request to adventofcode.com goes through this wrapper
     # so that we can put in user agent header, rate-limit, etc.
@@ -230,16 +223,21 @@ def colored(txt: str, color: t.Optional[str]) -> str:
     reset = "\x1b[0m"
     return f"\x1b[{code + 30}m{txt}{reset}"
 
+if sys.version_info >= (3, 10):
+    from importlib.metadata import EntryPoints
 
-def get_plugins(group: str ="adventofcode.user") -> _Plugins:
-    """
-    Currently installed plugins for user solves.
-    """
-    try:
-        # Python 3.10+
+    def get_plugins(group: str ="adventofcode.user") -> EntryPoints:
+        """
+        Currently installed plugins for user solves.
+        """
         return entry_points(group=group) # type: ignore[call-arg, return-value] # group argument does not exist for Python < 3.10
-    except TypeError:
-        # Python 3.9
+else:
+    from importlib.metadata import EntryPoint
+
+    def get_plugins(group: str ="adventofcode.user") -> list[EntryPoint]:
+        """
+        Currently installed plugins for user solves.
+        """
         return entry_points().get(group, [])
 
 

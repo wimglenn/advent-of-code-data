@@ -1,5 +1,6 @@
 import json
 import logging
+import numbers
 import os
 import re
 import sys
@@ -11,6 +12,7 @@ from datetime import timedelta
 from functools import cache
 from functools import cached_property
 from importlib.metadata import entry_points
+from importlib.metadata import EntryPoint
 from itertools import count
 from pathlib import Path
 from textwrap import dedent
@@ -30,7 +32,10 @@ from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
 from .utils import http
+from ._types import _Answer, _AnswerTuple, _Part
 
+if t.TYPE_CHECKING:
+    import numpy as np
 
 log = logging.getLogger(__name__)
 
@@ -41,8 +46,11 @@ AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expandu
 URL = "https://adventofcode.com/{year}/day/{day}"
 
 # TODO: Use typing.Self when support for < 3.11 is dropped
-_Answer = t.Optional[t.Union[int,str]]
 _TUser = t.TypeVar("_TUser", bound="User")
+
+class _SolverCallable(t.Protocol):
+    def __call__(self, year: int, day:int, data: str) -> _Answer:
+        ...
 
 class _Result(t.TypedDict):
     time: timedelta
@@ -120,7 +128,7 @@ class User:
         if years is None:
             years = all_years
         days = {str(i) for i in range(1, 26)}
-        results: dict[str, dict[t.Literal["a", "b"], _Result]] = {}
+        results: dict[str, dict[_Part, _Result]] = {}
         ur_broke = "You haven't collected any stars"
         # TODO: type check fails here b/c years could still be int if years is not in all-years.
         # This seems like it may be a subtle/unnoticed bug. What is the desired behavior?
@@ -261,7 +269,7 @@ class Puzzle:
         """
         return self._get_examples()
 
-    def _get_examples(self, parser_name="reference"):
+    def _get_examples(self, parser_name: str = "reference"):
         # invoke a named example parser to extract examples from cached prose.
         # logs warning and returns an empty list if the parser plugin raises an
         # exception for any reason.
@@ -304,7 +312,9 @@ class Puzzle:
             txt = f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
             p.text(txt)
 
-    def _coerce_val(self, val):
+    # TODO: providing better type hints for this function will require more work
+    # than I want to do right now LOL
+    def _coerce_val(self, val: _Answer) -> _Answer:
         # technically adventofcode.com will only accept strings as answers.
         # but it's convenient to be able to submit numbers, since many of the answers
         # are numeric strings. coerce the values to string safely.
@@ -337,7 +347,7 @@ class Puzzle:
         return val
 
     @property
-    def answer_a(self):
+    def answer_a(self) -> str:
         """
         The correct answer for the first part of the puzzle. This attribute hides
         itself if the first part has not yet been solved.
@@ -348,7 +358,7 @@ class Puzzle:
             raise AttributeError("answer_a")
 
     @answer_a.setter
-    def answer_a(self, val):
+    def answer_a(self, val: _Answer) -> None:
         """
         You can submit your answer to adventofcode.com by setting the answer attribute
         on a puzzle instance, e.g.
@@ -364,12 +374,12 @@ class Puzzle:
         self._submit(value=val, part="a")
 
     @property
-    def answered_a(self):
+    def answered_a(self) -> bool:
         """Has the first part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_a", None))
 
     @property
-    def answer_b(self):
+    def answer_b(self) -> str:
         """
         The correct answer for the second part of the puzzle. This attribute hides
         itself if the second part has not yet been solved.
@@ -380,7 +390,7 @@ class Puzzle:
             raise AttributeError("answer_b")
 
     @answer_b.setter
-    def answer_b(self, val):
+    def answer_b(self, val: _Answer) -> None:
         """
         You can submit your answer to adventofcode.com by setting the answer attribute
         on a puzzle instance, e.g.
@@ -396,11 +406,11 @@ class Puzzle:
         self._submit(value=val, part="b")
 
     @property
-    def answered_b(self):
+    def answered_b(self) -> bool:
         """Has the second part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_b", None))
 
-    def answered(self, part):
+    def answered(self, part: _Part) -> bool:
         """Has the specified part of this puzzle been solved correctly yet?"""
         if part == "a":
             return bool(getattr(self, "answer_a", None))
@@ -409,7 +419,7 @@ class Puzzle:
         raise AocdError('part must be "a" or "b"')
 
     @property
-    def answers(self):
+    def answers(self) -> _AnswerTuple:
         """
         Returns a tuple of the correct answers for this puzzle. Will raise an
         AttributeError if either part is yet to be solved by the associated user.
@@ -417,7 +427,7 @@ class Puzzle:
         return self.answer_a, self.answer_b
 
     @answers.setter
-    def answers(self, val):
+    def answers(self, val: _AnswerTuple) -> None:
         """
         Submit both answers at once. Pretty much impossible in practice, unless you've
         seen the puzzle before.
@@ -443,7 +453,13 @@ class Puzzle:
             return json.loads(self.submit_results_path.read_text())
         return []
 
-    def _submit(self, value, part, reopen=True, quiet=False):
+    def _submit(
+        self,
+        value: t.Optional[_Answer],
+        part: _Part,
+        reopen: bool = True,
+        quiet: bool = False
+    ):
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -652,14 +668,15 @@ class Puzzle:
         )
         path.write_text(json.dumps(data, indent=2))
 
-    def _get_answer(self, part):
+    def _get_answer(self, part: _Part) -> str:
         """
         Note: Answers are only revealed after a correct submission. If you've
         not already solved the puzzle, PuzzleUnsolvedError will be raised.
         """
+        assert part in "ab"
         if part == "b" and self.day == 25:
             return ""
-        answer_path = getattr(self, f"answer_{part}_path")
+        answer_path = self.answer_a_path if part == "a" else self.answer_b_path
         if answer_path.is_file():
             return answer_path.read_text(encoding="utf-8").strip()
         # check puzzle page for any previously solved answers.
@@ -671,7 +688,7 @@ class Puzzle:
         msg = f"Answer {self.year}-{self.day}{part} is not available"
         raise PuzzleUnsolvedError(msg)
 
-    def solve(self):
+    def solve(self) -> _AnswerTuple:
         """
         If there is a unique entry-point in the "adventofcode.user" group, load it and
         invoke it using this puzzle's input data. It is expected to return a tuple of
@@ -683,10 +700,10 @@ class Puzzle:
             [ep] = get_plugins()
         except ValueError:
             raise AocdError("Puzzle.solve is only available with unique entry point")
-        f = ep.load()
-        return f(year=self.year, day=self.day, data=self.input_data)
+        return self._solve(ep.load())
 
-    def solve_for(self, plugin):
+
+    def solve_for(self, plugin: str)-> _AnswerTuple:
         """
         Load the entry-point from the "adventofcode.user" plugin group with the
         specified name, and invoke it using this puzzle's input data. The entry-point
@@ -699,8 +716,17 @@ class Puzzle:
                 break
         else:
             raise AocdError(f"No entry point found for {plugin!r}")
-        f = ep.load()
-        return f(year=self.year, day=self.day, data=self.input_data)
+        return self._solve(ep.load())
+
+
+    def _solve(self, solver_callable: _SolverCallable) -> _AnswerTuple:
+        result = solver_callable(year=self.year, day=self.day, data=self.input_data)
+        assert (
+            isinstance(result, tuple) and
+            len(result) == 2 and
+            all(ele is None or isinstance(ele, (int, str)) for ele in result)
+        ), f"expected tuple of answers. got {result}"
+        return t.cast(_AnswerTuple, result)
 
     @property
     def url(self) -> str:
@@ -760,7 +786,7 @@ class Puzzle:
                     _ensure_intermediate_dirs(self.prose0_path)
                     self.prose0_path.write_text(text, encoding="utf-8")
 
-    def _get_prose(self):
+    def _get_prose(self) -> str:
         # prefer to return full prose (i.e. part b is solved or unlocked)
         # prefer to return prose with answers from same the user id as self.user.id
         for path in self.prose2_path, self.prose1_path:
@@ -810,7 +836,7 @@ class Puzzle:
         return result
 
     @staticmethod
-    def all(user=None):
+    def all(user: t.Optional[User] = None) -> t.Generator["Puzzle", t.Any, None]:
         """
         Return an iterator over all known puzzles that are currently playable.
         """
@@ -845,21 +871,35 @@ def _load_users() -> dict[str, str]:
         return t.cast(dict[str, str], users)
 
 
+
+
+
 @cache
-def _load_example_parser(group="adventofcode.examples", name="reference"):
+def _load_example_parser(
+    group: str = "adventofcode.examples",
+    name: str = "reference"
+):
     # lazy-loads a plugin used to parse sample data, and cache it
-    try:
-        # Python 3.10+ - group/name selectable entry points
-        eps = entry_points().select(group=group, name=name)
-    except AttributeError:
-        # Python 3.9 - dict interface
-        eps = [ep for ep in entry_points()[group] if ep.name == name]
+    eps = _get_entry_points(group, name)
     if not eps:
         msg = f"could not find the example parser plugin {group=}/{name=}"
         raise ExampleParserError(msg)
     if len(eps) > 1:
         log.warning("expected unique entrypoint but found %d entrypoints", len(eps))
-    ep = next(iter(eps))
+    it = iter(eps)
+    ep: EntryPoint = next(it)
     parser = ep.load()
     log.debug("loaded example parser %r", parser)
     return parser
+
+if sys.version_info >= (3, 10):
+    # Python 3.10+ - group/name selectable entry points
+    from importlib_metadata import EntryPoints
+
+    def _get_entry_points(group: str, name: str) -> EntryPoints:
+        return entry_points().select(group=group, name=name)
+else:
+    # Python 3.9 - dict interface
+
+    def _get_entry_points(group: str, name: str) -> list[EntryPoint]:
+        return [ep for ep in entry_points()[group] if ep.name == name]

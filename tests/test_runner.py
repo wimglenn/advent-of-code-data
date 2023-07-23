@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import MockerFixture
 
 from aocd.runner import _process_wrapper
 from aocd.runner import format_time
@@ -8,7 +9,7 @@ from aocd.runner import run_one
 from aocd.utils import colored
 
 
-def test_no_plugins_avail(capsys, mocker):
+def test_no_plugins_avail(capsys, mocker: MockerFixture):
     mock = mocker.patch("aocd.runner.get_plugins", return_value=[])
     mocker.patch("sys.argv", ["aoc"])
     msg = (
@@ -22,7 +23,7 @@ def test_no_plugins_avail(capsys, mocker):
     mock.assert_called_once_with()
 
 
-def test_no_datasets_avail(capsys, mocker, aocd_config_dir):
+def test_no_datasets_avail(capsys, mocker: MockerFixture, aocd_config_dir):
     tokens_file = aocd_config_dir / "tokens.json"
     tokens_file.write_text("{}")
     mocker.patch("sys.argv", ["aoc"])
@@ -36,7 +37,7 @@ def test_no_datasets_avail(capsys, mocker, aocd_config_dir):
     assert msg in err
 
 
-def test_main(capsys, mocker, aocd_config_dir):
+def test_main(capsys, mocker: MockerFixture, aocd_config_dir):
     mock = mocker.patch("aocd.runner.run_for", return_value=0)
     ep1 = mocker.Mock()
     ep1.name = "user1"
@@ -86,7 +87,7 @@ def bugged_entry_point(year, day, data):
     raise Exception(123, 456)
 
 
-def test_results(mocker, capsys):
+def test_results(mocker: MockerFixture, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
@@ -114,7 +115,7 @@ def test_results(mocker, capsys):
     assert "✔" in out
 
 
-def test_results_xmas(mocker, capsys):
+def test_results_xmas(mocker: MockerFixture, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = xmas_entry_point
@@ -160,7 +161,7 @@ def test_nothing_to_do():
     run_for(plugs=[], years=[], days=[], datasets=[])
 
 
-def test_day_out_of_range(mocker, capsys, freezer):
+def test_day_out_of_range(mocker: MockerFixture, capsys, freezer):
     freezer.move_to("2018-12-01 12:00:00Z")
     ep = mocker.Mock()
     ep.name = "testuser"
@@ -176,7 +177,7 @@ def test_day_out_of_range(mocker, capsys, freezer):
     assert out == err == ""
 
 
-def test_run_error(aocd_data_dir, mocker, capsys):
+def test_run_error(aocd_data_dir, mocker: MockerFixture, capsys):
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2018_25_prose.0.html"
@@ -202,7 +203,7 @@ def test_run_error(aocd_data_dir, mocker, capsys):
     assert "part b" not in out  # because it's 25 dec, no part b puzzle
 
 
-def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, pook):
+def test_run_and_autosubmit(aocd_data_dir, mocker: MockerFixture, capsys, pook):
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2015_01_prose.0.html"
@@ -231,7 +232,7 @@ def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, pook):
     assert "part b: wrong (correct answer unknown)" in out
 
 
-def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, pook):
+def test_run_and_no_autosubmit(aocd_data_dir, mocker: MockerFixture, capsys, pook):
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2015_01_prose.0.html"
@@ -257,7 +258,7 @@ def test_run_and_no_autosubmit(aocd_data_dir, mocker, capsys, pook):
     assert "part b: wrong (correct answer unknown)" in out
 
 
-def test_run_against_examples(aocd_data_dir, mocker, capsys, pook):
+def test_run_against_examples(aocd_data_dir, mocker: MockerFixture, capsys, pook):
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2022_25_prose.0.html"
@@ -299,7 +300,7 @@ def file_entry_point(year, day, data):
     return 123, "456"
 
 
-def test_load_input_from_file(mocker):
+def test_load_input_from_file(mocker: MockerFixture):
     ep = mocker.Mock()
     ep.name = "file_ep_user"
     ep.load.return_value = file_entry_point
@@ -310,7 +311,7 @@ def test_load_input_from_file(mocker):
     assert not error
 
 
-def test_scratch_cleanup_failure(mocker):
+def test_scratch_cleanup_failure(mocker: MockerFixture):
     ep = mocker.Mock()
     ep.name = "file_ep_user"
     ep.load.return_value = file_entry_point

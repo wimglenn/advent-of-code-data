@@ -2,6 +2,7 @@ import json
 import logging
 
 import pytest
+from pytest_mock import MockerFixture
 
 from aocd.exceptions import AocdError
 from aocd.post import submit
@@ -22,7 +23,7 @@ def test_submit_correct_answer(pook, capsys):
     assert msg in out
 
 
-def test_correct_submit_reopens_browser_on_answer_page(mocker, pook):
+def test_correct_submit_reopens_browser_on_answer_page(mocker: MockerFixture, pook):
     pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
         response_body="<article>That's the right answer</article>",

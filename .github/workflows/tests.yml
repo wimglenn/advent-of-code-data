@@ -34,7 +34,7 @@ jobs:
           architecture: x64
 
       - name: "Install"
-        run: pip install -q -e .[test,type-check] && pip freeze --all
+        run: pip install -q -e .[all] && pip freeze --all
 
       - name: "Run tests for ${{ matrix.python-version }} on ${{ matrix.os }}"
         run: python -m pytest --durations=10

@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import MockerFixture
 
 from aocd.examples import main
 from aocd.examples import Page
@@ -17,13 +18,13 @@ fake_prose = """
 """
 
 
-def test_page_repr(mocker):
+def test_page_repr(mocker: MockerFixture):
     mocker.patch("aocd.examples.hex", return_value="0xcafef00d")
     page_ab = Page.from_raw(html=fake_prose)
     assert repr(page_ab) == f"<Page(1234, 1) at 0xcafef00d>"
 
 
-def test_page_a_only(mocker):
+def test_page_a_only(mocker: MockerFixture):
     mocker.patch("aocd.examples.hex", return_value="0xdeadbeef")
     html_a_only = fake_prose[: fake_prose.rfind("<article>")]
     page_a_only = Page.from_raw(html=html_a_only)
@@ -68,7 +69,7 @@ def test_invalid_page_no_title():
         Page.from_raw(html=html)
 
 
-def test_aoce(mocker, freezer, pook, capsys):
+def test_aoce(mocker: MockerFixture, freezer, pook, capsys):
     pook.get(
         url="https://adventofcode.com:443/2022/day/1",
         response_body=fake_prose,

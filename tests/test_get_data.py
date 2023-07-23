@@ -5,6 +5,7 @@ import threading
 from importlib.metadata import version
 
 import pytest
+from pytest_mock import MockerFixture
 
 import aocd
 from aocd.exceptions import AocdError
@@ -79,7 +80,7 @@ def test_puzzle_not_available_yet(pook, caplog):
     assert mock.calls == 1
 
 
-def test_puzzle_not_available_yet_block(pook, caplog, mocker):
+def test_puzzle_not_available_yet_block(pook, caplog, mocker: MockerFixture):
     mock = pook.get(
         url="https://adventofcode.com/2101/day/1/input",
         response_body="Not Found",
@@ -126,7 +127,7 @@ def test_corrupted_cache(aocd_data_dir):
         aocd.get_data(year=2018, day=1)
 
 
-def test_race_on_download_data(mocker, aocd_data_dir, pook):
+def test_race_on_download_data(mocker: MockerFixture, aocd_data_dir, pook):
     pook.get(
         url="https://adventofcode.com/2018/day/1/input",
         response_body="fake data for year 2018 day 1",

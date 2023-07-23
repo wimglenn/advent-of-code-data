@@ -103,7 +103,7 @@ def get_day_and_year():
     pattern_path = sep + sep.join([r"20\d\d", r"[0-2]?\d", r".*\.py$"])
     visited = []
 
-    def giveup(msg):
+    def giveup(msg: str) -> AocdError:
         log.info("introspection failure")
         for fname in visited:
             log.info("stack crawl visited %s", fname)

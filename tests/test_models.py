@@ -5,6 +5,7 @@ from textwrap import dedent
 
 import numpy as np
 import pytest
+from pytest_mock import MockerFixture
 
 from aocd.exceptions import AocdError
 from aocd.exceptions import DeadTokenError
@@ -66,7 +67,7 @@ def test_answered(aocd_data_dir):
         puzzle.answered(1)
 
 
-def test_setattr_submits(mocker, pook):
+def test_setattr_submits(mocker: MockerFixture, pook):
     pook.get("https://adventofcode.com/2017/day/7")
     puzzle = Puzzle(year=2017, day=7)
     mock = mocker.patch("aocd.models.Puzzle._submit")
@@ -74,7 +75,7 @@ def test_setattr_submits(mocker, pook):
     mock.assert_called_once_with(part="a", value="4321")
 
 
-def test_setattr_doesnt_submit_if_already_done(mocker, aocd_data_dir):
+def test_setattr_doesnt_submit_if_already_done(mocker: MockerFixture, aocd_data_dir):
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("someval")
     puzzle = Puzzle(year=2017, day=7)
@@ -83,7 +84,7 @@ def test_setattr_doesnt_submit_if_already_done(mocker, aocd_data_dir):
     mock.assert_not_called()
 
 
-def test_setattr_submit_both(aocd_data_dir, mocker, pook):
+def test_setattr_submit_both(aocd_data_dir, mocker: MockerFixture, pook):
     pook.get("https://adventofcode.com/2017/day/7")
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("4321")
@@ -93,7 +94,7 @@ def test_setattr_submit_both(aocd_data_dir, mocker, pook):
     mock.assert_called_once_with(part="b", value="zyxw")
 
 
-def test_setattr_doesnt_submit_both_if_done(mocker, aocd_data_dir):
+def test_setattr_doesnt_submit_both_if_done(mocker: MockerFixture, aocd_data_dir):
     answer_a_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_b_path = aocd_data_dir / "testauth.testuser.000" / "2017_07b_answer.txt"
     answer_a_path.write_text("ansA")
@@ -104,7 +105,7 @@ def test_setattr_doesnt_submit_both_if_done(mocker, aocd_data_dir):
     mock.assert_not_called()
 
 
-def test_solve_no_plugs(mocker):
+def test_solve_no_plugs(mocker: MockerFixture):
     mock = mocker.patch("aocd.models.get_plugins", return_value=[])
     puzzle = Puzzle(year=2018, day=1)
     expected = AocdError("Puzzle.solve is only available with unique entry point")
@@ -113,22 +114,24 @@ def test_solve_no_plugs(mocker):
     mock.assert_called_once_with()
 
 
-def test_solve_one_plug(aocd_data_dir, mocker):
+def test_solve_one_plug(aocd_data_dir, mocker: MockerFixture):
     input_path = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("someinput")
     ep = mocker.Mock()
     ep.name = "myplugin"
+    ep.load.return_value = mocker.Mock(return_value=(None, None)) # plugin must return a tuple of answers
     mocker.patch("aocd.models.get_plugins", return_value=[ep])
     puzzle = Puzzle(year=2018, day=1)
     puzzle.solve()
     ep.load.return_value.assert_called_once_with(year=2018, day=1, data="someinput")
 
 
-def test_solve_for(aocd_data_dir, mocker):
+def test_solve_for(aocd_data_dir, mocker: MockerFixture):
     input_path = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("blah")
     plug1 = mocker.Mock()
     plug1.name = "myplugin"
+    plug1.load.return_value = mocker.Mock(return_value=(None, None)) # plugin must return a tuple of answers
     plug2 = mocker.Mock()
     plug2.name = "otherplugin"
     mocker.patch("aocd.models.get_plugins", return_value=[plug2, plug1])
@@ -140,7 +143,7 @@ def test_solve_for(aocd_data_dir, mocker):
     plug2.load.return_value.assert_not_called()
 
 
-def test_solve_for_unfound_user(aocd_data_dir, mocker):
+def test_solve_for_unfound_user(aocd_data_dir, mocker: MockerFixture):
     input_path = aocd_data_dir / "testauth.testuser.000" / "2018_01_input.txt"
     input_path.write_text("someinput")
     other_plug = mocker.Mock()
@@ -176,7 +179,7 @@ def test_get_title_failure(freezer, pook, caplog):
         puzzle.title
 
 
-def test_pprint(freezer, pook, mocker):
+def test_pprint(freezer, pook, mocker: MockerFixture):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
@@ -192,7 +195,7 @@ def test_pprint(freezer, pook, mocker):
     assert pretty.endswith(" - The Puzzle Title>")
 
 
-def test_pprint_cycle(freezer, pook, mocker):
+def test_pprint_cycle(freezer, pook, mocker: MockerFixture):
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.get(
         url="https://adventofcode.com/2018/day/1",
@@ -289,7 +292,7 @@ def test_get_stats_partially_complete(pook):
     }
 
 
-def test_puzzle_view(mocker):
+def test_puzzle_view(mocker: MockerFixture):
     browser_open = mocker.patch("aocd.models.webbrowser.open")
     puzzle = Puzzle(year=2019, day=4)
     puzzle.view()
@@ -322,7 +325,7 @@ def test_get_stats_400(pook):
 
 
 @pytest.mark.answer_not_cached(install=False)
-def test_check_guess_against_unsolved(mocker):
+def test_check_guess_against_unsolved(mocker: MockerFixture):
     mocker.patch("aocd.models.Puzzle._get_answer", side_effect=PuzzleUnsolvedError)
     puzzle = Puzzle(year=2019, day=4)
     rv = puzzle._check_already_solved("one", "a")
@@ -330,7 +333,7 @@ def test_check_guess_against_unsolved(mocker):
 
 
 @pytest.mark.answer_not_cached(install=False)
-def test_check_guess_against_empty(mocker):
+def test_check_guess_against_empty(mocker: MockerFixture):
     mocker.patch("aocd.models.Puzzle._get_answer", return_value="")
     puzzle = Puzzle(year=2019, day=4)
     rv = puzzle._check_already_solved("one", "a")
@@ -338,7 +341,7 @@ def test_check_guess_against_empty(mocker):
 
 
 @pytest.mark.answer_not_cached(install=False)
-def test_check_guess_against_saved_correct(mocker):
+def test_check_guess_against_saved_correct(mocker: MockerFixture):
     mocker.patch("aocd.models.Puzzle._get_answer", return_value="one")
     puzzle = Puzzle(year=2019, day=4)
     rv = puzzle._check_already_solved("one", "a")
@@ -346,7 +349,7 @@ def test_check_guess_against_saved_correct(mocker):
 
 
 @pytest.mark.answer_not_cached(install=False)
-def test_check_guess_against_saved_incorrect(mocker):
+def test_check_guess_against_saved_incorrect(mocker: MockerFixture):
     mocker.patch("aocd.models.Puzzle._get_answer", return_value="two")
     puzzle = Puzzle(year=2019, day=4)
     rv = puzzle._check_already_solved("one", "a")
@@ -548,7 +551,7 @@ def test_submit_prevents_bad_guesses_too_low(freezer, capsys, pook):
         assert line.strip() in out
 
 
-def test_submit_prevents_bad_guesses_known_incorrect(freezer, capsys, pook, mocker):
+def test_submit_prevents_bad_guesses_known_incorrect(freezer, capsys, pook, mocker: MockerFixture):
     mocker.patch("aocd.models.webbrowser.open")
     freezer.move_to("2022-12-01 12:34:56-05:00")
     pook.get("https://adventofcode.com/2022/day/1", times=2)

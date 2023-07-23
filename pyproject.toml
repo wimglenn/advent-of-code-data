@@ -37,8 +37,8 @@ content-type = "text/x-rst"
 Homepage = "https://github.com/wimglenn/advent-of-code-data"
 
 [project.optional-dependencies]
+all = ["advent-of-code-data[nb,test,type-check]"]
 nb = ["IPython", "jupyter-server"]
-type-check = ["mypy", "types-beautifulsoup4"]
 test = [
     "numpy",
     "pook @ git+https://github.com/wimglenn/pook@urllib3",
@@ -50,6 +50,7 @@ test = [
     "pytest-socket",
     "rich",
 ]
+type-check = ["mypy", "types-beautifulsoup4"]
 
 [project.scripts]
 aocd = "aocd.cli:main"
@@ -71,5 +72,6 @@ aocd = ["py.typed"] # include py.typed file in distributions
 strict = true
 allow_redefinition = true
 exclude = [
+    # TODO: type check tests
     'tests/.*\.py$',  # don't type check tests
 ]

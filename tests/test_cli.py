@@ -1,9 +1,10 @@
 import pytest
+from pytest_mock import MockerFixture
 
 from aocd.cli import main
 
 
-def test_main_invalid_date(mocker, capsys):
+def test_main_invalid_date(mocker: MockerFixture, capsys):
     mocker.patch("sys.argv", ["aocd", "1", "2014"])
     with pytest.raises(SystemExit(1)):
         main()
@@ -11,7 +12,7 @@ def test_main_invalid_date(mocker, capsys):
     assert out.startswith("usage: aocd [day 1-25] [year 2015-")
 
 
-def test_main_valid_date(mocker, capsys):
+def test_main_valid_date(mocker: MockerFixture, capsys):
     mocker.patch("sys.argv", ["aocd", "8", "2015"])
     getter = mocker.patch("aocd.cli.get_data", return_value="stuff")
     main()
@@ -21,7 +22,7 @@ def test_main_valid_date(mocker, capsys):
     getter.assert_called_once_with(session=None, year=2015, day=8)
 
 
-def test_main_valid_date_forgiving(mocker, capsys):
+def test_main_valid_date_forgiving(mocker: MockerFixture, capsys):
     mocker.patch("sys.argv", ["aocd", "2015", "8"])
     getter = mocker.patch("aocd.cli.get_data", return_value="stuff")
     main()
@@ -31,7 +32,7 @@ def test_main_valid_date_forgiving(mocker, capsys):
     getter.assert_called_once_with(session=None, year=2015, day=8)
 
 
-def test_main_user_guess(mocker, capsys):
+def test_main_user_guess(mocker: MockerFixture, capsys):
     fake_users = {
         "bill": "b",
         "teddy": "t",
@@ -43,7 +44,7 @@ def test_main_user_guess(mocker, capsys):
     getter.assert_called_once_with(session="t", year=2015, day=8)
 
 
-def test_main_user_ambiguous(mocker, capsys):
+def test_main_user_ambiguous(mocker: MockerFixture, capsys):
     fake_users = {
         "billy": "b",
         "teddy": "t",
@@ -56,7 +57,7 @@ def test_main_user_ambiguous(mocker, capsys):
     assert "aocd: error: argument -u/--user: y ambiguous (could be billy, teddy)" in err
 
 
-def test_main_user_exact(mocker, capsys):
+def test_main_user_exact(mocker: MockerFixture, capsys):
     fake_users = {
         "bill": "b",
         "billy": "b2",
@@ -68,7 +69,7 @@ def test_main_user_exact(mocker, capsys):
     getter.assert_called_once_with(session="b", year=2015, day=8)
 
 
-def test_main_user_wat(mocker, capsys):
+def test_main_user_wat(mocker: MockerFixture, capsys):
     fake_users = {
         "bo": "b",
         "ted": "t",
@@ -81,7 +82,7 @@ def test_main_user_wat(mocker, capsys):
     assert "error: argument -u/--user: invalid choice 'z' (choose from bo, ted)" in err
 
 
-def test_aocd_no_examples(mocker, pook, capsys):
+def test_aocd_no_examples(mocker: MockerFixture, pook, capsys):
     mocker.patch("sys.argv", ["aocd", "-d", "2022", "1", "--example"])
     pook.get("https://adventofcode.com/2022/day/1")
     main()
@@ -90,7 +91,7 @@ def test_aocd_no_examples(mocker, pook, capsys):
     assert out.strip() == "no examples available for 2022/01"
 
 
-def test_aocd_examples(mocker, pook, capsys):
+def test_aocd_examples(mocker: MockerFixture, pook, capsys):
     mocker.patch("sys.argv", ["aocd", "2022", "1", "--example"])
     resp = """
         <title>Day 1 - Advent of Code 2022</title>
