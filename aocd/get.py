@@ -2,6 +2,7 @@ import datetime
 import os
 import re
 import traceback
+import typing as t
 from logging import getLogger
 
 from ._ipykernel import get_ipynb_path
@@ -17,7 +18,12 @@ from .utils import blocker
 log = getLogger(__name__)
 
 
-def get_data(session=None, day=None, year=None, block=False):
+def get_data(
+    session: t.Optional[str] = None,
+    day: t.Optional[int] = None,
+    year: t.Optional[int] = None,
+    block: t.Union[bool, t.Literal["q"]] = False
+) -> str:
     """
     Get data for day (1-25) and year (2015+).
     User's session cookie (str) is needed - puzzle inputs differ by user.
@@ -45,7 +51,7 @@ def get_data(session=None, day=None, year=None, block=False):
         return puzzle.input_data
 
 
-def most_recent_year():
+def most_recent_year() -> int:
     """
     This year, if it's December.
     The most recent year, otherwise.
@@ -60,7 +66,7 @@ def most_recent_year():
     return year
 
 
-def current_day():
+def current_day() -> int:
     """
     Most recent day, if it's during the Advent of Code. Happy Holidays!
     Day 1 is assumed, otherwise.

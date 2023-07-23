@@ -1,11 +1,12 @@
 import argparse
+import inspect
 import logging
 import re
 import sys
+import typing as t
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import zip_longest
-from typing import NamedTuple
 
 import bs4
 
@@ -14,7 +15,6 @@ from aocd.exceptions import ExampleParserError
 from aocd.utils import _get_soup
 from aocd.utils import AOC_TZ
 from aocd.utils import get_plugins
-
 
 log = logging.getLogger(__name__)
 
@@ -39,14 +39,15 @@ class Page:
     a_raw: str  # The first <article> html as a string
     b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         part_a_only = "*" if self.article_b is None else ""
         return f"<Page({self.year}, {self.day}){part_a_only} at {hex(id(self))}>"
 
     @classmethod
-    def from_raw(cls, html):
+    def from_raw(cls, html: str) -> "Page":
         soup = _get_soup(html)
         title_pat = r"^Day (\d{1,2}) - Advent of Code (\d{4})$"
+        assert soup.title is not None
         title_text = soup.title.text
         if (match := re.match(title_pat, title_text)) is None:
             msg = f"failed to extract year/day from title {title_text!r}"
@@ -77,7 +78,7 @@ class Page:
         )
         return page
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str):
         if not name.startswith(("a_", "b_")):
             raise AttributeError(name)
         part, sep, tag = name.partition("_")
@@ -104,7 +105,7 @@ class Page:
         return result
 
 
-class Example(NamedTuple):
+class Example(t.NamedTuple):
     """
     Tuple of example data, answers, and any extra context needed for a solver.
 
@@ -118,23 +119,23 @@ class Example(NamedTuple):
     """
 
     input_data: str
-    answer_a: str = None
-    answer_b: str = None
-    extra: str = None
+    answer_a: t.Optional[str] = None
+    answer_b: t.Optional[str] = None
+    extra: t.Optional[str] = None
 
     @property
-    def answers(self):
+    def answers(self) -> tuple[t.Optional[str], t.Optional[str]]:
         return self.answer_a, self.answer_b
 
 
-def _trunc(s, maxlen=50):
+def _trunc(s: t.Optional[str], maxlen: int = 50) -> str:
     # don't print massive strings and mess up the table rendering
     if s is None or len(s) <= maxlen:
         return s
     return s[:maxlen] + f" ... ({len(s)} bytes)"
 
 
-def _get_unique_real_inputs(year, day):
+def _get_unique_real_inputs(year: int, day: int) -> list[str]:
     # these are passed to example parsers, in case the shape/content of the real
     # input(s) is in some way useful for extracting the example input(s). it is
     # not currently used by the default example parser implementation.
@@ -144,7 +145,7 @@ def _get_unique_real_inputs(year, day):
     return list({}.fromkeys(strs))
 
 
-def main():
+def main() -> None:
     """
     Summarize an example parser's results with historical puzzles' prose, and
     compare the performance against a reference implementation
@@ -205,7 +206,7 @@ def main():
             file=sys.stderr,
         )
         sys.exit(1)
-    plugin = plugins[args.example_parser].load()
+    plugin: t.Callable[[Page,list[str]], list[Example]] = plugins[args.example_parser].load()
     console = Console()
     parser_wants_real_datas = getattr(plugin, "uses_real_datas", True)
 

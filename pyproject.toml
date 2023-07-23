@@ -38,6 +38,7 @@ Homepage = "https://github.com/wimglenn/advent-of-code-data"
 
 [project.optional-dependencies]
 nb = ["IPython", "jupyter-server"]
+type-check = ["mypy", "types-beautifulsoup4"]
 test = [
     "numpy",
     "pook @ git+https://github.com/wimglenn/pook@urllib3",
@@ -59,6 +60,16 @@ aoce = "aocd.examples:main"
 [tool.setuptools]
 packages = ["aocd"]
 
+[tool.setuptools.package-data]
+aocd = ["py.typed"] # include py.typed file in distributions
+
 [project.entry-points]
 "adventofcode.user" = {}  # for user solvers
 "adventofcode.examples" = {}  # for example-parser implementations
+
+[tool.mypy]
+strict = true
+allow_redefinition = true
+exclude = [
+    'tests/.*\.py$',  # don't type check tests
+]

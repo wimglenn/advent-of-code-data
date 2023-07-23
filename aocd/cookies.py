@@ -66,7 +66,7 @@ def get_working_tokens():
     return result
 
 
-def scrape_session_tokens():
+def scrape_session_tokens() -> None:
     """Scrape AoC session tokens from your browser's cookie storage."""
     aocd_token_path = AOCD_CONFIG_DIR / "token"
     aocd_tokens_path = AOCD_CONFIG_DIR / "tokens.json"

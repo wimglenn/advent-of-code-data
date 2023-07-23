@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import time
+import typing as t
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
@@ -39,16 +40,24 @@ AOCD_DATA_DIR = AOCD_DATA_DIR.expanduser()
 AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
 
+# TODO: Use typing.Self when support for < 3.11 is dropped
+_Answer = t.Optional[t.Union[int,str]]
+_TUser = t.TypeVar("_TUser", bound="User")
+
+class _Result(t.TypedDict):
+    time: timedelta
+    rank: int
+    score: int
 
 class User:
-    _token2id = None
+    _token2id: t.Optional[dict[str, str]] = None
 
-    def __init__(self, token):
+    def __init__(self, token: str) -> None:
         self.token = token
         self._owner = "unknown.unknown.0"
 
     @classmethod
-    def from_id(cls, id):
+    def from_id(cls: type[_TUser], id: str) -> _TUser:
         users = _load_users()
         if id not in users:
             raise UnknownUserError(f"User with id '{id}' is not known")
@@ -57,7 +66,7 @@ class User:
         return user
 
     @property
-    def id(self):
+    def id(self) -> str:
         """
         User's token might change (they expire eventually) but the id found on AoC's
         settings page for a logged-in user is as close as we can get to a primary key.
@@ -86,17 +95,20 @@ class User:
             self._owner = owner
         return owner
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"<{type(self).__name__} {self._owner} (token=...{self.token[-4:]})>"
 
     @property
-    def memo_dir(self):
+    def memo_dir(self) -> Path:
         """
         Directory where this user's puzzle inputs, answers etc. are stored on filesystem.
         """
         return AOCD_DATA_DIR / self.id
 
-    def get_stats(self, years=None):
+    def get_stats(
+        self,
+        years: t.Optional[t.Union[t.Iterable[int], int]] = None
+    ) -> dict[str, dict[t.Literal['a', 'b'], _Result]]:
         """
         Parsed version of your personal stats (rank, solve time, score).
         See https://adventofcode.com/<year>/leaderboard/self when logged in.
@@ -108,8 +120,10 @@ class User:
         if years is None:
             years = all_years
         days = {str(i) for i in range(1, 26)}
-        results = {}
+        results: dict[str, dict[t.Literal["a", "b"], _Result]] = {}
         ur_broke = "You haven't collected any stars"
+        # TODO: type check fails here b/c years could still be int if years is not in all-years.
+        # This seems like it may be a subtle/unnoticed bug. What is the desired behavior?
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
             response = http.get(url, token=self.token, redirect=False)
@@ -120,8 +134,12 @@ class User:
             if response.status >= 400:
                 raise AocdError(f"HTTP {response.status} at {url}")
             soup = _get_soup(response.data)
-            if soup.article is None and ur_broke in soup.main.text:
-                continue
+            if soup.article is None:
+                assert soup.main is not None
+                if ur_broke in soup.main.text:
+                    continue
+            assert soup.article is not None
+            assert soup.article.pre is not None
             stats_txt = soup.article.pre.text
             lines = stats_txt.splitlines()
             lines = [x for x in lines if x.split()[0] in days]
@@ -144,7 +162,7 @@ class User:
         return results
 
 
-def default_user():
+def default_user() -> User:
     """
     Discover user's token from the environment or file, and exit with a diagnostic
     message if none can be found. This default user is used whenever a token or user id
@@ -178,7 +196,7 @@ def default_user():
 
 
 class Puzzle:
-    def __init__(self, year, day, user=None):
+    def __init__(self, year:int, day:int, user: t.Optional[User] =None):
         self.year = year
         self.day = day
         if user is None:
@@ -196,12 +214,12 @@ class Puzzle:
         self.prose2_path = pre.with_name(pre.name + "_prose.2.html")  # part b solved
 
     @property
-    def user(self):
+    def user(self) -> User:
         # this is a property to make it clear that it's read-only
         return self._user
 
     @property
-    def input_data(self):
+    def input_data(self) -> str:
         """
         This puzzle's input data, specific to puzzle.user. It will usually be retrieved
         from caches, but if this is the first time it was accessed it will be requested
@@ -685,16 +703,16 @@ class Puzzle:
         return f(year=self.year, day=self.day, data=self.input_data)
 
     @property
-    def url(self):
+    def url(self) -> str:
         """A link to the puzzle's description page on adventofcode.com."""
         return URL.format(year=self.year, day=self.day)
 
-    def view(self):
+    def view(self) -> None:
         """Open this puzzle's description page in a new browser tab"""
         webbrowser.open(self.url)
 
     @property
-    def my_stats(self):
+    def my_stats(self) -> dict[t.Literal['a', 'b'], _Result]:
         """
         Your personal stats (rank, solve time, score) for this particular puzzle.
         Raises `PuzzleUnsolvedError` if you haven't actually solved it yet.
@@ -706,7 +724,7 @@ class Puzzle:
         result = stats[key]
         return result
 
-    def _request_puzzle_page(self):
+    def _request_puzzle_page(self) -> None:
         # hit the server to get the prose
         # cache the results so we don't have to get them again
         response = http.get(self.url, token=self.user.token)
@@ -779,7 +797,7 @@ class Puzzle:
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
 
-    def unlock_time(self, local=True):
+    def unlock_time(self, local: bool =True) -> datetime:
         """
         The time this puzzle unlocked. Might be in the future.
         If local is True (default), returns a datetime in your local zone.
@@ -804,7 +822,7 @@ class Puzzle:
                 yield puzzle
 
 
-def _parse_duration(s):
+def _parse_duration(s: str) -> timedelta:
     """Parse a string like 01:11:16 (hours, minutes, seconds) into a timedelta"""
     if s == ">24h":
         return timedelta(hours=24)
@@ -812,15 +830,19 @@ def _parse_duration(s):
     return timedelta(hours=h, minutes=m, seconds=s)
 
 
-def _load_users():
+def _load_users() -> dict[str, str]:
     # loads the mapping between user ids and tokens. one user can have many tokens,
     # so we can't key the caches off of the token itself.
     path = AOCD_CONFIG_DIR / "tokens.json"
     try:
-        users = json.loads(path.read_text(encoding="utf-8"))
+        txt = path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        users = {"default": default_user().token}
-    return users
+        return {"default": default_user().token}
+    else:
+        users = json.loads(txt)
+        assert isinstance(users, dict)
+        assert all(isinstance(k, str) and isinstance(v, str) for k, v in users.items())
+        return t.cast(dict[str, str], users)
 
 
 @cache

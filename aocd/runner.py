@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 import time
+import typing as t
 from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
@@ -30,7 +31,7 @@ DEFAULT_TIMEOUT = 60
 log = logging.getLogger(__name__)
 
 
-def main():
+def main() -> t.NoReturn:
     """
     Run user solver(s) against their inputs and render the results. Can use multiple
     tokens to validate your code against multiple input datas.
@@ -234,7 +235,7 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kw
     return a, b, walltime, error
 
 
-def format_time(t, timeout=DEFAULT_TIMEOUT):
+def format_time(t, timeout=DEFAULT_TIMEOUT) -> str:
     """
     Used for rendering the puzzle solve time in color:
     - green, if you're under a quarter of the timeout (15s default)

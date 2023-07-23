@@ -1,10 +1,13 @@
 import argparse
+import importlib
 import logging
 import os
+from pathlib import Path
 import platform
 import shutil
 import sys
 import time
+import typing as t
 from collections import deque
 from datetime import datetime
 from functools import cache
@@ -25,20 +28,26 @@ AOC_TZ = ZoneInfo("America/New_York")
 _v = version("advent-of-code-data")
 USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"
 
+if sys.version_info >= (3, 10):
+    from importlib.metadata import EntryPoints # type: ignore[attr-defined] # EntryPoints does not exist for Python < 3.10
+    _Plugins = EntryPoints
+else:
+    from importlib.metadata import EntryPoint
+    _Plugins = list[EntryPoint]
 
 class HttpClient:
     # every request to adventofcode.com goes through this wrapper
     # so that we can put in user agent header, rate-limit, etc.
     # aocd users should not need to use this class directly.
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.pool_manager = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
         self.req_count = {"GET": 0, "POST": 0}
         self._max_t = 3.0
         self._cooloff = 0.16
         self._history = deque([time.time() - self._max_t] * 4, maxlen=4)
 
-    def _limiter(self):
+    def _limiter(self) -> None:
         now = time.time()
         t0 = self._history[0]
         if now - t0 < self._max_t:
@@ -57,7 +66,7 @@ class HttpClient:
             self._cooloff *= 2  # double it for repeat offenders
         self._history.append(now)
 
-    def get(self, url, token=None, redirect=True):
+    def get(self, url: str, token: object = None, redirect: object = True) -> urllib3.BaseHTTPResponse:
         # getting user inputs, puzzle prose, etc
         if token is None:
             headers = self.pool_manager.headers
@@ -68,7 +77,7 @@ class HttpClient:
         self.req_count["GET"] += 1
         return resp
 
-    def post(self, url, token, fields):
+    def post(self, url: str, token: object, fields: t.Mapping[str, str]) -> urllib3.BaseHTTPResponse:
         # submitting answers
         headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
         self._limiter()
@@ -86,11 +95,16 @@ class HttpClient:
 http = HttpClient()
 
 
-def _ensure_intermediate_dirs(path):
+def _ensure_intermediate_dirs(path: Path) -> None:
     path.expanduser().parent.mkdir(parents=True, exist_ok=True)
 
 
-def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
+def blocker(
+        quiet: bool = False,
+        dt: float = 0.1,
+        datefmt: t.Optional[str] = None,
+        until: t.Optional[tuple[int, int]] = None
+) -> None:
     """
     This function just blocks until the next puzzle unlocks.
     Pass `quiet=True` to disable the spinner etc.
@@ -115,12 +129,12 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
         return
     spinner = cycle(r"\|/-")
     localzone = datetime.now().astimezone().tzinfo
-    local_unlock = unlock.astimezone(tz=localzone)
+    local_unlock_tz = unlock.astimezone(tz=localzone)
     if datefmt is None:
         # %-I does not work on Windows, strip leading zeros manually
-        local_unlock = local_unlock.strftime("%I:%M %p").lstrip("0")
+        local_unlock = local_unlock_tz.strftime("%I:%M %p").lstrip("0")
     else:
-        local_unlock = local_unlock.strftime(datefmt)
+        local_unlock = local_unlock_tz.strftime(datefmt)
     msg = "{} Unlock day %s at %s ({} remaining)" % (unlock.day, local_unlock)
     while datetime.now(tz=AOC_TZ) < unlock:
         remaining = unlock - datetime.now(tz=AOC_TZ)
@@ -137,7 +151,7 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
         sys.stdout.flush()
 
 
-def get_owner(token):
+def get_owner(token: str) -> str:
     """
     Find owner of the token.
     Raises `DeadTokenError` if the token is expired/invalid.
@@ -152,6 +166,7 @@ def get_owner(token):
     soup = _get_soup(response.data)
     auth_source = "unknown"
     username = "unknown"
+    assert soup.code is not None
     userid = soup.code.text.split("-")[1]
     for span in soup.find_all("span"):
         if span.text.startswith("Link to "):
@@ -174,7 +189,7 @@ def get_owner(token):
     return result
 
 
-def atomic_write_file(path, contents_str):
+def atomic_write_file(path: Path, contents_str: str) -> None:
     """
     Atomically write a string to a file by writing it to a temporary file, and then
     renaming it to the final destination name. This solves a race condition where existence
@@ -187,8 +202,7 @@ def atomic_write_file(path, contents_str):
     log.debug("moving %s -> %s", f.name, path)
     shutil.move(f.name, path)
 
-
-def _cli_guess(choice, choices):
+def _cli_guess(choice: str, choices: list[str]) -> str:
     # used by the argument parser so that you can specify user ids with a substring
     # (for example just specifying `-u git` instead of `--users github.wimglenn.119932`
     if choice in choices:
@@ -209,7 +223,7 @@ if platform.system() == "Windows":
     os.system("color")  # hack - makes ANSI colors work in the windows cmd window
 
 
-def colored(txt, color):
+def colored(txt: str, color: t.Optional[str]) -> str:
     if color is None:
         return txt
     code = _ansi_colors.index(color.casefold())
@@ -217,18 +231,18 @@ def colored(txt, color):
     return f"\x1b[{code + 30}m{txt}{reset}"
 
 
-def get_plugins(group="adventofcode.user"):
+def get_plugins(group: str ="adventofcode.user") -> _Plugins:
     """
     Currently installed plugins for user solves.
     """
     try:
         # Python 3.10+
-        return entry_points(group=group)
+        return entry_points(group=group) # type: ignore[call-arg, return-value] # group argument does not exist for Python < 3.10
     except TypeError:
         # Python 3.9
         return entry_points().get(group, [])
 
 
 @cache
-def _get_soup(html):
+def _get_soup(html: t.Union[str, bytes]) -> bs4.BeautifulSoup:
     return bs4.BeautifulSoup(html, "html.parser")
