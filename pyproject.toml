@@ -90,7 +90,5 @@ exclude = [
 
 # ignore missing imports for libraries that do not have type hints available
 [[tool.mypy.overrides]]
-module = [
-    "browser_cookie3",
-]
+module = ["browser_cookie3"]
 ignore_missing_imports = true
