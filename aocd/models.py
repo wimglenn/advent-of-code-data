@@ -17,6 +17,8 @@ from itertools import count
 from pathlib import Path
 from textwrap import dedent
 
+
+
 from . import examples
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
@@ -35,7 +37,7 @@ from .utils import http
 from ._types import _Answer, _AnswerTuple, _Part
 
 if t.TYPE_CHECKING:
-    import numpy as np
+    import IPython.lib.pretty
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +53,8 @@ _TUser = t.TypeVar("_TUser", bound="User")
 class _SolverCallable(t.Protocol):
     def __call__(self, year: int, day:int, data: str) -> _Answer:
         ...
+
+_ExampleParserCallable = t.Callable[[examples.Page, list[str]], None]
 
 class _Result(t.TypedDict):
     time: timedelta
@@ -276,19 +280,17 @@ class Puzzle:
         try:
             page = examples.Page.from_raw(html=self._get_prose())
             parser = _load_example_parser(name=parser_name)
+            datas = []
             if getattr(parser, "uses_real_datas", True):
                 datas = examples._get_unique_real_inputs(self.year, self.day)
-            else:
-                datas = []
-            result = parser(page, datas)
+            return parser(page, datas)
         except Exception as err:
             msg = "unable to find example data for %d/%02d (%r)"
             log.warning(msg, self.year, self.day, err)
-            result = []
-        return result
+            return []
 
     @cached_property
-    def title(self):
+    def title(self) -> str:
         """
         Title of the puzzle, used in the pretty repr (IPython etc) and also displayed
         by aocd.runner.
@@ -304,13 +306,10 @@ class Puzzle:
             raise AocdError(f"unexpected h2 text: {txt}")
         return txt.removeprefix(prefix).removesuffix(suffix)
 
-    def _repr_pretty_(self, p, cycle):
+    def _repr_pretty_(self, p: "IPython.lib.pretty.PrettyPrinter", cycle: bool) -> None:
         """Hook for IPython's pretty-printer."""
-        if cycle:
-            p.text(repr(self))
-        else:
-            txt = f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
-            p.text(txt)
+        txt = repr(self) if cycle else f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
+        p.text(txt) # type: ignore[no-untyped-call] # ipython doesn't have type hints
 
     # TODO: providing better type hints for this function will require more work
     # than I want to do right now LOL
@@ -870,15 +869,11 @@ def _load_users() -> dict[str, str]:
         assert all(isinstance(k, str) and isinstance(v, str) for k, v in users.items())
         return t.cast(dict[str, str], users)
 
-
-
-
-
 @cache
 def _load_example_parser(
     group: str = "adventofcode.examples",
-    name: str = "reference"
-):
+    name: str = "reference",
+) -> _ExampleParserCallable:
     # lazy-loads a plugin used to parse sample data, and cache it
     eps = _get_entry_points(group, name)
     if not eps:
@@ -886,20 +881,19 @@ def _load_example_parser(
         raise ExampleParserError(msg)
     if len(eps) > 1:
         log.warning("expected unique entrypoint but found %d entrypoints", len(eps))
-    it = iter(eps)
-    ep: EntryPoint = next(it)
+    ep = next(iter(eps))
     parser = ep.load()
     log.debug("loaded example parser %r", parser)
-    return parser
+    assert callable(parser)
+    return t.cast(_ExampleParserCallable, parser)
 
 if sys.version_info >= (3, 10):
     # Python 3.10+ - group/name selectable entry points
-    from importlib_metadata import EntryPoints
+    from importlib.metadata import EntryPoints
 
     def _get_entry_points(group: str, name: str) -> EntryPoints:
         return entry_points().select(group=group, name=name)
 else:
     # Python 3.9 - dict interface
-
     def _get_entry_points(group: str, name: str) -> list[EntryPoint]:
         return [ep for ep in entry_points()[group] if ep.name == name]
