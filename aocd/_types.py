@@ -6,10 +6,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     "_Answer",
-    "_AnswerTuple",
     "_Part",
 ]
 
 _Answer = Optional[Union[str, numbers.Number, "np.number"]]
-_AnswerTuple = tuple[_Answer, _Answer]
 _Part = Literal["a", "b"]

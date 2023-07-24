@@ -9,6 +9,7 @@ import typing as t
 from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
+from importlib.metadata import EntryPoint
 from pathlib import Path
 
 import pebble.concurrent
@@ -23,6 +24,16 @@ from .utils import colored
 from .utils import get_plugins
 from ._types import _Part
 
+if t.TYPE_CHECKING:
+    if sys.version_info >= (3, 10):
+        from typing import ParamSpec
+    else:
+        from typing_extensions import ParamSpec
+    _PS = ParamSpec("_PS")
+
+_R = t.TypeVar("_R")
+
+
 
 # from https://adventofcode.com/about
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
@@ -30,6 +41,7 @@ from ._types import _Part
 
 DEFAULT_TIMEOUT = 60
 log = logging.getLogger(__name__)
+
 
 def main() -> t.NoReturn:
     """
@@ -183,24 +195,43 @@ def main() -> t.NoReturn:
     sys.exit(rc)
 
 
-def _timeout_wrapper(f, capture=False, timeout=DEFAULT_TIMEOUT, **kwargs):
+def _timeout_wrapper(
+    f: t.Callable["_PS", _R],
+    capture: bool = False,
+    timeout: float = DEFAULT_TIMEOUT,
+    *args: "_PS.args",
+    **kwargs: "_PS.kwargs",
+) -> pebble.ProcessFuture:
     # aocd.runner executes the user's solve in a subprocess, so that it can be reliably
     # killed if it exceeds a time limit. you can't do that with threads.
     func = pebble.concurrent.process(daemon=False, timeout=timeout)(_process_wrapper)
-    return func(f, capture, **kwargs)
+    return func(f, capture, *args, **kwargs)
 
 
-def _process_wrapper(f, capture=False, **kwargs):
+
+def _process_wrapper(
+    f: t.Callable["_PS", _R],
+    capture: bool = False,
+    *args: "_PS.args",
+    **kwargs: "_PS.kwargs",
+)  -> _R:
     # used to suppress any output from the subprocess, if aoc was invoked with --quiet
     with contextlib.ExitStack() as ctx:
         if capture:
             null = ctx.enter_context(open(os.devnull, "w"))
             ctx.enter_context(contextlib.redirect_stderr(null))
             ctx.enter_context(contextlib.redirect_stdout(null))
-        return f(**kwargs)
+        return f(*args, **kwargs)
+    assert False, "unreachable"
 
-
-def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kwargs):
+def run_with_timeout(
+    entry_point: EntryPoint,
+    timeout: float,
+    progress: t.Optional[str],
+    dt: float = 0.1,
+    capture: bool = False,
+    **kwargs
+) -> tuple[str, str, float, str]:
     """
     Execute a user solve, and display a progress spinner as it's running. Kill it if
     the runtime exceeds `timeout` seconds.
@@ -253,8 +284,14 @@ def format_time(t, timeout=DEFAULT_TIMEOUT) -> str:
 
 
 def run_one(
-    year, day, data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False
-):
+    year: int,
+    day: int,
+    data: str,
+    entry_point: EntryPoint,
+    timeout: float = DEFAULT_TIMEOUT,
+    progress: t.Optional[str] = None,
+    capture: bool = False,
+) -> tuple[str, str, float, str]:
     """
     Creates a temporary dir and change directory into it (restores cwd on exit).
     Lays down puzzle input in a file called "input.txt" in this directory - user code
@@ -294,16 +331,16 @@ def run_one(
 
 
 def run_for(
-    plugs,
-    years,
-    days,
-    datasets,
-    example=False,
-    timeout=DEFAULT_TIMEOUT,
-    autosubmit=True,
-    reopen=False,
-    capture=False,
-):
+    plugs: t.Iterable[str],
+    years: t.Iterable[int],
+    days: t.Iterable[int],
+    datasets: t.Mapping[str, str],
+    example: bool = False,
+    timeout: float = DEFAULT_TIMEOUT,
+    autosubmit: bool = True,
+    reopen: bool = False,
+    capture: bool = False,
+) -> int:
     """
     Run with multiple users, multiple datasets, multiple years/days, and render the results.
     """

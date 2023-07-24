@@ -18,7 +18,7 @@ from textwrap import dedent
 
 
 
-from . import examples
+from . import examples as _examples
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import ExampleParserError
@@ -33,7 +33,7 @@ from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
 from .utils import http
-from ._types import _Answer, _AnswerTuple, _Part
+from ._types import _Answer, _Part
 
 if t.TYPE_CHECKING:
     import IPython.lib.pretty
@@ -54,7 +54,7 @@ class _SolverCallable(t.Protocol):
         ...
 
 # TODO: what should the return type be?
-_ExampleParserCallable = t.Callable[[examples.Page, list[str]], None]
+_ExampleParserCallable = t.Callable[[_examples.Page, list[str]], list[_examples.Example]]
 
 class _Result(t.TypedDict):
     time: timedelta
@@ -261,10 +261,10 @@ class Puzzle:
         return data.rstrip("\r\n")
 
     @property
-    def examples(self):
+    def examples(self) -> list[_examples.Example]:
         """
         Sample data and answers associated with this puzzle, as a list of
-        `aocd.examples.Example` instances. These are extracted from the puzzle prose
+        `aocd._examples.Example` instances. These are extracted from the puzzle prose
         html, and they're the same for every user id. This list might be empty (not
         every puzzle has usable examples), or it might have several examples, but it
         will usually have one element. The list, and the examples themselves, may be
@@ -273,16 +273,16 @@ class Puzzle:
         """
         return self._get_examples()
 
-    def _get_examples(self, parser_name: str = "reference"):
+    def _get_examples(self, parser_name: str = "reference") -> list[_examples.Example]:
         # invoke a named example parser to extract examples from cached prose.
         # logs warning and returns an empty list if the parser plugin raises an
         # exception for any reason.
         try:
-            page = examples.Page.from_raw(html=self._get_prose())
+            page = _examples.Page.from_raw(html=self._get_prose())
             parser = _load_example_parser(name=parser_name)
             datas = []
             if getattr(parser, "uses_real_datas", True):
-                datas = examples._get_unique_real_inputs(self.year, self.day)
+                datas = _examples._get_unique_real_inputs(self.year, self.day)
             return parser(page, datas)
         except Exception as err:
             msg = "unable to find example data for %d/%02d (%r)"
@@ -313,15 +313,14 @@ class Puzzle:
 
     # TODO: providing better type hints for this function will require more work
     # than I want to do right now LOL
-    def _coerce_val(self, val: _Answer) -> _Answer:
+    def _coerce_val(self, val: _Answer) -> str:
         # technically adventofcode.com will only accept strings as answers.
         # but it's convenient to be able to submit numbers, since many of the answers
         # are numeric strings. coerce the values to string safely.
         orig_val = val
         orig_type = type(val)
         coerced = False
-        floatish = isinstance(val, (float, complex))
-        if floatish and val.imag == 0.0 and val.real.is_integer():
+        if isinstance(val, (float, complex)) and val.imag == 0.0 and val.real.is_integer():
             coerced = True
             val = int(val.real)
         elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
@@ -418,7 +417,7 @@ class Puzzle:
         raise AocdError('part must be "a" or "b"')
 
     @property
-    def answers(self) -> _AnswerTuple:
+    def answers(self) -> tuple[str, str]:
         """
         Returns a tuple of the correct answers for this puzzle. Will raise an
         AttributeError if either part is yet to be solved by the associated user.
@@ -426,7 +425,7 @@ class Puzzle:
         return self.answer_a, self.answer_b
 
     @answers.setter
-    def answers(self, val: _AnswerTuple) -> None:
+    def answers(self, val: tuple[_Answer, _Answer]) -> None:
         """
         Submit both answers at once. Pretty much impossible in practice, unless you've
         seen the puzzle before.
@@ -458,7 +457,7 @@ class Puzzle:
         part: _Part,
         reopen: bool = True,
         quiet: bool = False
-    ) -> str:
+    ) -> None: # TODO: this should not be None
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -471,7 +470,7 @@ class Puzzle:
             raise AocdError('part must be "a" or "b"')
         previous_submits = self.submit_results
         try:
-            value_as_int = int(value) # type: ignore[arg-type]
+            value_as_int = int(value)
         except ValueError:
             value_as_int = None
         skip_prefix = (
@@ -561,6 +560,7 @@ class Puzzle:
             log.error(response.data.decode(errors="replace"))
             raise AocdError(f"HTTP {response.status} at {url}")
         soup = _get_soup(response.data)
+        assert soup.article is not None
         message = soup.article.text
         self._save_submit_result(value=value, part=part, message=message, when=when)
         color = None
@@ -612,7 +612,7 @@ class Puzzle:
             print(colored(message, color=color))
         return response
 
-    def _check_already_solved(self, guess, part):
+    def _check_already_solved(self, guess: str, part: _Part) -> t.Optional[str]:
         # if you submit an answer on a puzzle which you've already solved, even if your
         # answer is correct, you get a sort of cryptic/confusing message back from the
         # server. this helper method prevents getting that.
@@ -687,7 +687,7 @@ class Puzzle:
         msg = f"Answer {self.year}-{self.day}{part} is not available"
         raise PuzzleUnsolvedError(msg)
 
-    def solve(self) -> _AnswerTuple:
+    def solve(self) -> tuple[_Answer, _Answer]:
         """
         If there is a unique entry-point in the "adventofcode.user" group, load it and
         invoke it using this puzzle's input data. It is expected to return a tuple of
@@ -702,7 +702,7 @@ class Puzzle:
         return self._solve(ep.load())
 
 
-    def solve_for(self, plugin: str)-> _AnswerTuple:
+    def solve_for(self, plugin: str)-> tuple[_Answer, _Answer]:
         """
         Load the entry-point from the "adventofcode.user" plugin group with the
         specified name, and invoke it using this puzzle's input data. The entry-point
@@ -718,14 +718,14 @@ class Puzzle:
         return self._solve(ep.load())
 
 
-    def _solve(self, solver_callable: _SolverCallable) -> _AnswerTuple:
+    def _solve(self, solver_callable: _SolverCallable) -> tuple[_Answer, _Answer]:
         result = solver_callable(year=self.year, day=self.day, data=self.input_data)
         assert (
             isinstance(result, tuple) and
             len(result) == 2 and
             all(ele is None or isinstance(ele, (int, str)) for ele in result)
         ), f"expected tuple of answers. got {result}"
-        return t.cast(_AnswerTuple, result)
+        return t.cast(tuple[_Answer, _Answer], result)
 
     @property
     def url(self) -> str:

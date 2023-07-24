@@ -1,5 +1,4 @@
 import argparse
-import importlib
 import logging
 import os
 from pathlib import Path
@@ -59,18 +58,17 @@ class HttpClient:
             self._cooloff *= 2  # double it for repeat offenders
         self._history.append(now)
 
-    def get(self, url: str, token: object = None, redirect: object = True) -> urllib3.BaseHTTPResponse:
+    def get(self, url: str, token: t.Optional[str] = None, redirect: bool = True) -> urllib3.BaseHTTPResponse:
         # getting user inputs, puzzle prose, etc
-        if token is None:
-            headers = self.pool_manager.headers
-        else:
-            headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
+        headers = self.pool_manager.headers
+        if token:
+            headers |= {"Cookie": f"session={token}"}
         self._limiter()
         resp = self.pool_manager.request("GET", url, headers=headers, redirect=redirect)
         self.req_count["GET"] += 1
         return resp
 
-    def post(self, url: str, token: object, fields: t.Mapping[str, str]) -> urllib3.BaseHTTPResponse:
+    def post(self, url: str, token: str, fields: t.Mapping[str, str]) -> urllib3.BaseHTTPResponse:
         # submitting answers
         headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
         self._limiter()
