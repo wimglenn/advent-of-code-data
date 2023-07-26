@@ -250,4 +250,4 @@ def _parse_part(part: _LoosePart) -> _Part:
         return "a"
     if part in (2, "2", "b", "B"):
         return "b"
-    raise AocdError('Unexpected value for part')
+    raise AocdError('part must be "a" or "b"')

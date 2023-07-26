@@ -12,11 +12,13 @@ from .utils import _ensure_intermediate_dirs
 from .utils import colored
 from .utils import get_owner
 
+if t.TYPE_CHECKING:
+    import http.cookiejar
 
 log = logging.getLogger(__name__)
 
 
-def get_working_tokens():
+def get_working_tokens() -> dict[str, str]:
     """Check browser cookie storage for session tokens from .adventofcode.com domain."""
     log.debug("checking for installation of browser-cookie3 package")
     try:
@@ -27,7 +29,7 @@ def get_working_tokens():
     log.info("checking browser storage for tokens, this might pop up an auth dialog!")
     log.info("checking chrome cookie jar...")
     cookie_files = (*glob.glob(os.path.expanduser("~/.config/google-chrome/*/Cookies")), None)
-    chrome_cookies = []
+    chrome_cookies: list["http.cookiejar.Cookie"] = []
     for cf in cookie_files:
         try:
             chrome = bc3.chrome(cookie_file=cf, domain_name=".adventofcode.com")
@@ -49,12 +51,12 @@ def get_working_tokens():
         log.info("%d candidates from firefox", len(firefox))
 
     # order preserving de-dupe
-    tokens = list({}.fromkeys([c.value for c in chrome + firefox]))
+    tokens = list({}.fromkeys([c.value for c in chrome + firefox if c.value is not None]))
     removed = len(chrome + firefox) - len(tokens)
     if removed:
         log.info("Removed %d duplicate%s", removed, "s"[: removed - 1])
 
-    result = {}  # map of {token: auth source}
+    result: dict[str, str] = {}  # map of {token: auth source}
     for token in tokens:
         try:
             owner = get_owner(token)
@@ -104,7 +106,7 @@ def scrape_session_tokens() -> None:
             if aocd_token_path.is_file():
                 txt = aocd_token_path.read_text(encoding="utf-8").strip()
                 if txt:
-                    tokens[aocd_token_path] = txt.split()[0]
+                    tokens[str(aocd_token_path)] = txt.split()[0]
             if aocd_tokens_path.is_file():
                 tokens.update(json.loads(aocd_tokens_path.read_text(encoding="utf-8")))
         else:

@@ -230,7 +230,7 @@ def run_with_timeout(
     progress: t.Optional[str],
     dt: float = 0.1,
     capture: bool = False,
-    **kwargs
+    **kwargs: object
 ) -> tuple[str, str, float, str]:
     """
     Execute a user solve, and display a progress spinner as it's running. Kill it if
@@ -266,7 +266,7 @@ def run_with_timeout(
     return a, b, walltime, error
 
 
-def format_time(t, timeout=DEFAULT_TIMEOUT) -> str:
+def format_time(t: float, timeout: float = DEFAULT_TIMEOUT) -> str:
     """
     Used for rendering the puzzle solve time in color:
     - green, if you're under a quarter of the timeout (15s default)
@@ -358,6 +358,11 @@ def run_for(
             continue
         entry_point = eps[plugin]
         puzzle = Puzzle(year, day)
+        # TODO: this Union is awkward (b/c it means we need the
+        # `assert isinstance` checks later on.)
+        # There's probably a way to clean this up, but it likely requires a
+        # bit of refactoring
+        datas: t.Union[range, t.Mapping[str, str]]
         if example:
             autosubmit = False
             examples = Puzzle(year, day).examples
@@ -366,14 +371,19 @@ def run_for(
             datas = datasets
         for dataset in datas:
             if example:
+                assert isinstance(dataset, int)
                 data = examples[dataset].input_data
             else:
+                assert isinstance(dataset, str)
                 token = datasets[dataset]
                 os.environ["AOC_SESSION"] = token
                 puzzle = Puzzle(year, day)
                 data = puzzle.input_data
             title = puzzle.title
-            descr = f"example-{dataset + 1}" if example else dataset
+            descr = dataset
+            if example:
+                assert isinstance(dataset, int)
+                descr = f"example-{dataset + 1}"
             progress = f"{year}/{day:<2d} - {title:<40}   {plugin:>{wp}}/{descr:<{wd}}"
             a, b, walltime, error = run_one(
                 year=year,
@@ -399,6 +409,7 @@ def run_for(
                     expected = None
                     try:
                         if example:
+                            assert isinstance(dataset, int)
                             expected = getattr(examples[dataset], "answer_" + part)
                         else:
                             expected = getattr(puzzle, "answer_" + part)

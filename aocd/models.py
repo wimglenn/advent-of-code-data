@@ -37,7 +37,17 @@ from .utils import _parse_part
 from ._types import _Answer, _Part, _LoosePart
 
 if t.TYPE_CHECKING:
+    import bs4
     import IPython.lib.pretty
+    import urllib3
+
+
+    class _Results(t.TypedDict):
+        part: _Part
+        value: str
+        when: str
+        message: str
+
 
 log = logging.getLogger(__name__)
 
@@ -128,15 +138,15 @@ class User:
         """
         aoc_now = datetime.now(tz=AOC_TZ)
         all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
-        if isinstance(years, int) and years in all_years:
+        if isinstance(years, int):
+            if years not in all_years:
+                raise ValueError(f"year must be within [{all_years.start}, {all_years.stop}). got {years}.")
             years = (years,)
         if years is None:
             years = all_years
         days = {str(i) for i in range(1, 26)}
         results: dict[str, dict[_Part, _Result]] = {}
         ur_broke = "You haven't collected any stars"
-        # TODO: type check fails here b/c years could still be int if years is not in all-years.
-        # This seems like it may be a subtle/unnoticed bug. What is the desired behavior?
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
             response = http.get(url, token=self.token, redirect=False)
@@ -310,10 +320,9 @@ class Puzzle:
     def _repr_pretty_(self, p: "IPython.lib.pretty.PrettyPrinter", cycle: bool) -> None:
         """Hook for IPython's pretty-printer."""
         txt = repr(self) if cycle else f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
-        p.text(txt)
+        p.text(txt) # type: ignore[no-untyped-call] # IPython/Jupyter doesn't provide type hints
 
-    # TODO: providing better type hints for this function will require more work
-    # than I want to do right now LOL
+    # TODO: providing better type hints for this function will require more work than I want to do right now. Should be possible with a refactor that uses early returns.
     def _coerce_val(self, val: _Answer) -> str:
         # technically adventofcode.com will only accept strings as answers.
         # but it's convenient to be able to submit numbers, since many of the answers
@@ -328,11 +337,11 @@ class Puzzle:
             # deal with numpy scalars
             if orig_type.__name__.startswith(("int", "uint", "long", "ulong")):
                 coerced = True
-                val = int(orig_val)
+                val = int(orig_val) # type: ignore[arg-type]
             elif orig_type.__name__.startswith(("float", "complex")):
-                if val.imag == 0.0 and float(val.real).is_integer():
+                if val.imag == 0.0 and float(val.real).is_integer(): # type: ignore[union-attr]
                     coerced = True
-                    val = int(val.real)
+                    val = int(val.real) # type: ignore[union-attr]
         if isinstance(val, int):
             val = str(val)
         if coerced:
@@ -343,7 +352,7 @@ class Puzzle:
                 self.year,
                 self.day,
             )
-        return val
+        return str(val)
 
     @property
     def answer_a(self) -> str:
@@ -431,10 +440,12 @@ class Puzzle:
         Submit both answers at once. Pretty much impossible in practice, unless you've
         seen the puzzle before.
         """
-        self.answer_a, self.answer_b = val
+        # This will call the property setter (which accepts _Answer, rather than
+        # str), but mypy doesn't understand this.
+        self.answer_a, self.answer_b = val # type: ignore[assignment]
 
     @property
-    def submit_results(self):
+    def submit_results(self) -> list["_Results"]:
         """
         Record of all previous submissions to adventofcode.com for this user/puzzle.
         Submissions made by typing answers directly into the website will not be
@@ -449,7 +460,7 @@ class Puzzle:
         seen with puzzle.submit_results[-1].
         """
         if self.submit_results_path.is_file():
-            return json.loads(self.submit_results_path.read_text())
+            return t.cast(list["_Results"], json.loads(self.submit_results_path.read_text()))
         return []
 
     def _submit(
@@ -458,7 +469,7 @@ class Puzzle:
         part: _LoosePart,
         reopen: bool = True,
         quiet: bool = False
-    ) -> None: # TODO: this should not be None
+    ) -> t.Optional["urllib3.BaseHTTPResponse"]: # TODO: this should not be None
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -492,7 +503,7 @@ class Puzzle:
                             f"It is certain that {value!r} is incorrect, "
                             f"because {value!r} != {result['value']!r}."
                         )
-                    return
+                    return None
             elif "your answer is too high" in result["message"]:
                 if value_as_int is None or value_as_int > int(result["value"]):
                     if not quiet:
@@ -506,7 +517,7 @@ class Puzzle:
                             f"It is certain that {value!r} is incorrect, "
                             f"because {result['value']!r} was too high."
                         )
-                    return
+                    return None
             elif "your answer is too low" in result["message"]:
                 if value_as_int is None or value_as_int < int(result["value"]):
                     if not quiet:
@@ -520,7 +531,7 @@ class Puzzle:
                             f"It is certain that {value!r} is incorrect, "
                             f"because {result['value']!r} was too low."
                         )
-                    return
+                    return None
             if result["value"] != value:
                 continue
             if not quiet:
@@ -529,12 +540,13 @@ class Puzzle:
                     f"At {result['when']} you've previously submitted "
                     f"{value} and the server responded with:"
                 )
-                if result["message"].startswith("That's the right answer"):
-                    color = "green"
-                else:
-                    color = "red"
-                print(colored(result["message"], color))
-            return
+                print(
+                    colored(
+                        result["message"],
+                        color="green" if result["message"].startswith("That's the right answer") else "red"
+                    )
+                )
+            return None
         if part == "b" and value == getattr(self, "answer_a", None):
             raise AocdError(
                 f"cowardly refusing to submit {value} for part b, "
@@ -547,7 +559,7 @@ class Puzzle:
                 log.info(check_guess)
             else:
                 print(check_guess)
-            return
+            return None
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": "1", "b": "2"}[part]
@@ -562,7 +574,7 @@ class Puzzle:
         assert soup.article is not None
         message = soup.article.text
         self._save_submit_result(value=value, part=part, message=message, when=when)
-        color = None
+        color: t.Optional[str] = None
         if "That's the right answer" in message:
             color = "green"
             if reopen:
@@ -587,6 +599,8 @@ class Puzzle:
         elif "That's not the right answer" in message:
             color = "red"
             try:
+                assert soup.article.span is not None
+                assert soup.article.span.code is not None
                 context = soup.article.span.code.text
             except AttributeError:
                 context = soup.article.text
@@ -629,7 +643,7 @@ class Puzzle:
             msg = colored(msg, "red")
         return msg
 
-    def _save_correct_answer(self, value, part):
+    def _save_correct_answer(self, value: str, part: _Part) -> None:
         # cache the correct answers so that we know not to submit again
         path = getattr(self, f"answer_{part}_path")
         txt = value.strip()
@@ -646,7 +660,7 @@ class Puzzle:
         _ensure_intermediate_dirs(path)
         path.write_text(txt, encoding="utf-8")
 
-    def _save_submit_result(self, value, part, message, when):
+    def _save_submit_result(self, value: str, part: _Part, message: str, when: str) -> None:
         # cache all submission results made by aocd. see the docstring of the
         # submit_results property for the reasons why.
         path = self.submit_results_path
@@ -764,12 +778,15 @@ class Puzzle:
             if not self.prose2_path.is_file():
                 _ensure_intermediate_dirs(self.prose2_path)
                 self.prose2_path.write_text(text, encoding="utf-8")
-            hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            hits: list["bs4.Tag"] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             if self.day == 25:
                 [pa] = hits
+                assert pa.code is not None
                 self._save_correct_answer(pa.code.text, "a")
             else:
                 pa, pb = hits
+                assert pa.code is not None
+                assert pb.code is not None
                 self._save_correct_answer(pa.code.text, "a")
                 self._save_correct_answer(pb.code.text, "b")
         elif "The first half of this puzzle is complete!" in text:  # part b unlocked
@@ -777,6 +794,7 @@ class Puzzle:
                 _ensure_intermediate_dirs(self.prose1_path)
                 self.prose1_path.write_text(text, encoding="utf-8")
             [pa] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            assert pa.code is not None
             self._save_correct_answer(pa.code.text, "a")
         else:  # init, or dead token - doesn't really matter
             if not self.prose0_path.is_file():
@@ -808,7 +826,7 @@ class Puzzle:
         raise AocdError(f"Could not get prose for {self.year}/{self.day:02d}")
 
     @property
-    def easter_eggs(self):
+    def easter_eggs(self) -> "bs4.ResultSet[bs4.Tag]":
         """
         Return a list of Easter eggs in the puzzle's description page. When you've
         completed all 25 days, adventofcode.com will reveal the Easter eggs directly in
@@ -818,10 +836,10 @@ class Puzzle:
         """
         txt = self._get_prose()
         soup = _get_soup(txt)
-        eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
+        eggs: "bs4.ResultSet[bs4.Tag]" = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
 
-    def unlock_time(self, local: bool =True) -> datetime:
+    def unlock_time(self, local: bool = True) -> datetime:
         """
         The time this puzzle unlocked. Might be in the future.
         If local is True (default), returns a datetime in your local zone.

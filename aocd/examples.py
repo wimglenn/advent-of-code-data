@@ -80,7 +80,7 @@ class Page:
         )
         return page
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> list[bs4.Tag]:
         if not name.startswith(("a_", "b_")):
             raise AttributeError(name)
         part, sep, tag = name.partition("_")
@@ -97,9 +97,10 @@ class Page:
         assert article is not None
         if tag == "li":
             # list items usually need further drill-down
-            result = article.find_all("li")
+            result: list[bs4.Tag] = article.find_all("li")
             for li in result:
-                li.codes = [code.text for code in li.find_all("code")]
+                codes: bs4.ResultSet[bs4.Tag] = li.find_all("code")
+                li.codes = [code.text for code in codes] # type: ignore[attr-defined]
         else:
             result = [t.text for t in article.find_all(tag)]
         setattr(self, name, result)  # cache the result

@@ -19,13 +19,11 @@ def get_ipynb_path() -> str:
     assert match is not None
     kernel_id = match[0]
     http = urllib3.PoolManager()
-    for serv in serverapp.list_running_servers(): # type: ignore[no-untyped-call] # ipython/jupyter doesn't provide type hints
-        url = url_path_join(serv["url"], "api/sessions") # type: ignore[no-untyped-call] # ipython/jupyter doesn't provide type hints
+    for serv in serverapp.list_running_servers(): # type: ignore[no-untyped-call] # IPython/Jupyter doesn't provide type hints
+        url = url_path_join(serv["url"], "api/sessions") # type: ignore[no-untyped-call] # IPython/Jupyter doesn't provide type hints
         resp = http.request("GET", url, fields={"token": serv["token"]})
-        # TODO: urllib3.BaseHTTPResponse has no raise_for_status method.
-        # Perhaps a holdover from using requests.Response.raise_for_status.
-        # Seems like an unnoticed bug.
-        resp.raise_for_status()
+        if resp.status >= 400:
+            raise urllib3.exceptions.ResponseError(f"Bad HTTP response status ({resp.status})")
         for sess in resp.json():
             if kernel_id == sess["kernel"]["id"]:
                 path = serv["root_dir"]

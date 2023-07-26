@@ -1,6 +1,8 @@
 import logging
 import typing as t
 
+import urllib3
+
 from .get import current_day
 from .get import most_recent_year
 from .models import default_user
@@ -20,7 +22,7 @@ def submit(
     session:t.Optional[str]=None,
     reopen: bool = True,
     quiet: bool = False,
-):
+) -> t.Optional[urllib3.BaseHTTPResponse]:
     """
     Submit your answer to adventofcode.com, and print the response to the terminal.
     The only required argument is `answer`, all others can usually be introspected
