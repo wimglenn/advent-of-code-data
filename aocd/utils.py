@@ -19,7 +19,8 @@ from zoneinfo import ZoneInfo
 import bs4
 import urllib3
 
-from .exceptions import DeadTokenError
+from .exceptions import AocdError, DeadTokenError
+from ._types import _Part, _LoosePart
 
 
 log = logging.getLogger(__name__)
@@ -242,3 +243,11 @@ else:
 @cache
 def _get_soup(html: t.Union[str, bytes]) -> bs4.BeautifulSoup:
     return bs4.BeautifulSoup(html, "html.parser")
+
+
+def _parse_part(part: _LoosePart) -> _Part:
+    if part in (1, "1", "a", "A"):
+        return "a"
+    if part in (2, "2", "b", "B"):
+        return "b"
+    raise AocdError('Unexpected value for part')

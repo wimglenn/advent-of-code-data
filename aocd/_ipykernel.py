@@ -1,5 +1,6 @@
 import os
 import re
+import typing as t
 
 import urllib3
 
@@ -12,13 +13,14 @@ def get_ipynb_path() -> str:
     from jupyter_server import serverapp
     from jupyter_server.utils import url_path_join
 
-    app = IPython.get_ipython().config["IPKernelApp"]
+    ipython = IPython.get_ipython() # type: ignore[attr-defined] # ipython/jupyter doesn't provide type hints
+    app = ipython.config["IPKernelApp"]
     match = _IPYNB_PATTERN.search(app["connection_file"])
     assert match is not None
     kernel_id = match[0]
     http = urllib3.PoolManager()
-    for serv in serverapp.list_running_servers():
-        url = url_path_join(serv["url"], "api/sessions")
+    for serv in serverapp.list_running_servers(): # type: ignore[no-untyped-call] # ipython/jupyter doesn't provide type hints
+        url = url_path_join(serv["url"], "api/sessions") # type: ignore[no-untyped-call] # ipython/jupyter doesn't provide type hints
         resp = http.request("GET", url, fields={"token": serv["token"]})
         # TODO: urllib3.BaseHTTPResponse has no raise_for_status method.
         # Perhaps a holdover from using requests.Response.raise_for_status.

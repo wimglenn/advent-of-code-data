@@ -33,7 +33,8 @@ from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
 from .utils import http
-from ._types import _Answer, _Part
+from .utils import _parse_part
+from ._types import _Answer, _Part, _LoosePart
 
 if t.TYPE_CHECKING:
     import IPython.lib.pretty
@@ -454,7 +455,7 @@ class Puzzle:
     def _submit(
         self,
         value: t.Optional[_Answer],
-        part: _Part,
+        part: _LoosePart,
         reopen: bool = True,
         quiet: bool = False
     ) -> None: # TODO: this should not be None
@@ -465,9 +466,7 @@ class Puzzle:
             raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
             value = self._coerce_val(value)
-        part = str(part).replace("1", "a").replace("2", "b").lower()
-        if part not in {"a", "b"}:
-            raise AocdError('part must be "a" or "b"')
+        part = _parse_part(part)
         previous_submits = self.submit_results
         try:
             value_as_int = int(value)
