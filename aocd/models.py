@@ -341,9 +341,9 @@ class Puzzle:
                 coerced = True
                 val = int(orig_val) # type: ignore[arg-type]
             elif orig_type.__name__.startswith(("float", "complex")):
-                if val.imag == 0.0 and float(val.real).is_integer():
+                if val.imag == 0.0 and float(val.real).is_integer(): # type: ignore[union-attr]
                     coerced = True
-                    val = int(val.real)
+                    val = int(val.real) # type: ignore[union-attr]
         if isinstance(val, int):
             val = str(val)
         if coerced:
@@ -482,7 +482,7 @@ class Puzzle:
         part = _parse_part(part)
         previous_submits = self.submit_results
         try:
-            value_as_int = int(value)
+            value_as_int = int(value) # type: ignore[arg-type] # downstream usage of self._coerce_val
         except ValueError:
             value_as_int = None
         skip_prefix = (
@@ -555,7 +555,7 @@ class Puzzle:
                 "because that was the answer for part a"
             )
         url = self.submit_url
-        check_guess = self._check_already_solved(value, part)
+        check_guess = self._check_already_solved(value, part) # type: ignore[arg-type] # downstream usage of self._coerce_val
         if check_guess is not None:
             if quiet:
                 log.info(check_guess)
@@ -565,7 +565,7 @@ class Puzzle:
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": "1", "b": "2"}[part]
-        fields = {"level": level, "answer": value}
+        fields: dict[str, str] = {"level": level, "answer": value} # type: ignore[dict-item] # downstream usage of self._coerce_val
         response = http.post(url, token=self.user.token, fields=fields)
         when = datetime.now(tz=AOC_TZ).isoformat(sep=" ")
         if response.status != 200:
@@ -575,7 +575,7 @@ class Puzzle:
         soup = _get_soup(response.data)
         assert soup.article is not None
         message = soup.article.text
-        self._save_submit_result(value=value, part=part, message=message, when=when)
+        self._save_submit_result(value=value, part=part, message=message, when=when) # type: ignore[arg-type] # downstream usage of self._coerce_val
         color: t.Optional[str] = None
         if "That's the right answer" in message:
             color = "green"
@@ -585,7 +585,7 @@ class Puzzle:
                 log.info("reopening to %s", part_b_url)
                 webbrowser.open(part_b_url)
             if not (self.day == 25 and part == "b"):
-                self._save_correct_answer(value=value, part=part)
+                self._save_correct_answer(value=value, part=part) # type: ignore[arg-type] # downstream usage of self._coerce_val
             if self.day == 25 and part == "a":
                 log.debug("checking if got 49 stars already for year %s...", self.year)
                 my_stats = self.user.get_stats(self.year)
