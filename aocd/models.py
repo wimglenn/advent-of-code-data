@@ -57,14 +57,12 @@ AOCD_DATA_DIR = AOCD_DATA_DIR.expanduser()
 AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
 
-# TODO: Use typing.Self when support for < 3.11 is dropped
-_TUser = t.TypeVar("_TUser", bound="User")
+_TUser = t.TypeVar("_TUser", bound="User") # TODO: Use typing.Self instead of this when support for < 3.11 is dropped
 
 class _SolverCallable(t.Protocol):
     def __call__(self, year: int, day:int, data: str) -> _Answer:
         ...
 
-# TODO: what should the return type be?
 _ExampleParserCallable = t.Callable[[_examples.Page, list[str]], list[_examples.Example]]
 
 class _Result(t.TypedDict):
@@ -322,8 +320,11 @@ class Puzzle:
         txt = repr(self) if cycle else f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
         p.text(txt) # type: ignore[no-untyped-call] # IPython/Jupyter doesn't provide type hints
 
-    # TODO: providing better type hints for this function will require more work than I want to do right now. Should be possible with a refactor that uses early returns.
-    def _coerce_val(self, val: _Answer) -> str:
+    # TODO: providing better type hints for this function will require quite a bit of effort.
+    # Maybe a refactor that uses early returns.
+    # Worth noting is that the intent seems to be to always return a str but it can actually return just about anything.
+    # Not sure how to address this w/o a breaking change.
+    def _coerce_val(self, val: _Answer) -> _Answer:
         # technically adventofcode.com will only accept strings as answers.
         # but it's convenient to be able to submit numbers, since many of the answers
         # are numeric strings. coerce the values to string safely.
@@ -336,12 +337,13 @@ class Puzzle:
         elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
             # deal with numpy scalars
             if orig_type.__name__.startswith(("int", "uint", "long", "ulong")):
+                # FIXME: np.longfloat, np.longcomplex, and np.longdouble will all take this branch. seems undesirable?
                 coerced = True
                 val = int(orig_val) # type: ignore[arg-type]
             elif orig_type.__name__.startswith(("float", "complex")):
-                if val.imag == 0.0 and float(val.real).is_integer(): # type: ignore[union-attr]
+                if val.imag == 0.0 and float(val.real).is_integer():
                     coerced = True
-                    val = int(val.real) # type: ignore[union-attr]
+                    val = int(val.real)
         if isinstance(val, int):
             val = str(val)
         if coerced:
@@ -352,7 +354,7 @@ class Puzzle:
                 self.year,
                 self.day,
             )
-        return str(val)
+        return val
 
     @property
     def answer_a(self) -> str:
@@ -469,7 +471,7 @@ class Puzzle:
         part: _LoosePart,
         reopen: bool = True,
         quiet: bool = False
-    ) -> t.Optional["urllib3.BaseHTTPResponse"]: # TODO: this should not be None
+    ) -> t.Optional["urllib3.BaseHTTPResponse"]:
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -599,9 +601,7 @@ class Puzzle:
         elif "That's not the right answer" in message:
             color = "red"
             try:
-                assert soup.article.span is not None
-                assert soup.article.span.code is not None
-                context = soup.article.span.code.text
+                context = soup.article.span.code.text # type: ignore[union-attr] # can't use defensive asserts w/o causing tests to fail
             except AttributeError:
                 context = soup.article.text
             log.warning("wrong answer: %s", context)
