@@ -47,7 +47,11 @@ class HttpClient:
             # increasing exponentially on subsequent occasions. implemented
             # at the AoC author's request:
             #   https://github.com/wimglenn/advent-of-code-data/issues/59
-            msg = "you're being rate-limited - slow down! (delay=%.02fs)"
+            msg = (
+                "you're being rate-limited - slow down on the requests! "
+                "see https://github.com/wimglenn/advent-of-code-data/issues/59 "
+                "(delay=%.02fs)"
+            )
             log.warning(msg, self._cooloff)
             time.sleep(self._cooloff)
             self._cooloff *= 2  # double it for repeat offenders
