@@ -210,7 +210,7 @@ def main() -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    plugin: Callable[[Page,list[str]], list[Example]] = plugins[args.example_parser].load()
+    plugin: Callable[[Page, list[str]], list[Example]] = plugins[args.example_parser].load()
     console = Console()
     parser_wants_real_datas = getattr(plugin, "uses_real_datas", True)
 

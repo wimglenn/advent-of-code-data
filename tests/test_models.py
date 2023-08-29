@@ -425,7 +425,7 @@ def test_example_data_crash(pook, caplog):
 
 
 @pytest.mark.parametrize(
-    "v_raw,v_expected,len_logs",
+    "v_raw, v_expected, len_logs",
     [
         ("123", "123", 0),
         (123, "123", 0),
