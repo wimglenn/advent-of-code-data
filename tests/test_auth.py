@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from aocd.exceptions import AocdError
@@ -13,7 +15,7 @@ def test_no_session_id(test_token, capsys):
     assert "ERROR: AoC session ID is needed to get your puzzle data!" in err
 
 
-def test_get_session_id_from_env(monkeypatch):
+def test_get_session_id_from_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("AOC_SESSION", "tokenfromenv1")
     user = default_user()
     assert user.token == "tokenfromenv1"
@@ -25,7 +27,7 @@ def test_get_session_id_from_file(test_token):
     assert user.token == "tokenfromfile"
 
 
-def test_env_takes_priority_over_file(monkeypatch, test_token):
+def test_env_takes_priority_over_file(monkeypatch: pytest.MonkeyPatch, test_token: Path):
     monkeypatch.setenv("AOC_SESSION", "tokenfromenv2")
     user = default_user()
     assert user.token == "tokenfromenv2"

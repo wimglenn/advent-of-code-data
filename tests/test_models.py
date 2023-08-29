@@ -1,7 +1,7 @@
-import logging
 from datetime import datetime
 from datetime import timedelta
-from textwrap import dedent
+from pathlib import Path
+import logging
 
 import numpy as np
 import pytest
@@ -75,7 +75,7 @@ def test_setattr_submits(mocker: MockerFixture, pook):
     mock.assert_called_once_with(part="a", value="4321")
 
 
-def test_setattr_doesnt_submit_if_already_done(mocker: MockerFixture, aocd_data_dir):
+def test_setattr_doesnt_submit_if_already_done(mocker: MockerFixture, aocd_data_dir: Path):
     answer_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_path.write_text("someval")
     puzzle = Puzzle(year=2017, day=7)
@@ -94,7 +94,7 @@ def test_setattr_submit_both(aocd_data_dir, mocker: MockerFixture, pook):
     mock.assert_called_once_with(part="b", value="zyxw")
 
 
-def test_setattr_doesnt_submit_both_if_done(mocker: MockerFixture, aocd_data_dir):
+def test_setattr_doesnt_submit_both_if_done(mocker: MockerFixture, aocd_data_dir: Path):
     answer_a_path = aocd_data_dir / "testauth.testuser.000" / "2017_07a_answer.txt"
     answer_b_path = aocd_data_dir / "testauth.testuser.000" / "2017_07b_answer.txt"
     answer_a_path.write_text("ansA")

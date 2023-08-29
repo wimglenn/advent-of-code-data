@@ -4,7 +4,6 @@ import os
 import re
 import sys
 import time
-import typing as t
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
@@ -15,8 +14,7 @@ from importlib.metadata import EntryPoint
 from itertools import count
 from pathlib import Path
 from textwrap import dedent
-
-
+from typing import TYPE_CHECKING, Callable, Generator, Optional, Protocol, TypeVar, TypedDict, cast, Iterable, Union, Literal
 
 from . import examples as _examples
 from .exceptions import AocdError
@@ -36,13 +34,13 @@ from .utils import http
 from .utils import _parse_part
 from ._types import _Answer, _Part, _LoosePart
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
     import bs4
     import IPython.lib.pretty
     import urllib3
 
 
-    class _Results(t.TypedDict):
+    class _Results(TypedDict):
         part: _Part
         value: str
         when: str
@@ -57,21 +55,21 @@ AOCD_DATA_DIR = AOCD_DATA_DIR.expanduser()
 AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
 
-_TUser = t.TypeVar("_TUser", bound="User") # TODO: Use typing.Self instead of this when support for < 3.11 is dropped
+_TUser = TypeVar("_TUser", bound="User") # TODO: Use typing.Self instead of this when support for < 3.11 is dropped
 
-class _SolverCallable(t.Protocol):
+class _SolverCallable(Protocol):
     def __call__(self, year: int, day:int, data: str) -> _Answer:
         ...
 
-_ExampleParserCallable = t.Callable[[_examples.Page, list[str]], list[_examples.Example]]
+_ExampleParserCallable = Callable[[_examples.Page, list[str]], list[_examples.Example]]
 
-class _Result(t.TypedDict):
+class _Result(TypedDict):
     time: timedelta
     rank: int
     score: int
 
 class User:
-    _token2id: t.Optional[dict[str, str]] = None
+    _token2id: Optional[dict[str, str]] = None
 
     def __init__(self, token: str) -> None:
         self.token = token
@@ -128,8 +126,8 @@ class User:
 
     def get_stats(
         self,
-        years: t.Optional[t.Union[t.Iterable[int], int]] = None
-    ) -> dict[str, dict[t.Literal['a', 'b'], _Result]]:
+        years: Optional[Union[Iterable[int], int]] = None
+    ) -> dict[str, dict[Literal['a', 'b'], _Result]]:
         """
         Parsed version of your personal stats (rank, solve time, score).
         See https://adventofcode.com/<year>/leaderboard/self when logged in.
@@ -217,7 +215,7 @@ def default_user() -> User:
 
 
 class Puzzle:
-    def __init__(self, year:int, day:int, user: t.Optional[User] =None):
+    def __init__(self, year:int, day:int, user: Optional[User] =None):
         self.year = year
         self.day = day
         if user is None:
@@ -462,16 +460,16 @@ class Puzzle:
         seen with puzzle.submit_results[-1].
         """
         if self.submit_results_path.is_file():
-            return t.cast(list["_Results"], json.loads(self.submit_results_path.read_text()))
+            return cast(list["_Results"], json.loads(self.submit_results_path.read_text()))
         return []
 
     def _submit(
         self,
-        value: t.Optional[_Answer],
+        value: Optional[_Answer],
         part: _LoosePart,
         reopen: bool = True,
         quiet: bool = False
-    ) -> t.Optional["urllib3.BaseHTTPResponse"]:
+    ) -> Optional["urllib3.BaseHTTPResponse"]:
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -576,7 +574,7 @@ class Puzzle:
         assert soup.article is not None
         message = soup.article.text
         self._save_submit_result(value=value, part=part, message=message, when=when) # type: ignore[arg-type] # downstream usage of self._coerce_val
-        color: t.Optional[str] = None
+        color: Optional[str] = None
         if "That's the right answer" in message:
             color = "green"
             if reopen:
@@ -625,7 +623,7 @@ class Puzzle:
             print(colored(message, color=color))
         return response
 
-    def _check_already_solved(self, guess: str, part: _Part) -> t.Optional[str]:
+    def _check_already_solved(self, guess: str, part: _Part) -> Optional[str]:
         # if you submit an answer on a puzzle which you've already solved, even if your
         # answer is correct, you get a sort of cryptic/confusing message back from the
         # server. this helper method prevents getting that.
@@ -738,7 +736,7 @@ class Puzzle:
             len(result) == 2 and
             all(ele is None or isinstance(ele, (int, str)) for ele in result)
         ), f"expected tuple of answers. got {result}"
-        return t.cast(tuple[_Answer, _Answer], result)
+        return cast(tuple[_Answer, _Answer], result)
 
     @property
     def url(self) -> str:
@@ -750,7 +748,7 @@ class Puzzle:
         webbrowser.open(self.url)
 
     @property
-    def my_stats(self) -> dict[t.Literal['a', 'b'], _Result]:
+    def my_stats(self) -> dict[Literal['a', 'b'], _Result]:
         """
         Your personal stats (rank, solve time, score) for this particular puzzle.
         Raises `PuzzleUnsolvedError` if you haven't actually solved it yet.
@@ -852,7 +850,7 @@ class Puzzle:
         return result
 
     @staticmethod
-    def all(user: t.Optional[User] = None) -> t.Generator["Puzzle", t.Any, None]:
+    def all(user: Optional[User] = None) -> Generator["Puzzle", None, None]:
         """
         Return an iterator over all known puzzles that are currently playable.
         """
@@ -884,7 +882,7 @@ def _load_users() -> dict[str, str]:
         users = json.loads(txt)
         assert isinstance(users, dict)
         assert all(isinstance(k, str) and isinstance(v, str) for k, v in users.items())
-        return t.cast(dict[str, str], users)
+        return cast(dict[str, str], users)
 
 @cache
 def _load_example_parser(
@@ -902,7 +900,7 @@ def _load_example_parser(
     parser = ep.load()
     log.debug("loaded example parser %r", parser)
     assert callable(parser)
-    return t.cast(_ExampleParserCallable, parser)
+    return cast(_ExampleParserCallable, parser)
 
 if sys.version_info >= (3, 10):
     # Python 3.10+ - group/name selectable entry points

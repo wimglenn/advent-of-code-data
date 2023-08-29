@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+from pathlib import Path
 import threading
 from importlib.metadata import version
 
@@ -127,7 +128,7 @@ def test_corrupted_cache(aocd_data_dir):
         aocd.get_data(year=2018, day=1)
 
 
-def test_race_on_download_data(mocker: MockerFixture, aocd_data_dir, pook):
+def test_race_on_download_data(mocker: MockerFixture, aocd_data_dir: Path, pook):
     pook.get(
         url="https://adventofcode.com/2018/day/1/input",
         response_body="fake data for year 2018 day 1",

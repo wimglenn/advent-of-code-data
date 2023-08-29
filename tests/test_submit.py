@@ -1,5 +1,6 @@
 import json
 import logging
+from pathlib import Path
 
 import pytest
 from pytest_mock import MockerFixture
@@ -106,7 +107,7 @@ def test_submit_wrong_answer(pook, capsys):
     assert msg in out
 
 
-def test_correct_submit_records_good_answer(pook, aocd_data_dir):
+def test_correct_submit_records_good_answer(pook, aocd_data_dir: Path):
     pook.get(url="https://adventofcode.com/2018/day/1")
     pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
@@ -137,7 +138,7 @@ def test_submit_correct_part_a_answer_for_part_b_blocked(pook):
         submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
 
 
-def test_submits_for_partb_when_already_submitted_parta(freezer, pook, aocd_data_dir):
+def test_submits_for_partb_when_already_submitted_parta(freezer, pook, aocd_data_dir: Path):
     freezer.move_to("2018-12-01 12:00:00Z")
     post = pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
@@ -150,7 +151,7 @@ def test_submits_for_partb_when_already_submitted_parta(freezer, pook, aocd_data
     assert post.calls == 1
 
 
-def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_dir):
+def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_dir: Path):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = pook.get(
         url="https://adventofcode.com/2018/day/1",
@@ -181,7 +182,7 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_di
     assert " Yo Dawg " in prose_path.read_text()
 
 
-def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir):
+def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir: Path):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = pook.get(
         url="https://adventofcode.com/2018/day/1",
@@ -209,7 +210,7 @@ def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir):
     assert post.calls == 1
 
 
-def test_submit_puts_level1_by_default(freezer, pook, aocd_data_dir):
+def test_submit_puts_level1_by_default(freezer, pook, aocd_data_dir: Path):
     freezer.move_to("2018-12-01 12:00:00Z")
     get = pook.get(url="https://adventofcode.com/2018/day/1")
     post = pook.post(

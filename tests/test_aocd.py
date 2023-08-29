@@ -41,7 +41,7 @@ def test_submit_doesnt_bind_day_and_year_when_introspection_failed(mocker: Mocke
     assert not isinstance(aocd.submit, functools.partial)
 
 
-def test_data_in_interactive_mode(monkeypatch, mocker: MockerFixture, freezer):
+def test_data_in_interactive_mode(monkeypatch: pytest.MonkeyPatch, mocker: MockerFixture, freezer):
     freezer.move_to("2017-12-10 12:00:00Z")
     monkeypatch.delattr("__main__.__file__")
     mock = mocker.patch("aocd.get_data", return_value="repl data")

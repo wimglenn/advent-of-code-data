@@ -5,12 +5,12 @@ import os
 import sys
 import tempfile
 import time
-import typing as t
 from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
 from importlib.metadata import EntryPoint
 from pathlib import Path
+from typing import TYPE_CHECKING, Callable, Iterable, Mapping, NoReturn, Optional, TypeVar, Union, cast
 
 import pebble.concurrent
 
@@ -24,26 +24,22 @@ from .utils import colored
 from .utils import get_plugins
 from ._types import _Part
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
     if sys.version_info >= (3, 10):
         from typing import ParamSpec
     else:
         from typing_extensions import ParamSpec
     _PS = ParamSpec("_PS")
 
-_R = t.TypeVar("_R")
-
-
+_R = TypeVar("_R")
 
 # from https://adventofcode.com/about
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
-
-
 DEFAULT_TIMEOUT = 60
 log = logging.getLogger(__name__)
 
 
-def main() -> t.NoReturn:
+def main() -> NoReturn:
     """
     Run user solver(s) against their inputs and render the results. Can use multiple
     tokens to validate your code against multiple input datas.
@@ -196,7 +192,7 @@ def main() -> t.NoReturn:
 
 
 def _timeout_wrapper(
-    f: t.Callable["_PS", _R],
+    f: Callable["_PS", _R],
     capture: bool = False,
     timeout: float = DEFAULT_TIMEOUT,
     *args: "_PS.args",
@@ -208,9 +204,8 @@ def _timeout_wrapper(
     return func(f, capture, *args, **kwargs)
 
 
-
 def _process_wrapper(
-    f: t.Callable["_PS", _R],
+    f: Callable["_PS", _R],
     capture: bool = False,
     *args: "_PS.args",
     **kwargs: "_PS.kwargs",
@@ -227,7 +222,7 @@ def _process_wrapper(
 def run_with_timeout(
     entry_point: EntryPoint,
     timeout: float,
-    progress: t.Optional[str],
+    progress: Optional[str],
     dt: float = 0.1,
     capture: bool = False,
     **kwargs: object
@@ -289,7 +284,7 @@ def run_one(
     data: str,
     entry_point: EntryPoint,
     timeout: float = DEFAULT_TIMEOUT,
-    progress: t.Optional[str] = None,
+    progress: Optional[str] = None,
     capture: bool = False,
 ) -> tuple[str, str, float, str]:
     """
@@ -331,10 +326,10 @@ def run_one(
 
 
 def run_for(
-    plugs: t.Iterable[str],
-    years: t.Iterable[int],
-    days: t.Iterable[int],
-    datasets: t.Mapping[str, str],
+    plugs: Iterable[str],
+    years: Iterable[int],
+    days: Iterable[int],
+    datasets: Mapping[str, str],
     example: bool = False,
     timeout: float = DEFAULT_TIMEOUT,
     autosubmit: bool = True,
@@ -362,7 +357,7 @@ def run_for(
         # `assert isinstance` checks later on.)
         # There's probably a way to clean this up, but it likely requires a
         # bit of refactoring
-        datas: t.Union[range, t.Mapping[str, str]]
+        datas: Union[range, Mapping[str, str]]
         if example:
             autosubmit = False
             examples = Puzzle(year, day).examples
@@ -402,7 +397,7 @@ def run_for(
                 n_incorrect += 1
                 line += f"   {icon} {error}"
             else:
-                for answer, part in zip((a, b), t.cast(t.Iterable[_Part], "ab")):
+                for answer, part in zip((a, b), cast(Iterable[_Part], "ab")):
                     if day == 25 and part == "b":
                         # there's no part b on christmas day, skip
                         continue

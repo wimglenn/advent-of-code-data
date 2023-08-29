@@ -6,7 +6,6 @@ import platform
 import shutil
 import sys
 import time
-import typing as t
 from collections import deque
 from datetime import datetime
 from functools import cache
@@ -14,6 +13,7 @@ from importlib.metadata import entry_points
 from importlib.metadata import version
 from itertools import cycle
 from tempfile import NamedTemporaryFile
+from typing import Mapping, Optional, Union
 from zoneinfo import ZoneInfo
 
 import bs4
@@ -59,7 +59,7 @@ class HttpClient:
             self._cooloff *= 2  # double it for repeat offenders
         self._history.append(now)
 
-    def get(self, url: str, token: t.Optional[str] = None, redirect: bool = True) -> urllib3.BaseHTTPResponse:
+    def get(self, url: str, token: Optional[str] = None, redirect: bool = True) -> urllib3.BaseHTTPResponse:
         # getting user inputs, puzzle prose, etc
         headers = self.pool_manager.headers
         if token:
@@ -69,7 +69,7 @@ class HttpClient:
         self.req_count["GET"] += 1
         return resp
 
-    def post(self, url: str, token: str, fields: t.Mapping[str, str]) -> urllib3.BaseHTTPResponse:
+    def post(self, url: str, token: str, fields: Mapping[str, str]) -> urllib3.BaseHTTPResponse:
         # submitting answers
         headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
         self._limiter()
@@ -94,8 +94,8 @@ def _ensure_intermediate_dirs(path: Path) -> None:
 def blocker(
         quiet: bool = False,
         dt: float = 0.1,
-        datefmt: t.Optional[str] = None,
-        until: t.Optional[tuple[int, int]] = None
+        datefmt: Optional[str] = None,
+        until: Optional[tuple[int, int]] = None
 ) -> None:
     """
     This function just blocks until the next puzzle unlocks.
@@ -215,7 +215,7 @@ if platform.system() == "Windows":
     os.system("color")  # hack - makes ANSI colors work in the windows cmd window
 
 
-def colored(txt: str, color: t.Optional[str]) -> str:
+def colored(txt: str, color: Optional[str]) -> str:
     if color is None:
         return txt
     code = _ansi_colors.index(color.casefold())
@@ -241,7 +241,7 @@ else:
 
 
 @cache
-def _get_soup(html: t.Union[str, bytes]) -> bs4.BeautifulSoup:
+def _get_soup(html: Union[str, bytes]) -> bs4.BeautifulSoup:
     return bs4.BeautifulSoup(html, "html.parser")
 
 

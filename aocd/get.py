@@ -2,8 +2,8 @@ import datetime
 import os
 import re
 import traceback
-import typing as t
 from logging import getLogger
+from typing import Optional, Union, Literal
 
 from ._ipykernel import get_ipynb_path
 from .exceptions import AocdError
@@ -19,10 +19,10 @@ log = getLogger(__name__)
 
 
 def get_data(
-    session: t.Optional[str] = None,
-    day: t.Optional[int] = None,
-    year: t.Optional[int] = None,
-    block: t.Union[bool, t.Literal["q"]] = False
+    session: Optional[str] = None,
+    day: Optional[int] = None,
+    year: Optional[int] = None,
+    block: Union[bool, Literal["q"]] = False
 ) -> str:
     """
     Get data for day (1-25) and year (2015+).
@@ -79,7 +79,7 @@ def current_day() -> int:
     return day
 
 
-def get_day_and_year() -> tuple[int, t.Optional[int]]:
+def get_day_and_year() -> tuple[int, Optional[int]]:
     """
     Returns tuple (day, year).
 

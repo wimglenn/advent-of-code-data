@@ -2,7 +2,7 @@ import argparse
 import logging
 import re
 import sys
-import typing as t
+from typing import NamedTuple, Optional, Callable
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import zip_longest
@@ -34,9 +34,9 @@ class Page:
     year: int  # AoC puzzle year (2015+) parsed from html title
     day: int  # AoC puzzle day (1-25) parsed from html title
     article_a: bs4.element.Tag  # The bs4 tag for the first <article> in the page, i.e. part a
-    article_b: t.Optional[bs4.element.Tag]  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
+    article_b: Optional[bs4.element.Tag]  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
     a_raw: str  # The first <article> html as a string
-    b_raw: t.Optional[str]  # The second <article> html as a string. Will be `None` if part b locked
+    b_raw: Optional[str]  # The second <article> html as a string. Will be `None` if part b locked
 
     def __repr__(self) -> str:
         part_a_only = "*" if self.article_b is None else ""
@@ -109,7 +109,7 @@ class Page:
         return result
 
 
-class Example(t.NamedTuple):
+class Example(NamedTuple):
     """
     Tuple of example data, answers, and any extra context needed for a solver.
 
@@ -123,16 +123,16 @@ class Example(t.NamedTuple):
     """
 
     input_data: str
-    answer_a: t.Optional[str] = None
-    answer_b: t.Optional[str] = None
-    extra: t.Optional[str] = None
+    answer_a: Optional[str] = None
+    answer_b: Optional[str] = None
+    extra: Optional[str] = None
 
     @property
-    def answers(self) -> tuple[t.Optional[str], t.Optional[str]]:
+    def answers(self) -> tuple[Optional[str], Optional[str]]:
         return self.answer_a, self.answer_b
 
 
-def _trunc(s: t.Optional[str], maxlen: int = 50) -> t.Optional[str]:
+def _trunc(s: Optional[str], maxlen: int = 50) -> Optional[str]:
     # don't print massive strings and mess up the table rendering
     if s is None or len(s) <= maxlen:
         return s
@@ -210,7 +210,7 @@ def main() -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    plugin: t.Callable[[Page,list[str]], list[Example]] = plugins[args.example_parser].load()
+    plugin: Callable[[Page,list[str]], list[Example]] = plugins[args.example_parser].load()
     console = Console()
     parser_wants_real_datas = getattr(plugin, "uses_real_datas", True)
 

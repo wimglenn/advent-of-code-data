@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import sys
-import typing as t
+from typing import TYPE_CHECKING
 
 from .exceptions import DeadTokenError
 from .models import AOCD_CONFIG_DIR
@@ -12,7 +12,7 @@ from .utils import _ensure_intermediate_dirs
 from .utils import colored
 from .utils import get_owner
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
     import http.cookiejar
 
 log = logging.getLogger(__name__)

@@ -1,5 +1,5 @@
 import sys
-import typing as t
+from typing import TYPE_CHECKING, Union
 from functools import partial
 
 from . import cli
@@ -27,9 +27,9 @@ __all__ = [
 
 data: str
 lines: list[str]
-numbers: t.Union[list[list[int]],list[int],int]
+numbers: Union[list[list[int]],list[int],int]
 
-if t.TYPE_CHECKING:
+if TYPE_CHECKING:
     submit = _impartial_submit
 
 def __getattr__(name): # type: ignore[no-untyped-def] # no idea how to provide meaningful types here
