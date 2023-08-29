@@ -30,9 +30,9 @@ dependencies = [
     "beautifulsoup4",
     "pebble",
     "urllib3",
-    'tzdata ; platform_system == "Windows"',
+    'tzdata; platform_system == "Windows"',
     "aocd-example-parser >= 2023.2",
-    'typing_extensions ; python_version < 3.10',
+    'typing-extensions; python_version < "3.10"',
 ]
 
 [[project.authors]]
