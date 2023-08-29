@@ -335,7 +335,7 @@ class Puzzle:
         elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
             # deal with numpy scalars
             if orig_type.__name__.startswith(("int", "uint", "long", "ulong")):
-                # FIXME: np.longfloat, np.longcomplex, and np.longdouble will all take this branch. seems undesirable?
+                # FIXME: np.longfloat, np.longcomplex, and np.longdouble will all take this branch. seems undesirable.
                 coerced = True
                 val = int(orig_val) # type: ignore[arg-type]
             elif orig_type.__name__.startswith(("float", "complex")):
