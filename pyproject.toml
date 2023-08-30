@@ -113,7 +113,7 @@ ignore_missing_imports = true
 [tool.coverage.report]
 exclude_also = [
     # type checking only code
-    'if t\.TYPE_CHECKING:',
+    'if (t\.|typing\.)?TYPE_CHECKING:',
 
     # defensive assertion code
     'raise AssertionError',
