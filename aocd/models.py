@@ -16,7 +16,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import TYPE_CHECKING, Callable, Generator, Optional, Protocol, TypeVar, TypedDict, cast, Iterable, Union, Literal
 
-from . import examples
+from . import examples as _examples # must rename import to avoid conflict w/ examples method
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import ExampleParserError
@@ -61,7 +61,7 @@ class _SolverCallable(Protocol):
     def __call__(self, year: int, day:int, data: str) -> _Answer:
         ...
 
-_ExampleParserCallable = Callable[[examples.Page, list[str]], list[examples.Example]]
+_ExampleParserCallable = Callable[[_examples.Page, list[str]], list[_examples.Example]]
 
 class _Result(TypedDict):
     time: timedelta
@@ -268,7 +268,7 @@ class Puzzle:
         return data.rstrip("\r\n")
 
     @property
-    def examples(self) -> list[examples.Example]:
+    def examples(self) -> list[_examples.Example]:
         """
         Sample data and answers associated with this puzzle, as a list of
         `aocd.examples.Example` instances. These are extracted from the puzzle prose
@@ -280,16 +280,16 @@ class Puzzle:
         """
         return self._get_examples()
 
-    def _get_examples(self, parser_name: str = "reference") -> list[examples.Example]:
+    def _get_examples(self, parser_name: str = "reference") -> list[_examples.Example]:
         # invoke a named example parser to extract examples from cached prose.
         # logs warning and returns an empty list if the parser plugin raises an
         # exception for any reason.
         try:
-            page = examples.Page.from_raw(html=self._get_prose())
+            page = _examples.Page.from_raw(html=self._get_prose())
             parser = _load_example_parser(name=parser_name)
             datas = []
             if getattr(parser, "uses_real_datas", True):
-                datas = examples._get_unique_real_inputs(self.year, self.day)
+                datas = _examples._get_unique_real_inputs(self.year, self.day)
             return parser(page, datas)
         except Exception as err:
             msg = "unable to find example data for %d/%02d (%r)"
