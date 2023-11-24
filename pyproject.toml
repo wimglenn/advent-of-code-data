@@ -54,7 +54,7 @@ all = ["advent-of-code-data[nb,test,type-check]"]
 nb = ["IPython", "jupyter-server"]
 test = [
     "numpy",
-    "pook @ git+https://github.com/wimglenn/pook",
+    "pook @ git+https://github.com/h2non/pook@f73fd34",
     "pytest",
     "pytest-cov",
     "pytest-mock",
