@@ -9,6 +9,6 @@ __all__ = [
     "_LoosePart",
 ]
 
-_Answer = Optional[Union[str, int, float, complex, "np.number"]]
+_Answer = Optional[Union[str, int, float, complex, "np.number[np.typing.NBitBase]"]]
 _Part = Literal["a", "b"]
 _LoosePart = Union[_Part, Literal[1, "1", 2, "2"]]

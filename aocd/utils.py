@@ -63,7 +63,7 @@ class HttpClient:
         # getting user inputs, puzzle prose, etc
         headers = self.pool_manager.headers
         if token:
-            headers |= {"Cookie": f"session={token}"}
+            headers = {**headers, "Cookie": f"session={token}"}
         self._limiter()
         resp = self.pool_manager.request("GET", url, headers=headers, redirect=redirect)
         self.req_count["GET"] += 1
@@ -71,7 +71,7 @@ class HttpClient:
 
     def post(self, url: str, token: str, fields: Mapping[str, str]) -> urllib3.BaseHTTPResponse:
         # submitting answers
-        headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
+        headers = {**self.pool_manager.headers, "Cookie": f"session={token}"}
         self._limiter()
         resp = self.pool_manager.request_encode_body(
             method="POST",
