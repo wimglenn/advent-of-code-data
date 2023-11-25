@@ -33,8 +33,6 @@ __all__ = [
 ]
 
 data: str
-lines: list[str]
-numbers: Union[list[list[int]], list[int], int]
 
 if TYPE_CHECKING:
     submit = _impartial_submit
