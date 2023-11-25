@@ -1,12 +1,13 @@
 import functools
 
-import pytest
+from freezegun.api import FrozenDateTimeFactory
 from pytest_mock import MockerFixture
+import pytest
 
 import aocd
 
 
-def test_aocd_data_with_attribute_access(mocker: MockerFixture):
+def test_aocd_data_with_attribute_access(mocker: MockerFixture) -> None:
     fake_stack = [("~/2016/q22.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mock = mocker.patch("aocd.get_data", return_value="test data 2016/22")
@@ -15,7 +16,7 @@ def test_aocd_data_with_attribute_access(mocker: MockerFixture):
     assert data == "test data 2016/22"
 
 
-def test_aocd_data_with_from_import(mocker: MockerFixture):
+def test_aocd_data_with_from_import(mocker: MockerFixture) -> None:
     fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mock = mocker.patch("aocd.get_data", return_value="test data 2017/23")
@@ -25,7 +26,7 @@ def test_aocd_data_with_from_import(mocker: MockerFixture):
     assert data == "test data 2017/23"
 
 
-def test_submit_autobinds_day_and_year(mocker: MockerFixture):
+def test_submit_autobinds_day_and_year(mocker: MockerFixture) -> None:
     fake_stack = [("~/2017/q23.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     submit = aocd.submit
@@ -35,13 +36,13 @@ def test_submit_autobinds_day_and_year(mocker: MockerFixture):
     assert submit.keywords == {"day": 23, "year": 2017}
 
 
-def test_submit_doesnt_bind_day_and_year_when_introspection_failed(mocker: MockerFixture):
-    fake_stack = []
+def test_submit_doesnt_bind_day_and_year_when_introspection_failed(mocker: MockerFixture) -> None:
+    fake_stack = ()
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     assert not isinstance(aocd.submit, functools.partial)
 
 
-def test_data_in_interactive_mode(monkeypatch: pytest.MonkeyPatch, mocker: MockerFixture, freezer):
+def test_data_in_interactive_mode(monkeypatch: pytest.MonkeyPatch, mocker: MockerFixture, freezer: FrozenDateTimeFactory) -> None:
     freezer.move_to("2017-12-10 12:00:00Z")
     monkeypatch.delattr("__main__.__file__")
     mock = mocker.patch("aocd.get_data", return_value="repl data")
@@ -50,6 +51,6 @@ def test_data_in_interactive_mode(monkeypatch: pytest.MonkeyPatch, mocker: Mocke
     assert data == "repl data"
 
 
-def test_attribute_errors_have_context():
-    with pytest.raises(AttributeError("module 'aocd' has no attribute 'nope'")):
+def test_attribute_errors_have_context() -> None:
+    with pytest.raises(AttributeError("module 'aocd' has no attribute 'nope'")): # type: ignore[call-overload] # using pytest-raisin
         aocd.nope

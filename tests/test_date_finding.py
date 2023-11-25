@@ -1,5 +1,6 @@
 import logging
 
+from freezegun.api import FrozenDateTimeFactory
 import pytest
 
 from aocd.exceptions import AocdError
@@ -17,15 +18,15 @@ from aocd.get import most_recent_year
         ("2016-01-01 12:00:00Z", 2015),
     ],
 )
-def test_current_year(date_str, expected_year, freezer):
+def test_current_year(date_str: str, expected_year: int, freezer: FrozenDateTimeFactory) -> None:
     freezer.move_to(date_str)
     year = most_recent_year()
     assert year == expected_year
 
 
-def test_year_out_of_range(freezer):
+def test_year_out_of_range(freezer: FrozenDateTimeFactory) -> None:
     freezer.move_to("2015-11-11")
-    with pytest.raises(AocdError("Time travel not supported yet")):
+    with pytest.raises(AocdError("Time travel not supported yet")): # type: ignore[call-overload] # using pytest-raisin
         most_recent_year()
 
 
@@ -39,13 +40,13 @@ def test_year_out_of_range(freezer):
         ("2016-12-30 12:00:00-05:00", 25),
     ],
 )
-def test_current_day(date_str, expected_day, freezer):
+def test_current_day(date_str: str, expected_day: int, freezer: FrozenDateTimeFactory) -> None:
     freezer.move_to(date_str)
     day = current_day()
     assert day == expected_day
 
 
-def test_day_out_of_range(freezer, caplog):
+def test_day_out_of_range(freezer: FrozenDateTimeFactory, caplog: pytest.LogCaptureFixture) -> None:
     freezer.move_to("2015-11-11")
     assert current_day() == 1
     msg = "current_day is only available in December (EST)"

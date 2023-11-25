@@ -7,12 +7,12 @@ from aocd.exceptions import AocdError
 from aocd.get import get_day_and_year
 
 
-def test_get_day_and_year_fail_no_filename_on_stack():
-    with pytest.raises(AocdError("Failed introspection of filename")):
+def test_get_day_and_year_fail_no_filename_on_stack() -> None:
+    with pytest.raises(AocdError("Failed introspection of filename")): # type: ignore[call-overload] # using pytest-raisin
         get_day_and_year()
 
 
-def test_get_day_and_year_from_stack(mocker: MockerFixture):
+def test_get_day_and_year_from_stack(mocker: MockerFixture) -> None:
     stack = [("xmas_problem_2016_25b_dawg.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=stack)
     day, year = get_day_and_year()
@@ -20,28 +20,28 @@ def test_get_day_and_year_from_stack(mocker: MockerFixture):
     assert year == 2016
 
 
-def test_year_is_ambiguous(mocker: MockerFixture):
+def test_year_is_ambiguous(mocker: MockerFixture) -> None:
     fake_stack = [("~/2016/2017_q01.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    with pytest.raises(AocdError("Failed introspection of year")):
+    with pytest.raises(AocdError("Failed introspection of year")): # type: ignore[call-overload] # using pytest-raisin
         get_day_and_year()
 
 
-def test_day_is_unknown(mocker: MockerFixture):
+def test_day_is_unknown(mocker: MockerFixture) -> None:
     fake_stack = [("~/2016.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    with pytest.raises(AocdError("Failed introspection of day")):
+    with pytest.raises(AocdError("Failed introspection of day")): # type: ignore[call-overload] # using pytest-raisin
         get_day_and_year()
 
 
-def test_day_is_invalid(mocker: MockerFixture):
+def test_day_is_invalid(mocker: MockerFixture) -> None:
     fake_stack = [("~/2016/q27.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
-    with pytest.raises(AocdError("Failed introspection of day")):
+    with pytest.raises(AocdError("Failed introspection of day")): # type: ignore[call-overload] # using pytest-raisin
         get_day_and_year()
 
 
-def test_ipynb_ok(mocker: MockerFixture):
+def test_ipynb_ok(mocker: MockerFixture) -> None:
     fake_stack = [("ipykernel/123456789.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mocker.patch("aocd.get.get_ipynb_path", return_value="puzzle-2020-03.py")
@@ -50,23 +50,23 @@ def test_ipynb_ok(mocker: MockerFixture):
     assert year == 2020
 
 
-def test_ipynb_fail(mocker: MockerFixture):
+def test_ipynb_fail(mocker: MockerFixture) -> None:
     fake_stack = [("ipykernel/123456789.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mocker.patch("aocd.get.get_ipynb_path", side_effect=ImportError)
-    with pytest.raises(AocdError("Failed introspection of filename")):
+    with pytest.raises(AocdError("Failed introspection of filename")): # type: ignore[call-overload] # using pytest-raisin
         get_day_and_year()
 
 
-def test_ipynb_fail_no_numbers_in_ipynb_filename(mocker: MockerFixture):
+def test_ipynb_fail_no_numbers_in_ipynb_filename(mocker: MockerFixture) -> None:
     fake_stack = [("ipykernel/123456789.py", 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
     mocker.patch("aocd.get.get_ipynb_path", "puzzle.py")
-    with pytest.raises(AocdError("Failed introspection of filename")):
+    with pytest.raises(AocdError("Failed introspection of filename")): # type: ignore[call-overload] # using pytest-raisin
         get_day_and_year()
 
 
-def test_no_numbers_in_py_filename_but_date_in_abspath(mocker: MockerFixture):
+def test_no_numbers_in_py_filename_but_date_in_abspath(mocker: MockerFixture) -> None:
     fname = os.sep.join(["adventofcode", "2022", "02", "main.py"])
     fake_stack = [(fname, 1, "<test>", "from aocd import data")]
     mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)

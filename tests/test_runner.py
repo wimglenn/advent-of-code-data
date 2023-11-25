@@ -1,6 +1,11 @@
-import pytest
-from pytest_mock import MockerFixture
+from pathlib import Path
 
+from freezegun.api import FrozenDateTimeFactory
+from pytest_mock import MockerFixture
+import pook as pook_mod
+import pytest
+
+from aocd._types import _Answer
 from aocd.runner import _process_wrapper
 from aocd.runner import format_time
 from aocd.runner import main
@@ -9,21 +14,21 @@ from aocd.runner import run_one
 from aocd.utils import colored
 
 
-def test_no_plugins_avail(capsys, mocker: MockerFixture):
+def test_no_plugins_avail(capsys: pytest.CaptureFixture[str], mocker: MockerFixture) -> None:
     mock = mocker.patch("aocd.runner.get_plugins", return_value=[])
     mocker.patch("sys.argv", ["aoc"])
     msg = (
         "There are no plugins available. Install some package(s) with a registered 'adventofcode.user' entry-point.\n"
         "See https://github.com/wimglenn/advent-of-code-sample for an example plugin package structure.\n"
     )
-    with pytest.raises(SystemExit(1)):
+    with pytest.raises(SystemExit(1)): # type: ignore[call-overload] # using pytest-raisin
         main()
     out, err = capsys.readouterr()
     assert msg in err
     mock.assert_called_once_with()
 
 
-def test_no_datasets_avail(capsys, mocker: MockerFixture, aocd_config_dir):
+def test_no_datasets_avail(capsys: pytest.CaptureFixture[str], mocker: MockerFixture, aocd_config_dir: Path) -> None:
     tokens_file = aocd_config_dir / "tokens.json"
     tokens_file.write_text("{}")
     mocker.patch("sys.argv", ["aoc"])
@@ -31,13 +36,13 @@ def test_no_datasets_avail(capsys, mocker: MockerFixture, aocd_config_dir):
         "There are no datasets available to use.\n"
         f"Either export your AOC_SESSION or put some auth tokens into {tokens_file}\n"
     )
-    with pytest.raises(SystemExit(1)):
+    with pytest.raises(SystemExit(1)): # type: ignore[call-overload] # using pytest-raisin
         main()
     out, err = capsys.readouterr()
     assert msg in err
 
 
-def test_main(capsys, mocker: MockerFixture, aocd_config_dir):
+def test_main(mocker: MockerFixture, aocd_config_dir: Path) -> None:
     mock = mocker.patch("aocd.runner.run_for", return_value=0)
     ep1 = mocker.Mock()
     ep1.name = "user1"
@@ -47,7 +52,7 @@ def test_main(capsys, mocker: MockerFixture, aocd_config_dir):
     tokens_file = aocd_config_dir / "tokens.json"
     tokens_file.write_text('{"data1": "token1", "data2": "token2"}')
     mocker.patch("sys.argv", ["aoc", "--years=2015", "--days", "3", "7"])
-    with pytest.raises(SystemExit(0)):
+    with pytest.raises(SystemExit(0)): # type: ignore[call-overload] # using pytest-raisin
         main()
     mock.assert_called_once_with(
         plugs=["user1", "user2"],
@@ -62,32 +67,32 @@ def test_main(capsys, mocker: MockerFixture, aocd_config_dir):
     )
 
 
-def fake_entry_point(year, day, data):
+def fake_entry_point(year: int, day: int, data: str) -> tuple[_Answer, _Answer]:
     assert year == 2015
     assert day == 1
     assert data == "testinput"
     return "answer1", "wrong"
 
 
-def fake_entry_point_25(year, day, data):
+def fake_entry_point_25(year: int, day: int, data: str) -> tuple[_Answer, _Answer]:
     assert year == 2022
     assert day == 25
     assert data == "test example data"
     return "answer_a", ""
 
 
-def xmas_entry_point(year, day, data):
+def xmas_entry_point(year: int, day: int, data: str) -> tuple[_Answer, _Answer]:
     assert year == 2015
     assert day == 25
     assert data == "testinput"
     return "answer1", ""
 
 
-def bugged_entry_point(year, day, data):
+def bugged_entry_point(year: int, day: int, data: str) -> tuple[_Answer, _Answer]:
     raise Exception(123, 456)
 
 
-def test_results(mocker: MockerFixture, capsys):
+def test_results(mocker: MockerFixture, capsys: pytest.CaptureFixture[str]) -> None:
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = fake_entry_point
@@ -115,7 +120,7 @@ def test_results(mocker: MockerFixture, capsys):
     assert "✔" in out
 
 
-def test_results_xmas(mocker: MockerFixture, capsys):
+def test_results_xmas(mocker: MockerFixture, capsys: pytest.CaptureFixture[str]) -> None:
     ep = mocker.Mock()
     ep.name = "testuser"
     ep.load.return_value = xmas_entry_point
@@ -152,16 +157,16 @@ def test_results_xmas(mocker: MockerFixture, capsys):
         (111.5555, 400, " 111.56s", "yellow"),
     ],
 )
-def test_format_time(t, timeout, expected, color):
+def test_format_time(t: float, timeout: float, expected: str, color: str) -> None:
     actual = format_time(t, timeout)
     assert actual == colored(expected, color)
 
 
-def test_nothing_to_do():
-    run_for(plugs=[], years=[], days=[], datasets=[])
+def test_nothing_to_do() -> None:
+    run_for(plugs=[], years=[], days=[], datasets={})
 
 
-def test_day_out_of_range(mocker: MockerFixture, capsys, freezer):
+def test_day_out_of_range(mocker: MockerFixture, capsys: pytest.CaptureFixture[str], freezer: FrozenDateTimeFactory) -> None:
     freezer.move_to("2018-12-01 12:00:00Z")
     ep = mocker.Mock()
     ep.name = "testuser"
@@ -177,7 +182,7 @@ def test_day_out_of_range(mocker: MockerFixture, capsys, freezer):
     assert out == err == ""
 
 
-def test_run_error(aocd_data_dir, mocker: MockerFixture, capsys):
+def test_run_error(aocd_data_dir: Path, mocker: MockerFixture, capsys: pytest.CaptureFixture[str]) -> None:
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2018_25_prose.0.html"
@@ -203,7 +208,7 @@ def test_run_error(aocd_data_dir, mocker: MockerFixture, capsys):
     assert "part b" not in out  # because it's 25 dec, no part b puzzle
 
 
-def test_run_and_autosubmit(aocd_data_dir, mocker: MockerFixture, capsys, pook):
+def test_run_and_autosubmit(aocd_data_dir: Path, mocker: MockerFixture, capsys: pytest.CaptureFixture[str], pook: pook_mod) -> None:
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2015_01_prose.0.html"
@@ -232,7 +237,7 @@ def test_run_and_autosubmit(aocd_data_dir, mocker: MockerFixture, capsys, pook):
     assert "part b: wrong (correct answer unknown)" in out
 
 
-def test_run_and_no_autosubmit(aocd_data_dir, mocker: MockerFixture, capsys, pook):
+def test_run_and_no_autosubmit(aocd_data_dir: Path, mocker: MockerFixture, capsys: pytest.CaptureFixture[str], pook: pook_mod) -> None:
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2015_01_prose.0.html"
@@ -258,7 +263,7 @@ def test_run_and_no_autosubmit(aocd_data_dir, mocker: MockerFixture, capsys, poo
     assert "part b: wrong (correct answer unknown)" in out
 
 
-def test_run_against_examples(aocd_data_dir, mocker: MockerFixture, capsys, pook):
+def test_run_against_examples(aocd_data_dir: Path, mocker: MockerFixture, capsys: pytest.CaptureFixture[str], pook: pook_mod) -> None:
     prose_dir = aocd_data_dir / "prose"
     prose_dir.mkdir()
     puzzle_file = prose_dir / "2022_25_prose.0.html"
@@ -291,7 +296,7 @@ def test_run_against_examples(aocd_data_dir, mocker: MockerFixture, capsys, pook
     assert "part b:" not in out
 
 
-def file_entry_point(year, day, data):
+def file_entry_point(year: int, day: int, data: str) -> tuple[_Answer, _Answer]:
     assert year == 2015
     assert day == 1
     assert data == "abcxyz"
@@ -300,7 +305,7 @@ def file_entry_point(year, day, data):
     return 123, "456"
 
 
-def test_load_input_from_file(mocker: MockerFixture):
+def test_load_input_from_file(mocker: MockerFixture) -> None:
     ep = mocker.Mock()
     ep.name = "file_ep_user"
     ep.load.return_value = file_entry_point
@@ -311,7 +316,7 @@ def test_load_input_from_file(mocker: MockerFixture):
     assert not error
 
 
-def test_scratch_cleanup_failure(mocker: MockerFixture):
+def test_scratch_cleanup_failure(mocker: MockerFixture) -> None:
     ep = mocker.Mock()
     ep.name = "file_ep_user"
     ep.load.return_value = file_entry_point
@@ -319,7 +324,7 @@ def test_scratch_cleanup_failure(mocker: MockerFixture):
     run_one(2015, 1, "abcxyz", ep)
 
 
-def test_process_wrapper(capsys):
+def test_process_wrapper(capsys: pytest.CaptureFixture[str]) -> None:
     _process_wrapper(lambda: print("1"))
     out, err = capsys.readouterr()
     assert err == ""

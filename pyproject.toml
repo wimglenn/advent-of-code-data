@@ -84,22 +84,7 @@ aocd = ["py.typed"] # include py.typed file in distributions
 [tool.mypy]
 strict = true
 allow_redefinition = true
-exclude = [
-    # TODO: type check tests
-    # '^tests\/conftest.py$',
-    '^tests\/test_aocd.py$',
-    '^tests\/test_auth.py$',
-    '^tests\/test_cli.py$',
-    '^tests\/test_cookies.py$',
-    '^tests\/test_date_finding.py$',
-    '^tests\/test_date_introspection.py$',
-    '^tests\/test_example_parser.py$',
-    '^tests\/test_get_data.py$',
-    '^tests\/test_models.py$',
-    '^tests\/test_runner.py$',
-    '^tests\/test_submit.py$',
-    '^tests\/test_utils.py$',
-]
+enable_error_code = ["ignore-without-code"]
 
 # ignore missing imports for libraries that do not have type hints available
 [[tool.mypy.overrides]]

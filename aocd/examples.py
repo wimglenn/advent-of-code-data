@@ -2,7 +2,7 @@ import argparse
 import logging
 import re
 import sys
-from typing import NamedTuple, Optional, Callable
+from typing import NamedTuple, Optional, Callable, Union
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import zip_longest
@@ -80,7 +80,7 @@ class Page:
         )
         return page
 
-    def __getattr__(self, name: str) -> list[bs4.Tag]:
+    def __getattr__(self, name: str) -> Union[list[bs4.Tag], list[str]]:
         if not name.startswith(("a_", "b_")):
             raise AttributeError(name)
         part, sep, tag = name.partition("_")
@@ -95,14 +95,10 @@ class Page:
             raise AttributeError(name)
         article = self.article_a if part == "a" else self.article_b
         assert article is not None
-        if tag == "li":
-            # list items usually need further drill-down
-            result: list[bs4.Tag] = article.find_all("li")
-            for li in result:
-                codes: bs4.ResultSet[bs4.Tag] = li.find_all("code")
-                li.codes = [code.text for code in codes] # type: ignore[attr-defined]
-        else:
-            result = [t.text for t in article.find_all(tag)]
+        tags: list[bs4.Tag] = article.find_all(tag)
+        result: Union[list[bs4.Tag], list[str]] = tags
+        if tag != "li":
+            result = [t.text for t in tags]
         setattr(self, name, result)  # cache the result
         msg = "cached %s accessors for puzzle %d/%02d part %s page (%d hits)"
         log.debug(msg, tag, self.year, self.day, part, len(result))

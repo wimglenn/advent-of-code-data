@@ -1,7 +1,9 @@
+from pathlib import Path
 import platform
 
-import pytest
 from freezegun import freeze_time
+import pook as pook_mod
+import pytest
 
 from aocd.exceptions import DeadTokenError
 from aocd.utils import atomic_write_file
@@ -13,7 +15,7 @@ cpython = platform.python_implementation() == "CPython"
 
 
 @pytest.mark.xfail(not cpython, reason="freezegun tick is not working on pypy")
-def test_blocker(capsys):
+def test_blocker(capsys: pytest.CaptureFixture[str]) -> None:
     with freeze_time("2020-11-30 23:59:59.8-05:00", tick=True):
         # 0.2 second before unlock day 1
         blocker(dt=0.2)
@@ -21,21 +23,21 @@ def test_blocker(capsys):
     assert " Unlock day 1 at " in out
 
 
-def test_blocker_quiet(capsys):
+def test_blocker_quiet(capsys: pytest.CaptureFixture[str]) -> None:
     with freeze_time("2020-11-30 23:59:59.8-05:00", auto_tick_seconds=1):
         blocker(dt=0.2, quiet=True)
     out, err = capsys.readouterr()
     assert not out
 
 
-def test_get_owner_not_logged_in(pook):
+def test_get_owner_not_logged_in(pook: pook_mod) -> None:
     pook.reset()
     pook.get("https://adventofcode.com/settings", reply=302)
     with pytest.raises(DeadTokenError):
         get_owner("not_logged_in")
 
 
-def test_get_owner_user_id(pook):
+def test_get_owner_user_id(pook: pook_mod) -> None:
     pook.reset()
     pook.get(
         "https://adventofcode.com/settings",
@@ -45,7 +47,7 @@ def test_get_owner_user_id(pook):
     assert owner == "unknown.unknown.123"
 
 
-def test_get_owner_and_username(pook):
+def test_get_owner_and_username(pook: pook_mod) -> None:
     pook.reset()
     pook.get(
         "https://adventofcode.com/settings",
@@ -55,7 +57,7 @@ def test_get_owner_and_username(pook):
     assert owner == "reddit.wim.123"
 
 
-def test_get_owner_google(pook):
+def test_get_owner_google(pook: pook_mod) -> None:
     pook.reset()
     pook.get(
         "https://adventofcode.com/settings",
@@ -65,7 +67,7 @@ def test_get_owner_google(pook):
     assert owner == "google.wim.1"
 
 
-def test_atomic_write_file(aocd_data_dir):
+def test_atomic_write_file(aocd_data_dir: Path) -> None:
     target = aocd_data_dir / "foo" / "bar" / "baz.txt"
     atomic_write_file(target, "123")  # no clobber
     assert target.read_text() == "123"

@@ -1,16 +1,19 @@
+from pathlib import Path
 import json
 import logging
-from pathlib import Path
 
-import pytest
+from freezegun.api import FrozenDateTimeFactory
 from pytest_mock import MockerFixture
+from pytest_mock.plugin import MockType
+import pook as pook_mod
+import pytest
 
 from aocd.exceptions import AocdError
 from aocd.post import submit
 from aocd.utils import colored
 
 
-def test_submit_correct_answer(pook, capsys):
+def test_submit_correct_answer(pook: pook_mod, capsys: pytest.CaptureFixture[str]) -> None:
     post = pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
         content="application/x-www-form-urlencoded",
@@ -24,7 +27,7 @@ def test_submit_correct_answer(pook, capsys):
     assert msg in out
 
 
-def test_correct_submit_reopens_browser_on_answer_page(mocker: MockerFixture, pook):
+def test_correct_submit_reopens_browser_on_answer_page(mocker: MockerFixture, pook: pook_mod) -> None:
     pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
         response_body="<article>That's the right answer</article>",
@@ -34,20 +37,20 @@ def test_correct_submit_reopens_browser_on_answer_page(mocker: MockerFixture, po
     browser_open.assert_called_once_with("https://adventofcode.com/2018/day/1#part2")
 
 
-def test_submit_bogus_part():
-    with pytest.raises(AocdError('part must be "a" or "b"')):
-        submit(1234, part="c")
+def test_submit_bogus_part() -> None:
+    with pytest.raises(AocdError('part must be "a" or "b"')): # type: ignore[call-overload] # using pytest-raisin
+        submit(1234, part="c") # type: ignore[arg-type] # testing that this type violation is caught at runtime
 
 
-def test_server_error(pook, freezer):
+def test_server_error(pook: pook_mod, freezer: FrozenDateTimeFactory) -> None:
     url = "https://adventofcode.com/2018/day/1/answer"
     freezer.move_to("2018-12-01 12:00:00Z")
     pook.post(url, reply=500)
-    with pytest.raises(AocdError(f"HTTP 500 at {url}")):
+    with pytest.raises(AocdError(f"HTTP 500 at {url}")): # type: ignore[call-overload] # using pytest-raisin
         submit(1234, part="a")
 
 
-def test_submit_when_already_solved(pook, capsys):
+def test_submit_when_already_solved(pook: pook_mod, capsys: pytest.CaptureFixture[str]) -> None:
     html = """<article><p>You don't seem to be solving the right level.  Did you already complete it? <a href="/2018/day/1">[Return to Day 1]</a></p></article>"""
     pook.post(url="https://adventofcode.com/2018/day/1/answer", response_body=html)
     submit(1234, part="a", year=2018, day=1, reopen=False)
@@ -57,7 +60,7 @@ def test_submit_when_already_solved(pook, capsys):
     assert msg in out
 
 
-def test_submitted_too_recently_autoretry(pook, capsys, mocked_sleep):
+def test_submitted_too_recently_autoretry(pook: pook_mod, capsys: pytest.CaptureFixture[str], mocked_sleep: MockType) -> None:
     html1 = """<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 30s left to wait. <a href="/2015/day/24">[Return to Day 24]</a></p></article>"""
     html2 = "<article>That's the right answer. Yeah!!</article>"
     for body in html1, html2:
@@ -73,7 +76,7 @@ def test_submitted_too_recently_autoretry(pook, capsys, mocked_sleep):
     assert msg in out
 
 
-def test_submitted_too_recently_autoretry_quiet(pook, capsys, mocked_sleep):
+def test_submitted_too_recently_autoretry_quiet(pook: pook_mod, capsys: pytest.CaptureFixture[str], mocked_sleep: MockType) -> None:
     html1 = """<article><p>You gave an answer too recently; you have to wait after submitting an answer before trying again.  You have 3m 30s left to wait. <a href="/2015/day/24">[Return to Day 24]</a></p></article>"""
     html2 = "<article>That's the right answer. Yeah!!</article>"
     for body in html1, html2:
@@ -87,7 +90,7 @@ def test_submitted_too_recently_autoretry_quiet(pook, capsys, mocked_sleep):
     assert out == err == ""
 
 
-def test_submit_when_submitted_too_recently_no_autoretry(pook, capsys):
+def test_submit_when_submitted_too_recently_no_autoretry(pook: pook_mod, capsys: pytest.CaptureFixture[str]) -> None:
     html = """<article><p>You gave an answer too recently</p></article>"""
     pook.post(url="https://adventofcode.com/2015/day/25/answer", response_body=html)
     submit(1234, part="a", year=2015, day=25, reopen=False)
@@ -97,7 +100,7 @@ def test_submit_when_submitted_too_recently_no_autoretry(pook, capsys):
     assert msg in out
 
 
-def test_submit_wrong_answer(pook, capsys):
+def test_submit_wrong_answer(pook: pook_mod, capsys: pytest.CaptureFixture[str]) -> None:
     html = """<article><p>That's not the right answer.  If you're stuck, there are some general tips on the <a href="/2015/about">about page</a>, or you can ask for hints on the <a href="https://www.reddit.com/r/adventofcode/" target="_blank">subreddit</a>.  Please wait one minute before trying again. (You guessed <span style="white-space:nowrap;"><code>WROOOONG</code>.)</span> <a href="/2015/day/1">[Return to Day 1]</a></p></article>"""
     pook.post(url="https://adventofcode.com/2015/day/1/answer", response_body=html)
     submit(1234, part="a", year=2015, day=1, reopen=False)
@@ -107,7 +110,7 @@ def test_submit_wrong_answer(pook, capsys):
     assert msg in out
 
 
-def test_correct_submit_records_good_answer(pook, aocd_data_dir: Path):
+def test_correct_submit_records_good_answer(pook: pook_mod, aocd_data_dir: Path) -> None:
     pook.get(url="https://adventofcode.com/2018/day/1")
     pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
@@ -120,7 +123,7 @@ def test_correct_submit_records_good_answer(pook, aocd_data_dir: Path):
     assert answer_path.read_text() == "1234"
 
 
-def test_submit_correct_part_a_answer_for_part_b_blocked(pook):
+def test_submit_correct_part_a_answer_for_part_b_blocked(pook: pook_mod) -> None:
     pook.get(
         url="https://adventofcode.com/2018/day/1",
         response_body=(
@@ -134,11 +137,11 @@ def test_submit_correct_part_a_answer_for_part_b_blocked(pook):
         response_body="<article>That's the right answer</article>",
     )
     expected_msg = "cowardly refusing to submit 1234 for part b, because that was the answer for part a"
-    with pytest.raises(AocdError(expected_msg)):
+    with pytest.raises(AocdError(expected_msg)): # type: ignore[call-overload] # using pytest-raisin
         submit(1234, part="b", day=1, year=2018, session="whatever", reopen=False)
 
 
-def test_submits_for_partb_when_already_submitted_parta(freezer, pook, aocd_data_dir: Path):
+def test_submits_for_partb_when_already_submitted_parta(freezer: FrozenDateTimeFactory, pook: pook_mod, aocd_data_dir: Path) -> None:
     freezer.move_to("2018-12-01 12:00:00Z")
     post = pook.post(
         url="https://adventofcode.com/2018/day/1/answer",
@@ -151,7 +154,7 @@ def test_submits_for_partb_when_already_submitted_parta(freezer, pook, aocd_data
     assert post.calls == 1
 
 
-def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_dir: Path):
+def test_submit_when_parta_solved_but_answer_unsaved(freezer: FrozenDateTimeFactory, pook: pook_mod, aocd_data_dir: Path) -> None:
     freezer.move_to("2018-12-01 12:00:00Z")
     get = pook.get(
         url="https://adventofcode.com/2018/day/1",
@@ -182,7 +185,7 @@ def test_submit_when_parta_solved_but_answer_unsaved(freezer, pook, aocd_data_di
     assert " Yo Dawg " in prose_path.read_text()
 
 
-def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir: Path):
+def test_submit_saves_both_answers_if_possible(freezer: FrozenDateTimeFactory, pook: pook_mod, aocd_data_dir: Path) -> None:
     freezer.move_to("2018-12-01 12:00:00Z")
     get = pook.get(
         url="https://adventofcode.com/2018/day/1",
@@ -210,7 +213,7 @@ def test_submit_saves_both_answers_if_possible(freezer, pook, aocd_data_dir: Pat
     assert post.calls == 1
 
 
-def test_submit_puts_level1_by_default(freezer, pook, aocd_data_dir: Path):
+def test_submit_puts_level1_by_default(freezer: FrozenDateTimeFactory, pook: pook_mod, aocd_data_dir: Path) -> None:
     freezer.move_to("2018-12-01 12:00:00Z")
     get = pook.get(url="https://adventofcode.com/2018/day/1")
     post = pook.post(
@@ -227,7 +230,7 @@ def test_submit_puts_level1_by_default(freezer, pook, aocd_data_dir: Path):
     assert parta_answer.read_text() == "1234"
 
 
-def test_cannot_submit_same_bad_answer_twice(aocd_data_dir, pook, capsys, freezer):
+def test_cannot_submit_same_bad_answer_twice(aocd_data_dir: Path, pook: pook_mod, capsys: pytest.CaptureFixture[str], freezer: FrozenDateTimeFactory) -> None:
     mock1 = pook.post(
         url="https://adventofcode.com/2015/day/1/answer",
         response_body="<article><p>That's not the right answer. (You guessed <span>69.)</span></a></p></article>",
@@ -263,19 +266,19 @@ def test_cannot_submit_same_bad_answer_twice(aocd_data_dir, pook, capsys, freeze
     ]
 
 
-def test_will_not_submit_null():
-    with pytest.raises(AocdError("cowardly refusing to submit non-answer: None")):
+def test_will_not_submit_null() -> None:
+    with pytest.raises(AocdError("cowardly refusing to submit non-answer: None")): # type: ignore[call-overload] # using pytest-raisin
         submit(None, part="a")
 
 
 @pytest.mark.answer_not_cached(rv="value")
-def test_submit_guess_against_saved(pook, capsys):
+def test_submit_guess_against_saved(pook: pook_mod) -> None:
     post = pook.post(url="https://adventofcode.com/2018/day/1/answer")
     submit(1234, part="a", day=1, year=2018, session="whatever", reopen=False)
     assert post.calls == 0
 
 
-def test_submit_float_warns(pook, capsys, caplog):
+def test_submit_float_warns(pook: pook_mod, caplog: pytest.LogCaptureFixture) -> None:
     post = pook.post(
         url="https://adventofcode.com/2022/day/8/answer",
         response_body="<article>yeah</article>",
