@@ -1,6 +1,10 @@
 from importlib.metadata import entry_points
 import sys
 
+if sys.version_info >= (3, 11):
+    from typing import Self as Self # import using same name to tell the type checker we intend to export this (so other modules can import it)
+else:
+    from typing_extensions import Self as Self # import using same name to tell the type checker we intend to export this (so other modules can import it)
 
 if sys.version_info >= (3, 10):
     from importlib.metadata import EntryPoints

@@ -15,7 +15,7 @@ from textwrap import dedent
 from typing import TYPE_CHECKING, Callable, Generator, Optional, Protocol, TypeVar, TypedDict, cast, Iterable, Union, Literal
 
 from . import examples as _examples # must rename import to avoid conflict w/ examples method
-from ._compat import get_entry_points
+from ._compat import get_entry_points, Self
 from ._types import _Answer, _Part, _LoosePart
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
@@ -54,7 +54,6 @@ AOCD_DATA_DIR = AOCD_DATA_DIR.expanduser()
 AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
 
-_TUser = TypeVar("_TUser", bound="User") # TODO: Use typing.Self instead of this when support for < 3.11 is dropped
 
 class _SolverCallable(Protocol):
     def __call__(self, year: int, day:int, data: str) -> _Answer:
@@ -75,7 +74,7 @@ class User:
         self._owner = "unknown.unknown.0"
 
     @classmethod
-    def from_id(cls: type[_TUser], id: str) -> _TUser:
+    def from_id(cls, id: str) -> Self:
         users = _load_users()
         if id not in users:
             raise UnknownUserError(f"User with id '{id}' is not known")
