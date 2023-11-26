@@ -12,11 +12,24 @@ from functools import cached_property
 from itertools import count
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Callable, Generator, Optional, Protocol, TypeVar, TypedDict, cast, Iterable, Union, Literal
+from typing import Callable
+from typing import cast
+from typing import Generator
+from typing import Iterable
+from typing import Literal
+from typing import Optional
+from typing import Protocol
+from typing import TYPE_CHECKING
+from typing import TypedDict
+from typing import TypeVar
+from typing import Union
 
 from . import examples as _examples # must rename import to avoid conflict w/ examples method
-from ._compat import get_entry_points, Self
-from ._types import _Answer, _Part, _LoosePart
+from ._compat import get_entry_points
+from ._compat import Self
+from ._types import _Answer
+from ._types import _LoosePart
+from ._types import _Part
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import ExampleParserError

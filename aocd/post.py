@@ -3,12 +3,13 @@ from typing import Optional
 
 import urllib3
 
+from ._types import _Answer
+from ._types import _Part
 from .get import current_day
 from .get import most_recent_year
 from .models import default_user
 from .models import Puzzle
 from .models import User
-from ._types import _Part, _Answer
 
 
 log = logging.getLogger(__name__)

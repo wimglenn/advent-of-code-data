@@ -1,6 +1,6 @@
 import sys
-from typing import TYPE_CHECKING
 from functools import partial
+from typing import TYPE_CHECKING
 
 from . import cli
 from . import cookies

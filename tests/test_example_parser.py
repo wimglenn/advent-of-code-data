@@ -1,8 +1,8 @@
 import bs4
-from freezegun.api import FrozenDateTimeFactory
-from pytest_mock import MockerFixture
 import pook as pook_mod
 import pytest
+from freezegun.api import FrozenDateTimeFactory
+from pytest_mock import MockerFixture
 
 from aocd.examples import main
 from aocd.examples import Page

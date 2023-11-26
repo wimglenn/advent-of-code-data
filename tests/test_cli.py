@@ -1,8 +1,8 @@
+import pook as pook_mod
 import pytest
 from pytest_mock import MockerFixture
 
 from aocd.cli import main
-import pook as pook_mod
 
 def test_main_invalid_date(mocker: MockerFixture, capsys: pytest.CaptureFixture[str]) -> None:
     mocker.patch("sys.argv", ["aocd", "1", "2014"])

@@ -3,7 +3,9 @@ import os
 import re
 import traceback
 from logging import getLogger
-from typing import Optional, Union, Literal
+from typing import Literal
+from typing import Optional
+from typing import Union
 
 from ._ipykernel import get_ipynb_path
 from .exceptions import AocdError

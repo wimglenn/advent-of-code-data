@@ -1,7 +1,7 @@
 import logging
 
-from freezegun.api import FrozenDateTimeFactory
 import pytest
+from freezegun.api import FrozenDateTimeFactory
 
 from aocd.exceptions import AocdError
 from aocd.get import current_day

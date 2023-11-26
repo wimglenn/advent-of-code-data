@@ -2,10 +2,13 @@ import argparse
 import logging
 import re
 import sys
-from typing import NamedTuple, Optional, Callable, Union
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import zip_longest
+from typing import Callable
+from typing import NamedTuple
+from typing import Optional
+from typing import Union
 
 import bs4
 

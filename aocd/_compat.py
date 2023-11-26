@@ -1,5 +1,5 @@
-from importlib.metadata import entry_points
 import sys
+from importlib.metadata import entry_points
 
 # typing.Self added in 3.11
 if sys.version_info >= (3, 11):

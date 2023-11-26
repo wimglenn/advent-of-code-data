@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-from pathlib import Path
 import platform
 import shutil
 import sys
@@ -12,16 +11,21 @@ from functools import cache
 from importlib.metadata import entry_points
 from importlib.metadata import version
 from itertools import cycle
+from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Mapping, Optional, Union
+from typing import Mapping
+from typing import Optional
+from typing import Union
 from zoneinfo import ZoneInfo
 
 import bs4
 import urllib3
 
 from ._compat import get_plugins as get_plugins # import using same name to tell the type checker we intend to export this (so other modules can import it)
-from ._types import _Part, _LoosePart
-from .exceptions import AocdError, DeadTokenError
+from ._types import _LoosePart
+from ._types import _Part
+from .exceptions import AocdError
+from .exceptions import DeadTokenError
 
 
 log = logging.getLogger(__name__)

@@ -1,9 +1,9 @@
-from pathlib import Path
 import platform
+from pathlib import Path
 
-from freezegun import freeze_time
 import pook as pook_mod
 import pytest
+from freezegun import freeze_time
 
 from aocd.exceptions import DeadTokenError
 from aocd.utils import atomic_write_file

@@ -1,13 +1,13 @@
+import logging
 from datetime import datetime
 from datetime import timedelta
 from pathlib import Path
-import logging
 
-from freezegun.api import FrozenDateTimeFactory
-from pytest_mock import MockerFixture
 import numpy as np
 import pook as pook_mod
 import pytest
+from freezegun.api import FrozenDateTimeFactory
+from pytest_mock import MockerFixture
 
 from aocd._types import _Answer
 from aocd.exceptions import AocdError

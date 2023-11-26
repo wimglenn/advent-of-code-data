@@ -1,4 +1,7 @@
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import Literal
+from typing import Optional
+from typing import TYPE_CHECKING
+from typing import Union
 
 if TYPE_CHECKING:
     import numpy as np

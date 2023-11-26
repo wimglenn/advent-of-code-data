@@ -1,12 +1,12 @@
-from pathlib import Path
 import json
 import logging
+from pathlib import Path
 
+import pook as pook_mod
+import pytest
 from freezegun.api import FrozenDateTimeFactory
 from pytest_mock import MockerFixture
 from pytest_mock.plugin import MockType
-import pook as pook_mod
-import pytest
 
 from aocd.exceptions import AocdError
 from aocd.post import submit

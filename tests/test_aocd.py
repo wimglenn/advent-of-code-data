@@ -1,8 +1,8 @@
 import functools
 
+import pytest
 from freezegun.api import FrozenDateTimeFactory
 from pytest_mock import MockerFixture
-import pytest
 
 import aocd
 

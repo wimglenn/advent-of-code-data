@@ -1,14 +1,13 @@
+from pathlib import Path
 from typing import Generator
 
 import pook as pook_mod
 import pytest
 from pytest_mock import MockerFixture
+from pytest_mock.plugin import MockType
 
 from aocd.models import User
 from aocd.utils import http
-
-from pathlib import Path
-from pytest_mock.plugin import MockType
 
 
 @pytest.fixture(autouse=True)

@@ -2,18 +2,18 @@ import functools
 import io
 import logging
 import os
-from pathlib import Path
 import threading
 from importlib.metadata import version
+from pathlib import Path
 
-from freezegun.api import FrozenDateTimeFactory
-from pytest_mock import MockerFixture
 import pook as pook_mod
 import pytest
+from freezegun.api import FrozenDateTimeFactory
+from pytest_mock import MockerFixture
 
+import aocd
 from aocd.exceptions import AocdError
 from aocd.exceptions import PuzzleLockedError
-import aocd
 
 
 
