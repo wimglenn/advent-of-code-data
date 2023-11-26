@@ -1,5 +1,5 @@
 import sys
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from functools import partial
 
 from . import cli
