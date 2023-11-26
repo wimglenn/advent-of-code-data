@@ -58,13 +58,13 @@ class Page:
         if len(articles) > 2:
             raise ExampleParserError("too many <article> found in html")
 
-        article_a = articles.pop(0)
+        article_a = articles[0]
         assert isinstance(article_a, bs4.Tag)
         a_raw = str(article_a)
 
         article_b = b_raw = None
-        if articles:
-            article_b = articles.pop(0)
+        if len(articles) == 2:
+            article_b = articles[1]
             assert isinstance(article_b, bs4.Tag)
             b_raw = str(article_b)
 
