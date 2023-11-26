@@ -136,7 +136,7 @@ class User:
         all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
         if isinstance(years, int):
             if years not in all_years:
-                raise ValueError(f"year must be within [{all_years.start}, {all_years.stop}). got {years}.")
+                raise ValueError(f"Valid years are {all_years.start} through {all_years.stop - 1}. Got {years}.")
             years = (years,)
         if years is None:
             years = all_years
