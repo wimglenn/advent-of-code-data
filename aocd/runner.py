@@ -14,6 +14,8 @@ from typing import TYPE_CHECKING, Callable, Iterable, Mapping, NoReturn, Optiona
 
 import pebble.concurrent
 
+from ._compat import ParamSpec
+from ._types import _Part
 from .exceptions import AocdError
 from .models import _load_users
 from .models import AOCD_CONFIG_DIR
@@ -22,15 +24,8 @@ from .utils import _cli_guess
 from .utils import AOC_TZ
 from .utils import colored
 from .utils import get_plugins
-from ._types import _Part
 
-if TYPE_CHECKING:
-    if sys.version_info >= (3, 10):
-        from typing import ParamSpec
-    else:
-        from typing_extensions import ParamSpec
-    _PS = ParamSpec("_PS")
-
+_PS = ParamSpec("_PS")
 _R = TypeVar("_R")
 
 # from https://adventofcode.com/about

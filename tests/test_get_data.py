@@ -12,18 +12,13 @@ from pytest_mock import MockerFixture
 import pook as pook_mod
 import pytest
 
-import aocd
+from aocd._compat import ParamSpec
 from aocd.exceptions import AocdError
 from aocd.exceptions import PuzzleLockedError
+import aocd
 
 
-if TYPE_CHECKING:
-    import sys
-    if sys.version_info >= (3, 10):
-        from typing import Concatenate, ParamSpec
-    else:
-        from typing_extensions import Concatenate, ParamSpec
-    _PS = ParamSpec("_PS")
+_PS = ParamSpec("_PS")
 _R = TypeVar("_R")
 
 

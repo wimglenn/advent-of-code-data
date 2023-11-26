@@ -9,14 +9,14 @@ from datetime import datetime
 from datetime import timedelta
 from functools import cache
 from functools import cached_property
-from importlib.metadata import entry_points
-from importlib.metadata import EntryPoint
 from itertools import count
 from pathlib import Path
 from textwrap import dedent
 from typing import TYPE_CHECKING, Callable, Generator, Optional, Protocol, TypeVar, TypedDict, cast, Iterable, Union, Literal
 
 from . import examples as _examples # must rename import to avoid conflict w/ examples method
+from ._compat import get_entry_points
+from ._types import _Answer, _Part, _LoosePart
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import ExampleParserError
@@ -25,14 +25,13 @@ from .exceptions import PuzzleUnsolvedError
 from .exceptions import UnknownUserError
 from .utils import _ensure_intermediate_dirs
 from .utils import _get_soup
+from .utils import _parse_part
 from .utils import AOC_TZ
 from .utils import atomic_write_file
 from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
 from .utils import http
-from .utils import _parse_part
-from ._types import _Answer, _Part, _LoosePart
 
 if TYPE_CHECKING:
     import bs4
@@ -890,7 +889,7 @@ def _load_example_parser(
     name: str = "reference",
 ) -> _ExampleParserCallable:
     # lazy-loads a plugin used to parse sample data, and cache it
-    eps = _get_entry_points(group, name)
+    eps = get_entry_points(group, name)
     if not eps:
         msg = f"could not find the example parser plugin {group=}/{name=}"
         raise ExampleParserError(msg)
@@ -901,14 +900,3 @@ def _load_example_parser(
     log.debug("loaded example parser %r", parser)
     assert callable(parser)
     return cast(_ExampleParserCallable, parser)
-
-if sys.version_info >= (3, 10):
-    # Python 3.10+ - group/name selectable entry points
-    from importlib.metadata import EntryPoints
-
-    def _get_entry_points(group: str, name: str) -> EntryPoints:
-        return entry_points().select(group=group, name=name)
-else:
-    # Python 3.9 - dict interface
-    def _get_entry_points(group: str, name: str) -> list[EntryPoint]:
-        return [ep for ep in entry_points()[group] if ep.name == name]

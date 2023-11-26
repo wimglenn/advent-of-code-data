@@ -19,8 +19,9 @@ from zoneinfo import ZoneInfo
 import bs4
 import urllib3
 
-from .exceptions import AocdError, DeadTokenError
+from ._compat import get_plugins as get_plugins # import using same name to tell the type checker we intend to export this (so other modules can import it)
 from ._types import _Part, _LoosePart
+from .exceptions import AocdError, DeadTokenError
 
 
 log = logging.getLogger(__name__)
@@ -221,23 +222,6 @@ def colored(txt: str, color: Optional[str]) -> str:
     code = _ansi_colors.index(color.casefold())
     reset = "\x1b[0m"
     return f"\x1b[{code + 30}m{txt}{reset}"
-
-if sys.version_info >= (3, 10):
-    from importlib.metadata import EntryPoints
-
-    def get_plugins(group: str = "adventofcode.user") -> EntryPoints:
-        """
-        Currently installed plugins for user solves.
-        """
-        return entry_points(group=group)
-else:
-    from importlib.metadata import EntryPoint
-
-    def get_plugins(group: str = "adventofcode.user") -> list[EntryPoint]:
-        """
-        Currently installed plugins for user solves.
-        """
-        return entry_points().get(group, [])
 
 
 @cache
