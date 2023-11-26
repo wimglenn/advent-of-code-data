@@ -79,7 +79,7 @@ def current_day() -> int:
     return day
 
 
-def get_day_and_year() -> tuple[int, Optional[int]]:
+def get_day_and_year() -> tuple[int, int]:
     """
     Returns tuple (day, year).
 
@@ -163,9 +163,9 @@ def get_day_and_year() -> tuple[int, Optional[int]]:
         log.debug("non-interactive")
         raise giveup("Failed introspection of filename")
     years = {int(year) for year in re.findall(pattern_year, abspath)}
-    if len(years) > 1:
+    if len(years) != 1:
         raise giveup("Failed introspection of year")
-    year = years.pop() if years else None
+    year = years.pop()
     basename_no_years = re.sub(pattern_year, "", basename)
     try:
         [day_str] = set(re.findall(pattern_day, basename_no_years))
