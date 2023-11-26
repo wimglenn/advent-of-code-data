@@ -5,21 +5,17 @@ import os
 from pathlib import Path
 import threading
 from importlib.metadata import version
-from typing import Any, Callable, TypeVar, TYPE_CHECKING
 
 from freezegun.api import FrozenDateTimeFactory
 from pytest_mock import MockerFixture
 import pook as pook_mod
 import pytest
 
-from aocd._compat import ParamSpec
 from aocd.exceptions import AocdError
 from aocd.exceptions import PuzzleLockedError
 import aocd
 
 
-_PS = ParamSpec("_PS")
-_R = TypeVar("_R")
 
 
 def test_get_from_server(pook: pook_mod) -> None:
