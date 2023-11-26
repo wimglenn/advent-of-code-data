@@ -97,7 +97,12 @@ class Page:
         assert article is not None
         tags: list[bs4.Tag] = article.find_all(tag)
         result: Union[list[bs4.Tag], list[str]] = tags
-        if tag != "li":
+        if tag == "li":
+            # list items usually need further drill-down
+            for li in tags:
+                code_tags: list[bs4.Tag] = li.find_all("code")
+                li.codes = [code.text for code in code_tags] # type: ignore[attr-defined]
+        else:
             result = [t.text for t in tags]
         setattr(self, name, result)  # cache the result
         msg = "cached %s accessors for puzzle %d/%02d part %s page (%d hits)"

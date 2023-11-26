@@ -46,12 +46,17 @@ def test_li_drilldown() -> None:
     s = "<code>test answer_a</code>"
     html = fake_prose.replace(s, f"<li>{s}</li>")
     page = Page.from_raw(html)
-    assert len(page.a_li) == 1
-    li = page.a_li[0]
+    li = page.a_li
+    assert len(li) == 1
+    li = li[0]
     assert isinstance(li, bs4.Tag)
-    code = li.code
-    assert code is not None
-    assert code.string == "test answer_a"
+
+    # Type checker incorrectly thinks this is an Optional[Tag]. We set it to a list[str].
+    codes = li.codes
+
+    assert isinstance(codes, list)
+    assert len(codes) == 1
+    assert codes[0] == "test answer_a"
 
 
 def test_invalid_page_too_many_articles() -> None:
