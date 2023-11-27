@@ -433,22 +433,20 @@ def test_example_data_crash(pook: pook_mod, caplog: pytest.LogCaptureFixture) ->
 @pytest.mark.parametrize(
     "v_raw, v_expected, len_logs",
     [
-        ("123", "123", 0),
-        (b"123", "123", 1),
-        (123, "123", 0),
-        ("xxx", "xxx", 0),
-        (123.0, "123", 1),
-        (123.0 + 0.0j, "123", 1),
-        (np.int32(123), "123", 1),
-        (np.uint32(123), "123", 1),
-        (np.double(123.0), "123", 1),
-        (np.complex64(123.0 + 0.0j), "123", 1),
-        (np.array([123]), "123", 1),
-        (np.array([123.0]), "123", 1),
-        (np.array([123.0 + 0j]), "123", 1),
-        (fractions.Fraction(123, 1), "123", 1),
-        (fractions.Fraction(123 * 2, 2), "123", 1),
-        (decimal.Decimal("123"), "123", 1),
+        ("xxx", "xxx", 0), # str -> str
+        (b"123", "123", 1), # bytes -> str
+        (123, "123", 0), # int -> str
+        (123.0, "123", 1), # float -> str
+        (123.0 + 0.0j, "123", 1), # complex -> str
+        (np.int32(123), "123", 1), # np.int -> str
+        (np.uint32(123), "123", 1), # np.uint -> str
+        (np.double(123.0), "123", 1), # np.double -> str
+        (np.complex64(123.0 + 0.0j), "123", 1), # np.complex -> str
+        (np.array([123]), "123", 1), # 1D np.array of int -> str
+        (np.array([[123.0]]), "123", 1), # 2D np.array of float -> str
+        (np.array([[[[[[123.0 + 0j]]]]]]), "123", 1), # deep np.array of complex -> str
+        (fractions.Fraction(123 * 2, 2), "123", 1), # Fraction -> int
+        (decimal.Decimal("123"), "123", 1), # Decimal -> int
     ],
 )
 def test_type_coercions(v_raw: _Answer, v_expected: str, len_logs: int, caplog: pytest.LogCaptureFixture) -> None:
@@ -461,13 +459,13 @@ def test_type_coercions(v_raw: _Answer, v_expected: str, len_logs: int, caplog: 
 @pytest.mark.parametrize(
     "val, failure",
     [
-        (123.5, AocdError("Failed to coerce float value 123.5 for 2022/01.")),
-        (123.0 + 123.0j, AocdError("Failed to coerce complex value (123+123j) for 2022/01.")),
-        (np.complex64(123.0 + 0.5j), AocdError("Failed to coerce complex64 value (123+0.5j) for 2022/01.")),
-        (np.array([1, 2]), AocdError("Failed to coerce ndarray value array([1, 2]) for 2022/01.")),
-        (np.array([[1], [2]]), AocdError("Failed to coerce ndarray value array([[1],\n       [2]]) for 2022/01.")),
-        (fractions.Fraction(123, 2), AocdError("Failed to coerce Fraction value Fraction(123, 2) for 2022/01.")),
-        (decimal.Decimal("123.5"), AocdError("Failed to coerce Decimal value Decimal('123.5') for 2022/01.")),
+        (123.5, AocdError("Failed to coerce float value 123.5 for 2022/01.")), # non-integer float
+        (123.0 + 123.0j, AocdError("Failed to coerce complex value (123+123j) for 2022/01.")), # complex w/ imag
+        (np.complex64(123.0 + 0.5j), AocdError("Failed to coerce complex64 value (123+0.5j) for 2022/01.")), # np.complex w/ imag
+        (np.array([1, 2]), AocdError("Failed to coerce ndarray value array([1, 2]) for 2022/01.")), # 1D np.array with size != 1
+        (np.array([[1], [2]]), AocdError("Failed to coerce ndarray value array([[1],\n       [2]]) for 2022/01.")), # 2D np.array with size != 1
+        (fractions.Fraction(123, 2), AocdError("Failed to coerce Fraction value Fraction(123, 2) for 2022/01.")), # Fraction
+        (decimal.Decimal("123.5"), AocdError("Failed to coerce Decimal value Decimal('123.5') for 2022/01.")), # Decimal
     ]
 )
 def test_type_coercions_fail(val: _Answer, failure: BaseException) -> None:
