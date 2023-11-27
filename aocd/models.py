@@ -1,3 +1,4 @@
+import contextlib
 import json
 import logging
 import os
@@ -17,11 +18,11 @@ from typing import cast
 from typing import Generator
 from typing import Iterable
 from typing import Literal
+from typing import NoReturn
 from typing import Optional
 from typing import Protocol
 from typing import TYPE_CHECKING
 from typing import TypedDict
-from typing import TypeVar
 from typing import Union
 
 from . import examples as _examples # must rename import to avoid conflict w/ examples method
@@ -329,41 +330,38 @@ class Puzzle:
         txt = repr(self) if cycle else f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
         p.text(txt) # type: ignore[no-untyped-call] # IPython/Jupyter doesn't provide type hints
 
-    # TODO: providing better type hints for this function will require quite a bit of effort.
-    # Maybe a refactor that uses early returns.
-    # Worth noting is that the intent seems to be to always return a str but it can actually return just about anything.
-    # Not sure how to address this w/o a breaking change.
-    def _coerce_val(self, val: _Answer) -> _Answer:
+    def _coerce_val(self, val: _Answer) -> str:
         # technically adventofcode.com will only accept strings as answers.
         # but it's convenient to be able to submit numbers, since many of the answers
         # are numeric strings. coerce the values to string safely.
-        orig_val = val
-        orig_type = type(val)
-        coerced = False
-        if isinstance(val, (float, complex)) and val.imag == 0.0 and val.real.is_integer():
-            coerced = True
-            val = int(val.real)
-        elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
-            # deal with numpy scalars
-            if orig_type.__name__.startswith(("int", "uint", "long", "ulong")):
-                # FIXME: np.longfloat, np.longcomplex, and np.longdouble will all take this branch. seems undesirable.
-                coerced = True
-                val = int(orig_val) # type: ignore[arg-type]
-            elif orig_type.__name__.startswith(("float", "complex")):
-                if val.imag == 0.0 and float(val.real).is_integer(): # type: ignore[union-attr]
-                    coerced = True
-                    val = int(val.real) # type: ignore[union-attr]
+
+        original_val = val
+        def fail() -> NoReturn:
+            msg = f"Failed to coerce {type(original_val).__name__} value {original_val!r} for {self.year}/{self.day:02}."
+            raise AocdError(msg)
+
+        # if we get an ImportError, numpy is not installed, so we skip handling numpy types
+        with contextlib.suppress(ImportError):
+            import numpy as np
+
+            # "unwrap" arrays that contain a single element
+            if isinstance(val, np.ndarray) and val.size == 1:
+                val = val.item()
+            if isinstance(val, (np.integer, np.floating, np.complexfloating)) and val.imag == 0 and val.real.is_integer():
+                return str(int(val.real))
+        if isinstance(val, str):
+            return val
+        # TODO: Python 3.12 adds an `is_integer` method to `int`, so we can merge this and the following branch
         if isinstance(val, int):
-            val = str(val)
-        if coerced:
-            log.warning(
-                "coerced %s value %r for %d/%02d",
-                orig_type.__name__,
-                orig_val,
-                self.year,
-                self.day,
-            )
-        return val
+            return str(val)
+        if isinstance(val, (float, complex)) and val.imag == 0 and val.real.is_integer():
+            return str(int(val.real))
+
+        fail()
+
+
+
+
 
     @property
     def answer_a(self) -> str:
@@ -491,7 +489,7 @@ class Puzzle:
         part = _parse_part(part)
         previous_submits = self.submit_results
         try:
-            value_as_int = int(value) # type: ignore[arg-type] # downstream usage of self._coerce_val
+            value_as_int = int(value)
         except ValueError:
             value_as_int = None
         skip_prefix = (
@@ -564,7 +562,7 @@ class Puzzle:
                 "because that was the answer for part a"
             )
         url = self.submit_url
-        check_guess = self._check_already_solved(value, part) # type: ignore[arg-type] # downstream usage of self._coerce_val
+        check_guess = self._check_already_solved(value, part)
         if check_guess is not None:
             if quiet:
                 log.info(check_guess)
@@ -574,7 +572,7 @@ class Puzzle:
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": "1", "b": "2"}[part]
-        fields: dict[str, str] = {"level": level, "answer": value} # type: ignore[dict-item] # downstream usage of self._coerce_val
+        fields: dict[str, str] = {"level": level, "answer": value}
         response = http.post(url, token=self.user.token, fields=fields)
         when = datetime.now(tz=AOC_TZ).isoformat(sep=" ")
         if response.status != 200:
@@ -584,7 +582,7 @@ class Puzzle:
         soup = _get_soup(response.data)
         assert soup.article is not None
         message = soup.article.text
-        self._save_submit_result(value=value, part=part, message=message, when=when) # type: ignore[arg-type] # downstream usage of self._coerce_val
+        self._save_submit_result(value=value, part=part, message=message, when=when)
         color: Optional[str] = None
         if "That's the right answer" in message:
             color = "green"
@@ -594,7 +592,7 @@ class Puzzle:
                 log.info("reopening to %s", part_b_url)
                 webbrowser.open(part_b_url)
             if not (self.day == 25 and part == "b"):
-                self._save_correct_answer(value=value, part=part) # type: ignore[arg-type] # downstream usage of self._coerce_val
+                self._save_correct_answer(value=value, part=part)
             if self.day == 25 and part == "a":
                 log.debug("checking if got 49 stars already for year %s...", self.year)
                 my_stats = self.user.get_stats(self.year)
