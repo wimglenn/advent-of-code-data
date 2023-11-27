@@ -1,4 +1,6 @@
 import contextlib
+from decimal import Decimal
+from fractions import Fraction
 import json
 import logging
 import os
@@ -340,24 +342,48 @@ class Puzzle:
             msg = f"Failed to coerce {type(original_val).__name__} value {original_val!r} for {self.year}/{self.day:02}."
             raise AocdError(msg)
 
+        coerced = False
+
         # if we get an ImportError, numpy is not installed, so we skip handling numpy types
         with contextlib.suppress(ImportError):
             import numpy as np
 
             # "unwrap" arrays that contain a single element
             if isinstance(val, np.ndarray) and val.size == 1:
+                coerced = True
                 val = val.item()
             if isinstance(val, (np.integer, np.floating, np.complexfloating)) and val.imag == 0 and val.real.is_integer():
-                return str(int(val.real))
-        if isinstance(val, str):
-            return val
-        # TODO: Python 3.12 adds an `is_integer` method to `int`, so we can merge this and the following branch
+                coerced = True
+                val = str(int(val.real))
         if isinstance(val, int):
-            return str(val)
-        if isinstance(val, (float, complex)) and val.imag == 0 and val.real.is_integer():
-            return str(int(val.real))
+            val = str(val)
+        elif isinstance(val, (float, complex)) and val.imag == 0 and val.real.is_integer():
+            coerced = True
+            val = str(int(val.real))
+        elif isinstance(val, bytes):
+            coerced = True
+            val = val.decode()
+        elif isinstance(val, (Decimal, Fraction)):
+            # if val can be represented as an integer ratio where the denominator is 1
+            # val is an integer and val == numerator
+            numerator, denominator = val.as_integer_ratio()
+            if denominator == 1:
+                coerced = True
+                val = str(numerator)
 
-        fail()
+        if not isinstance(val, str):
+            fail()
+
+        if coerced:
+            log.warning(
+                "coerced %s value %r for %d/%02d to %s",
+                type(original_val).__name__,
+                original_val,
+                self.year,
+                self.day,
+                val
+            )
+        return val
 
 
 
@@ -744,7 +770,7 @@ class Puzzle:
             isinstance(result, tuple) and
             len(result) == 2 and
             all(ele is None or isinstance(ele, (int, str)) for ele in result)
-        ), f"expected tuple of answers. got {result}"
+        ), f"expected tuple of answers. got {result}" # type: ignore[str-bytes-safe]
         return cast(tuple[_Answer, _Answer], result)
 
     @property

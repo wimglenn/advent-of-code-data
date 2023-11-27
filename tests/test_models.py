@@ -1,3 +1,5 @@
+import decimal
+import fractions
 import logging
 from datetime import datetime
 from datetime import timedelta
@@ -429,26 +431,31 @@ def test_example_data_crash(pook: pook_mod, caplog: pytest.LogCaptureFixture) ->
 
 
 @pytest.mark.parametrize(
-    "v_raw, v_expected",
+    "v_raw, v_expected, len_logs",
     [
-        ("123", "123"),
-        (123, "123"),
-        ("xxx", "xxx"),
-        (123.0, "123"),
-        (123.0 + 0.0j, "123"),
-        (np.int32(123), "123"),
-        (np.uint32(123), "123"),
-        (np.double(123.0), "123"),
-        (np.complex64(123.0 + 0.0j), "123"),
-        (np.array([123]), "123"),
-        (np.array([123.0]), "123"),
-        (np.array([123.0 + 0j]), "123"),
+        ("123", "123", 0),
+        (b"123", "123", 1),
+        (123, "123", 0),
+        ("xxx", "xxx", 0),
+        (123.0, "123", 1),
+        (123.0 + 0.0j, "123", 1),
+        (np.int32(123), "123", 1),
+        (np.uint32(123), "123", 1),
+        (np.double(123.0), "123", 1),
+        (np.complex64(123.0 + 0.0j), "123", 1),
+        (np.array([123]), "123", 1),
+        (np.array([123.0]), "123", 1),
+        (np.array([123.0 + 0j]), "123", 1),
+        (fractions.Fraction(123, 1), "123", 1),
+        (fractions.Fraction(123 * 2, 2), "123", 1),
+        (decimal.Decimal("123"), "123", 1),
     ],
 )
-def test_type_coercions(v_raw: _Answer, v_expected: str) -> None:
+def test_type_coercions(v_raw: _Answer, v_expected: str, len_logs: int, caplog: pytest.LogCaptureFixture) -> None:
     p = Puzzle(2022, 1)
     v_actual = p._coerce_val(v_raw)
-    assert v_actual == v_expected, f"{type(v_raw)} {v_raw})"
+    assert v_actual == v_expected, f"{type(v_raw)} {v_raw})" # type: ignore[str-bytes-safe]
+    assert len(caplog.records) == len_logs
 
 
 @pytest.mark.parametrize(
@@ -459,6 +466,8 @@ def test_type_coercions(v_raw: _Answer, v_expected: str) -> None:
         (np.complex64(123.0 + 0.5j), AocdError("Failed to coerce complex64 value (123+0.5j) for 2022/01.")),
         (np.array([1, 2]), AocdError("Failed to coerce ndarray value array([1, 2]) for 2022/01.")),
         (np.array([[1], [2]]), AocdError("Failed to coerce ndarray value array([[1],\n       [2]]) for 2022/01.")),
+        (fractions.Fraction(123, 2), AocdError("Failed to coerce Fraction value Fraction(123, 2) for 2022/01.")),
+        (decimal.Decimal("123.5"), AocdError("Failed to coerce Decimal value Decimal('123.5') for 2022/01.")),
     ]
 )
 def test_type_coercions_fail(val: _Answer, failure: BaseException) -> None:
