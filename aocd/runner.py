@@ -8,10 +8,22 @@ import time
 from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
+from importlib.metadata import EntryPoint
 from pathlib import Path
+from typing import Callable
+from typing import cast
+from typing import Iterable
+from typing import Mapping
+from typing import NoReturn
+from typing import Optional
+from typing import TYPE_CHECKING
+from typing import TypeVar
+from typing import Union
 
 import pebble.concurrent
 
+from ._compat import ParamSpec
+from ._types import _Part
 from .exceptions import AocdError
 from .models import _load_users
 from .models import AOCD_CONFIG_DIR
@@ -21,16 +33,16 @@ from .utils import AOC_TZ
 from .utils import colored
 from .utils import get_plugins
 
+_PS = ParamSpec("_PS")
+_R = TypeVar("_R")
 
 # from https://adventofcode.com/about
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
-
-
 DEFAULT_TIMEOUT = 60
 log = logging.getLogger(__name__)
 
 
-def main():
+def main() -> NoReturn:
     """
     Run user solver(s) against their inputs and render the results. Can use multiple
     tokens to validate your code against multiple input datas.
@@ -182,24 +194,42 @@ def main():
     sys.exit(rc)
 
 
-def _timeout_wrapper(f, capture=False, timeout=DEFAULT_TIMEOUT, **kwargs):
+def _timeout_wrapper(
+    f: Callable["_PS", _R],
+    capture: bool = False,
+    timeout: float = DEFAULT_TIMEOUT,
+    *args: "_PS.args",
+    **kwargs: "_PS.kwargs",
+) -> pebble.ProcessFuture:
     # aocd.runner executes the user's solve in a subprocess, so that it can be reliably
     # killed if it exceeds a time limit. you can't do that with threads.
     func = pebble.concurrent.process(daemon=False, timeout=timeout)(_process_wrapper)
-    return func(f, capture, **kwargs)
+    return func(f, capture, *args, **kwargs)
 
 
-def _process_wrapper(f, capture=False, **kwargs):
+def _process_wrapper(
+    f: Callable["_PS", _R],
+    capture: bool = False,
+    *args: "_PS.args",
+    **kwargs: "_PS.kwargs",
+)  -> _R:
     # used to suppress any output from the subprocess, if aoc was invoked with --quiet
     with contextlib.ExitStack() as ctx:
         if capture:
             null = ctx.enter_context(open(os.devnull, "w"))
             ctx.enter_context(contextlib.redirect_stderr(null))
             ctx.enter_context(contextlib.redirect_stdout(null))
-        return f(**kwargs)
+        return f(*args, **kwargs)
+    assert False, "unreachable"
 
-
-def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kwargs):
+def run_with_timeout(
+    entry_point: EntryPoint,
+    timeout: float,
+    progress: Optional[str],
+    dt: float = 0.1,
+    capture: bool = False,
+    **kwargs: object
+) -> tuple[str, str, float, str]:
     """
     Execute a user solve, and display a progress spinner as it's running. Kill it if
     the runtime exceeds `timeout` seconds.
@@ -234,7 +264,7 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kw
     return a, b, walltime, error
 
 
-def format_time(t, timeout=DEFAULT_TIMEOUT):
+def format_time(t: float, timeout: float = DEFAULT_TIMEOUT) -> str:
     """
     Used for rendering the puzzle solve time in color:
     - green, if you're under a quarter of the timeout (15s default)
@@ -252,8 +282,14 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
 
 
 def run_one(
-    year, day, data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False
-):
+    year: int,
+    day: int,
+    data: str,
+    entry_point: EntryPoint,
+    timeout: float = DEFAULT_TIMEOUT,
+    progress: Optional[str] = None,
+    capture: bool = False,
+) -> tuple[str, str, float, str]:
     """
     Creates a temporary dir and change directory into it (restores cwd on exit).
     Lays down puzzle input in a file called "input.txt" in this directory - user code
@@ -293,16 +329,16 @@ def run_one(
 
 
 def run_for(
-    plugs,
-    years,
-    days,
-    datasets,
-    example=False,
-    timeout=DEFAULT_TIMEOUT,
-    autosubmit=True,
-    reopen=False,
-    capture=False,
-):
+    plugs: Iterable[str],
+    years: Iterable[int],
+    days: Iterable[int],
+    datasets: Mapping[str, str],
+    example: bool = False,
+    timeout: float = DEFAULT_TIMEOUT,
+    autosubmit: bool = True,
+    reopen: bool = False,
+    capture: bool = False,
+) -> int:
     """
     Run with multiple users, multiple datasets, multiple years/days, and render the results.
     """
@@ -320,6 +356,11 @@ def run_for(
             continue
         entry_point = eps[plugin]
         puzzle = Puzzle(year, day)
+        # TODO: this Union is awkward (b/c it means we need the
+        # `assert isinstance` checks later on.)
+        # There's probably a way to clean this up, but it likely requires a
+        # bit of refactoring
+        datas: Union[range, Mapping[str, str]]
         if example:
             autosubmit = False
             examples = Puzzle(year, day).examples
@@ -328,14 +369,19 @@ def run_for(
             datas = datasets
         for dataset in datas:
             if example:
+                assert isinstance(dataset, int)
                 data = examples[dataset].input_data
             else:
+                assert isinstance(dataset, str)
                 token = datasets[dataset]
                 os.environ["AOC_SESSION"] = token
                 puzzle = Puzzle(year, day)
                 data = puzzle.input_data
             title = puzzle.title
-            descr = f"example-{dataset + 1}" if example else dataset
+            descr = dataset
+            if example:
+                assert isinstance(dataset, int)
+                descr = f"example-{dataset + 1}"
             progress = f"{year}/{day:<2d} - {title:<40}   {plugin:>{wp}}/{descr:<{wd}}"
             a, b, walltime, error = run_one(
                 year=year,
@@ -354,13 +400,14 @@ def run_for(
                 n_incorrect += 1
                 line += f"   {icon} {error}"
             else:
-                for answer, part in zip((a, b), "ab"):
+                for answer, part in zip((a, b), cast(Iterable[_Part], "ab")):
                     if day == 25 and part == "b":
                         # there's no part b on christmas day, skip
                         continue
                     expected = None
                     try:
                         if example:
+                            assert isinstance(dataset, int)
                             expected = getattr(examples[dataset], "answer_" + part)
                         else:
                             expected = getattr(puzzle, "answer_" + part)

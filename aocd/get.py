@@ -3,6 +3,9 @@ import os
 import re
 import traceback
 from logging import getLogger
+from typing import Literal
+from typing import Optional
+from typing import Union
 
 from ._ipykernel import get_ipynb_path
 from .exceptions import AocdError
@@ -17,7 +20,12 @@ from .utils import blocker
 log = getLogger(__name__)
 
 
-def get_data(session=None, day=None, year=None, block=False):
+def get_data(
+    session: Optional[str] = None,
+    day: Optional[int] = None,
+    year: Optional[int] = None,
+    block: Union[bool, Literal["q"]] = False
+) -> str:
     """
     Get data for day (1-25) and year (2015+).
     User's session cookie (str) is needed - puzzle inputs differ by user.
@@ -45,7 +53,7 @@ def get_data(session=None, day=None, year=None, block=False):
         return puzzle.input_data
 
 
-def most_recent_year():
+def most_recent_year() -> int:
     """
     This year, if it's December.
     The most recent year, otherwise.
@@ -60,7 +68,7 @@ def most_recent_year():
     return year
 
 
-def current_day():
+def current_day() -> int:
     """
     Most recent day, if it's during the Advent of Code. Happy Holidays!
     Day 1 is assumed, otherwise.
@@ -73,7 +81,7 @@ def current_day():
     return day
 
 
-def get_day_and_year():
+def get_day_and_year() -> tuple[int, int]:
     """
     Returns tuple (day, year).
 
@@ -95,9 +103,9 @@ def get_day_and_year():
     pattern_day = r"2[0-5]|1[0-9]|[1-9]"
     sep = re.escape(os.sep)
     pattern_path = sep + sep.join([r"20\d\d", r"[0-2]?\d", r".*\.py$"])
-    visited = []
+    visited: list[str] = []
 
-    def giveup(msg):
+    def giveup(msg: str) -> AocdError:
         log.info("introspection failure")
         for fname in visited:
             log.info("stack crawl visited %s", fname)
@@ -157,17 +165,17 @@ def get_day_and_year():
         log.debug("non-interactive")
         raise giveup("Failed introspection of filename")
     years = {int(year) for year in re.findall(pattern_year, abspath)}
-    if len(years) > 1:
+    if len(years) != 1:
         raise giveup("Failed introspection of year")
-    year = years.pop() if years else None
+    year = years.pop()
     basename_no_years = re.sub(pattern_year, "", basename)
     try:
-        [day] = set(re.findall(pattern_day, basename_no_years))
+        [day_str] = set(re.findall(pattern_day, basename_no_years))
     except ValueError:
         pass
     else:
-        assert not day.startswith("0"), "regex pattern_day must prevent any leading 0"
-        day = int(day)
+        assert not day_str.startswith("0"), "regex pattern_day must prevent any leading 0"
+        day = int(day_str)
         assert 1 <= day <= 25, "regex pattern_day must only match numbers in range 1-25"
         log.debug("year=%s day=%s", year or "?", day)
         return day, year

@@ -1,3 +1,6 @@
+import contextlib
+from decimal import Decimal
+from fractions import Fraction
 import json
 import logging
 import os
@@ -9,12 +12,27 @@ from datetime import datetime
 from datetime import timedelta
 from functools import cache
 from functools import cached_property
-from importlib.metadata import entry_points
 from itertools import count
 from pathlib import Path
 from textwrap import dedent
+from typing import Callable
+from typing import cast
+from typing import Generator
+from typing import Iterable
+from typing import Literal
+from typing import NoReturn
+from typing import Optional
+from typing import Protocol
+from typing import TYPE_CHECKING
+from typing import TypedDict
+from typing import Union
 
-from . import examples
+from . import examples as _examples # must rename import to avoid conflict w/ examples method
+from ._compat import get_entry_points
+from ._compat import Self
+from ._types import _Answer
+from ._types import _LoosePart
+from ._types import _Part
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import ExampleParserError
@@ -23,12 +41,25 @@ from .exceptions import PuzzleUnsolvedError
 from .exceptions import UnknownUserError
 from .utils import _ensure_intermediate_dirs
 from .utils import _get_soup
+from .utils import _parse_part
 from .utils import AOC_TZ
 from .utils import atomic_write_file
 from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
 from .utils import http
+
+if TYPE_CHECKING:
+    import bs4
+    import IPython.lib.pretty
+    import urllib3
+
+
+    class _Results(TypedDict):
+        part: _Part
+        value: str
+        when: str
+        message: str
 
 
 log = logging.getLogger(__name__)
@@ -40,15 +71,26 @@ AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expandu
 URL = "https://adventofcode.com/{year}/day/{day}"
 
 
-class User:
-    _token2id = None
+class _SolverCallable(Protocol):
+    def __call__(self, year: int, day:int, data: str) -> _Answer:
+        ...
 
-    def __init__(self, token):
+_ExampleParserCallable = Callable[[_examples.Page, list[str]], list[_examples.Example]]
+
+class _Result(TypedDict):
+    time: timedelta
+    rank: int
+    score: int
+
+class User:
+    _token2id: Optional[dict[str, str]] = None
+
+    def __init__(self, token: str) -> None:
         self.token = token
         self._owner = "unknown.unknown.0"
 
     @classmethod
-    def from_id(cls, id):
+    def from_id(cls, id: str) -> Self:
         users = _load_users()
         if id not in users:
             raise UnknownUserError(f"User with id '{id}' is not known")
@@ -57,7 +99,7 @@ class User:
         return user
 
     @property
-    def id(self):
+    def id(self) -> str:
         """
         User's token might change (they expire eventually) but the id found on AoC's
         settings page for a logged-in user is as close as we can get to a primary key.
@@ -86,29 +128,34 @@ class User:
             self._owner = owner
         return owner
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"<{type(self).__name__} {self._owner} (token=...{self.token[-4:]})>"
 
     @property
-    def memo_dir(self):
+    def memo_dir(self) -> Path:
         """
         Directory where this user's puzzle inputs, answers etc. are stored on filesystem.
         """
         return AOCD_DATA_DIR / self.id
 
-    def get_stats(self, years=None):
+    def get_stats(
+        self,
+        years: Optional[Union[Iterable[int], int]] = None
+    ) -> dict[str, dict[Literal['a', 'b'], _Result]]:
         """
         Parsed version of your personal stats (rank, solve time, score).
         See https://adventofcode.com/<year>/leaderboard/self when logged in.
         """
         aoc_now = datetime.now(tz=AOC_TZ)
         all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
-        if isinstance(years, int) and years in all_years:
+        if isinstance(years, int):
+            if years not in all_years:
+                raise ValueError(f"Valid years are {all_years.start} through {all_years.stop - 1}. Got {years}.")
             years = (years,)
         if years is None:
             years = all_years
         days = {str(i) for i in range(1, 26)}
-        results = {}
+        results: dict[str, dict[_Part, _Result]] = {}
         ur_broke = "You haven't collected any stars"
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
@@ -120,8 +167,12 @@ class User:
             if response.status >= 400:
                 raise AocdError(f"HTTP {response.status} at {url}")
             soup = _get_soup(response.data)
-            if soup.article is None and ur_broke in soup.main.text:
-                continue
+            if soup.article is None:
+                assert soup.main is not None
+                if ur_broke in soup.main.text:
+                    continue
+            assert soup.article is not None
+            assert soup.article.pre is not None
             stats_txt = soup.article.pre.text
             lines = stats_txt.splitlines()
             lines = [x for x in lines if x.split()[0] in days]
@@ -144,7 +195,7 @@ class User:
         return results
 
 
-def default_user():
+def default_user() -> User:
     """
     Discover user's token from the environment or file, and exit with a diagnostic
     message if none can be found. This default user is used whenever a token or user id
@@ -178,7 +229,7 @@ def default_user():
 
 
 class Puzzle:
-    def __init__(self, year, day, user=None):
+    def __init__(self, year:int, day:int, user: Optional[User] =None):
         self.year = year
         self.day = day
         if user is None:
@@ -196,12 +247,12 @@ class Puzzle:
         self.prose2_path = pre.with_name(pre.name + "_prose.2.html")  # part b solved
 
     @property
-    def user(self):
+    def user(self) -> User:
         # this is a property to make it clear that it's read-only
         return self._user
 
     @property
-    def input_data(self):
+    def input_data(self) -> str:
         """
         This puzzle's input data, specific to puzzle.user. It will usually be retrieved
         from caches, but if this is the first time it was accessed it will be requested
@@ -231,7 +282,7 @@ class Puzzle:
         return data.rstrip("\r\n")
 
     @property
-    def examples(self):
+    def examples(self) -> list[_examples.Example]:
         """
         Sample data and answers associated with this puzzle, as a list of
         `aocd.examples.Example` instances. These are extracted from the puzzle prose
@@ -243,26 +294,24 @@ class Puzzle:
         """
         return self._get_examples()
 
-    def _get_examples(self, parser_name="reference"):
+    def _get_examples(self, parser_name: str = "reference") -> list[_examples.Example]:
         # invoke a named example parser to extract examples from cached prose.
         # logs warning and returns an empty list if the parser plugin raises an
         # exception for any reason.
         try:
-            page = examples.Page.from_raw(html=self._get_prose())
+            page = _examples.Page.from_raw(html=self._get_prose())
             parser = _load_example_parser(name=parser_name)
+            datas = []
             if getattr(parser, "uses_real_datas", True):
-                datas = examples._get_unique_real_inputs(self.year, self.day)
-            else:
-                datas = []
-            result = parser(page, datas)
+                datas = _examples._get_unique_real_inputs(self.year, self.day)
+            return parser(page, datas)
         except Exception as err:
             msg = "unable to find example data for %d/%02d (%r)"
             log.warning(msg, self.year, self.day, err)
-            result = []
-        return result
+            return []
 
     @cached_property
-    def title(self):
+    def title(self) -> str:
         """
         Title of the puzzle, used in the pretty repr (IPython etc) and also displayed
         by aocd.runner.
@@ -278,48 +327,70 @@ class Puzzle:
             raise AocdError(f"unexpected h2 text: {txt}")
         return txt.removeprefix(prefix).removesuffix(suffix)
 
-    def _repr_pretty_(self, p, cycle):
+    def _repr_pretty_(self, p: "IPython.lib.pretty.PrettyPrinter", cycle: bool) -> None:
         """Hook for IPython's pretty-printer."""
-        if cycle:
-            p.text(repr(self))
-        else:
-            txt = f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
-            p.text(txt)
+        txt = repr(self) if cycle else f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
+        p.text(txt) # type: ignore[no-untyped-call] # IPython/Jupyter doesn't provide type hints
 
-    def _coerce_val(self, val):
+    def _coerce_val(self, val: _Answer) -> str:
         # technically adventofcode.com will only accept strings as answers.
         # but it's convenient to be able to submit numbers, since many of the answers
         # are numeric strings. coerce the values to string safely.
-        orig_val = val
-        orig_type = type(val)
+
+        original_val = val
+        def fail() -> NoReturn:
+            msg = f"Failed to coerce {type(original_val).__name__} value {original_val!r} for {self.year}/{self.day:02}."
+            raise AocdError(msg)
+
         coerced = False
-        floatish = isinstance(val, (float, complex))
-        if floatish and val.imag == 0.0 and val.real.is_integer():
-            coerced = True
-            val = int(val.real)
-        elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
-            # deal with numpy scalars
-            if orig_type.__name__.startswith(("int", "uint", "long", "ulong")):
+
+        # if we get an ImportError, numpy is not installed, so we skip handling numpy types
+        with contextlib.suppress(ImportError):
+            import numpy as np
+
+            # "unwrap" arrays that contain a single element
+            if isinstance(val, np.ndarray) and val.size == 1:
                 coerced = True
-                val = int(orig_val)
-            elif orig_type.__name__.startswith(("float", "complex")):
-                if val.imag == 0.0 and float(val.real).is_integer():
-                    coerced = True
-                    val = int(val.real)
+                val = val.item()
+            if isinstance(val, (np.integer, np.floating, np.complexfloating)) and val.imag == 0 and val.real.is_integer():
+                coerced = True
+                val = str(int(val.real))
         if isinstance(val, int):
             val = str(val)
+        elif isinstance(val, (float, complex)) and val.imag == 0 and val.real.is_integer():
+            coerced = True
+            val = str(int(val.real))
+        elif isinstance(val, bytes):
+            coerced = True
+            val = val.decode()
+        elif isinstance(val, (Decimal, Fraction)):
+            # if val can be represented as an integer ratio where the denominator is 1
+            # val is an integer and val == numerator
+            numerator, denominator = val.as_integer_ratio()
+            if denominator == 1:
+                coerced = True
+                val = str(numerator)
+
+        if not isinstance(val, str):
+            fail()
+
         if coerced:
             log.warning(
-                "coerced %s value %r for %d/%02d",
-                orig_type.__name__,
-                orig_val,
+                "coerced %s value %r for %d/%02d to %s",
+                type(original_val).__name__,
+                original_val,
                 self.year,
                 self.day,
+                val
             )
         return val
 
+
+
+
+
     @property
-    def answer_a(self):
+    def answer_a(self) -> str:
         """
         The correct answer for the first part of the puzzle. This attribute hides
         itself if the first part has not yet been solved.
@@ -330,7 +401,7 @@ class Puzzle:
             raise AttributeError("answer_a")
 
     @answer_a.setter
-    def answer_a(self, val):
+    def answer_a(self, val: _Answer) -> None:
         """
         You can submit your answer to adventofcode.com by setting the answer attribute
         on a puzzle instance, e.g.
@@ -346,12 +417,12 @@ class Puzzle:
         self._submit(value=val, part="a")
 
     @property
-    def answered_a(self):
+    def answered_a(self) -> bool:
         """Has the first part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_a", None))
 
     @property
-    def answer_b(self):
+    def answer_b(self) -> str:
         """
         The correct answer for the second part of the puzzle. This attribute hides
         itself if the second part has not yet been solved.
@@ -362,7 +433,7 @@ class Puzzle:
             raise AttributeError("answer_b")
 
     @answer_b.setter
-    def answer_b(self, val):
+    def answer_b(self, val: _Answer) -> None:
         """
         You can submit your answer to adventofcode.com by setting the answer attribute
         on a puzzle instance, e.g.
@@ -378,11 +449,11 @@ class Puzzle:
         self._submit(value=val, part="b")
 
     @property
-    def answered_b(self):
+    def answered_b(self) -> bool:
         """Has the second part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_b", None))
 
-    def answered(self, part):
+    def answered(self, part: _Part) -> bool:
         """Has the specified part of this puzzle been solved correctly yet?"""
         if part == "a":
             return bool(getattr(self, "answer_a", None))
@@ -391,7 +462,7 @@ class Puzzle:
         raise AocdError('part must be "a" or "b"')
 
     @property
-    def answers(self):
+    def answers(self) -> tuple[str, str]:
         """
         Returns a tuple of the correct answers for this puzzle. Will raise an
         AttributeError if either part is yet to be solved by the associated user.
@@ -399,15 +470,17 @@ class Puzzle:
         return self.answer_a, self.answer_b
 
     @answers.setter
-    def answers(self, val):
+    def answers(self, val: tuple[_Answer, _Answer]) -> None:
         """
         Submit both answers at once. Pretty much impossible in practice, unless you've
         seen the puzzle before.
         """
-        self.answer_a, self.answer_b = val
+        # This will call the property setter (which accepts _Answer, rather than
+        # str), but mypy doesn't understand this.
+        self.answer_a, self.answer_b = val # type: ignore[assignment]
 
     @property
-    def submit_results(self):
+    def submit_results(self) -> list["_Results"]:
         """
         Record of all previous submissions to adventofcode.com for this user/puzzle.
         Submissions made by typing answers directly into the website will not be
@@ -422,10 +495,16 @@ class Puzzle:
         seen with puzzle.submit_results[-1].
         """
         if self.submit_results_path.is_file():
-            return json.loads(self.submit_results_path.read_text())
+            return cast(list["_Results"], json.loads(self.submit_results_path.read_text()))
         return []
 
-    def _submit(self, value, part, reopen=True, quiet=False):
+    def _submit(
+        self,
+        value: Optional[_Answer],
+        part: _LoosePart,
+        reopen: bool = True,
+        quiet: bool = False
+    ) -> Optional["urllib3.BaseHTTPResponse"]:
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -433,9 +512,7 @@ class Puzzle:
             raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
             value = self._coerce_val(value)
-        part = str(part).replace("1", "a").replace("2", "b").lower()
-        if part not in {"a", "b"}:
-            raise AocdError('part must be "a" or "b"')
+        part = _parse_part(part)
         previous_submits = self.submit_results
         try:
             value_as_int = int(value)
@@ -461,7 +538,7 @@ class Puzzle:
                             f"It is certain that {value!r} is incorrect, "
                             f"because {value!r} != {result['value']!r}."
                         )
-                    return
+                    return None
             elif "your answer is too high" in result["message"]:
                 if value_as_int is None or value_as_int > int(result["value"]):
                     if not quiet:
@@ -475,7 +552,7 @@ class Puzzle:
                             f"It is certain that {value!r} is incorrect, "
                             f"because {result['value']!r} was too high."
                         )
-                    return
+                    return None
             elif "your answer is too low" in result["message"]:
                 if value_as_int is None or value_as_int < int(result["value"]):
                     if not quiet:
@@ -489,7 +566,7 @@ class Puzzle:
                             f"It is certain that {value!r} is incorrect, "
                             f"because {result['value']!r} was too low."
                         )
-                    return
+                    return None
             if result["value"] != value:
                 continue
             if not quiet:
@@ -498,12 +575,13 @@ class Puzzle:
                     f"At {result['when']} you've previously submitted "
                     f"{value} and the server responded with:"
                 )
-                if result["message"].startswith("That's the right answer"):
-                    color = "green"
-                else:
-                    color = "red"
-                print(colored(result["message"], color))
-            return
+                print(
+                    colored(
+                        result["message"],
+                        color="green" if result["message"].startswith("That's the right answer") else "red"
+                    )
+                )
+            return None
         if part == "b" and value == getattr(self, "answer_a", None):
             raise AocdError(
                 f"cowardly refusing to submit {value} for part b, "
@@ -516,11 +594,11 @@ class Puzzle:
                 log.info(check_guess)
             else:
                 print(check_guess)
-            return
+            return None
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": "1", "b": "2"}[part]
-        fields = {"level": level, "answer": value}
+        fields: dict[str, str] = {"level": level, "answer": value}
         response = http.post(url, token=self.user.token, fields=fields)
         when = datetime.now(tz=AOC_TZ).isoformat(sep=" ")
         if response.status != 200:
@@ -528,9 +606,10 @@ class Puzzle:
             log.error(response.data.decode(errors="replace"))
             raise AocdError(f"HTTP {response.status} at {url}")
         soup = _get_soup(response.data)
+        assert soup.article is not None
         message = soup.article.text
         self._save_submit_result(value=value, part=part, message=message, when=when)
-        color = None
+        color: Optional[str] = None
         if "That's the right answer" in message:
             color = "green"
             if reopen:
@@ -555,7 +634,7 @@ class Puzzle:
         elif "That's not the right answer" in message:
             color = "red"
             try:
-                context = soup.article.span.code.text
+                context = soup.article.span.code.text # type: ignore[union-attr] # can't use defensive asserts w/o causing tests to fail
             except AttributeError:
                 context = soup.article.text
             log.warning("wrong answer: %s", context)
@@ -579,7 +658,7 @@ class Puzzle:
             print(colored(message, color=color))
         return response
 
-    def _check_already_solved(self, guess, part):
+    def _check_already_solved(self, guess: str, part: _Part) -> Optional[str]:
         # if you submit an answer on a puzzle which you've already solved, even if your
         # answer is correct, you get a sort of cryptic/confusing message back from the
         # server. this helper method prevents getting that.
@@ -597,7 +676,7 @@ class Puzzle:
             msg = colored(msg, "red")
         return msg
 
-    def _save_correct_answer(self, value, part):
+    def _save_correct_answer(self, value: str, part: _Part) -> None:
         # cache the correct answers so that we know not to submit again
         path = getattr(self, f"answer_{part}_path")
         txt = value.strip()
@@ -614,7 +693,7 @@ class Puzzle:
         _ensure_intermediate_dirs(path)
         path.write_text(txt, encoding="utf-8")
 
-    def _save_submit_result(self, value, part, message, when):
+    def _save_submit_result(self, value: str, part: _Part, message: str, when: str) -> None:
         # cache all submission results made by aocd. see the docstring of the
         # submit_results property for the reasons why.
         path = self.submit_results_path
@@ -634,14 +713,15 @@ class Puzzle:
         )
         path.write_text(json.dumps(data, indent=2))
 
-    def _get_answer(self, part):
+    def _get_answer(self, part: _Part) -> str:
         """
         Note: Answers are only revealed after a correct submission. If you've
         not already solved the puzzle, PuzzleUnsolvedError will be raised.
         """
+        assert part in "ab"
         if part == "b" and self.day == 25:
             return ""
-        answer_path = getattr(self, f"answer_{part}_path")
+        answer_path = self.answer_a_path if part == "a" else self.answer_b_path
         if answer_path.is_file():
             return answer_path.read_text(encoding="utf-8").strip()
         # check puzzle page for any previously solved answers.
@@ -653,7 +733,7 @@ class Puzzle:
         msg = f"Answer {self.year}-{self.day}{part} is not available"
         raise PuzzleUnsolvedError(msg)
 
-    def solve(self):
+    def solve(self) -> tuple[_Answer, _Answer]:
         """
         If there is a unique entry-point in the "adventofcode.user" group, load it and
         invoke it using this puzzle's input data. It is expected to return a tuple of
@@ -665,10 +745,10 @@ class Puzzle:
             [ep] = get_plugins()
         except ValueError:
             raise AocdError("Puzzle.solve is only available with unique entry point")
-        f = ep.load()
-        return f(year=self.year, day=self.day, data=self.input_data)
+        return self._solve(ep.load())
 
-    def solve_for(self, plugin):
+
+    def solve_for(self, plugin: str)-> tuple[_Answer, _Answer]:
         """
         Load the entry-point from the "adventofcode.user" plugin group with the
         specified name, and invoke it using this puzzle's input data. The entry-point
@@ -681,20 +761,29 @@ class Puzzle:
                 break
         else:
             raise AocdError(f"No entry point found for {plugin!r}")
-        f = ep.load()
-        return f(year=self.year, day=self.day, data=self.input_data)
+        return self._solve(ep.load())
+
+
+    def _solve(self, solver_callable: _SolverCallable) -> tuple[_Answer, _Answer]:
+        result = solver_callable(year=self.year, day=self.day, data=self.input_data)
+        assert (
+            isinstance(result, tuple) and
+            len(result) == 2 and
+            all(ele is None or isinstance(ele, (int, str)) for ele in result)
+        ), f"expected tuple of answers. got {result}" # type: ignore[str-bytes-safe]
+        return cast(tuple[_Answer, _Answer], result)
 
     @property
-    def url(self):
+    def url(self) -> str:
         """A link to the puzzle's description page on adventofcode.com."""
         return URL.format(year=self.year, day=self.day)
 
-    def view(self):
+    def view(self) -> None:
         """Open this puzzle's description page in a new browser tab"""
         webbrowser.open(self.url)
 
     @property
-    def my_stats(self):
+    def my_stats(self) -> dict[Literal['a', 'b'], _Result]:
         """
         Your personal stats (rank, solve time, score) for this particular puzzle.
         Raises `PuzzleUnsolvedError` if you haven't actually solved it yet.
@@ -706,7 +795,7 @@ class Puzzle:
         result = stats[key]
         return result
 
-    def _request_puzzle_page(self):
+    def _request_puzzle_page(self) -> None:
         # hit the server to get the prose
         # cache the results so we don't have to get them again
         response = http.get(self.url, token=self.user.token)
@@ -722,12 +811,15 @@ class Puzzle:
             if not self.prose2_path.is_file():
                 _ensure_intermediate_dirs(self.prose2_path)
                 self.prose2_path.write_text(text, encoding="utf-8")
-            hits = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            hits: list["bs4.Tag"] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
             if self.day == 25:
                 [pa] = hits
+                assert pa.code is not None
                 self._save_correct_answer(pa.code.text, "a")
             else:
                 pa, pb = hits
+                assert pa.code is not None
+                assert pb.code is not None
                 self._save_correct_answer(pa.code.text, "a")
                 self._save_correct_answer(pb.code.text, "b")
         elif "The first half of this puzzle is complete!" in text:  # part b unlocked
@@ -735,6 +827,7 @@ class Puzzle:
                 _ensure_intermediate_dirs(self.prose1_path)
                 self.prose1_path.write_text(text, encoding="utf-8")
             [pa] = [p for p in soup.find_all("p") if p.text.startswith(hit)]
+            assert pa.code is not None
             self._save_correct_answer(pa.code.text, "a")
         else:  # init, or dead token - doesn't really matter
             if not self.prose0_path.is_file():
@@ -742,7 +835,7 @@ class Puzzle:
                     _ensure_intermediate_dirs(self.prose0_path)
                     self.prose0_path.write_text(text, encoding="utf-8")
 
-    def _get_prose(self):
+    def _get_prose(self) -> str:
         # prefer to return full prose (i.e. part b is solved or unlocked)
         # prefer to return prose with answers from same the user id as self.user.id
         for path in self.prose2_path, self.prose1_path:
@@ -766,7 +859,7 @@ class Puzzle:
         raise AocdError(f"Could not get prose for {self.year}/{self.day:02d}")
 
     @property
-    def easter_eggs(self):
+    def easter_eggs(self) -> "bs4.ResultSet[bs4.Tag]":
         """
         Return a list of Easter eggs in the puzzle's description page. When you've
         completed all 25 days, adventofcode.com will reveal the Easter eggs directly in
@@ -776,10 +869,10 @@ class Puzzle:
         """
         txt = self._get_prose()
         soup = _get_soup(txt)
-        eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
+        eggs: "bs4.ResultSet[bs4.Tag]" = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
 
-    def unlock_time(self, local=True):
+    def unlock_time(self, local: bool = True) -> datetime:
         """
         The time this puzzle unlocked. Might be in the future.
         If local is True (default), returns a datetime in your local zone.
@@ -792,7 +885,7 @@ class Puzzle:
         return result
 
     @staticmethod
-    def all(user=None):
+    def all(user: Optional[User] = None) -> Generator["Puzzle", None, None]:
         """
         Return an iterator over all known puzzles that are currently playable.
         """
@@ -804,7 +897,7 @@ class Puzzle:
                 yield puzzle
 
 
-def _parse_duration(s):
+def _parse_duration(s: str) -> timedelta:
     """Parse a string like 01:11:16 (hours, minutes, seconds) into a timedelta"""
     if s == ">24h":
         return timedelta(hours=24)
@@ -812,26 +905,27 @@ def _parse_duration(s):
     return timedelta(hours=h, minutes=m, seconds=s)
 
 
-def _load_users():
+def _load_users() -> dict[str, str]:
     # loads the mapping between user ids and tokens. one user can have many tokens,
     # so we can't key the caches off of the token itself.
     path = AOCD_CONFIG_DIR / "tokens.json"
     try:
-        users = json.loads(path.read_text(encoding="utf-8"))
+        txt = path.read_text(encoding="utf-8")
     except FileNotFoundError:
-        users = {"default": default_user().token}
-    return users
-
+        return {"default": default_user().token}
+    else:
+        users = json.loads(txt)
+        assert isinstance(users, dict)
+        assert all(isinstance(k, str) and isinstance(v, str) for k, v in users.items())
+        return cast(dict[str, str], users)
 
 @cache
-def _load_example_parser(group="adventofcode.examples", name="reference"):
+def _load_example_parser(
+    group: str = "adventofcode.examples",
+    name: str = "reference",
+) -> _ExampleParserCallable:
     # lazy-loads a plugin used to parse sample data, and cache it
-    try:
-        # Python 3.10+ - group/name selectable entry points
-        eps = entry_points().select(group=group, name=name)
-    except AttributeError:
-        # Python 3.9 - dict interface
-        eps = [ep for ep in entry_points()[group] if ep.name == name]
+    eps = get_entry_points(group, name)
     if not eps:
         msg = f"could not find the example parser plugin {group=}/{name=}"
         raise ExampleParserError(msg)
@@ -840,4 +934,5 @@ def _load_example_parser(group="adventofcode.examples", name="reference"):
     ep = next(iter(eps))
     parser = ep.load()
     log.debug("loaded example parser %r", parser)
-    return parser
+    assert callable(parser)
+    return cast(_ExampleParserCallable, parser)

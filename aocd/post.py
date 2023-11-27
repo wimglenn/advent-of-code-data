@@ -1,5 +1,10 @@
 import logging
+from typing import Optional
 
+import urllib3
+
+from ._types import _Answer
+from ._types import _Part
 from .get import current_day
 from .get import most_recent_year
 from .models import default_user
@@ -11,8 +16,14 @@ log = logging.getLogger(__name__)
 
 
 def submit(
-    answer, part=None, day=None, year=None, session=None, reopen=True, quiet=False
-):
+    answer: _Answer,
+    part: Optional[_Part]=None,
+    day: Optional[int]=None,
+    year: Optional[int]=None,
+    session: Optional[str]=None,
+    reopen: bool = True,
+    quiet: bool = False,
+) -> Optional[urllib3.BaseHTTPResponse]:
     """
     Submit your answer to adventofcode.com, and print the response to the terminal.
     The only required argument is `answer`, all others can usually be introspected

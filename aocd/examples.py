@@ -5,7 +5,10 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import zip_longest
+from typing import Callable
 from typing import NamedTuple
+from typing import Optional
+from typing import Union
 
 import bs4
 
@@ -14,7 +17,6 @@ from aocd.exceptions import ExampleParserError
 from aocd.utils import _get_soup
 from aocd.utils import AOC_TZ
 from aocd.utils import get_plugins
-
 
 log = logging.getLogger(__name__)
 
@@ -35,18 +37,19 @@ class Page:
     year: int  # AoC puzzle year (2015+) parsed from html title
     day: int  # AoC puzzle day (1-25) parsed from html title
     article_a: bs4.element.Tag  # The bs4 tag for the first <article> in the page, i.e. part a
-    article_b: bs4.element.Tag  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
+    article_b: Optional[bs4.element.Tag]  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
     a_raw: str  # The first <article> html as a string
-    b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
+    b_raw: Optional[str]  # The second <article> html as a string. Will be `None` if part b locked
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         part_a_only = "*" if self.article_b is None else ""
         return f"<Page({self.year}, {self.day}){part_a_only} at {hex(id(self))}>"
 
     @classmethod
-    def from_raw(cls, html):
+    def from_raw(cls, html: str) -> "Page":
         soup = _get_soup(html)
         title_pat = r"^Day (\d{1,2}) - Advent of Code (\d{4})$"
+        assert soup.title is not None
         title_text = soup.title.text
         if (match := re.match(title_pat, title_text)) is None:
             msg = f"failed to extract year/day from title {title_text!r}"
@@ -55,16 +58,19 @@ class Page:
         articles = soup.find_all("article")
         if len(articles) == 0:
             raise ExampleParserError("no <article> found in html")
-        elif len(articles) == 1:
-            [article_a] = articles
-            a_raw = str(article_a)
-            article_b = b_raw = None
-        elif len(articles) == 2:
-            article_a, article_b = articles
-            a_raw = str(article_a)
-            b_raw = str(article_b)
-        else:
+        if len(articles) > 2:
             raise ExampleParserError("too many <article> found in html")
+
+        article_a = articles[0]
+        assert isinstance(article_a, bs4.Tag)
+        a_raw = str(article_a)
+
+        article_b = b_raw = None
+        if len(articles) == 2:
+            article_b = articles[1]
+            assert isinstance(article_b, bs4.Tag)
+            b_raw = str(article_b)
+
         page = Page(
             raw_html=html,
             soup=soup,
@@ -77,7 +83,7 @@ class Page:
         )
         return page
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Union[list[bs4.Tag], list[str]]:
         if not name.startswith(("a_", "b_")):
             raise AttributeError(name)
         part, sep, tag = name.partition("_")
@@ -91,13 +97,16 @@ class Page:
             # actually used by an example parser
             raise AttributeError(name)
         article = self.article_a if part == "a" else self.article_b
+        assert article is not None
+        tags: list[bs4.Tag] = article.find_all(tag)
+        result: Union[list[bs4.Tag], list[str]] = tags
         if tag == "li":
             # list items usually need further drill-down
-            result = article.find_all("li")
-            for li in result:
-                li.codes = [code.text for code in li.find_all("code")]
+            for li in tags:
+                code_tags: list[bs4.Tag] = li.find_all("code")
+                li.codes = [code.text for code in code_tags] # type: ignore[attr-defined]
         else:
-            result = [t.text for t in article.find_all(tag)]
+            result = [t.text for t in tags]
         setattr(self, name, result)  # cache the result
         msg = "cached %s accessors for puzzle %d/%02d part %s page (%d hits)"
         log.debug(msg, tag, self.year, self.day, part, len(result))
@@ -118,23 +127,23 @@ class Example(NamedTuple):
     """
 
     input_data: str
-    answer_a: str = None
-    answer_b: str = None
-    extra: str = None
+    answer_a: Optional[str] = None
+    answer_b: Optional[str] = None
+    extra: Optional[str] = None
 
     @property
-    def answers(self):
+    def answers(self) -> tuple[Optional[str], Optional[str]]:
         return self.answer_a, self.answer_b
 
 
-def _trunc(s, maxlen=50):
+def _trunc(s: Optional[str], maxlen: int = 50) -> Optional[str]:
     # don't print massive strings and mess up the table rendering
     if s is None or len(s) <= maxlen:
         return s
     return s[:maxlen] + f" ... ({len(s)} bytes)"
 
 
-def _get_unique_real_inputs(year, day):
+def _get_unique_real_inputs(year: int, day: int) -> list[str]:
     # these are passed to example parsers, in case the shape/content of the real
     # input(s) is in some way useful for extracting the example input(s). it is
     # not currently used by the default example parser implementation.
@@ -144,7 +153,7 @@ def _get_unique_real_inputs(year, day):
     return list({}.fromkeys(strs))
 
 
-def main():
+def main() -> None:
     """
     Summarize an example parser's results with historical puzzles' prose, and
     compare the performance against a reference implementation
@@ -205,7 +214,7 @@ def main():
             file=sys.stderr,
         )
         sys.exit(1)
-    plugin = plugins[args.example_parser].load()
+    plugin: Callable[[Page, list[str]], list[Example]] = plugins[args.example_parser].load()
     console = Console()
     parser_wants_real_datas = getattr(plugin, "uses_real_datas", True)
 

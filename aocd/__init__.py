@@ -1,7 +1,7 @@
 import sys
 from functools import partial
+from typing import TYPE_CHECKING
 
-from . import _ipykernel
 from . import cli
 from . import cookies
 from . import examples
@@ -16,8 +16,28 @@ from .get import get_data
 from .get import get_day_and_year
 from .post import submit as _impartial_submit
 
+__all__ = [
+    "AocdError",
+    "cli",
+    "cookies",
+    "data",
+    "examples",
+    "exceptions",
+    "get_data",
+    "get",
+    "models",
+    "post",
+    "runner",
+    "submit",
+    "utils",
+]
 
-def __getattr__(name):
+data: str
+
+if TYPE_CHECKING:
+    submit = _impartial_submit
+
+def __getattr__(name): # type: ignore[no-untyped-def] # no idea how to provide meaningful types here
     if name == "data":
         day, year = get_day_and_year()
         return get_data(day=day, year=year)

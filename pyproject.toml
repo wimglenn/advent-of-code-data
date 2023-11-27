@@ -7,19 +7,21 @@ name = "advent-of-code-data"
 version = "2.0.1"
 description = "Get your puzzle data with a single import"
 requires-python = ">=3.9"
-classifiers = [
+classifiers = [  # https://pypi.org/classifiers/
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python :: 3",
     "Topic :: Games/Entertainment :: Puzzle Games",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
 ]
 dependencies = [
     "beautifulsoup4",
     "pebble",
     "urllib3",
-    'tzdata ; platform_system == "Windows"',
+    'tzdata; platform_system == "Windows"',
     "aocd-example-parser >= 2023.2",
+    'typing-extensions; python_version < "3.11"',
 ]
 
 [[project.authors]]
@@ -37,7 +39,20 @@ content-type = "text/x-rst"
 Homepage = "https://github.com/wimglenn/advent-of-code-data"
 
 [project.optional-dependencies]
+all = ["advent-of-code-data[nb,test,type-check]"]
 nb = ["IPython", "jupyter-server"]
+test = [
+    "numpy",
+    "pook @ git+https://github.com/h2non/pook@f73fd34",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-raisin",
+    "pytest-freezer",
+    "pytest-socket",
+    "rich",
+]
+type-check = ["mypy", "types-beautifulsoup4"]
 
 [project.scripts]
 aocd = "aocd.cli:main"
@@ -48,6 +63,40 @@ aoce = "aocd.examples:main"
 [tool.setuptools]
 packages = ["aocd"]
 
+[tool.setuptools.package-data]
+aocd = ["py.typed"] # include py.typed file in distributions
+
 [project.entry-points]
 "adventofcode.user" = {}  # for user solvers
 "adventofcode.examples" = {}  # for example-parser implementations
+
+[tool.mypy]
+strict = true
+allow_redefinition = true
+enable_error_code = ["ignore-without-code"]
+
+# ignore missing imports for libraries that do not have type hints available
+[[tool.mypy.overrides]]
+module = [
+    "browser_cookie3",
+    "pebble.*",
+    "pook",
+]
+ignore_missing_imports = true
+
+[tool.coverage.report]
+exclude_also = [
+    # type checking only code
+    'if (t\.|typing\.)?TYPE_CHECKING:',
+
+    # defensive assertion code
+    'raise AssertionError',
+    'raise NotImplementedError',
+    'assert False',
+
+    # abstract methods are not run
+    '@(abc\.)?abstractmethod',
+
+    # methods on protocol classes are not run
+    'class .*\((t\.|typing\.)?Protocol\):'
+]
