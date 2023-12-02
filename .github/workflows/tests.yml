@@ -9,7 +9,7 @@ on:
 
 jobs:
   tests:
-    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -22,21 +22,21 @@ jobs:
         - "3.9"
         - "3.12"
         include:
-          - python-version: "pypy-3.9"
+          - python-version: pypy-3.9
             os: ubuntu-latest
 
     steps:
-      - uses: "actions/checkout@v3"
+      - uses: actions/checkout@v3
 
-      - uses: "actions/setup-python@v4"
+      - uses: actions/setup-python@v4
         with:
-          python-version: "${{ matrix.python-version }}"
+          python-version: ${{ matrix.python-version }}
           architecture: x64
 
-      - name: "Install"
+      - name: Install
         run: pip install -q -r tests/requirements.txt && pip freeze --all
 
-      - name: "Run tests for ${{ matrix.python-version }} on ${{ matrix.os }}"
+      - name: Run tests for ${{ matrix.python-version }} on ${{ matrix.os }}
         run: python -m pytest --durations=10
 
       - name: Upload coverage to Codecov
