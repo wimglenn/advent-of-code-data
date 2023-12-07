@@ -43,3 +43,29 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  typesafety:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          # Tell setuptools to *not* create a PEP 660 import hook and to use
+          # symlinks instead, so that pyright can still find the package. See
+          # https://microsoft.github.io/pyright/#/import-resolution?id=editable-installs
+          pip install --editable . --config-settings editable_mode=strict
+
+      - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
+
+      - uses: jakebailey/pyright-action@v1
+        with:
+          ignore-external: true
+          verify-types: "aocd"
