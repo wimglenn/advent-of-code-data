@@ -51,3 +51,14 @@ packages = ["aocd"]
 [project.entry-points]
 "adventofcode.user" = {}  # for user solvers
 "adventofcode.examples" = {}  # for example-parser implementations
+
+[tool.pytest.ini_options]
+addopts =
+  --strict-markers
+  --disable-socket
+  --allow-unix-socket
+  --cov-branch
+  --cov=aocd --cov=tests
+  --cov-report=html --cov-report=term-missing:skip-covered
+xfail_strict = True
+markers = answer_not_cached
