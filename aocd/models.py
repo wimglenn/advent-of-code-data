@@ -885,7 +885,7 @@ class Puzzle:
         return result
 
     @staticmethod
-    def all(user: Optional[User] = None) -> Generator["Puzzle", None, None]:
+    def all(user: Optional[User] = None) -> Iterator["Puzzle"]:
         """
         Return an iterator over all known puzzles that are currently playable.
         """
