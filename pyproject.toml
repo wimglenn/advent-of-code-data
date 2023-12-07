@@ -48,6 +48,10 @@ aoce = "aocd.examples:main"
 [tool.setuptools]
 packages = ["aocd"]
 
+[tool.setuptools.package-data]
+aocd = ["py.typed"]
+
+
 [project.entry-points]
 "adventofcode.user" = {}  # for user solvers
 "adventofcode.examples" = {}  # for example-parser implementations
@@ -62,3 +66,8 @@ addopts = """
   --cov-report=html --cov-report=term-missing:skip-covered"""
 xfail_strict = true
 markers = "answer_not_cached"
+
+[tool.coverage.report]
+exclude_also = [
+  "if t\\.TYPE_CHECKING:"
+]
