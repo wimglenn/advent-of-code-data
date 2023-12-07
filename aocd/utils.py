@@ -21,7 +21,7 @@ from zoneinfo import ZoneInfo
 import bs4
 import urllib3
 
-from ._compat import get_plugins as get_plugins # import using same name to tell the type checker we intend to export this (so other modules can import it)
+from ._compat import get_plugins as get_plugins # explicitly re-export to public API
 from ._types import _LoosePart
 from ._types import _Part
 from .exceptions import AocdError
