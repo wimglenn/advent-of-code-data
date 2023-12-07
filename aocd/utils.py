@@ -32,7 +32,12 @@ class HttpClient:
     # aocd users should not need to use this class directly.
 
     def __init__(self):
-        self.pool_manager = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
+        
+        proxy_url = os.environ.get('http_proxy') or os.environ.get('https_proxy')
+        if proxy_url:
+            self.pool_manager = urllib3.ProxyManager(proxy_url, headers={"User-Agent": USER_AGENT})
+        else:
+            self.pool_manager = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
         self.req_count = {"GET": 0, "POST": 0}
         self._max_t = 3.0
         self._cooloff = 0.16
