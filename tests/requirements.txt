@@ -8,3 +8,4 @@ pytest-raisin
 pytest-freezer
 pytest-socket
 rich
+freezegun==1.2.2
