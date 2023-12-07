@@ -229,7 +229,7 @@ def default_user() -> User:
 
 
 class Puzzle:
-    def __init__(self, year:int, day:int, user: Optional[User] =None):
+    def __init__(self, year: int, day: int, user: Optional[User] = None) -> None:
         self.year = year
         self.day = day
         if user is None:
