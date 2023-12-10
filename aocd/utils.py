@@ -60,6 +60,7 @@ class HttpClient:
             log.warning(msg, self._cooloff)
             time.sleep(self._cooloff)
             self._cooloff *= 2  # double it for repeat offenders
+            self._cooloff = min(self._cooloff, 10)
         self._history.append(now)
 
     def get(self, url, token=None, redirect=True):
