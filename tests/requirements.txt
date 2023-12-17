@@ -1,6 +1,6 @@
 --editable .
 numpy
-git+https://github.com/h2non/pook@f73fd34
+pook >= 1.2
 pytest
 pytest-cov
 pytest-mock
