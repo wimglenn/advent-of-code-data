@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import itertools
 import logging
@@ -5,9 +7,11 @@ import os
 import sys
 import tempfile
 import time
+import typing as t
 from argparse import ArgumentParser
 from datetime import datetime
 from functools import partial
+from importlib.metadata import EntryPoint
 from pathlib import Path
 
 import pebble.concurrent
@@ -27,10 +31,10 @@ from .utils import get_plugins
 
 
 DEFAULT_TIMEOUT = 60
-log = logging.getLogger(__name__)
+log: logging.Logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> t.NoReturn:
     """
     Run user solver(s) against their inputs and render the results. Can use multiple
     tokens to validate your code against multiple input datas.
@@ -199,7 +203,14 @@ def _process_wrapper(f, capture=False, **kwargs):
         return f(**kwargs)
 
 
-def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kwargs):
+def run_with_timeout(
+    entry_point: EntryPoint,
+    timeout: float,
+    progress: str | None,
+    dt: float = 0.1,
+    capture: bool = False,
+    **kwargs: t.Any,
+) -> tuple[str, str, float, str]:
     """
     Execute a user solve, and display a progress spinner as it's running. Kill it if
     the runtime exceeds `timeout` seconds.
@@ -234,7 +245,7 @@ def run_with_timeout(entry_point, timeout, progress, dt=0.1, capture=False, **kw
     return a, b, walltime, error
 
 
-def format_time(t, timeout=DEFAULT_TIMEOUT):
+def format_time(t: float, timeout: float = DEFAULT_TIMEOUT) -> str:
     """
     Used for rendering the puzzle solve time in color:
     - green, if you're under a quarter of the timeout (15s default)
@@ -252,8 +263,14 @@ def format_time(t, timeout=DEFAULT_TIMEOUT):
 
 
 def run_one(
-    year, day, data, entry_point, timeout=DEFAULT_TIMEOUT, progress=None, capture=False
-):
+    year: int,
+    day: int,
+    data: str,
+    entry_point: EntryPoint,
+    timeout: float = DEFAULT_TIMEOUT,
+    progress: str | None = None,
+    capture: bool = False,
+) -> tuple[str, str, float, str]:
     """
     Creates a temporary dir and change directory into it (restores cwd on exit).
     Lays down puzzle input in a file called "input.txt" in this directory - user code
@@ -293,16 +310,16 @@ def run_one(
 
 
 def run_for(
-    plugs,
-    years,
-    days,
-    datasets,
-    example=False,
-    timeout=DEFAULT_TIMEOUT,
-    autosubmit=True,
-    reopen=False,
-    capture=False,
-):
+    plugs: t.Collection[str],
+    years: t.Iterable[int],
+    days: t.Iterable[int],
+    datasets: t.Mapping[str, str],
+    example: bool = False,
+    timeout: float = DEFAULT_TIMEOUT,
+    autosubmit: bool = True,
+    reopen: bool = False,
+    capture: bool = False,
+) -> int:
     """
     Run with multiple users, multiple datasets, multiple years/days, and render the results.
     """

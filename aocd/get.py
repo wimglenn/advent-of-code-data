@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import datetime
 import os
 import re
 import traceback
-from logging import getLogger
+import typing as t
+from logging import Logger, getLogger
 
 from ._ipykernel import get_ipynb_path
 from .exceptions import AocdError
@@ -14,10 +17,15 @@ from .utils import AOC_TZ
 from .utils import blocker
 
 
-log = getLogger(__name__)
+log: Logger = getLogger(__name__)
 
 
-def get_data(session=None, day=None, year=None, block=False):
+def get_data(
+    session: str | None = None,
+    day: int | None = None,
+    year: int | None = None,
+    block: bool = False,
+) -> str:
     """
     Get data for day (1-25) and year (2015+).
     User's session cookie (str) is needed - puzzle inputs differ by user.
@@ -45,7 +53,7 @@ def get_data(session=None, day=None, year=None, block=False):
         return puzzle.input_data
 
 
-def most_recent_year():
+def most_recent_year() -> int:
     """
     This year, if it's December.
     The most recent year, otherwise.
@@ -60,7 +68,7 @@ def most_recent_year():
     return year
 
 
-def current_day():
+def current_day() -> int:
     """
     Most recent day, if it's during the Advent of Code. Happy Holidays!
     Day 1 is assumed, otherwise.
@@ -73,7 +81,7 @@ def current_day():
     return day
 
 
-def get_day_and_year():
+def get_day_and_year() -> tuple[int, int | None]:
     """
     Returns tuple (day, year).
 

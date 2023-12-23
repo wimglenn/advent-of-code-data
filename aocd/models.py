@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
 import re
 import sys
 import time
+import typing as t
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
@@ -15,6 +18,7 @@ from pathlib import Path
 from textwrap import dedent
 
 from . import examples
+from .examples import Example
 from .exceptions import AocdError
 from .exceptions import DeadTokenError
 from .exceptions import ExampleParserError
@@ -29,9 +33,13 @@ from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
 from .utils import http
+from .types import AnswerValue
+from .types import PuzzlePart
+from .types import PuzzleStats
+from .types import Submission
 
 
-log = logging.getLogger(__name__)
+log: logging.Logger = logging.getLogger(__name__)
 
 
 AOCD_DATA_DIR = Path(os.environ.get("AOCD_DIR", Path("~", ".config", "aocd")))
@@ -43,12 +51,12 @@ URL = "https://adventofcode.com/{year}/day/{day}"
 class User:
     _token2id = None
 
-    def __init__(self, token):
+    def __init__(self, token: str) -> None:
         self.token = token
         self._owner = "unknown.unknown.0"
 
     @classmethod
-    def from_id(cls, id):
+    def from_id(cls, id: str) -> User:
         users = _load_users()
         if id not in users:
             raise UnknownUserError(f"User with id '{id}' is not known")
@@ -57,7 +65,7 @@ class User:
         return user
 
     @property
-    def id(self):
+    def id(self) -> str:
         """
         User's token might change (they expire eventually) but the id found on AoC's
         settings page for a logged-in user is as close as we can get to a primary key.
@@ -86,17 +94,19 @@ class User:
             self._owner = owner
         return owner
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"<{type(self).__name__} {self._owner} (token=...{self.token[-4:]})>"
 
     @property
-    def memo_dir(self):
+    def memo_dir(self) -> Path:
         """
         Directory where this user's puzzle inputs, answers etc. are stored on filesystem.
         """
         return AOCD_DATA_DIR / self.id
 
-    def get_stats(self, years=None):
+    def get_stats(
+        self, years: int | t.Iterable[int] | None = None
+    ) -> dict[str, dict[PuzzlePart, PuzzleStats]]:
         """
         Parsed version of your personal stats (rank, solve time, score).
         See https://adventofcode.com/<year>/leaderboard/self when logged in.
@@ -144,7 +154,7 @@ class User:
         return results
 
 
-def default_user():
+def default_user() -> User:
     """
     Discover user's token from the environment or file, and exit with a diagnostic
     message if none can be found. This default user is used whenever a token or user id
@@ -178,30 +188,30 @@ def default_user():
 
 
 class Puzzle:
-    def __init__(self, year, day, user=None):
+    def __init__(self, year: int, day: int, user: User | None = None) -> None:
         self.year = year
         self.day = day
         if user is None:
             user = default_user()
         self._user = user
-        self.input_data_url = self.url + "/input"
-        self.submit_url = self.url + "/answer"
+        self.input_data_url: str = self.url + "/input"
+        self.submit_url: str = self.url + "/answer"
         pre = self.user.memo_dir / f"{self.year}_{self.day:02d}"
-        self.input_data_path = pre.with_name(pre.name + "_input.txt")
-        self.answer_a_path = pre.with_name(pre.name + "a_answer.txt")
-        self.answer_b_path = pre.with_name(pre.name + "b_answer.txt")
-        self.submit_results_path = pre.with_name(pre.name + "_post.json")
-        self.prose0_path = AOCD_DATA_DIR / "prose" / (pre.name + "_prose.0.html")
-        self.prose1_path = pre.with_name(pre.name + "_prose.1.html")  # part a solved
-        self.prose2_path = pre.with_name(pre.name + "_prose.2.html")  # part b solved
+        self.input_data_path: Path = pre.with_name(pre.name + "_input.txt")
+        self.answer_a_path: Path = pre.with_name(pre.name + "a_answer.txt")
+        self.answer_b_path: Path = pre.with_name(pre.name + "b_answer.txt")
+        self.submit_results_path: Path = pre.with_name(pre.name + "_post.json")
+        self.prose0_path: Path = AOCD_DATA_DIR / "prose" / (pre.name + "_prose.0.html")
+        self.prose1_path: Path = pre.with_name(pre.name + "_prose.1.html")  # part a solved
+        self.prose2_path: Path = pre.with_name(pre.name + "_prose.2.html")  # part b solved
 
     @property
-    def user(self):
+    def user(self) -> User:
         # this is a property to make it clear that it's read-only
         return self._user
 
     @property
-    def input_data(self):
+    def input_data(self) -> str:
         """
         This puzzle's input data, specific to puzzle.user. It will usually be retrieved
         from caches, but if this is the first time it was accessed it will be requested
@@ -231,7 +241,7 @@ class Puzzle:
         return data.rstrip("\r\n")
 
     @property
-    def examples(self):
+    def examples(self) -> list[Example]:
         """
         Sample data and answers associated with this puzzle, as a list of
         `aocd.examples.Example` instances. These are extracted from the puzzle prose
@@ -262,7 +272,7 @@ class Puzzle:
         return result
 
     @cached_property
-    def title(self):
+    def title(self) -> str:
         """
         Title of the puzzle, used in the pretty repr (IPython etc) and also displayed
         by aocd.runner.
@@ -319,7 +329,7 @@ class Puzzle:
         return val
 
     @property
-    def answer_a(self):
+    def answer_a(self) -> str:
         """
         The correct answer for the first part of the puzzle. This attribute hides
         itself if the first part has not yet been solved.
@@ -330,7 +340,7 @@ class Puzzle:
             raise AttributeError("answer_a")
 
     @answer_a.setter
-    def answer_a(self, val):
+    def answer_a(self, val: AnswerValue) -> None:
         """
         You can submit your answer to adventofcode.com by setting the answer attribute
         on a puzzle instance, e.g.
@@ -346,12 +356,12 @@ class Puzzle:
         self._submit(value=val, part="a")
 
     @property
-    def answered_a(self):
+    def answered_a(self) -> bool:
         """Has the first part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_a", None))
 
     @property
-    def answer_b(self):
+    def answer_b(self) -> str:
         """
         The correct answer for the second part of the puzzle. This attribute hides
         itself if the second part has not yet been solved.
@@ -362,7 +372,7 @@ class Puzzle:
             raise AttributeError("answer_b")
 
     @answer_b.setter
-    def answer_b(self, val):
+    def answer_b(self, val: AnswerValue) -> None:
         """
         You can submit your answer to adventofcode.com by setting the answer attribute
         on a puzzle instance, e.g.
@@ -378,11 +388,11 @@ class Puzzle:
         self._submit(value=val, part="b")
 
     @property
-    def answered_b(self):
+    def answered_b(self) -> bool:
         """Has the second part of this puzzle been solved correctly yet?"""
         return bool(getattr(self, "answer_b", None))
 
-    def answered(self, part):
+    def answered(self, part: PuzzlePart) -> bool:
         """Has the specified part of this puzzle been solved correctly yet?"""
         if part == "a":
             return bool(getattr(self, "answer_a", None))
@@ -391,7 +401,7 @@ class Puzzle:
         raise AocdError('part must be "a" or "b"')
 
     @property
-    def answers(self):
+    def answers(self) -> tuple[str, str]:
         """
         Returns a tuple of the correct answers for this puzzle. Will raise an
         AttributeError if either part is yet to be solved by the associated user.
@@ -399,7 +409,7 @@ class Puzzle:
         return self.answer_a, self.answer_b
 
     @answers.setter
-    def answers(self, val):
+    def answers(self, val: tuple[AnswerValue, AnswerValue]) -> None:
         """
         Submit both answers at once. Pretty much impossible in practice, unless you've
         seen the puzzle before.
@@ -407,7 +417,7 @@ class Puzzle:
         self.answer_a, self.answer_b = val
 
     @property
-    def submit_results(self):
+    def submit_results(self) -> list[Submission]:
         """
         Record of all previous submissions to adventofcode.com for this user/puzzle.
         Submissions made by typing answers directly into the website will not be
@@ -653,7 +663,7 @@ class Puzzle:
         msg = f"Answer {self.year}-{self.day}{part} is not available"
         raise PuzzleUnsolvedError(msg)
 
-    def solve(self):
+    def solve(self) -> tuple[AnswerValue, AnswerValue]:
         """
         If there is a unique entry-point in the "adventofcode.user" group, load it and
         invoke it using this puzzle's input data. It is expected to return a tuple of
@@ -668,7 +678,7 @@ class Puzzle:
         f = ep.load()
         return f(year=self.year, day=self.day, data=self.input_data)
 
-    def solve_for(self, plugin):
+    def solve_for(self, plugin: str) -> tuple[AnswerValue, AnswerValue]:
         """
         Load the entry-point from the "adventofcode.user" plugin group with the
         specified name, and invoke it using this puzzle's input data. The entry-point
@@ -685,16 +695,16 @@ class Puzzle:
         return f(year=self.year, day=self.day, data=self.input_data)
 
     @property
-    def url(self):
+    def url(self) -> str:
         """A link to the puzzle's description page on adventofcode.com."""
         return URL.format(year=self.year, day=self.day)
 
-    def view(self):
+    def view(self) -> None:
         """Open this puzzle's description page in a new browser tab"""
         webbrowser.open(self.url)
 
     @property
-    def my_stats(self):
+    def my_stats(self) -> dict[PuzzlePart, PuzzleStats]:
         """
         Your personal stats (rank, solve time, score) for this particular puzzle.
         Raises `PuzzleUnsolvedError` if you haven't actually solved it yet.
@@ -766,7 +776,7 @@ class Puzzle:
         raise AocdError(f"Could not get prose for {self.year}/{self.day:02d}")
 
     @property
-    def easter_eggs(self):
+    def easter_eggs(self) -> list[str]:
         """
         Return a list of Easter eggs in the puzzle's description page. When you've
         completed all 25 days, adventofcode.com will reveal the Easter eggs directly in
@@ -779,7 +789,7 @@ class Puzzle:
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
 
-    def unlock_time(self, local=True):
+    def unlock_time(self, local: bool = True) -> datetime:
         """
         The time this puzzle unlocked. Might be in the future.
         If local is True (default), returns a datetime in your local zone.
@@ -792,7 +802,7 @@ class Puzzle:
         return result
 
     @staticmethod
-    def all(user=None):
+    def all(user: User | None = None) -> t.Iterator[Puzzle]:
         """
         Return an iterator over all known puzzles that are currently playable.
         """

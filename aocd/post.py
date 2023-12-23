@@ -1,18 +1,32 @@
+from __future__ import annotations
+
 import logging
+import typing as t
 
 from .get import current_day
 from .get import most_recent_year
 from .models import default_user
 from .models import Puzzle
 from .models import User
+from .types import AnswerValue
+from .types import PuzzlePart
+
+if t.TYPE_CHECKING:
+    from urllib3 import BaseHTTPResponse
 
 
-log = logging.getLogger(__name__)
+log: logging.Logger = logging.getLogger(__name__)
 
 
 def submit(
-    answer, part=None, day=None, year=None, session=None, reopen=True, quiet=False
-):
+    answer: AnswerValue,
+    part: PuzzlePart | None = None,
+    day: int | None = None,
+    year: int | None = None,
+    session: str | None = None,
+    reopen: bool = True,
+    quiet: bool = False,
+) -> BaseHTTPResponse | None:
     """
     Submit your answer to adventofcode.com, and print the response to the terminal.
     The only required argument is `answer`, all others can usually be introspected

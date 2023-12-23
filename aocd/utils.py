@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import logging
 import os
@@ -5,12 +7,14 @@ import platform
 import shutil
 import sys
 import time
+import typing as t
 from collections import deque
 from datetime import datetime
 from functools import cache
 from importlib.metadata import entry_points
 from importlib.metadata import version
 from itertools import cycle
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 from zoneinfo import ZoneInfo
 
@@ -19,8 +23,16 @@ import urllib3
 
 from .exceptions import DeadTokenError
 
+if sys.version_info >= (3, 10):
+    # Python 3.10+
+    from importlib.metadata import EntryPoints as _EntryPointsType
+else:
+    # Python 3.9
+    from importlib.metadata import EntryPoint
 
-log = logging.getLogger(__name__)
+    _EntryPointsType = list[EntryPoint]
+
+log: logging.Logger = logging.getLogger(__name__)
 AOC_TZ = ZoneInfo("America/New_York")
 _v = version("advent-of-code-data")
 USER_AGENT = f"github.com/wimglenn/advent-of-code-data v{_v} by hey@wimglenn.com"
@@ -31,7 +43,10 @@ class HttpClient:
     # so that we can put in user agent header, rate-limit, etc.
     # aocd users should not need to use this class directly.
 
-    def __init__(self):
+    pool_manager: urllib3.PoolManager
+    req_count: dict[t.Literal["GET", "POST"], int]
+
+    def __init__(self) -> None:
         
         proxy_url = os.environ.get('http_proxy') or os.environ.get('https_proxy')
         if proxy_url:
@@ -63,7 +78,9 @@ class HttpClient:
             self._cooloff = min(self._cooloff, 10)
         self._history.append(now)
 
-    def get(self, url, token=None, redirect=True):
+    def get(
+        self, url: str, token: str | None = None, redirect: bool = True
+    ) -> urllib3.BaseHTTPResponse:
         # getting user inputs, puzzle prose, etc
         if token is None:
             headers = self.pool_manager.headers
@@ -74,7 +91,9 @@ class HttpClient:
         self.req_count["GET"] += 1
         return resp
 
-    def post(self, url, token, fields):
+    def post(
+        self, url: str, token: str, fields: t.Mapping[str, str]
+    ) -> urllib3.BaseHTTPResponse:
         # submitting answers
         headers = self.pool_manager.headers | {"Cookie": f"session={token}"}
         self._limiter()
@@ -89,14 +108,19 @@ class HttpClient:
         return resp
 
 
-http = HttpClient()
+http: HttpClient = HttpClient()
 
 
 def _ensure_intermediate_dirs(path):
     path.expanduser().parent.mkdir(parents=True, exist_ok=True)
 
 
-def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
+def blocker(
+    quiet: bool = False,
+    dt: float = 0.1,
+    datefmt: str | None = None,
+    until: tuple[int, int] | None = None,
+) -> None:
     """
     This function just blocks until the next puzzle unlocks.
     Pass `quiet=True` to disable the spinner etc.
@@ -143,7 +167,7 @@ def blocker(quiet=False, dt=0.1, datefmt=None, until=None):
         sys.stdout.flush()
 
 
-def get_owner(token):
+def get_owner(token: str) -> str:
     """
     Find owner of the token.
     Raises `DeadTokenError` if the token is expired/invalid.
@@ -180,7 +204,7 @@ def get_owner(token):
     return result
 
 
-def atomic_write_file(path, contents_str):
+def atomic_write_file(path: Path, contents_str: str) -> None:
     """
     Atomically write a string to a file by writing it to a temporary file, and then
     renaming it to the final destination name. This solves a race condition where existence
@@ -210,12 +234,15 @@ def _cli_guess(choice, choices):
     return result
 
 
-_ansi_colors = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
+_ANSIColor = t.Literal[
+    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"
+]
+_ansi_colors = t.get_args(_ANSIColor)
 if platform.system() == "Windows":
     os.system("color")  # hack - makes ANSI colors work in the windows cmd window
 
 
-def colored(txt, color):
+def colored(txt: str, color: _ANSIColor | None) -> str:
     if color is None:
         return txt
     code = _ansi_colors.index(color.casefold())
@@ -223,7 +250,7 @@ def colored(txt, color):
     return f"\x1b[{code + 30}m{txt}{reset}"
 
 
-def get_plugins(group="adventofcode.user"):
+def get_plugins(group: str = "adventofcode.user") -> _EntryPointsType:
     """
     Currently installed plugins for user solves.
     """

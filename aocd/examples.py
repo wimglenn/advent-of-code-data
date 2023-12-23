@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import argparse
 import logging
 import re
 import sys
+import typing as t
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import zip_longest
@@ -16,7 +19,11 @@ from aocd.utils import AOC_TZ
 from aocd.utils import get_plugins
 
 
-log = logging.getLogger(__name__)
+log: logging.Logger = logging.getLogger(__name__)
+
+_AnswerElem = t.Literal[
+    "a_code", "a_li", "a_pre", "a_em", "b_code", "b_li", "b_pre", "b_em"
+]
 
 
 @dataclass
@@ -34,17 +41,17 @@ class Page:
     soup: bs4.BeautifulSoup  # The raw_html string parsed into a bs4.BeautifulSoup instance
     year: int  # AoC puzzle year (2015+) parsed from html title
     day: int  # AoC puzzle day (1-25) parsed from html title
-    article_a: bs4.element.Tag  # The bs4 tag for the first <article> in the page, i.e. part a
-    article_b: bs4.element.Tag  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
+    article_a: bs4.Tag  # The bs4 tag for the first <article> in the page, i.e. part a
+    article_b: bs4.Tag | None  # The bs4 tag for the second <article> in the page, i.e. part b. It will be `None` if part b locked
     a_raw: str  # The first <article> html as a string
-    b_raw: str  # The second <article> html as a string. Will be `None` if part b locked
+    b_raw: str | None  # The second <article> html as a string. Will be `None` if part b locked
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         part_a_only = "*" if self.article_b is None else ""
         return f"<Page({self.year}, {self.day}){part_a_only} at {hex(id(self))}>"
 
     @classmethod
-    def from_raw(cls, html):
+    def from_raw(cls, html: str) -> Page:
         soup = _get_soup(html)
         title_pat = r"^Day (\d{1,2}) - Advent of Code (\d{4})$"
         title_text = soup.title.text
@@ -77,7 +84,7 @@ class Page:
         )
         return page
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: _AnswerElem) -> t.Sequence[str]:
         if not name.startswith(("a_", "b_")):
             raise AttributeError(name)
         part, sep, tag = name.partition("_")
@@ -118,12 +125,12 @@ class Example(NamedTuple):
     """
 
     input_data: str
-    answer_a: str = None
-    answer_b: str = None
-    extra: str = None
+    answer_a: str | None = None
+    answer_b: str | None = None
+    extra: str | None = None
 
     @property
-    def answers(self):
+    def answers(self) -> tuple[str | None, str | None]:
         return self.answer_a, self.answer_b
 
 
@@ -144,7 +151,7 @@ def _get_unique_real_inputs(year, day):
     return list({}.fromkeys(strs))
 
 
-def main():
+def main() -> None:
     """
     Summarize an example parser's results with historical puzzles' prose, and
     compare the performance against a reference implementation

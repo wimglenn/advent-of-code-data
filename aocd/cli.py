@@ -13,7 +13,7 @@ from .utils import AOC_TZ
 from .utils import get_plugins
 
 
-def main():
+def main() -> None:
     """Get your puzzle input data, caching it if necessary, and print it on stdout."""
     aoc_now = datetime.datetime.now(tz=AOC_TZ)
     days = range(1, 26)
