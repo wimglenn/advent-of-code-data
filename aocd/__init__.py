@@ -26,6 +26,7 @@ __all__ = [
     "examples",
     "exceptions",
     "get",
+    "get_data",
     "models",
     "post",
     "runner",
