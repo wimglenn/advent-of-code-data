@@ -48,9 +48,19 @@ def get_working_tokens() -> dict[str, str]:
         firefox = [c for c in firefox if c.name == "session"]
         log.info("%d candidates from firefox", len(firefox))
 
+    log.info("checking edge cookie jar...")
+    try:
+        edge = bc3.edge(domain_name=".adventofcode.com")
+    except Exception as err:
+        log.debug("Couldn't scrape edge - %s: %s", type(err), err)
+        edge = []
+    else:
+        edge = [c for c in edge if c.name == "session"]
+        log.info("%d candidates from edge", len(edge))
+
     # order preserving de-dupe
-    tokens = list({}.fromkeys([c.value for c in chrome + firefox]))
-    removed = len(chrome + firefox) - len(tokens)
+    tokens = list({}.fromkeys([c.value for c in chrome + firefox + edge]))
+    removed = len(chrome + firefox + edge) - len(tokens)
     if removed:
         log.info("Removed %d duplicate%s", removed, "s"[: removed - 1])
 
