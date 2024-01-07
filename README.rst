@@ -101,8 +101,8 @@ variable to some existing directory if you wish to use another location to store
 
 *New in version 0.9.0.* There's a utility script ``aocd-token`` which attempts to
 find session tokens from your browser's cookie storage. This feature is experimental
-and requires you to additionally install the package ``browser-cookie3``. Only Chrome
-and Firefox browsers are currently supported. On macOS, you may get an authentication
+and requires you to additionally install the package ``browser-cookie3``. Only Chrome,
+Firefox, and Edge browsers are currently supported. On macOS, you may get an authentication
 dialog requesting permission, since Python is attempting to read browser storage files.
 This is expected, the script *is* actually scraping those private files to access AoC
 session token(s).
