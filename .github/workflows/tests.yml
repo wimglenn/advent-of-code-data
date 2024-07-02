@@ -25,6 +25,11 @@ jobs:
         include:
           - python-version: pypy-3.9
             os: ubuntu-latest
+          - python-version: "3.9"
+            os: macos-13
+        exclude:
+          - python-version: "3.9"
+            os: macos-latest
 
     steps:
       - uses: actions/checkout@v3
