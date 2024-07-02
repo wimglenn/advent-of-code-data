@@ -1,6 +1,6 @@
 --editable .
 numpy
-pook >= 1.2
+pook >= 2
 pytest
 pytest-cov
 pytest-mock

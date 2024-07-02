@@ -1,4 +1,3 @@
-import pook as pook_mod
 import pytest
 
 from aocd.models import User
@@ -58,13 +57,6 @@ def answer_not_cached(request, mocker):
 
     if install:
         mocker.patch("aocd.models.Puzzle._check_already_solved", return_value=rv)
-
-
-@pytest.fixture
-def pook():
-    pook_mod.on()
-    yield pook_mod
-    pook_mod.off()
 
 
 @pytest.fixture(autouse=True)
