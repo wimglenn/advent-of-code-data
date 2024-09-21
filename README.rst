@@ -46,7 +46,7 @@ Note that ``aocd`` will cache puzzle inputs and answers (including incorrect gue
 
 .. code-block:: bash
 
-   $ aocd 2022 5 --example
+   $ aocd 2022 5 --example-parser
                              --- Day 5: Supply Stacks ---
                          https://adventofcode.com/2022/day/5
    ------------------------------- Example data 1/1 -------------------------------
