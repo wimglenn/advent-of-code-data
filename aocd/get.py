@@ -5,7 +5,8 @@ import os
 import re
 import traceback
 import typing as t
-from logging import Logger, getLogger
+from logging import getLogger
+from logging import Logger
 
 from ._ipykernel import get_ipynb_path
 from .exceptions import AocdError

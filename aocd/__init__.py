@@ -11,8 +11,8 @@ from . import get
 from . import models
 from . import post
 from . import runner
-from . import utils
 from . import types
+from . import utils
 from .exceptions import AocdError
 from .get import get_data
 from .get import get_day_and_year

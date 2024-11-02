@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from datetime import timedelta
 from numbers import Number
-from typing import Literal, TypedDict, Union
+from typing import Literal
+from typing import TypedDict
+from typing import Union
 
 AnswerValue = Union[str, Number]
 """The answer to a puzzle, either a string or a number. Numbers are coerced to a string"""
