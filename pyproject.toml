@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [[project.authors]]
-name = "Wim Glenn"
+name = "Wim Jeantine-Glenn"
 email = "hey@wimglenn.com"
 
 [project.license]
