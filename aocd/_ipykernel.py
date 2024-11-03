@@ -17,7 +17,8 @@ def get_ipynb_path():
     for serv in serverapp.list_running_servers():
         url = url_path_join(serv["url"], "api/sessions")
         resp = http.request("GET", url, fields={"token": serv["token"]})
-        resp.raise_for_status()
+        if resp.status >= 400:
+            raise urllib3.exceptions.ResponseError(f"HTTP {resp.status}")
         for sess in resp.json():
             if kernel_id == sess["kernel"]["id"]:
                 path = serv["root_dir"]

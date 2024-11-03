@@ -19,7 +19,7 @@ from .get import get_day_and_year
 from .post import submit as _impartial_submit
 
 __all__ = [
-    "_ipykernel",
+    "AocdError",
     "cli",
     "cookies",
     "data",

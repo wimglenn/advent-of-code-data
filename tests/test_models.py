@@ -1,7 +1,8 @@
+import decimal
+import fractions
 import logging
 from datetime import datetime
 from datetime import timedelta
-from textwrap import dedent
 
 import numpy as np
 import pytest
@@ -443,6 +444,50 @@ def test_type_coercions(v_raw, v_expected, len_logs, caplog):
     v_actual = p._coerce_val(v_raw)
     assert v_actual == v_expected, f"{type(v_raw)} {v_raw})"
     assert len(caplog.records) == len_logs
+
+
+@pytest.mark.parametrize(
+    "v_raw, v_expected, len_logs",
+    [
+        ("xxx", "xxx", 0),  # str -> str
+        (b"123", "123", 1),  # bytes -> str
+        (123, "123", 0),  # int -> str
+        (123.0, "123", 1),  # float -> str
+        (123.0 + 0.0j, "123", 1),  # complex -> str
+        (np.int32(123), "123", 1),  # np.int -> str
+        (np.uint32(123), "123", 1),  # np.uint -> str
+        (np.double(123.0), "123", 1),  # np.double -> str
+        (np.complex64(123.0 + 0.0j), "123", 1),  # np.complex -> str
+        (np.array([123]), "123", 1),  # 1D np.array of int -> str
+        (np.array([[123.0]]), "123", 1),  # 2D np.array of float -> str
+        (np.array([[[[[[123.0 + 0j]]]]]]), "123", 1),  # deep np.array of complex -> str
+        (fractions.Fraction(123 * 2, 2), "123", 1),  # Fraction -> int
+        (decimal.Decimal("123"), "123", 1),  # Decimal -> int
+    ],
+)
+def test_type_coercions(v_raw, v_expected, len_logs, caplog):
+    p = Puzzle(2022, 1)
+    v_actual = p._coerce_val(v_raw)
+    assert v_actual == v_expected, f"{type(v_raw)} {v_raw})"
+    assert len(caplog.records) == len_logs
+
+
+@pytest.mark.parametrize(
+    "val, error_msg",
+    [
+        (123.5, "Failed to coerce float value 123.5 for 2022/01."),  # non-integer float
+        (123.0 + 123.0j, "Failed to coerce complex value (123+123j) for 2022/01."),  # complex w/ imag
+        (np.complex64(123.0 + 0.5j), "Failed to coerce complex64 value np.complex64(123+0.5j) for 2022/01."),  # np.complex w/ imag
+        (np.array([1, 2]), "Failed to coerce ndarray value array([1, 2]) for 2022/01."),  # 1D np.array with size != 1
+        (np.array([[1], [2]]), "Failed to coerce ndarray value array([[1],\n       [2]]) for 2022/01."),  # 2D np.array with size != 1
+        (fractions.Fraction(123, 2), "Failed to coerce Fraction value Fraction(123, 2) for 2022/01."),  # Fraction
+        (decimal.Decimal("123.5"), "Failed to coerce Decimal value Decimal('123.5') for 2022/01."),  # Decimal
+    ]
+)
+def test_type_coercions_fail(val, error_msg):
+    p = Puzzle(2022, 1)
+    with pytest.raises(AocdError(error_msg)):
+        p._coerce_val(val)
 
 
 def test_get_prose_cache(aocd_data_dir):
