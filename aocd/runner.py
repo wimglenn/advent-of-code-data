@@ -373,7 +373,7 @@ def run_for(
             else:
                 for answer, part in zip((a, b), "ab"):
                     if day == 25 and part == "b":
-                        # there's no part b on christmas day, skip
+                        # there's no part b on Christmas day, skip
                         continue
                     expected = None
                     try:

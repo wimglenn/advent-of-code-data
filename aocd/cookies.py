@@ -58,9 +58,10 @@ def get_working_tokens() -> dict[str, str]:
         edge = [c for c in edge if c.name == "session"]
         log.info("%d candidates from edge", len(edge))
 
+    cookies = chrome + firefox + edge
     # order preserving de-dupe
-    tokens = list({}.fromkeys([c.value for c in chrome + firefox + edge]))
-    removed = len(chrome + firefox + edge) - len(tokens)
+    tokens = list({}.fromkeys([c.value for c in cookies if c.value is not None]))
+    removed = len(cookies) - len(tokens)
     if removed:
         log.info("Removed %d duplicate%s", removed, "s"[: removed - 1])
 

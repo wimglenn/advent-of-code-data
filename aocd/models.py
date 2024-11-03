@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import os
@@ -10,6 +11,8 @@ import typing as t
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
+from decimal import Decimal
+from fractions import Fraction
 from functools import cache
 from functools import cached_property
 from importlib.metadata import entry_points
@@ -113,10 +116,14 @@ class User:
         """
         aoc_now = datetime.now(tz=AOC_TZ)
         all_years = range(2015, aoc_now.year + int(aoc_now.month == 12))
-        if isinstance(years, int) and years in all_years:
+        if isinstance(years, int):
             years = (years,)
         if years is None:
             years = all_years
+        invalid_years = sorted([y for y in years if y not in all_years])
+        if invalid_years:
+            bad = ', '.join(map(str, invalid_years))
+            raise ValueError(f"Invalid years: {bad}")
         days = {str(i) for i in range(1, 26)}
         results = {}
         ur_broke = "You haven't collected any stars"
@@ -248,7 +255,7 @@ class Puzzle:
         html, and they're the same for every user id. This list might be empty (not
         every puzzle has usable examples), or it might have several examples, but it
         will usually have one element. The list, and the examples themselves, may be
-        different depending on whether or not part b of the puzzle prose has been
+        different regardless of whether part b of the puzzle prose has been
         unlocked (i.e. part a has already been solved correctly).
         """
         return self._get_examples()
@@ -301,30 +308,44 @@ class Puzzle:
         # but it's convenient to be able to submit numbers, since many of the answers
         # are numeric strings. coerce the values to string safely.
         orig_val = val
-        orig_type = type(val)
         coerced = False
-        floatish = isinstance(val, (float, complex))
-        if floatish and val.imag == 0.0 and val.real.is_integer():
-            coerced = True
-            val = int(val.real)
-        elif orig_type.__module__ == "numpy" and getattr(val, "ndim", None) == 0:
-            # deal with numpy scalars
-            if orig_type.__name__.startswith(("int", "uint", "long", "ulong")):
+        # A user can't be submitting a numpy type if numpy is not installed, so skip
+        # handling of those types
+        with contextlib.suppress(ImportError):
+            import numpy as np
+
+            # "unwrap" arrays that contain a single element
+            if isinstance(val, np.ndarray) and val.size == 1:
                 coerced = True
-                val = int(orig_val)
-            elif orig_type.__name__.startswith(("float", "complex")):
-                if val.imag == 0.0 and float(val.real).is_integer():
-                    coerced = True
-                    val = int(val.real)
+                val = val.item()
+            if isinstance(val, (np.integer, np.floating, np.complexfloating)) and val.imag == 0 and val.real.is_integer():
+                coerced = True
+                val = str(int(val.real))
         if isinstance(val, int):
             val = str(val)
+        elif isinstance(val, (float, complex)) and val.imag == 0 and val.real.is_integer():
+            coerced = True
+            val = str(int(val.real))
+        elif isinstance(val, bytes):
+            coerced = True
+            val = val.decode()
+        elif isinstance(val, (Decimal, Fraction)):
+            # if val can be represented as an integer ratio where the denominator is 1
+            # val is an integer and val == numerator
+            numerator, denominator = val.as_integer_ratio()
+            if denominator == 1:
+                coerced = True
+                val = str(numerator)
+        if not isinstance(val, str):
+            raise AocdError(f"Failed to coerce {type(orig_val).__name__} value {orig_val!r} for {self.year}/{self.day:02}.")
         if coerced:
             log.warning(
-                "coerced %s value %r for %d/%02d",
-                orig_type.__name__,
+                "coerced %s value %r for %d/%02d to %r",
+                type(orig_val).__name__,
                 orig_val,
                 self.year,
                 self.day,
+                val,
             )
         return val
 
