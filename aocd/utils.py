@@ -47,7 +47,6 @@ class HttpClient:
     req_count: dict[t.Literal["GET", "POST"], int]
 
     def __init__(self) -> None:
-        
         proxy_url = os.environ.get('http_proxy') or os.environ.get('https_proxy')
         if proxy_url:
             self.pool_manager = urllib3.ProxyManager(proxy_url, headers={"User-Agent": USER_AGENT})
