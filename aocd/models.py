@@ -559,6 +559,9 @@ class Puzzle:
             log.error(response.data.decode(errors="replace"))
             raise AocdError(f"HTTP {response.status} at {url}")
         soup = _get_soup(response.data)
+        if soup(string="[Log In]"):
+            log.warning("Can't submit when unauthenticated")
+            raise DeadTokenError(f"the auth token ...{self.user.token[-4:]} is dead")
         message = soup.article.text
         self._save_submit_result(value=value, part=part, message=message, when=when)
         color = None
