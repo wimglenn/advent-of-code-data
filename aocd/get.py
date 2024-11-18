@@ -21,14 +21,14 @@ from .utils import blocker
 log: Logger = getLogger(__name__)
 
 
-def get_data(
+def get_puzzle(
     session: str | None = None,
     day: int | None = None,
     year: int | None = None,
     block: bool = False,
-) -> str:
+) -> Puzzle:
     """
-    Get data for day (1-25) and year (2015+).
+    Get puzzle for day (1-25) and year (2015+).
     User's session cookie (str) is needed - puzzle inputs differ by user.
     If `block` is True and the puzzle is still locked, will wait until unlock
     before returning data.
@@ -45,14 +45,27 @@ def get_data(
         log.info("most recent year=%s", year)
     puzzle = Puzzle(year=year, day=day, user=user)
     try:
-        return puzzle.input_data
+        return puzzle
     except PuzzleLockedError:
         if not block:
             raise
         q = block == "q"
         blocker(quiet=q, until=(year, day))
-        return puzzle.input_data
+        return puzzle
 
+def get_data(
+    session: str | None = None,
+    day: int | None = None,
+    year: int | None = None,
+    block: bool = False,
+) -> str:
+    """
+    Get puzzle for day (1-25) and year (2015+).
+    User's session cookie (str) is needed - puzzle inputs differ by user.
+    If `block` is True and the puzzle is still locked, will wait until unlock
+    before returning data.
+    """
+    return get_puzzle(session=session, day=day, year=year, block=block).input_data
 
 def most_recent_year() -> int:
     """
