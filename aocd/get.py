@@ -45,6 +45,7 @@ def get_puzzle(
         log.info("most recent year=%s", year)
     puzzle = Puzzle(year=year, day=day, user=user)
     try:
+        _ = puzzle.input_data
         return puzzle
     except PuzzleLockedError:
         if not block:
