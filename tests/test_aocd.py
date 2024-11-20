@@ -52,3 +52,14 @@ def test_data_in_interactive_mode(monkeypatch, mocker, freezer):
 def test_attribute_errors_have_context():
     with pytest.raises(AttributeError("module 'aocd' has no attribute 'nope'")):
         aocd.nope
+
+
+def test_import_puzzle(mocker):
+    fake_stack = [("~/2023/q21.py", 1, "<test>", "from aocd import data")]
+    mocker.patch("aocd.get.traceback.extract_stack", return_value=fake_stack)
+    mocker.patch("aocd.models.Puzzle.input_data", "test puzzle")
+    from aocd import puzzle
+
+    assert puzzle.year == 2023
+    assert puzzle.day == 21
+    assert puzzle.input_data == "test puzzle"

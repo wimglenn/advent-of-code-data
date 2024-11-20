@@ -15,6 +15,7 @@ from . import types
 from . import utils
 from .exceptions import AocdError
 from .get import get_data
+from .get import get_puzzle
 from .get import get_day_and_year
 from .post import submit as _impartial_submit
 
@@ -48,7 +49,7 @@ def __getattr__(name: str) -> t.Any:
         return get_data(day=day, year=year)
     if name == "puzzle":
         day, year = get_day_and_year()
-        return get.get_puzzle(day=day, year=year)
+        return get_puzzle(day=day, year=year)
     if name == "submit":
         try:
             day, year = get_day_and_year()
