@@ -29,6 +29,7 @@ __all__ = [
     "get_data",
     "models",
     "post",
+    "puzzle",
     "runner",
     "submit",
     "types",
@@ -37,6 +38,7 @@ __all__ = [
 
 if t.TYPE_CHECKING:
     data: str
+    puzzle: models.Puzzle
     submit = _impartial_submit
 
 
@@ -44,6 +46,9 @@ def __getattr__(name: str) -> t.Any:
     if name == "data":
         day, year = get_day_and_year()
         return get_data(day=day, year=year)
+    if name == "puzzle":
+        day, year = get_day_and_year()
+        return get.get_puzzle(day=day, year=year)
     if name == "submit":
         try:
             day, year = get_day_and_year()

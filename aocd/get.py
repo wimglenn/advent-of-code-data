@@ -54,6 +54,40 @@ def get_data(
         return puzzle.input_data
 
 
+def get_puzzle(
+    session: str | None = None,
+    day: int | None = None,
+    year: int | None = None,
+    block: bool = False,
+) -> Puzzle:
+    """
+    Get puzzle for day (1-25) and year (2015+).
+    User's session cookie (str) is needed - puzzle inputs differ by user.
+    If `block` is True and the puzzle is still locked, will wait until unlock
+    before returning data.
+    """
+    if session is None:
+        user = default_user()
+    else:
+        user = User(token=session)
+    if day is None:
+        day = current_day()
+        log.info("current day=%s", day)
+    if year is None:
+        year = most_recent_year()
+        log.info("most recent year=%s", year)
+    puzzle = Puzzle(year=year, day=day, user=user)
+    try:
+        _ = puzzle.input_data
+        return puzzle
+    except PuzzleLockedError:
+        if not block:
+            raise
+        q = block == "q"
+        blocker(quiet=q, until=(year, day))
+        return puzzle
+
+
 def most_recent_year() -> int:
     """
     This year, if it's December.
