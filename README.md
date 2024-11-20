@@ -20,7 +20,7 @@ data in a string:
 '1\n2\n3\n7\n11\n13\n17\n19\n23\n31...
 ```
 
-If you\'d just like to print or keep your own raw input files, there\'s
+If you'd just like to print or keep your own raw input files, there's
 a script for that:
 
 ``` bash
@@ -85,18 +85,17 @@ export AOC_SESSION=cafef00db01dfaceba5eba11deadbeef
 *Note:* Windows users should use `set` instead of `export` here.
 
 The session ID is a cookie which is set when you login to AoC. You can
-find it with your browser inspector. If you\'re hacking on AoC at all
+find it with your browser inspector. If you're hacking on AoC at all
 you probably already know these kind of tricks, but if you need help
-with that part then you can [look
-here](https://github.com/wimglenn/advent-of-code/issues/1).
+with that part then you can [look here](https://github.com/wimglenn/advent-of-code/issues/1).
 
-*Note:* If you don\'t like the env var, you could also keep your
+*Note:* If you don't like the env var, you could also keep your
 token(s) in files. By default the location is `~/.config/aocd/token`.
 Set the `AOCD_DIR` environment variable to some existing directory if
 you wish to use another location to store token(s).
 
-*New in version 0.9.0.* There\'s a utility script `aocd-token` which
-attempts to find session tokens from your browser\'s cookie storage.
+*New in version 0.9.0.* There's a utility script `aocd-token` which
+attempts to find session tokens from your browser's cookie storage.
 This feature is experimental and requires you to additionally install
 the package `browser-cookie3`. Only Chrome, Firefox, and Edge browsers
 are currently supported. On macOS, you may get an authentication dialog
@@ -121,7 +120,7 @@ submit(my_answer, part="a", day=25, year=2017)
 ```
 
 Note that the same filename introspection of year/day also works for
-automated submission. There\'s also introspection of the \"level\", i.e.
+automated submission. There's also introspection of the "level", i.e.
 part a or part b, aocd can automatically determine if you have already
 completed part a or not and submit your answer for the correct part
 accordingly. In this case, just use:
@@ -135,14 +134,14 @@ The response message from AoC will be printed in the terminal. If you
 gave the right answer, then the puzzle will be refreshed in your web
 browser (so you can read the instructions for the next part, for
 example). **Proceed with caution!** If you submit wrong guesses, your
-user **WILL** get rate-limited by Eric, so don\'t call submit until
-you\'re fairly confident you have a correct answer!
+user **WILL** get rate-limited by Eric, so don't call submit until
+you're fairly confident you have a correct answer!
 
 *New in version 2.0.0*: Prevent submission of an answer when it is
 certain the value is incorrect. For example, if the server previously
-told you that your answer \"1234\" was too high, then aocd will remember
+told you that your answer "1234" was too high, then aocd will remember
 this info and prevent you from subsequently submitting an even higher
-value such as \"1300\".
+value such as "1300".
 
 ## Models
 
@@ -180,11 +179,8 @@ Your own solutions can be executed by writing and using an
 [entry-point](https://packaging.python.org/specifications/entry-points/)
 into your code, registered in the group `"adventofcode.user"`. Your
 entry-point should resolve to a callable, and it will be called with
-three keyword arguments: `year`, `day`, and `data`. For example, [my
-entry-point is called
-\"wim\"](https://github.com/wimglenn/advent-of-code-wim/blob/d033366c16fba50e413f2fa7df32e8a0eac9542f/setup.py#L36)
-and running against [my
-code](https://github.com/wimglenn/advent-of-code-wim/blob/main/aoc_wim/__init__.py)
+three keyword arguments: `year`, `day`, and `data`. For example, [my entry-point is called "wim"](https://github.com/wimglenn/advent-of-code-wim/blob/d033366c16fba50e413f2fa7df32e8a0eac9542f/setup.py#L36)
+and running against [my code](https://github.com/wimglenn/advent-of-code-wim/blob/main/aoc_wim/__init__.py)
 (after `pip install advent-of-code-wim`) would be like this:
 
 ``` python
@@ -193,7 +189,7 @@ code](https://github.com/wimglenn/advent-of-code-wim/blob/main/aoc_wim/__init__.
 ('XLZAKBGZ', '10656')
 ```
 
-If you\'ve never written a plugin before, see
+If you've never written a plugin before, see
 <https://entrypoints.readthedocs.io/> for more info about plugin systems
 based on Python entry-points.
 
@@ -201,8 +197,8 @@ based on Python entry-points.
 
 *New in version 0.8.0.*
 
-Ever tried running your code against other people\'s inputs? AoC is full
-of tricky edge cases. You may find that sometimes you\'re only getting
+Ever tried running your code against other people's inputs? AoC is full
+of tricky edge cases. You may find that sometimes you're only getting
 the right answer by luck, and your code will fail on some other dataset.
 Using aocd, you can collect a few different auth tokens for each of your
 accounts (github/google/reddit/twitter) and verify your answers across
@@ -219,7 +215,7 @@ the `aoc` console script:
 As you can see above, I actually had incorrect code for [2017 Day 20:
 Particle Swarm](https://adventofcode.com/2017/day/20), but that
 [bug](https://github.com/wimglenn/advent-of-code-wim/commit/31e454270001c6d06b46014fe5dafd03e29507b8)
-only showed up for the google token\'s dataset. Whoops. Also, it looks
+only showed up for the google token's dataset. Whoops. Also, it looks
 like my algorithm for [2017 Day 13: Packet
 Scanners](https://adventofcode.com/2017/day/13) was kinda garbage. Too
 slow. According to [AoC FAQ](https://adventofcode.com/about):
@@ -232,7 +228,7 @@ By the way, the `aoc` runner will kill your code if it takes more than
 option, e.g. `--timeout=120`.
 
 *New in version 1.1.0:* Added option `--quiet` to suppress any output
-from plugins so it doesn\'t mess up the `aoc` runner\'s display.
+from plugins so it doesn't mess up the `aoc` runner's display.
 
 *New in version 2.0.0:* You can verify your code against the example
 input data and answers, scraped from puzzle pages where available, using
@@ -241,7 +237,7 @@ instead of passing the full user input data.
 
 ## How does this library work?
 
-It will automatically get today\'s data at import time, if used within
+It will automatically get today's data at import time, if used within
 the interactive interpreter. Otherwise, the date is found by
 introspection of the path and file name from which `aocd` module was
 imported.
@@ -256,8 +252,8 @@ xmas_problem_2016_25b_dawg.py
 ~/src/aoc/2015/p8.py
 ```
 
-A filename like `problem_one.py` will not work, so don\'t do that. If
-you don\'t like weird frame hacks, just use the `aocd.get_data()`
+A filename like `problem_one.py` will not work, so don't do that. If
+you don't like weird frame hacks, just use the `aocd.get_data()`
 function instead and have a nice day!
 
 ## Cache invalidation?
@@ -266,7 +262,7 @@ function instead and have a nice day!
 avoid hitting the AoC servers any more often than strictly necessary
 (this also speeds things up). All data is persisted in plain text files
 under `~/.config/aocd`. To remove any caches, you may simply delete
-whatever files you want under that directory tree. If you\'d prefer to
+whatever files you want under that directory tree. If you'd prefer to
 use a different path, then export an `AOCD_DIR` environment variable
 with the desired location.
 
