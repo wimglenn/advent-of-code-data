@@ -173,6 +173,9 @@ aocd will not submit that answer again. You've previously guessed 299 and the se
 That's not the right answer; your answer is too high. If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit. Please wait one minute before trying again. (You guessed 299.) [Return to Day 20]
 ```
 
+*New in version 2.0.4:* Added convenience `from aocd import puzzle`,
+to return a `Puzzle` instance bound to the auto-detected day/year/user.
+
 Your own solutions can be executed by writing and using an
 [entry-point](https://packaging.python.org/specifications/entry-points/)
 into your code, registered in the group `"adventofcode.user"`. Your
