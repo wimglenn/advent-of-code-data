@@ -121,13 +121,13 @@ class Example(NamedTuple):
 
     Sometimes examples in the prose need some extra context, such as a fewer
     number of iterations to be used when working with the test data. This may
-    be returned as some human-readable string in `example.extra`
+    be returned as key/val context in `example.extra`.
     """
 
     input_data: str
     answer_a: str | None = None
     answer_b: str | None = None
-    extra: str | None = None
+    extra: dict[str, t.Any] | None = None
 
     @property
     def answers(self) -> tuple[str | None, str | None]:

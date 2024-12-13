@@ -1,3 +1,5 @@
+import os
+import json
 import sys
 import typing as t
 from functools import partial
@@ -26,6 +28,7 @@ __all__ = [
     "data",
     "examples",
     "exceptions",
+    "extra",
     "get",
     "get_data",
     "models",
@@ -39,6 +42,7 @@ __all__ = [
 
 if t.TYPE_CHECKING:
     data: str
+    extra: dict[str, t.Any]
     puzzle: models.Puzzle
     submit = _impartial_submit
 
@@ -50,6 +54,8 @@ def __getattr__(name: str) -> t.Any:
     if name == "puzzle":
         day, year = get_day_and_year()
         return get_puzzle(day=day, year=year)
+    if name == "extra":
+        return json.loads(os.environ.get("AOCD_EXTRA", "{}"))
     if name == "submit":
         try:
             day, year = get_day_and_year()
