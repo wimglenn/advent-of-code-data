@@ -72,3 +72,11 @@ def test_no_numbers_in_py_filename_but_date_in_abspath(mocker):
     day, year = get_day_and_year()
     assert day == 2
     assert year == 2022
+
+
+def test_get_day_and_year_separate_part2_filename(mocker):
+    stack = [("AoC2024/day14part2.py", 1, "<test>", "from aocd import data")]
+    mocker.patch("aocd.get.traceback.extract_stack", return_value=stack)
+    day, year = get_day_and_year()
+    assert day == 14
+    assert year == 2024

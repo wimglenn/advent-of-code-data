@@ -133,6 +133,7 @@ def get_day_and_year() -> tuple[int, int | None]:
         filename = frame[0]
         linetxt = frame[-1] or ""
         basename = os.path.basename(filename)
+        basename = basename.split("part")[0]
         reasons_to_skip_frame = [
             not re.search(pattern_day, basename),  # no digits in filename
             filename == __file__,  # here
