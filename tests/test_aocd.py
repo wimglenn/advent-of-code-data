@@ -63,3 +63,9 @@ def test_import_puzzle(mocker):
     assert puzzle.year == 2023
     assert puzzle.day == 21
     assert puzzle.input_data == "test puzzle"
+
+
+def test_extra_context(monkeypatch):
+    monkeypatch.setenv("AOCD_EXTRA", '{"k": "v"}')
+    from aocd import extra
+    assert extra["k"] == "v"

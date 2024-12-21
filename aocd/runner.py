@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import itertools
+import json
 import logging
 import os
 import sys
@@ -30,7 +31,7 @@ from .utils import get_plugins
 # every problem has a solution that completes in at most 15 seconds on ten-year-old hardware
 
 
-DEFAULT_TIMEOUT = 60
+DEFAULT_TIMEOUT: float = 60.
 log: logging.Logger = logging.getLogger(__name__)
 
 
@@ -346,6 +347,9 @@ def run_for(
         for dataset in datas:
             if example:
                 data = examples[dataset].input_data
+                extra = examples[dataset].extra
+                if extra:
+                    os.environ[f"AOCD_EXTRA"] = json.dumps(extra)
             else:
                 token = datasets[dataset]
                 os.environ["AOC_SESSION"] = token
@@ -363,6 +367,7 @@ def run_for(
                 progress=progress,
                 capture=capture,
             )
+            os.environ.pop(f"AOCD_EXTRA", None)
             runtime = format_time(walltime, timeout)
             line = "   ".join([runtime, progress])
             if error:
