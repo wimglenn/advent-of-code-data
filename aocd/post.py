@@ -61,12 +61,14 @@ def submit(
         # guess if user is submitting for part a or part b,
         # based on whether part a is already solved or not
         answer_a = getattr(puzzle, "answer_a", None)
-        log.warning("answer a: %s", answer_a)
         if answer_a is None:
             log.warning("submitting for part a")
             part = "a"
         else:
-            log.warning("submitting for part b (part a is already completed)")
+            log.warning(
+                "submitting for part b (part a already completed with %r)",
+                answer_a,
+            )
             part = "b"
     response = puzzle._submit(value=answer, part=part, reopen=reopen, quiet=quiet)
     return response
