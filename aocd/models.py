@@ -129,6 +129,7 @@ class User:
         ur_broke = "You haven't collected any stars"
         for year in years:
             url = f"https://adventofcode.com/{year}/leaderboard/self"
+            log.debug("requesting personal stats for year %d", year)
             response = http.get(url, token=self.token, redirect=False)
             if 300 <= response.status < 400:
                 # expired tokens 302 redirect to the overall leaderboard
@@ -456,7 +457,7 @@ class Puzzle:
             return json.loads(self.submit_results_path.read_text())
         return []
 
-    def _submit(self, value, part, reopen=True, quiet=False):
+    def _submit(self, value, part, reopen=True, quiet=False, precheck=True):
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
@@ -541,13 +542,14 @@ class Puzzle:
                 "because that was the answer for part a"
             )
         url = self.submit_url
-        check_guess = self._check_already_solved(value, part)
-        if check_guess is not None:
-            if quiet:
-                log.info(check_guess)
-            else:
-                print(check_guess)
-            return
+        if precheck:
+            check_guess = self._check_already_solved(value, part)
+            if check_guess is not None:
+                if quiet:
+                    log.info(check_guess)
+                else:
+                    print(check_guess)
+                return
         sanitized = "..." + self.user.token[-4:]
         log.info("posting %r to %s (part %s) token=%s", value, url, part, sanitized)
         level = {"a": "1", "b": "2"}[part]
@@ -681,6 +683,7 @@ class Puzzle:
         # check puzzle page for any previously solved answers.
         # if these were solved by typing into the website directly, rather than using
         # aocd submit, then our caches might not know about the answers yet.
+        log.debug(f"check page {self.year}/{self.day:02d} for existing answer ({part})")
         self._request_puzzle_page()
         if answer_path.is_file():
             return answer_path.read_text(encoding="utf-8").strip()

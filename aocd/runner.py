@@ -390,13 +390,19 @@ def run_for(
                         post = part == "a" or (part == "b" and puzzle.answered_a)
                         if autosubmit and post:
                             try:
-                                puzzle._submit(answer, part, reopen=reopen, quiet=True)
+                                puzzle._submit(
+                                    value=answer,
+                                    part=part,
+                                    reopen=reopen,
+                                    quiet=True,
+                                    precheck=False,
+                                )
                             except AocdError as err:
                                 log.warning("error submitting - %s", err)
-                            try:
+                            # Correct submission will have created the answer file
+                            answer_path = getattr(puzzle, f"answer_{part}_path")
+                            if answer_path.is_file():
                                 expected = getattr(puzzle, "answer_" + part)
-                            except AttributeError:
-                                pass
                     correct = expected is not None and str(expected) == answer
                     icon = colored("✔", "green") if correct else colored("✖", "red")
                     correction = ""

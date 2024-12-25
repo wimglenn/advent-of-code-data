@@ -47,11 +47,12 @@ class HttpClient:
     req_count: dict[t.Literal["GET", "POST"], int]
 
     def __init__(self) -> None:
-        proxy_url = os.environ.get('http_proxy') or os.environ.get('https_proxy')
+        proxy_url = os.environ.get("http_proxy") or os.environ.get("https_proxy")
+        headers = {"User-Agent": USER_AGENT}
         if proxy_url:
-            self.pool_manager = urllib3.ProxyManager(proxy_url, headers={"User-Agent": USER_AGENT})
+            self.pool_manager = urllib3.ProxyManager(proxy_url, headers=headers)
         else:
-            self.pool_manager = urllib3.PoolManager(headers={"User-Agent": USER_AGENT})
+            self.pool_manager = urllib3.PoolManager(headers=headers)
         self.req_count = {"GET": 0, "POST": 0}
         self._max_t = 3.0
         self._cooloff = 0.16
@@ -173,6 +174,7 @@ def get_owner(token: str) -> str:
     Returns a string like "authtype.username.userid"
     """
     url = "https://adventofcode.com/settings"
+    log.debug(f"attempting to determine owner of token ...{token[-4:]}")
     response = http.get(url, token=token, redirect=False)
     if response.status != 200:
         # bad tokens will 302 redirect to main page
