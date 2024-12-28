@@ -20,6 +20,7 @@ import pebble.concurrent
 from .exceptions import AocdError
 from .models import _load_users
 from .models import AOCD_CONFIG_DIR
+from .models import NON_ANSWER
 from .models import Puzzle
 from .utils import _cli_guess
 from .utils import AOC_TZ
@@ -370,6 +371,9 @@ def run_for(
             os.environ.pop(f"AOCD_EXTRA", None)
             runtime = format_time(walltime, timeout)
             line = "   ".join([runtime, progress])
+            if a in NON_ANSWER and b in NON_ANSWER and not error:
+                a = b = ""
+                error = f"Skipping {year}/{day:<2d} (entry-point returned non-answers)"
             if error:
                 assert a == b == ""
                 icon = colored("✖", "red")

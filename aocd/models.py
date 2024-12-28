@@ -50,6 +50,10 @@ AOCD_DATA_DIR = AOCD_DATA_DIR.expanduser()
 AOCD_CONFIG_DIR = Path(os.environ.get("AOCD_CONFIG_DIR", AOCD_DATA_DIR)).expanduser()
 URL = "https://adventofcode.com/{year}/day/{day}"
 
+# aocd will refuse to submit these as answers, and if a user entry point happens to
+# return them the runner will consider it to mean the solution hasn't been implemented
+NON_ANSWER = "", b"", None, b"None", "None"
+
 
 class User:
     _token2id = None
@@ -461,7 +465,7 @@ class Puzzle:
         # actual submit logic. not meant to be invoked directly - users are expected
         # to use aocd.post.submit function, puzzle answer setters, or the aoc.runner
         # which autosubmits answers by default.
-        if value in {"", b"", None, b"None", "None"}:
+        if value in NON_ANSWER:
             raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
             value = self._coerce_val(value)

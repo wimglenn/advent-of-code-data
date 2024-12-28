@@ -86,6 +86,10 @@ def bugged_entry_point(year, day, data):
     raise Exception(123, 456)
 
 
+def non_answer_entry_point(year, day, data):
+    return "", ""
+
+
 def test_results(mocker, capsys):
     ep = mocker.Mock()
     ep.name = "testuser"
@@ -200,6 +204,30 @@ def test_run_error(aocd_data_dir, mocker, capsys):
     assert "✖" in out
     assert txt in out
     assert "part b" not in out  # because it's 25 dec, no part b puzzle
+
+
+def test_run_non_answers(aocd_data_dir, mocker, capsys):
+    prose_dir = aocd_data_dir / "prose"
+    prose_dir.mkdir()
+    puzzle_file = prose_dir / "2018_25_prose.0.html"
+    puzzle_file.write_text("<h2>--- Day 25: The Puzzle Title ---</h2>")
+    input_path = aocd_data_dir / "testauth.testuser.000" / "2018_25_input.txt"
+    input_path.write_text("someinput")
+    answer_path = aocd_data_dir / "testauth.testuser.000" / "2018_25a_answer.txt"
+    answer_path.write_text("answ")
+    ep = mocker.Mock()
+    ep.name = "testuser"
+    ep.load.return_value = non_answer_entry_point
+    mocker.patch("aocd.runner.get_plugins", return_value=[ep])
+    run_for(
+        plugs=["testuser"],
+        years=[2018],
+        days=[25],
+        datasets={"default": "thetesttoken"},
+    )
+    out, err = capsys.readouterr()
+    txt = "Skipping 2018/25 (entry-point returned non-answers)"
+    assert txt in out
 
 
 def test_run_and_autosubmit(aocd_data_dir, mocker, capsys, pook):
