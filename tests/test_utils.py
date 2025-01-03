@@ -98,7 +98,7 @@ def test_atomic_write_file(aocd_data_dir):
     ],
 )
 def test_type_coercions(v_raw, v_expected, len_logs, caplog):
-    v_actual = coerce(v_raw)
+    v_actual = coerce(v_raw, warn=True)
     assert v_actual == v_expected, f"{type(v_raw)} {v_raw})"
     assert len(caplog.records) == len_logs
 

@@ -272,7 +272,7 @@ def _get_soup(html):
     return bs4.BeautifulSoup(html, "html.parser")
 
 
-def coerce(val: t.Any, warn: bool = True) -> str:
+def coerce(val: t.Any, warn: bool = False) -> str:
     """
     Convert answer `val` into a string suitable for HTTP submission.
     Technically adventofcode.com will only accept strings as answers,

@@ -329,7 +329,7 @@ class Puzzle:
         to the server if necessary.
         """
         if not isinstance(val, str):
-            val = coerce(val)
+            val = coerce(val, warn=True)
         if getattr(self, "answer_a", None) == val:
             return
         self._submit(value=val, part="a")
@@ -362,7 +362,7 @@ class Puzzle:
         to the server if necessary.
         """
         if not isinstance(val, str):
-            val = coerce(val)
+            val = coerce(val, warn=True)
         if getattr(self, "answer_b", None) == val:
             return
         self._submit(value=val, part="b")
@@ -422,7 +422,7 @@ class Puzzle:
         if value in NON_ANSWER:
             raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
-            value = coerce(value)
+            value = coerce(value, warn=True)
         part = str(part).replace("1", "a").replace("2", "b").lower()
         if part not in {"a", "b"}:
             raise AocdError('part must be "a" or "b"')
