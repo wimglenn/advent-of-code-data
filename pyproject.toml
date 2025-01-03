@@ -20,7 +20,7 @@ dependencies = [
     "pebble",
     "urllib3",
     'tzdata ; platform_system == "Windows"',
-    "aocd-example-parser >= 2023.12.21",
+    "aocd-example-parser >= 2023.12.24",
 ]
 
 [[project.authors]]

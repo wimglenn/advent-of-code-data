@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import contextlib
 import json
 import logging
 import os
@@ -11,8 +10,6 @@ import typing as t
 import webbrowser
 from datetime import datetime
 from datetime import timedelta
-from decimal import Decimal
-from fractions import Fraction
 from functools import cache
 from functools import cached_property
 from importlib.metadata import entry_points
@@ -36,6 +33,7 @@ from .utils import _ensure_intermediate_dirs
 from .utils import _get_soup
 from .utils import AOC_TZ
 from .utils import atomic_write_file
+from .utils import coerce
 from .utils import colored
 from .utils import get_owner
 from .utils import get_plugins
@@ -308,52 +306,6 @@ class Puzzle:
             txt = f"<Puzzle({self.year}, {self.day}) at {hex(id(self))} - {self.title}>"
             p.text(txt)
 
-    def _coerce_val(self, val):
-        # technically adventofcode.com will only accept strings as answers.
-        # but it's convenient to be able to submit numbers, since many of the answers
-        # are numeric strings. coerce the values to string safely.
-        orig_val = val
-        coerced = False
-        # A user can't be submitting a numpy type if numpy is not installed, so skip
-        # handling of those types
-        with contextlib.suppress(ImportError):
-            import numpy as np
-
-            # "unwrap" arrays that contain a single element
-            if isinstance(val, np.ndarray) and val.size == 1:
-                coerced = True
-                val = val.item()
-            if isinstance(val, (np.integer, np.floating, np.complexfloating)) and val.imag == 0 and val.real.is_integer():
-                coerced = True
-                val = str(int(val.real))
-        if isinstance(val, int):
-            val = str(val)
-        elif isinstance(val, (float, complex)) and val.imag == 0 and val.real.is_integer():
-            coerced = True
-            val = str(int(val.real))
-        elif isinstance(val, bytes):
-            coerced = True
-            val = val.decode()
-        elif isinstance(val, (Decimal, Fraction)):
-            # if val can be represented as an integer ratio where the denominator is 1
-            # val is an integer and val == numerator
-            numerator, denominator = val.as_integer_ratio()
-            if denominator == 1:
-                coerced = True
-                val = str(numerator)
-        if not isinstance(val, str):
-            raise AocdError(f"Failed to coerce {type(orig_val).__name__} value {orig_val!r} for {self.year}/{self.day:02}.")
-        if coerced:
-            log.warning(
-                "coerced %s value %r for %d/%02d to %r",
-                type(orig_val).__name__,
-                orig_val,
-                self.year,
-                self.day,
-                val,
-            )
-        return val
-
     @property
     def answer_a(self) -> str:
         """
@@ -376,7 +328,8 @@ class Puzzle:
         The result of the submission will be printed to the terminal. It will only POST
         to the server if necessary.
         """
-        val = self._coerce_val(val)
+        if not isinstance(val, str):
+            val = coerce(val)
         if getattr(self, "answer_a", None) == val:
             return
         self._submit(value=val, part="a")
@@ -408,7 +361,8 @@ class Puzzle:
         The result of the submission will be printed to the terminal. It will only POST
         to the server if necessary.
         """
-        val = self._coerce_val(val)
+        if not isinstance(val, str):
+            val = coerce(val)
         if getattr(self, "answer_b", None) == val:
             return
         self._submit(value=val, part="b")
@@ -468,7 +422,7 @@ class Puzzle:
         if value in NON_ANSWER:
             raise AocdError(f"cowardly refusing to submit non-answer: {value!r}")
         if not isinstance(value, str):
-            value = self._coerce_val(value)
+            value = coerce(value)
         part = str(part).replace("1", "a").replace("2", "b").lower()
         if part not in {"a", "b"}:
             raise AocdError('part must be "a" or "b"')

@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import sys
 import typing as t
 from functools import partial
@@ -17,8 +17,8 @@ from . import types
 from . import utils
 from .exceptions import AocdError
 from .get import get_data
-from .get import get_puzzle
 from .get import get_day_and_year
+from .get import get_puzzle
 from .post import submit as _impartial_submit
 
 __all__ = [

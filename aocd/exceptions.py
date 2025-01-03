@@ -20,3 +20,7 @@ class UnknownUserError(AocdError):
 
 class ExampleParserError(AocdError):
     """for problems specific to the example extraction code"""
+
+
+class CoercionError(AocdError):
+    """failed to coerce a value to string safely"""
