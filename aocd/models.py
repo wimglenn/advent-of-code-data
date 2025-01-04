@@ -268,7 +268,7 @@ class Puzzle:
         # logs warning and returns an empty list if the parser plugin raises an
         # exception for any reason.
         try:
-            page = examples.Page.from_raw(html=self._get_prose())
+            page = examples.Page.from_raw(html=self._get_prose(force_precheck=True))
             parser = _load_example_parser(name=parser_name)
             if getattr(parser, "uses_real_datas", True):
                 datas = examples._get_unique_real_inputs(self.year, self.day)
@@ -737,9 +737,16 @@ class Puzzle:
                     _ensure_intermediate_dirs(self.prose0_path)
                     self.prose0_path.write_text(text, encoding="utf-8")
 
-    def _get_prose(self):
+    def _get_prose(self, force_precheck=False):
         # prefer to return full prose (i.e. part b is solved or unlocked)
         # prefer to return prose with answers from same the user id as self.user.id
+        if force_precheck:
+            unlocked_files = [
+                *AOCD_DATA_DIR.glob("*/" + self.prose1_path.name),
+                *AOCD_DATA_DIR.glob("*/" + self.prose2_path.name),
+            ]
+            if not unlocked_files:
+                self._request_puzzle_page()
         for path in self.prose2_path, self.prose1_path:
             if path.is_file():
                 log.debug("_get_prose cache hit %s", path)
@@ -753,7 +760,8 @@ class Puzzle:
             log.debug("_get_prose cache hit %s", self.prose0_path)
             return self.prose0_path.read_text(encoding="utf-8")
         log.debug("_get_prose cache miss year=%d day=%d", self.year, self.day)
-        self._request_puzzle_page()
+        if not force_precheck:
+            self._request_puzzle_page()
         for path in self.prose2_path, self.prose1_path, self.prose0_path:
             if path.is_file():
                 log.debug("_get_prose using %s", path)

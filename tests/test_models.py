@@ -374,13 +374,16 @@ def test_user_from_unknown_id(aocd_config_dir):
         User.from_id("blah")
 
 
-def test_examples_cache(aocd_data_dir, pook):
+def test_examples_cache(aocd_data_dir, pook, caplog):
+    caplog.set_level(logging.DEBUG)
     mock = pook.get(
         url="https://adventofcode.com/2014/day/1",
         response_body=(
             "<title>Day 1 - Advent of Code 2014</title>"
             "<article><pre><code>1\n2\n3\n</code></pre><code>abc</code></article>"
             "<article><pre><code>1\n2\n3\n</code></pre><code>xyz</code></article>"
+            "The first half of this puzzle is complete!"
+            "<p>Your puzzle answer was <code>answerA</code></p>"
         ),
         times=1,
     )
@@ -388,8 +391,8 @@ def test_examples_cache(aocd_data_dir, pook):
     assert mock.calls == 0
     assert puzzle.examples[0].input_data == "1\n2\n3"
     assert mock.calls == 1
-    assert puzzle.examples[0].input_data
-    assert mock.calls == 1
+    assert puzzle.examples[0].input_data == "1\n2\n3"
+    assert mock.calls == 1, "Should re-use cached result"
 
 
 def test_example_partial(aocd_data_dir, pook):

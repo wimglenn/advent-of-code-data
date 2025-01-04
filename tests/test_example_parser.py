@@ -9,11 +9,12 @@ fake_prose = """
 <title>Day 1 - Advent of Code 1234</title>
 <article>
 <pre><code>test input data</code></pre>
-<code>test answer_a</code>
+<p>Your puzzle answer was <code>test answer_a</code>.</p>
 </article>
 <article>
-<code>test answer_b</code>
+<p>Your puzzle answer was <code>test answer_b</code>.</p>
 </article>
+<p>Both parts of this puzzle are complete! They provide two gold stars: **</p>
 """
 
 
@@ -70,7 +71,7 @@ def test_invalid_page_no_title():
 
 def test_aoce(mocker, freezer, pook, capsys):
     pook.get(
-        url="https://adventofcode.com:443/2022/day/1",
+        url="https://adventofcode.com/2022/day/1",
         response_body=fake_prose,
     )
     freezer.move_to("2022-12-01 12:00:00-0500")
