@@ -42,7 +42,7 @@ def test_submit_doesnt_bind_day_and_year_when_introspection_failed(mocker):
 
 def test_data_in_interactive_mode(monkeypatch, mocker, freezer):
     freezer.move_to("2017-12-10 12:00:00Z")
-    monkeypatch.delattr("__main__.__file__")
+    monkeypatch.setattr("sys.ps1", ">>>>> ", raising=False)
     mock = mocker.patch("aocd.get_data", return_value="repl data")
     data = aocd.data
     mock.assert_called_once_with(day=10, year=2017)
