@@ -67,9 +67,7 @@ def get_puzzle(
             raise
         q = block == "q"
         blocker(quiet=q, until=(year, day))
-        return puzzle
-    else:
-        return puzzle
+    return puzzle
 
 
 def most_recent_year() -> int:
