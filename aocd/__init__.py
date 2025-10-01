@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import typing as t
+from collections.abc import Callable
 from functools import partial
 
 from . import _ipykernel
@@ -44,7 +45,7 @@ if t.TYPE_CHECKING:
     data: str
     extra: dict[str, t.Any]
     puzzle: models.Puzzle
-    submit = _impartial_submit
+    submit: Callable = _impartial_submit
 
 
 def __getattr__(name: str) -> t.Any:
