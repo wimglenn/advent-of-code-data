@@ -7,6 +7,7 @@ name = "advent-of-code-data"
 version = "2.1.0"
 description = "Get your puzzle data with a single import"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.9"
 classifiers = [
     "Intended Audience :: Developers",
@@ -26,9 +27,6 @@ dependencies = [
 [[project.authors]]
 name = "Wim Jeantine-Glenn"
 email = "hey@wimglenn.com"
-
-[project.license]
-text = "MIT"
 
 [project.urls]
 Homepage = "https://github.com/wimglenn/advent-of-code-data"
