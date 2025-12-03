@@ -777,7 +777,7 @@ class Puzzle:
         Most puzzles have exactly one Easter egg, but 2018-12-17 had two, so this
         property always returns a list for consistency.
         """
-        txt = self._get_prose()
+        txt = self._get_prose(force_precheck=True)
         soup = _get_soup(txt)
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
