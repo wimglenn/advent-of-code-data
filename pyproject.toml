@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "advent-of-code-data"
-version = "2.1.0"
+version = "2.1.1"
 description = "Get your puzzle data with a single import"
 readme = "README.md"
 license = "MIT"
@@ -20,7 +20,7 @@ dependencies = [
     "pebble",
     "urllib3",
     'tzdata ; platform_system == "Windows"',
-    "aocd-example-parser >= 2023.12.24",
+    "aocd-example-parser >= 2025.12.1",
 ]
 
 [[project.authors]]

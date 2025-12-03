@@ -311,6 +311,30 @@ def test_easter_eggs(pook):
     assert egg.attrs["title"] == "Later, on its turn, it sends you a sorcery."
 
 
+def test_easter_eggs_cache(pook):
+    pook.get(
+        url="https://adventofcode.com/2025/day/1",
+        response_body=(
+            "Advent of Code"
+            '<article class="day-desc">'
+            "<h2>--- Day 1: Secret Entrance ---</h2>"
+            "The first half of this puzzle is complete!"
+            "<p>Your puzzle answer was <code>answerA</code></p>"
+            '<p><em>password method <span title="You should have seen the chaos">'
+            "0x434C49434B</span></em></p>"
+        )
+    )
+    puzzle = Puzzle(2025, 1)
+    puzzle.prose0_path.parent.mkdir(parents=True, exist_ok=True)
+    puzzle.prose0_path.write_text("no egg")
+    assert not puzzle.prose1_path.exists()
+    [egg] = puzzle.easter_eggs
+    assert puzzle.prose1_path.exists()
+    assert not puzzle.prose2_path.exists()
+    assert egg.text == "0x434C49434B"
+    assert egg.attrs["title"] == "You should have seen the chaos"
+
+
 def test_get_stats_400(pook):
     url = "https://adventofcode.com/2015/leaderboard/self"
     pook.get(url, reply=400)
