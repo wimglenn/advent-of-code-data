@@ -150,17 +150,29 @@ class User:
                 day = int(vals[0])
                 k = f"{year}/{day:02d}"
                 results[k] = {}
-                results[k]["a"] = {
-                    "time": _parse_duration(vals[1]),
-                    "rank": int(vals[2]),
-                    "score": int(vals[3]),
-                }
-                if vals[4] != "-":
-                    results[k]["b"] = {
-                        "time": _parse_duration(vals[4]),
-                        "rank": int(vals[5]),
-                        "score": int(vals[6]),
+                if year >= 2025: # ['1', '10:33:17', '19:54:00']
+                    results[k]["a"] = {
+                        "time": _parse_duration(vals[1]) if vals[1] != "-" else "-",
+                        "rank": 0,
+                        "score": 0,
                     }
+                    results[k]["b"] = {
+                        "time": _parse_duration(vals[2]) if vals[2] != "-" else "-",
+                        "rank": 0,
+                        "score": 0,
+                    }
+                else: # ['1', '11:39:53', '62742', '0', '11:53:41', '59000', '0']
+                    results[k]["a"] = {
+                        "time": _parse_duration(vals[1]),
+                        "rank": int(vals[2]),
+                        "score": int(vals[3]),
+                    }
+                    if vals[4] != "-":
+                        results[k]["b"] = {
+                            "time": _parse_duration(vals[4]),
+                            "rank": int(vals[5]),
+                            "score": int(vals[6]),
+                        }
         return results
 
 
@@ -777,7 +789,7 @@ class Puzzle:
         Most puzzles have exactly one Easter egg, but 2018-12-17 had two, so this
         property always returns a list for consistency.
         """
-        txt = self._get_prose(force_precheck=True)
+        txt = self._get_prose()
         soup = _get_soup(txt)
         eggs = soup.find_all(["span", "em", "code"], class_=None, attrs={"title": bool})
         return eggs
@@ -811,7 +823,10 @@ def _parse_duration(s):
     """Parse a string like 01:11:16 (hours, minutes, seconds) into a timedelta"""
     if s == ">24h":
         return timedelta(hours=24)
-    h, m, s = [int(x) for x in s.split(":")]
+    elif s == "-":
+        return timedelta(0,0,0)
+    else:
+        h, m, s = [int(x) for x in s.split(":")]
     return timedelta(hours=h, minutes=m, seconds=s)
 
 
