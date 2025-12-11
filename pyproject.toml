@@ -21,6 +21,7 @@ dependencies = [
     "urllib3",
     'tzdata ; platform_system == "Windows"',
     "aocd-example-parser >= 2025.12.1",
+    'typing_extensions ; python_version < "3.11"',
 ]
 
 [[project.authors]]

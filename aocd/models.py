@@ -149,18 +149,16 @@ class User:
                 vals = line.split()
                 day = int(vals[0])
                 k = f"{year}/{day:02d}"
-                results[k] = {}
-                results[k]["a"] = {
-                    "time": _parse_duration(vals[1]),
-                    "rank": int(vals[2]),
-                    "score": int(vals[3]),
-                }
-                if vals[4] != "-":
-                    results[k]["b"] = {
-                        "time": _parse_duration(vals[4]),
-                        "rank": int(vals[5]),
-                        "score": int(vals[6]),
-                    }
+                results[k] = {"a": {"time": _parse_duration(vals[1])}}
+                if year < 2025:
+                    results[k]["a"]["rank"] = int(vals[2])
+                    results[k]["a"]["score"] = int(vals[3])
+                    del vals[2:4]
+                if vals[2] != "-":
+                    results[k]["b"] = {"time": _parse_duration(vals[2])}
+                    if year < 2025:
+                        results[k]["b"]["rank"] = int(vals[3])
+                        results[k]["b"]["score"] = int(vals[4])
         return results
 
 
