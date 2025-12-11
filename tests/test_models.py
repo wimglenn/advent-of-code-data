@@ -235,6 +235,34 @@ def test_get_stats(pook):
     }
 
 
+fake_stats_response_2025 = """
+<article><p>These are your personal leaderboard times:</p>
+<pre>Day   <span class="leaderboard-daydesc-first">-Part 1-</span>
+            <span class="leaderboard-daydesc-both">-Part 2-</span>
+  2   00:05:42   -
+  1   00:06:31   00:31:28
+</pre>
+</article>
+"""
+
+
+def test_get_stats_2025(pook):
+    puzzle1 = Puzzle(year=2025, day=1)
+    puzzle2 = Puzzle(year=2025, day=2)
+    pook.get(
+        url="https://adventofcode.com/2025/leaderboard/self",
+        response_body=fake_stats_response_2025,
+        times=2,
+    )
+    assert puzzle1.my_stats == {
+        "a": {"time": timedelta(minutes=6, seconds=31)},
+        "b": {"time": timedelta(minutes=31, seconds=28)},
+    }
+    assert puzzle2.my_stats == {
+        "a": {"time": timedelta(minutes=5, seconds=42)},
+    }
+
+
 def test_get_stats_when_token_expired(pook):
     # sadly, it just returns the global leaderboard, rather than a http 4xx
     user = User("token12345678")

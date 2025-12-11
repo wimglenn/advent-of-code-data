@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+import sys
 from datetime import timedelta
 from typing import Any
 from typing import Literal
 from typing import TypedDict
+
+if sys.version_info < (3, 11):
+    from typing_extensions import NotRequired
+else:
+    from typing import NotRequired
 
 
 AnswerValue = Any
@@ -16,11 +22,13 @@ class PuzzleStats(TypedDict):
     """Your personal stats for a given puzzle
 
     See https://adventofcode.com/<year>/leaderboard/self when logged in.
+
+    Since 2025, "rank" and "score" are no longer provided.
     """
 
     time: timedelta
-    rank: int
-    score: int
+    rank: NotRequired[int]
+    score: NotRequired[int]
 
 
 class Submission(TypedDict):
