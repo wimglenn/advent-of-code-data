@@ -228,6 +228,8 @@ def main() -> None:
         table.add_column("Extra")
         missing = Example("")
         for day in range(1, 26):
+            if year >= 2025 and day > 12:
+                break
             puzzle = models.Puzzle(year, day)
             if datetime.now(tz=AOC_TZ) < puzzle.unlock_time(local=False):
                 break
@@ -282,9 +284,10 @@ def main() -> None:
                     row[4] += f"\n(correct: {correct.answer_a})"
                     wrong += inc
 
-                if day < 25 and part_b_locked and i5:
+                _not_final_day = (day < 12) if year >= 2025 else (day < 25)
+                if _not_final_day and part_b_locked and i5:
                     row[5] = "❓"
-                elif day < 25 or scraped.answer_b:
+                elif _not_final_day or scraped.answer_b:
                     row[5] = "❌✅"[i5] + f" {_trunc(scraped.answer_b)}"
                     count += inc
                     if not i5:
