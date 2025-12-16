@@ -30,7 +30,7 @@ def main() -> None:
         "day",
         nargs="?",
         type=int,
-        default=min(aoc_now.day, 25) if aoc_now.month == 12 else 1,
+        default=min(aoc_now.day, 25 if aoc_now.year < 2025 else 12) if aoc_now.month == 12 else 1,
         help="1-25 (default: %(default)s)",
     )
     parser.add_argument(

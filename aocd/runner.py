@@ -337,6 +337,8 @@ def run_for(
     for year, day, plugin in matrix:
         if year == aoc_now.year and day > aoc_now.day:
             continue
+        if year >= 2025 and day > 12:
+            continue
         entry_point = eps[plugin]
         puzzle = Puzzle(year, day)
         if example:
