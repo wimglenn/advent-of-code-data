@@ -534,7 +534,7 @@ class Puzzle:
             if not (self._is_final_day and part == "b"):
                 self._save_correct_answer(value=value, part=part)
             if self._is_final_day and part == "a":
-                max_stars = 50 if self.year <= 2025 else 24
+                max_stars = 50 if self.year < 2025 else 24
                 log.debug("checking if got %d stars already for year %s...", max_stars - 1, self.year)
                 my_stats = self.user.get_stats(self.year)
                 n_stars = sum(len(val) for val in my_stats.values())
