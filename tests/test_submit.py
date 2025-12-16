@@ -282,3 +282,47 @@ def test_submit_float_warns(pook, capsys, caplog):
     assert post.calls == 1
     record = ("aocd.utils", logging.WARNING, "coerced float value 1234.0 to '1234'")
     assert record in caplog.record_tuples
+
+
+full_stats_resp = """
+<article><p>These are your personal leaderboard times:</p>
+<pre>Day   <span class="leaderboard-daydesc-first">-Part 1-</span>
+            <span class="leaderboard-daydesc-both">-Part 2-</span>
+ 12   00:25:52   -
+ 11   00:05:52   02:14:30
+ 10   00:45:22   17:13:51
+  9   00:05:54   03:23:40
+  8   00:44:46   00:48:51
+  7   00:30:35   00:55:12
+  6   03:43:07   03:58:49
+  5   00:03:18   00:08:43
+  4   00:03:12   00:04:49
+  3   00:02:59   00:20:44
+  2   00:05:42   00:10:48
+  1   00:06:31   00:31:28
+</pre>
+</article>
+"""
+
+
+def test_submit_on_final_day(pook):
+    post1 = pook.post(
+        url="https://adventofcode.com/2025/day/12/answer",
+        content="application/x-www-form-urlencoded",
+        body="level=1&answer=1234",
+        response_body="<article>That's the right answer. Yeah!!</article>",
+    )
+    stats = pook.get(
+        url="https://adventofcode.com/2025/leaderboard/self",
+        response_body=full_stats_resp,
+    )
+    post2 = pook.post(
+        url="https://adventofcode.com/2025/day/12/answer",
+        content="application/x-www-form-urlencoded",
+        body="level=2&answer=done",
+        response_body="<article>You've finished every puzzle </article>",
+    )
+    submit(1234, part="a", day=12, year=2025, session="whatever", reopen=False)
+    assert post1.calls == 1
+    assert stats.calls == 1
+    assert post2.calls == 1

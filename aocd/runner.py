@@ -337,6 +337,8 @@ def run_for(
     for year, day, plugin in matrix:
         if year == aoc_now.year and day > aoc_now.day:
             continue
+        if year >= 2025 and day > 12:
+            continue
         entry_point = eps[plugin]
         puzzle = Puzzle(year, day)
         if example:
@@ -381,8 +383,8 @@ def run_for(
                 line += f"   {icon} {error}"
             else:
                 for answer, part in zip((a, b), "ab"):
-                    if day == 25 and part == "b":
-                        # there's no part b on Christmas day, skip
+                    if part == "b" and (day == 25 or (year >= 2025 and day == 12)):
+                        # there's no part b on the final day, skip
                         continue
                     expected = None
                     try:

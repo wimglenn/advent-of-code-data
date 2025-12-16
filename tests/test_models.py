@@ -523,14 +523,14 @@ def test_unlock_time(pook):
 
 
 def test_all_puzzles(freezer):
-    freezer.move_to("2017-10-10")
+    freezer.move_to("2025-12-16")
     all_puzzles = list(Puzzle.all())
-    assert len(all_puzzles) == 50
+    assert len(all_puzzles) == 262
     first, *rest, last = all_puzzles
     assert first.year == 2015
     assert first.day == 1
-    assert last.year == 2016
-    assert last.day == 25
+    assert last.year == 2025
+    assert last.day == 12
 
 
 def test_submit_prevents_bad_guesses_too_high(freezer, capsys, pook):
