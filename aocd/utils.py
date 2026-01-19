@@ -15,6 +15,7 @@ from decimal import Decimal
 from fractions import Fraction
 from functools import cache
 from importlib.metadata import entry_points
+from importlib.metadata import EntryPoints
 from importlib.metadata import version
 from itertools import cycle
 from pathlib import Path
@@ -27,14 +28,6 @@ import urllib3
 from .exceptions import CoercionError
 from .exceptions import DeadTokenError
 
-if sys.version_info >= (3, 10):
-    # Python 3.10+
-    from importlib.metadata import EntryPoints as _EntryPointsType
-else:
-    # Python 3.9
-    from importlib.metadata import EntryPoint
-
-    _EntryPointsType = list[EntryPoint]
 
 log: logging.Logger = logging.getLogger(__name__)
 AOC_TZ = ZoneInfo("America/New_York")
@@ -255,16 +248,11 @@ def colored(txt: str, color: _ANSIColor | None) -> str:
     return f"\x1b[{code + 30}m{txt}{reset}"
 
 
-def get_plugins(group: str = "adventofcode.user") -> _EntryPointsType:
+def get_plugins(group: str = "adventofcode.user") -> EntryPoints:
     """
     Currently installed plugins for user solves.
     """
-    try:
-        # Python 3.10+
-        return entry_points(group=group)
-    except TypeError:
-        # Python 3.9
-        return entry_points().get(group, [])
+    return entry_points(group=group)
 
 
 @cache
