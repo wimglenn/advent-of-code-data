@@ -839,12 +839,7 @@ def _load_users():
 @cache
 def _load_example_parser(group="adventofcode.examples", name="reference"):
     # lazy-loads a plugin used to parse sample data, and cache it
-    try:
-        # Python 3.10+ - group/name selectable entry points
-        eps = entry_points().select(group=group, name=name)
-    except AttributeError:
-        # Python 3.9 - dict interface
-        eps = [ep for ep in entry_points()[group] if ep.name == name]
+    eps = entry_points().select(group=group, name=name)
     if not eps:
         msg = f"could not find the example parser plugin {group=}/{name=}"
         raise ExampleParserError(msg)
