@@ -219,7 +219,7 @@ class Puzzle:
         # this is a property to make it clear that it's read-only
         return self._user
 
-    @property
+    @cached_property
     def input_data(self) -> str:
         """
         This puzzle's input data, specific to puzzle.user. It will usually be retrieved
