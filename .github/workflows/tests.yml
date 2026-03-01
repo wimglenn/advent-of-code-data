@@ -63,7 +63,7 @@ jobs:
 
       - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-      - uses: jakebailey/pyright-action@v2
+      - uses: jakebailey/pyright-action@v3
         with:
           ignore-external: true
           verify-types: aocd
