@@ -40,7 +40,7 @@ jobs:
         run: pytest --durations=10
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
 
   typesafety:
     runs-on: ubuntu-latest
