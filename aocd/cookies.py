@@ -117,7 +117,10 @@ def scrape_session_tokens() -> None:
                 if txt:
                     tokens[aocd_token_path] = txt.split()[0]
             if aocd_tokens_path.is_file():
-                tokens.update(json.loads(aocd_tokens_path.read_text(encoding="utf-8")))
+                try:
+                    tokens.update(json.loads(aocd_tokens_path.read_text(encoding="utf-8")))
+                except json.JSONDecodeError:
+                    sys.exit(f"{aocd_tokens_path} is not valid JSON")
         else:
             tokens = {"CLI": args.check}
         if not tokens:
